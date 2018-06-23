@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SharpLife.Engine": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life\\hl.exe",
+      "commandLineArgs": "-game sharplife_full +developer 2",
+      "workingDirectory": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life"
+    }
+  }
+}
