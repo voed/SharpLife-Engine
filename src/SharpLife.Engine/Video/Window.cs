@@ -15,6 +15,7 @@
 
 using SDL2;
 using SharpLife.Engine.Configuration;
+using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;
 using SixLabors.ImageSharp;
 using System;
@@ -31,14 +32,17 @@ namespace SharpLife.Engine.Video
 
         private readonly GameConfiguration _gameConfiguration;
 
+        private readonly IEngineLoop _engineLoop;
+
         private IntPtr _window;
 
         private IntPtr _glContext;
 
-        public Window(ICommandLine commandLine, GameConfiguration gameConfiguration)
+        public Window(ICommandLine commandLine, GameConfiguration gameConfiguration, IEngineLoop engineLoop)
         {
             _commandLine = commandLine ?? throw new ArgumentNullException(nameof(commandLine));
             _gameConfiguration = gameConfiguration ?? throw new ArgumentNullException(nameof(gameConfiguration));
+            _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
 
             if (commandLine.Contains("-noontop"))
             {
@@ -64,7 +68,7 @@ namespace SharpLife.Engine.Video
             GC.SuppressFinalize(this);
         }
 
-        private void Destroy()
+        private void DestroyWindow()
         {
             if (_glContext != IntPtr.Zero)
             {
@@ -77,6 +81,11 @@ namespace SharpLife.Engine.Video
                 SDL.SDL_DestroyWindow(_window);
                 _window = IntPtr.Zero;
             }
+        }
+
+        private void Destroy()
+        {
+            DestroyWindow();
 
             SDL.SDL_QuitSubSystem(SDL.SDL_INIT_VIDEO);
         }
@@ -187,6 +196,52 @@ namespace SharpLife.Engine.Video
             if (r <= 4 || g <= 4 || b <= 4 || depth <= 15 /*|| gl_renderer && Q_strstr(gl_renderer, "GDI Generic")*/)
             {
                 throw new InvalidOperationException("Failed to create SDL Window, unsupported video mode. A 16-bit color depth desktop is required and a supported GL driver");
+            }
+        }
+
+        public void CenterWindow()
+        {
+            SDL.SDL_GetWindowSize(_window, out var windowWidth, out var windowHeight);
+
+            if (0 == SDL.SDL_GetDisplayBounds(0, out var bounds))
+            {
+                SDL.SDL_SetWindowPosition(_window, (bounds.w - windowWidth) / 2, (bounds.h - windowHeight) / 2);
+            }
+        }
+
+        /// <summary>
+        /// Sleep up to <paramref name="milliSeconds"/> milliseconds, waking to process events
+        /// </summary>
+        /// <param name="milliSeconds"></param>
+        public void SleepUntilInput(int milliSeconds)
+        {
+            SDL.SDL_PumpEvents();
+
+            if (SDL.SDL_WaitEventTimeout(out var sdlEvent, milliSeconds) > 0)
+            {
+                //Process all events
+                do
+                {
+                    switch (sdlEvent.type)
+                    {
+                        case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                            {
+                                if (sdlEvent.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
+                                {
+                                    _engineLoop.Exiting = true;
+                                    DestroyWindow();
+                                }
+
+                                break;
+                            }
+                        case SDL.SDL_EventType.SDL_QUIT:
+                            {
+                                _engineLoop.Exiting = true;
+                                break;
+                            }
+                    }
+                }
+                while (SDL.SDL_PollEvent(out sdlEvent) > 0);
             }
         }
     }

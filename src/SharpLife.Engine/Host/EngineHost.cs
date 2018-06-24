@@ -13,8 +13,10 @@
 *
 ****/
 
+using SDL2;
 using SharpLife.Engine.CommandSystem;
 using SharpLife.Engine.Configuration;
+using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;
 using SharpLife.Engine.Video;
 using System;
@@ -28,7 +30,7 @@ namespace SharpLife.Engine.Host
     /// <summary>
     /// Handles engine hosting, startup
     /// </summary>
-    public sealed class EngineHost
+    public sealed class EngineHost : IEngineLoop
     {
         private static readonly List<string> CommandLineKeyPrefixes = new List<string> { "-", "+" };
 
@@ -57,6 +59,22 @@ namespace SharpLife.Engine.Host
 
         private Window _window;
 
+        private bool _exiting;
+
+        public bool Exiting
+        {
+            get => _exiting;
+
+            set
+            {
+                //Don't allow continuing loop once exit has been signalled
+                if (!_exiting)
+                {
+                    _exiting = value;
+                }
+            }
+        }
+
         public void Start(string[] args, HostType type)
         {
             HostType = type;
@@ -75,6 +93,15 @@ namespace SharpLife.Engine.Host
             SystemInitialize();
 
             HostInitialize();
+
+            _window.CenterWindow();
+
+            while (!_exiting)
+            {
+                _window.SleepUntilInput(0);
+            }
+
+            SDL.SDL_Quit();
         }
 
         private void SystemInitialize()
@@ -114,7 +141,7 @@ namespace SharpLife.Engine.Host
                 throw;
             }
 
-            _window = new Window(_commandLine, GameConfiguration);
+            _window = new Window(_commandLine, GameConfiguration, this);
 
             _window.CreateGameWindow();
 
