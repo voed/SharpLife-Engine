@@ -1,3 +1,5 @@
+#include "SDL2/SDL.h"
+
 #include "CManagedHost.h"
 
 #include "Dlls/extdll.h"
@@ -55,6 +57,18 @@ int Initialize( cl_enginefunc_t* pEnginefuncs, int iVersion )
 	if( iVersion != CLDLL_INTERFACE_VERSION )
 	{
 		return false;
+	}
+
+	//Find and destroy the engine window
+	//This is a dirty hack, but it eliminates problems with the other window being visible and interfering with the other SDL library
+	for( Uint32 i = 0; i < 10; ++i )
+	{
+		auto pWindow = SDL_GetWindowFromID( i );
+
+		if( pWindow )
+		{
+			SDL_DestroyWindow( pWindow );
+		}
 	}
 
 	g_Host.Initialize( pEnginefuncs->pfnGetGameDirectory(), false );

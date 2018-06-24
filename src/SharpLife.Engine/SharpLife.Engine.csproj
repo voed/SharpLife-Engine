@@ -9,11 +9,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
@@ -29,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NativeLibraryLoader" Version="1.0.10" />
     <PackageReference Include="SDL2-CS" Version="1.0.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-dev001535" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,6 +16,7 @@
 using SharpLife.Engine.CommandSystem;
 using SharpLife.Engine.Configuration;
 using SharpLife.Engine.Utility;
+using SharpLife.Engine.Video;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,6 +45,8 @@ namespace SharpLife.Engine.Host
 
         private EngineConfiguration EngineConfiguration { get; set; }
 
+        private GameConfiguration GameConfiguration { get; set; }
+
         private ICommandLine _commandLine;
 
         private string SharpLifeGameDirectory;
@@ -51,6 +54,8 @@ namespace SharpLife.Engine.Host
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
         private ConCommandSystem _conCommandSystem;
+
+        private Window _window;
 
         public void Start(string[] args, HostType type)
         {
@@ -92,6 +97,26 @@ namespace SharpLife.Engine.Host
             {
                 throw new InvalidOperationException("Default game must be specified");
             }
+
+            try
+            {
+                using (var stream = new FileStream($"{SharpLifeGameDirectory}/cfg/SharpLife-Game.xml", FileMode.Open))
+                {
+                    var serializer = new XmlSerializer(typeof(GameConfiguration));
+
+                    GameConfiguration = (GameConfiguration)serializer.Deserialize(stream);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Couldn't load game configuration file\n{e}");
+
+                throw;
+            }
+
+            _window = new Window(_commandLine, GameConfiguration);
+
+            _window.CreateGameWindow();
 
             //TODO: initialize subsystems
 

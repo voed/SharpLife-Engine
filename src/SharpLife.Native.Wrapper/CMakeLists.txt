@@ -1,5 +1,10 @@
 cmake_minimum_required( VERSION 3.11 )
 
+# Source additional modules from the "cmake" directory
+list( APPEND CMAKE_MODULE_PATH
+	"${CMAKE_CURRENT_LIST_DIR}/../../cmake"
+)
+
 set( STEAMCOMMON "$ENV{STEAMCOMMON}" CACHE PATH "Steam common directory path" )
 
 set( GAME_DIRECTORY "Half-Life" CACHE STRING "Game directory name" )
@@ -29,6 +34,8 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 #	Our engine will exit by returning to mod code, which then calls std::quick_exit,
 #	which avoids running the engine's original shutdown code, which would otherwise print warnings in output
 #
+
+find_package( SDL2 MODULE REQUIRED )
 
 set( TARGET_NAME client )
 
@@ -89,6 +96,10 @@ target_include_directories( ${TARGET_NAME} PRIVATE
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+)
+
+target_link_libraries( ${TARGET_NAME} PRIVATE
+	SDL2
 )
 
 set_target_properties( ${TARGET_NAME} PROPERTIES
