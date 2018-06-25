@@ -14,6 +14,10 @@
 ****/
 
 using SDL2;
+using Serilog;
+using Serilog.Formatting;
+using Serilog.Formatting.Compact;
+using Serilog.Formatting.Display;
 using SharpLife.Engine.CommandSystem;
 using SharpLife.Engine.Configuration;
 using SharpLife.Engine.FileSystem;
@@ -83,6 +87,26 @@ namespace SharpLife.Engine.Host
         {
             HostType = type;
 
+            try
+            {
+                StartHost(args);
+            }
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception.
+            catch (Exception e)
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception.
+            {
+                //Log first, in case user terminates program while messagebox is open
+                Log.Logger?.Error(e, "A fatal error occurred");
+
+                //Display an error message
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "SharpLife error", e.Message, IntPtr.Zero);
+
+                throw;
+            }
+        }
+
+        private void StartHost(string[] args)
+        {
             _commandLine = new CommandLine(args, CommandLineKeyPrefixes);
 
             SharpLifeGameDirectory = _commandLine.GetValue("-game");
@@ -93,6 +117,10 @@ namespace SharpLife.Engine.Host
             {
                 throw new InvalidOperationException("No game directory specified, cannot continue");
             }
+
+            EngineConfiguration = LoadEngineConfiguration(SharpLifeGameDirectory);
+
+            Log.Logger = CreateLogger();
 
             SystemInitialize();
 
@@ -106,6 +134,36 @@ namespace SharpLife.Engine.Host
             }
 
             SystemShutdown();
+        }
+
+        private ILogger CreateLogger()
+        {
+            var config = new LoggerConfiguration();
+
+            ITextFormatter formatter = null;
+
+            switch (EngineConfiguration.LoggingConfiguration.LogFormat)
+            {
+                case LoggingConfiguration.Format.Text:
+                    {
+                        formatter = new MessageTemplateTextFormatter("{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}", null);
+                        break;
+                    }
+
+                case LoggingConfiguration.Format.CompactJSON:
+                    {
+                        formatter = new CompactJsonFormatter();
+                        break;
+                    }
+            }
+
+            //Invalid config setting for RetainedFileCountLimit will throw
+            config
+                .WriteTo.File(formatter, $"{SharpLifeGameDirectory}/logs/engine.log",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: EngineConfiguration.LoggingConfiguration.RetainedFileCountLimit);
+
+            return config.CreateLogger();
         }
 
         private void SystemInitialize()
@@ -131,26 +189,39 @@ namespace SharpLife.Engine.Host
             SDL.SDL_Quit();
         }
 
-        private void HostInitialize()
+        private static EngineConfiguration LoadEngineConfiguration(string gameDirectory)
         {
-            _conCommandSystem = new ConCommandSystem(_commandLine);
+            EngineConfiguration engineConfiguration;
 
-            using (var stream = new FileStream($"{SharpLifeGameDirectory}/cfg/SharpLife-Engine.xml", FileMode.Open))
+            using (var stream = new FileStream($"{gameDirectory}/cfg/SharpLife-Engine.xml", FileMode.Open))
             {
                 var serializer = new XmlSerializer(typeof(EngineConfiguration));
 
-                EngineConfiguration = (EngineConfiguration)serializer.Deserialize(stream);
+                engineConfiguration = (EngineConfiguration)serializer.Deserialize(stream);
             }
 
-            if (string.IsNullOrWhiteSpace(EngineConfiguration.DefaultGame))
+            if (string.IsNullOrWhiteSpace(engineConfiguration.DefaultGame))
             {
                 throw new InvalidOperationException("Default game must be specified");
             }
 
-            if (string.IsNullOrWhiteSpace(EngineConfiguration.DefaultGameName))
+            if (string.IsNullOrWhiteSpace(engineConfiguration.DefaultGameName))
             {
                 throw new InvalidOperationException("Default game name must be specified");
             }
+
+            //Use a default configuration if none was provided
+            if (engineConfiguration.LoggingConfiguration == null)
+            {
+                engineConfiguration.LoggingConfiguration = new LoggingConfiguration();
+            }
+
+            return engineConfiguration;
+        }
+
+        private void HostInitialize()
+        {
+            _conCommandSystem = new ConCommandSystem(_commandLine);
 
             _fileSystem = new DiskFileSystem();
 
@@ -195,10 +266,8 @@ namespace SharpLife.Engine.Host
             //Note: the engine has no-Steam directory paths used for testing, but since this is Steam-only, we won't add those
             _fileSystem.RemoveAllSearchPaths();
 
-            var cmdLineArgs = Environment.GetCommandLineArgs();
-
             //Strip off the exe name
-            var baseDir = Path.GetDirectoryName(cmdLineArgs[0]);
+            var baseDir = Path.GetDirectoryName(_commandLine[0]);
 
             string defaultGame = EngineConfiguration.DefaultGame;
 

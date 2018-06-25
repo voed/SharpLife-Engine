@@ -36,5 +36,10 @@ namespace SharpLife.Engine.Configuration
         /// Whether to enable the addons directory for file searching
         /// </summary>
         public bool EnableAddonsFolder { get; set; }
+
+        /// <summary>
+        /// The engine's logging configuration
+        /// </summary>
+        public LoggingConfiguration LoggingConfiguration { get; set; }
     }
 }
