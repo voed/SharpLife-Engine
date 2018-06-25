@@ -30,73 +30,20 @@ namespace SharpLife.Engine.Video
     /// </summary>
     public sealed class Window
     {
-        private readonly ICommandLine _commandLine;
-
-        private readonly GameConfiguration _gameConfiguration;
-
         private readonly IEngineLoop _engineLoop;
-
-        private readonly IFileSystem _fileSystem;
 
         private IntPtr _window;
 
         private IntPtr _glContext;
 
-        public Window(ICommandLine commandLine, GameConfiguration gameConfiguration, IEngineLoop engineLoop, IFileSystem fileSystem)
+        public Window(ICommandLine commandLine, IFileSystem fileSystem, IEngineLoop engineLoop, EngineConfiguration engineConfiguration, GameConfiguration gameConfiguration)
         {
-            _commandLine = commandLine ?? throw new ArgumentNullException(nameof(commandLine));
-            _gameConfiguration = gameConfiguration ?? throw new ArgumentNullException(nameof(gameConfiguration));
             _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
-            if (commandLine.Contains("-noontop"))
-            {
-                SDL.SDL_SetHint(SDL.SDL_HINT_ALLOW_TOPMOST, "0");
-            }
+            //This differs from vanilla GoldSource; set the OpenGL context version to 2.0 so we can use shaders
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XRANDR, "1");
-            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XVIDMODE, "1");
-
-            SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
-
-            SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-        }
-
-        ~Window()
-        {
-            Destroy();
-        }
-
-        public void Dispose()
-        {
-            Destroy();
-            GC.SuppressFinalize(this);
-        }
-
-        private void DestroyWindow()
-        {
-            if (_glContext != IntPtr.Zero)
-            {
-                SDL.SDL_GL_DeleteContext(_glContext);
-                _glContext = IntPtr.Zero;
-            }
-
-            if (_window != IntPtr.Zero)
-            {
-                SDL.SDL_DestroyWindow(_window);
-                _window = IntPtr.Zero;
-            }
-        }
-
-        private void Destroy()
-        {
-            DestroyWindow();
-
-            SDL.SDL_QuitSubSystem(SDL.SDL_INIT_VIDEO);
-        }
-
-        public void CreateGameWindow()
-        {
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ACCELERATED_VISUAL, 1);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 24);
@@ -105,16 +52,16 @@ namespace SharpLife.Engine.Video
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 4);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, 0);
 
-            var gameWindowName = "Half-Life";
+            var gameWindowName = engineConfiguration.DefaultGameName;
 
-            if (!string.IsNullOrWhiteSpace(_gameConfiguration.GameName))
+            if (!string.IsNullOrWhiteSpace(gameConfiguration.GameName))
             {
-                gameWindowName = _gameConfiguration.GameName;
+                gameWindowName = gameConfiguration.GameName;
             }
 
             var flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
 
-            if (_commandLine.Contains("-noborder"))
+            if (commandLine.Contains("-noborder"))
             {
                 flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
             }
@@ -138,7 +85,7 @@ namespace SharpLife.Engine.Video
             //Load the game icon
             try
             {
-                var image = Image.Load(_fileSystem.OpenRead("game.png"));
+                var image = Image.Load(fileSystem.OpenRead("game.png"));
 
                 if (image != null)
                 {
@@ -209,6 +156,37 @@ namespace SharpLife.Engine.Video
             {
                 throw new InvalidOperationException("Failed to create SDL Window, unsupported video mode. A 16-bit color depth desktop is required and a supported GL driver");
             }
+        }
+
+        ~Window()
+        {
+            Destroy();
+        }
+
+        public void Dispose()
+        {
+            Destroy();
+            GC.SuppressFinalize(this);
+        }
+
+        private void DestroyWindow()
+        {
+            if (_glContext != IntPtr.Zero)
+            {
+                SDL.SDL_GL_DeleteContext(_glContext);
+                _glContext = IntPtr.Zero;
+            }
+
+            if (_window != IntPtr.Zero)
+            {
+                SDL.SDL_DestroyWindow(_window);
+                _window = IntPtr.Zero;
+            }
+        }
+
+        private void Destroy()
+        {
+            DestroyWindow();
         }
 
         public void CenterWindow()

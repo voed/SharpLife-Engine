@@ -105,12 +105,30 @@ namespace SharpLife.Engine.Host
                 _window.SleepUntilInput(0);
             }
 
-            SDL.SDL_Quit();
+            SystemShutdown();
         }
 
         private void SystemInitialize()
         {
             _stopwatch.Start();
+
+            //Disable to prevent debugger from shutting down the game
+            SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
+
+            if (_commandLine.Contains("-noontop"))
+            {
+                SDL.SDL_SetHint(SDL.SDL_HINT_ALLOW_TOPMOST, "0");
+            }
+
+            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XRANDR, "1");
+            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XVIDMODE, "1");
+
+            SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+        }
+
+        private void SystemShutdown()
+        {
+            SDL.SDL_Quit();
         }
 
         private void HostInitialize()
@@ -127,6 +145,11 @@ namespace SharpLife.Engine.Host
             if (string.IsNullOrWhiteSpace(EngineConfiguration.DefaultGame))
             {
                 throw new InvalidOperationException("Default game must be specified");
+            }
+
+            if (string.IsNullOrWhiteSpace(EngineConfiguration.DefaultGameName))
+            {
+                throw new InvalidOperationException("Default game name must be specified");
             }
 
             _fileSystem = new DiskFileSystem();
@@ -149,9 +172,7 @@ namespace SharpLife.Engine.Host
                 throw;
             }
 
-            _window = new Window(_commandLine, GameConfiguration, this, _fileSystem);
-
-            _window.CreateGameWindow();
+            _window = new Window(_commandLine, _fileSystem, this, EngineConfiguration, GameConfiguration);
 
             //TODO: initialize subsystems
 

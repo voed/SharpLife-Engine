@@ -23,6 +23,11 @@ namespace SharpLife.Engine.Configuration
         public string DefaultGame { get; set; }
 
         /// <summary>
+        /// The name of the default game to use for display purposes
+        /// </summary>
+        public string DefaultGameName { get; set; }
+
+        /// <summary>
         /// Whether to enable HD models
         /// </summary>
         public bool EnableHDModels { get; set; } = true;
