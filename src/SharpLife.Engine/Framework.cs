@@ -13,23 +13,16 @@
 *
 ****/
 
-namespace SharpLife.Engine.Configuration
+namespace SharpLife.Engine
 {
-    public sealed class EngineConfiguration
+    /// <summary>
+    /// Framework constants
+    /// </summary>
+    public static class Framework
     {
         /// <summary>
-        /// The mod name of the default game to load
+        /// This is the default language that game data is localized in
         /// </summary>
-        public string DefaultGame { get; set; }
-
-        /// <summary>
-        /// Whether to enable HD models
-        /// </summary>
-        public bool EnableHDModels { get; set; } = true;
-
-        /// <summary>
-        /// Whether to enable the addons directory for file searching
-        /// </summary>
-        public bool EnableAddonsFolder { get; set; }
+        public const string DefaultLanguage = "english";
     }
 }

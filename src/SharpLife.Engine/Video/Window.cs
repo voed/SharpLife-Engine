@@ -17,8 +17,10 @@ using SDL2;
 using SharpLife.Engine.Configuration;
 using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;
+using SharpLife.FileSystem;
 using SixLabors.ImageSharp;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SharpLife.Engine.Video
@@ -34,15 +36,18 @@ namespace SharpLife.Engine.Video
 
         private readonly IEngineLoop _engineLoop;
 
+        private readonly IFileSystem _fileSystem;
+
         private IntPtr _window;
 
         private IntPtr _glContext;
 
-        public Window(ICommandLine commandLine, GameConfiguration gameConfiguration, IEngineLoop engineLoop)
+        public Window(ICommandLine commandLine, GameConfiguration gameConfiguration, IEngineLoop engineLoop, IFileSystem fileSystem)
         {
             _commandLine = commandLine ?? throw new ArgumentNullException(nameof(commandLine));
             _gameConfiguration = gameConfiguration ?? throw new ArgumentNullException(nameof(gameConfiguration));
             _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
             if (commandLine.Contains("-noontop"))
             {
@@ -131,25 +136,32 @@ namespace SharpLife.Engine.Video
             }
 
             //Load the game icon
-            var image = Image.Load("sharplife_full/game.png");
-
-            if (image != null)
+            try
             {
-                var pixels = image.SavePixelData();
+                var image = Image.Load(_fileSystem.OpenRead("game.png"));
 
-                var nativeMemory = Marshal.AllocHGlobal(pixels.Length);
-
-                Marshal.Copy(pixels, 0, nativeMemory, pixels.Length);
-
-                var surface = SDL.SDL_CreateRGBSurfaceFrom(nativeMemory, image.Width, image.Height, 32, 4 * image.Width, 0xFF, 0xFF << 8, 0xFF << 16, unchecked((uint)(0xFF << 24)));
-
-                if (surface != IntPtr.Zero)
+                if (image != null)
                 {
-                    SDL.SDL_SetWindowIcon(_window, surface);
-                    SDL.SDL_FreeSurface(surface);
-                }
+                    var pixels = image.SavePixelData();
 
-                Marshal.FreeHGlobal(nativeMemory);
+                    var nativeMemory = Marshal.AllocHGlobal(pixels.Length);
+
+                    Marshal.Copy(pixels, 0, nativeMemory, pixels.Length);
+
+                    var surface = SDL.SDL_CreateRGBSurfaceFrom(nativeMemory, image.Width, image.Height, 32, 4 * image.Width, 0xFF, 0xFF << 8, 0xFF << 16, unchecked((uint)(0xFF << 24)));
+
+                    if (surface != IntPtr.Zero)
+                    {
+                        SDL.SDL_SetWindowIcon(_window, surface);
+                        SDL.SDL_FreeSurface(surface);
+                    }
+
+                    Marshal.FreeHGlobal(nativeMemory);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                //If image doesn't exist, just ignore it
             }
 
             SDL.SDL_ShowWindow(_window);

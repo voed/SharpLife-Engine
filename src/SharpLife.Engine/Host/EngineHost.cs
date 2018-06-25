@@ -16,9 +16,11 @@
 using SDL2;
 using SharpLife.Engine.CommandSystem;
 using SharpLife.Engine.Configuration;
+using SharpLife.Engine.FileSystem;
 using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;
 using SharpLife.Engine.Video;
+using SharpLife.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +52,8 @@ namespace SharpLife.Engine.Host
         private GameConfiguration GameConfiguration { get; set; }
 
         private ICommandLine _commandLine;
+
+        private IFileSystem _fileSystem;
 
         private string SharpLifeGameDirectory;
 
@@ -125,9 +129,13 @@ namespace SharpLife.Engine.Host
                 throw new InvalidOperationException("Default game must be specified");
             }
 
+            _fileSystem = new DiskFileSystem();
+
+            SetupFileSystem();
+
             try
             {
-                using (var stream = new FileStream($"{SharpLifeGameDirectory}/cfg/SharpLife-Game.xml", FileMode.Open))
+                using (var stream = _fileSystem.OpenRead($"{SharpLifeGameDirectory}/cfg/SharpLife-Game.xml"))
                 {
                     var serializer = new XmlSerializer(typeof(GameConfiguration));
 
@@ -141,7 +149,7 @@ namespace SharpLife.Engine.Host
                 throw;
             }
 
-            _window = new Window(_commandLine, GameConfiguration, this);
+            _window = new Window(_commandLine, GameConfiguration, this, _fileSystem);
 
             _window.CreateGameWindow();
 
@@ -159,6 +167,71 @@ namespace SharpLife.Engine.Host
             }
 
             _conCommandSystem.QueueCommands(CommandSource.Local, $"exec {EngineConfiguration.DefaultGame}.rc");
+        }
+
+        private void SetupFileSystem()
+        {
+            //Note: the engine has no-Steam directory paths used for testing, but since this is Steam-only, we won't add those
+            _fileSystem.RemoveAllSearchPaths();
+
+            var cmdLineArgs = Environment.GetCommandLineArgs();
+
+            //Strip off the exe name
+            var baseDir = Path.GetDirectoryName(cmdLineArgs[0]);
+
+            string defaultGame = EngineConfiguration.DefaultGame;
+
+            var gameDir = SharpLifeGameDirectory;
+
+            //TODO: get language from SteamWorks
+            const string language = Framework.DefaultLanguage;
+
+            const bool addLanguage = language != Framework.DefaultLanguage;
+
+            //TODO: get from SteamWorks
+            const bool lowViolence = false;
+
+            var hdModels = !_commandLine.Contains("-nohdmodels") && EngineConfiguration.EnableHDModels;
+
+            var addons = _commandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder;
+
+            void AddGameDirectories(string gameDirectoryName, string pathID)
+            {
+                if (lowViolence)
+                {
+                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}{FileSystemConstants.Suffixes.LowViolence}", pathID, false);
+                }
+
+                if (addons)
+                {
+                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}{FileSystemConstants.Suffixes.Addon}", pathID, false);
+                }
+
+                if (addLanguage)
+                {
+                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}_{language}", pathID, false);
+                }
+
+                if (hdModels)
+                {
+                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}{FileSystemConstants.Suffixes.HD}", pathID, false);
+                }
+            }
+
+            AddGameDirectories(gameDir, FileSystemConstants.PathID.Game);
+
+            _fileSystem.AddSearchPath($"{baseDir}/{gameDir}", FileSystemConstants.PathID.Game);
+            _fileSystem.AddSearchPath($"{baseDir}/{gameDir}", FileSystemConstants.PathID.GameConfig);
+
+            _fileSystem.AddSearchPath($"{baseDir}/{gameDir}{FileSystemConstants.Suffixes.Downloads}", FileSystemConstants.PathID.GameDownload);
+
+            AddGameDirectories(defaultGame, FileSystemConstants.PathID.DefaultGame);
+
+            _fileSystem.AddSearchPath(baseDir, FileSystemConstants.PathID.Base);
+
+            _fileSystem.AddSearchPath($"{baseDir}/{defaultGame}", FileSystemConstants.PathID.Game, false);
+
+            _fileSystem.AddSearchPath($"{baseDir}/{FileSystemConstants.PlatformDirectory}", FileSystemConstants.PathID.Platform);
         }
     }
 }
