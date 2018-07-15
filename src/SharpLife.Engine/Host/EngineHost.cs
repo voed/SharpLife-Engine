@@ -13,6 +13,7 @@
 *
 ****/
 
+using ImGuiNET;
 using SDL2;
 using Serilog;
 using Serilog.Formatting;
@@ -63,9 +64,13 @@ namespace SharpLife.Engine.Host
 
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
+        private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
+
         private ConCommandSystem _conCommandSystem;
 
         private Window _window;
+
+        private Renderer.Renderer _renderer;
 
         private bool _exiting;
 
@@ -128,9 +133,24 @@ namespace SharpLife.Engine.Host
 
             _window.CenterWindow();
 
+            long previousFrameTicks = 0;
+
             while (!_exiting)
             {
+                var currentFrameTicks = _stopwatch.ElapsedTicks;
+                double deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
+                previousFrameTicks = currentFrameTicks;
+
                 _window.SleepUntilInput(0);
+
+                Update((float)deltaSeconds);
+
+                if (_exiting)
+                {
+                    break;
+                }
+
+                _renderer.Draw();
             }
 
             SystemShutdown();
@@ -245,6 +265,12 @@ namespace SharpLife.Engine.Host
 
             _window = new Window(_commandLine, _fileSystem, this, EngineConfiguration, GameConfiguration);
 
+            _window.CenterWindow();
+
+            _renderer = new Renderer.Renderer(_window.WindowHandle, _window.GLContextHandle, _fileSystem, _window.InputSystem, Framework.Path.EnvironmentMaps, Framework.Path.Shaders);
+
+            _window.Resized += _renderer.WindowResized;
+
             //TODO: initialize subsystems
 
             //Get the build date from the generated resource file
@@ -322,6 +348,19 @@ namespace SharpLife.Engine.Host
             _fileSystem.AddSearchPath($"{baseDir}/{defaultGame}", FileSystemConstants.PathID.Game, false);
 
             _fileSystem.AddSearchPath($"{baseDir}/{FileSystemConstants.PlatformDirectory}", FileSystemConstants.PathID.Platform);
+        }
+
+        private void Update(float deltaSeconds)
+        {
+            _fta.AddTime(deltaSeconds);
+            _renderer.Update(deltaSeconds);
+
+            if (ImGui.BeginMainMenuBar())
+            {
+                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
+
+                ImGui.EndMainMenuBar();
+            }
         }
     }
 }

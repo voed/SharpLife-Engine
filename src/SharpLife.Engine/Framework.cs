@@ -24,5 +24,25 @@ namespace SharpLife.Engine
         /// This is the default language that game data is localized in
         /// </summary>
         public const string DefaultLanguage = "english";
+
+        public static class Directory
+        {
+            public const string Graphics = "gfx";
+            public const string EnvironmentMaps = "env";
+            public const string Shaders = "shaders";
+        }
+
+        public static class Path
+        {
+            /// <summary>
+            /// 2D skybox textures are stored here
+            /// </summary>
+            public static readonly string EnvironmentMaps = System.IO.Path.Combine(Directory.Graphics, Directory.EnvironmentMaps);
+
+            /// <summary>
+            /// Shared are stored here
+            /// </summary>
+            public static readonly string Shaders = System.IO.Path.Combine(Directory.Graphics, Directory.Shaders);
+        }
     }
 }

@@ -18,6 +18,7 @@ using SharpLife.Engine.Configuration;
 using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;
 using SharpLife.FileSystem;
+using SharpLife.Input;
 using SixLabors.ImageSharp;
 using System;
 using System.IO;
@@ -32,17 +33,25 @@ namespace SharpLife.Engine.Video
     {
         private readonly IEngineLoop _engineLoop;
 
-        private IntPtr _window;
+        public IntPtr WindowHandle { get; private set; }
 
-        private IntPtr _glContext;
+        public IntPtr GLContextHandle { get; private set; }
+
+        private readonly InputSystem _inputSystem = new InputSystem();
+
+        public IInputSystem InputSystem => _inputSystem;
+
+        public event Action Resized;
 
         public Window(ICommandLine commandLine, IFileSystem fileSystem, IEngineLoop engineLoop, EngineConfiguration engineConfiguration, GameConfiguration gameConfiguration)
         {
             _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
 
-            //This differs from vanilla GoldSource; set the OpenGL context version to 2.0 so we can use shaders
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+            //This differs from vanilla GoldSource; set the OpenGL context version to 3.0 so we can use shaders
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_FLAGS, (int)SDL.SDL_GLcontext.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 0);
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
 
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ACCELERATED_VISUAL, 1);
@@ -66,17 +75,17 @@ namespace SharpLife.Engine.Video
                 flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
             }
 
-            _window = SDL.SDL_CreateWindow(gameWindowName, 0, 0, 640, 480, flags);
+            WindowHandle = SDL.SDL_CreateWindow(gameWindowName, 0, 0, 640, 480, flags);
 
-            if (_window == IntPtr.Zero)
+            if (WindowHandle == IntPtr.Zero)
             {
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 16);
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, 3);
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, 3);
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 3);
-                _window = SDL.SDL_CreateWindow(gameWindowName, 0, 0, 640, 480, flags);
+                WindowHandle = SDL.SDL_CreateWindow(gameWindowName, 0, 0, 640, 480, flags);
 
-                if (_window == IntPtr.Zero)
+                if (WindowHandle == IntPtr.Zero)
                 {
                     throw new InvalidOperationException("Failed to create SDL Window");
                 }
@@ -99,7 +108,7 @@ namespace SharpLife.Engine.Video
 
                     if (surface != IntPtr.Zero)
                     {
-                        SDL.SDL_SetWindowIcon(_window, surface);
+                        SDL.SDL_SetWindowIcon(WindowHandle, surface);
                         SDL.SDL_FreeSurface(surface);
                     }
 
@@ -111,11 +120,11 @@ namespace SharpLife.Engine.Video
                 //If image doesn't exist, just ignore it
             }
 
-            SDL.SDL_ShowWindow(_window);
+            SDL.SDL_ShowWindow(WindowHandle);
 
-            _glContext = SDL.SDL_GL_CreateContext(_window);
+            GLContextHandle = SDL.SDL_GL_CreateContext(WindowHandle);
 
-            if (_glContext == IntPtr.Zero)
+            if (GLContextHandle == IntPtr.Zero)
             {
                 throw new InvalidOperationException("Failed to create SDL Window");
             }
@@ -171,16 +180,16 @@ namespace SharpLife.Engine.Video
 
         private void DestroyWindow()
         {
-            if (_glContext != IntPtr.Zero)
+            if (GLContextHandle != IntPtr.Zero)
             {
-                SDL.SDL_GL_DeleteContext(_glContext);
-                _glContext = IntPtr.Zero;
+                SDL.SDL_GL_DeleteContext(GLContextHandle);
+                GLContextHandle = IntPtr.Zero;
             }
 
-            if (_window != IntPtr.Zero)
+            if (WindowHandle != IntPtr.Zero)
             {
-                SDL.SDL_DestroyWindow(_window);
-                _window = IntPtr.Zero;
+                SDL.SDL_DestroyWindow(WindowHandle);
+                WindowHandle = IntPtr.Zero;
             }
         }
 
@@ -191,11 +200,11 @@ namespace SharpLife.Engine.Video
 
         public void CenterWindow()
         {
-            SDL.SDL_GetWindowSize(_window, out var windowWidth, out var windowHeight);
+            SDL.SDL_GetWindowSize(WindowHandle, out var windowWidth, out var windowHeight);
 
             if (0 == SDL.SDL_GetDisplayBounds(0, out var bounds))
             {
-                SDL.SDL_SetWindowPosition(_window, (bounds.w - windowWidth) / 2, (bounds.h - windowHeight) / 2);
+                SDL.SDL_SetWindowPosition(WindowHandle, (bounds.w - windowWidth) / 2, (bounds.h - windowHeight) / 2);
             }
         }
 
@@ -205,33 +214,41 @@ namespace SharpLife.Engine.Video
         /// <param name="milliSeconds"></param>
         public void SleepUntilInput(int milliSeconds)
         {
-            SDL.SDL_PumpEvents();
+            _inputSystem.ProcessEvents(milliSeconds);
 
-            if (SDL.SDL_WaitEventTimeout(out var sdlEvent, milliSeconds) > 0)
+            var snapshot = _inputSystem.Snapshot;
+
+            for (var i = 0; i < snapshot.Events.Count; ++i)
             {
-                //Process all events
-                do
-                {
-                    switch (sdlEvent.type)
-                    {
-                        case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                            {
-                                if (sdlEvent.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
-                                {
-                                    _engineLoop.Exiting = true;
-                                    DestroyWindow();
-                                }
+                var sdlEvent = snapshot.Events[i];
 
-                                break;
-                            }
-                        case SDL.SDL_EventType.SDL_QUIT:
+                switch (sdlEvent.type)
+                {
+                    case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                        {
+                            switch (sdlEvent.window.windowEvent)
                             {
-                                _engineLoop.Exiting = true;
-                                break;
+                                case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
+                                    {
+                                        Resized?.Invoke();
+                                        break;
+                                    }
+
+                                case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
+                                    {
+                                        _engineLoop.Exiting = true;
+                                        DestroyWindow();
+                                        break;
+                                    }
                             }
-                    }
+                            break;
+                        }
+                    case SDL.SDL_EventType.SDL_QUIT:
+                        {
+                            _engineLoop.Exiting = true;
+                            break;
+                        }
                 }
-                while (SDL.SDL_PollEvent(out sdlEvent) > 0);
             }
         }
     }

@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Engine", "SharpLi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.FileSystem", "SharpLife.FileSystem\SharpLife.FileSystem.csproj", "{1B7349D3-7FD4-431A-802B-13278DA66461}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Renderer", "SharpLife.Renderer\SharpLife.Renderer.csproj", "{91D2EA0E-D7AD-4EFF-B9A6-BB29E570D5CB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Input", "SharpLife.Input\SharpLife.Input.csproj", "{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{1B7349D3-7FD4-431A-802B-13278DA66461}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B7349D3-7FD4-431A-802B-13278DA66461}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B7349D3-7FD4-431A-802B-13278DA66461}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91D2EA0E-D7AD-4EFF-B9A6-BB29E570D5CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91D2EA0E-D7AD-4EFF-B9A6-BB29E570D5CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91D2EA0E-D7AD-4EFF-B9A6-BB29E570D5CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91D2EA0E-D7AD-4EFF-B9A6-BB29E570D5CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
