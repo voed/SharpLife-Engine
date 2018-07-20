@@ -66,6 +66,8 @@ namespace SharpLife.Engine.Host
 
         private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
 
+        private double _desiredFrameLengthSeconds = 1.0 / 60.0;
+
         private ConCommandSystem _conCommandSystem;
 
         private Window _window;
@@ -139,6 +141,13 @@ namespace SharpLife.Engine.Host
             {
                 var currentFrameTicks = _stopwatch.ElapsedTicks;
                 double deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
+
+                while (deltaSeconds < _desiredFrameLengthSeconds)
+                {
+                    currentFrameTicks = _stopwatch.ElapsedTicks;
+                    deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
+                }
+
                 previousFrameTicks = currentFrameTicks;
 
                 _window.SleepUntilInput(0);
@@ -358,6 +367,10 @@ namespace SharpLife.Engine.Host
             if (ImGui.BeginMainMenuBar())
             {
                 ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
+
+                var cameraPosition = _renderer.Scene.Camera.Position.ToString();
+
+                ImGui.TextUnformatted($"Camera Position: {cameraPosition} Camera Angles: Pitch {_renderer.Scene.Camera.Pitch} Yaw {_renderer.Scene.Camera.Yaw}");
 
                 ImGui.EndMainMenuBar();
             }
