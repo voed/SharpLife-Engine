@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharpLife.Engine.Utility
+namespace SharpLife.Utility
 {
     /// <summary>
     /// Tokenizes a string
