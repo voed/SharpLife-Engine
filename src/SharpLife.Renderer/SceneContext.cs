@@ -31,6 +31,8 @@ namespace SharpLife.Renderer
         // MainSceneView resource set uses this.
         public ResourceLayout TextureSamplerResourceLayout { get; private set; }
 
+        public Sampler MainSampler { get; private set; }
+
         public Texture MainSceneColorTexture { get; private set; }
         public Texture MainSceneDepthTexture { get; private set; }
         public Framebuffer MainSceneFramebuffer { get; private set; }
@@ -53,6 +55,22 @@ namespace SharpLife.Renderer
             ProjectionMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             ViewMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             CameraInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+
+            //TODO: pull filter settings and anisotropy from config
+            var mainSamplerDescription = new SamplerDescription
+            {
+                AddressModeU = SamplerAddressMode.Wrap,
+                AddressModeV = SamplerAddressMode.Wrap,
+                AddressModeW = SamplerAddressMode.Wrap,
+                Filter = SamplerFilter.MinLinear_MagLinear_MipLinear,
+                LodBias = 0,
+                MinimumLod = 0,
+                MaximumLod = uint.MaxValue,
+                MaximumAnisotropy = 4,
+            };
+
+            MainSampler = factory.CreateSampler(ref mainSamplerDescription);
+
             if (Camera != null)
             {
                 UpdateCameraBuffers(cl);
@@ -70,6 +88,7 @@ namespace SharpLife.Renderer
             ProjectionMatrixBuffer.Dispose();
             ViewMatrixBuffer.Dispose();
             CameraInfoBuffer.Dispose();
+            MainSampler.Dispose();
             MainSceneColorTexture.Dispose();
             MainSceneResolvedColorTexture.Dispose();
             MainSceneResolvedColorView.Dispose();
@@ -91,7 +110,7 @@ namespace SharpLife.Renderer
             cl.UpdateBuffer(CameraInfoBuffer, 0, Camera.GetCameraInfo());
         }
 
-        internal void RecreateWindowSizedResources(GraphicsDevice gd, CommandList cl)
+        public void RecreateWindowSizedResources(GraphicsDevice gd, CommandList cl)
         {
             MainSceneColorTexture?.Dispose();
             MainSceneDepthTexture?.Dispose();

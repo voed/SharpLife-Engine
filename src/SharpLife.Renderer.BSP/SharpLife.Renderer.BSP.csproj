@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>7.3</LangVersion>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.3</LangVersion>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpLife.FileFormats.BSP\SharpLife.FileFormats.BSP.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Veldrid">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
+    </Reference>
+    <Reference Include="Veldrid.ImageSharp">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.ImageSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Veldrid.Utilities">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.Utilities.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -36,8 +36,9 @@ namespace SharpLife.Renderer
         private readonly Dictionary<string, (Shader, Shader)> s_shaderSets
             = new Dictionary<string, (Shader, Shader)>();
 
-        private readonly Dictionary<ImageSharpTexture, Texture> s_textures
-            = new Dictionary<ImageSharpTexture, Texture>();
+        //Case insensitive comparison is needed for textures due to various tools converting the filename case
+        private readonly Dictionary<string, Texture> s_textures
+            = new Dictionary<string, Texture>(StringComparer.OrdinalIgnoreCase);
 
         private readonly Dictionary<Texture, TextureView> s_textureViews = new Dictionary<Texture, TextureView>();
 
@@ -120,7 +121,7 @@ namespace SharpLife.Renderer
             }
             s_shaderSets.Clear();
 
-            foreach (KeyValuePair<ImageSharpTexture, Texture> kvp in s_textures)
+            foreach (var kvp in s_textures)
             {
                 kvp.Value.Dispose();
             }
@@ -142,18 +143,38 @@ namespace SharpLife.Renderer
             s_resourceSets.Clear();
         }
 
-        internal Texture GetTexture2D(GraphicsDevice gd, ResourceFactory factory, ImageSharpTexture textureData)
+        /// <summary>
+        /// Adds a 2D texture
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <param name="factory"></param>
+        /// <param name="textureData"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Texture AddTexture2D(GraphicsDevice gd, ResourceFactory factory, ImageSharpTexture textureData, string name)
         {
-            if (!s_textures.TryGetValue(textureData, out Texture tex))
+            if (s_textures.ContainsKey(name))
             {
-                tex = textureData.CreateDeviceTexture(gd, factory);
-                s_textures.Add(textureData, tex);
+                throw new InvalidOperationException($"Cannot add texture \"{name}\", already uploaded");
+            }
+
+            var tex = textureData.CreateDeviceTexture(gd, factory);
+            s_textures.Add(name, tex);
+
+            return tex;
+        }
+
+        public Texture GetTexture2D(string name)
+        {
+            if (!s_textures.TryGetValue(name, out Texture tex))
+            {
+                return null;
             }
 
             return tex;
         }
 
-        internal TextureView GetTextureView(ResourceFactory factory, Texture texture)
+        public TextureView GetTextureView(ResourceFactory factory, Texture texture)
         {
             if (!s_textureViews.TryGetValue(texture, out TextureView view))
             {
@@ -164,7 +185,7 @@ namespace SharpLife.Renderer
             return view;
         }
 
-        internal unsafe Texture GetPinkTexture(GraphicsDevice gd, ResourceFactory factory)
+        public unsafe Texture GetPinkTexture(GraphicsDevice gd, ResourceFactory factory)
         {
             if (_pinkTex == null)
             {
@@ -176,7 +197,7 @@ namespace SharpLife.Renderer
             return _pinkTex;
         }
 
-        internal ResourceSet GetResourceSet(ResourceFactory factory, ResourceSetDescription description)
+        public ResourceSet GetResourceSet(ResourceFactory factory, ResourceSetDescription description)
         {
             if (!s_resourceSets.TryGetValue(description, out ResourceSet ret))
             {

@@ -21,9 +21,9 @@ using Veldrid.Utilities;
 
 namespace SharpLife.Renderer
 {
-    internal static class Util
+    public static class Util
     {
-        internal static uint SizeInBytes<T>(this T[] array) where T : struct
+        public static uint SizeInBytes<T>(this T[] array) where T : struct
         {
             return (uint)(array.Length * Unsafe.SizeOf<T>());
         }

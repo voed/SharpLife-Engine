@@ -11,7 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Renderer", "Sharp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Input", "SharpLife.Input\SharpLife.Input.csproj", "{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.FileFormats.BSP", "SharpLife.FileFormats.BSP\SharpLife.FileFormats.BSP.csproj", "{F3671875-BBB4-4C95-8007-C7406CD19CAB}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Utility", "SharpLife.Utility\SharpLife.Utility.csproj", "{E51D4353-6B17-46F6-80A7-E569AE83841C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Renderer.BSP", "SharpLife.Renderer.BSP\SharpLife.Renderer.BSP.csproj", "{317A3B4D-2575-4617-9521-DADB3FB9E85C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.FileFormats.WAD", "SharpLife.FileFormats.WAD\SharpLife.FileFormats.WAD.csproj", "{E35B4230-2298-4061-87B9-11DDB3030471}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +41,22 @@ Global
 		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EF5894D-AAEF-4CCA-9AF3-C7E93429DA16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3671875-BBB4-4C95-8007-C7406CD19CAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3671875-BBB4-4C95-8007-C7406CD19CAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3671875-BBB4-4C95-8007-C7406CD19CAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3671875-BBB4-4C95-8007-C7406CD19CAB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E51D4353-6B17-46F6-80A7-E569AE83841C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E51D4353-6B17-46F6-80A7-E569AE83841C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E51D4353-6B17-46F6-80A7-E569AE83841C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E51D4353-6B17-46F6-80A7-E569AE83841C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{317A3B4D-2575-4617-9521-DADB3FB9E85C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{317A3B4D-2575-4617-9521-DADB3FB9E85C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{317A3B4D-2575-4617-9521-DADB3FB9E85C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{317A3B4D-2575-4617-9521-DADB3FB9E85C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E35B4230-2298-4061-87B9-11DDB3030471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E35B4230-2298-4061-87B9-11DDB3030471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E35B4230-2298-4061-87B9-11DDB3030471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E35B4230-2298-4061-87B9-11DDB3030471}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -81,6 +81,7 @@ namespace SharpLife.Renderer
 
             // Main scene
             cl.SetFramebuffer(sc.MainSceneFramebuffer);
+            cl.ClearColorTarget(0, RgbaFloat.Grey);
             var fbWidth = sc.MainSceneFramebuffer.Width;
             var fbHeight = sc.MainSceneFramebuffer.Height;
             cl.SetViewport(0, new Viewport(0, 0, fbWidth, fbHeight, 0, 1));
@@ -225,7 +226,7 @@ namespace SharpLife.Renderer
             _resourceUpdateCL.Dispose();
         }
 
-        internal void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
             _cullableStage[0].Clear();
             _octree.GetAllContainedObjects(_cullableStage[0]);

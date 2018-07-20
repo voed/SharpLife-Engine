@@ -16,11 +16,13 @@
 using SDL2;
 using SharpLife.FileSystem;
 using SharpLife.Input;
+using SharpLife.Renderer;
+using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Objects;
 using System;
 using Veldrid;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Engine.Renderer
 {
     /// <summary>
     /// The main renderer
@@ -42,6 +44,8 @@ namespace SharpLife.Renderer
         private bool _windowResized = false;
 
         private event Action<int, int> _resizeHandled;
+
+        public Scene Scene => _scene;
 
         public Renderer(IntPtr window, IntPtr glContext, IFileSystem fileSystem, IInputSystem inputSystem, string envMapDirectory, string shadersDirectory)
         {
@@ -75,6 +79,14 @@ namespace SharpLife.Renderer
             _resizeHandled += _imGuiRenderable.WindowResized;
             _scene.AddRenderable(_imGuiRenderable);
             _scene.AddUpdateable(_imGuiRenderable);
+
+            var bspFile = FileFormats.BSP.Input.ReadBSPFile(fileSystem.OpenRead("maps/bounce.bsp"));
+
+            var bspWorld = new BSPWorldRenderable(fileSystem, bspFile, Framework.Extension.WAD);
+            _scene.AddRenderable(bspWorld);
+
+            var coordinateAxes = new CoordinateAxes();
+            _scene.AddRenderable(coordinateAxes);
 
             //TODO: define default in config
             Skybox2D skybox = Skybox2D.LoadDefaultSkybox(fileSystem, envMapDirectory, "2desert");

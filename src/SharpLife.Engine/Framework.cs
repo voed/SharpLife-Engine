@@ -44,5 +44,14 @@ namespace SharpLife.Engine
             /// </summary>
             public static readonly string Shaders = System.IO.Path.Combine(Directory.Graphics, Directory.Shaders);
         }
+
+        /// <summary>
+        /// Contains commonly used file extensions, without the dot
+        /// Use <see cref="SharpLife.Utility.FileExtensionUtils.AsExtension(string)"/> to add the dot
+        /// </summary>
+        public static class Extension
+        {
+            public const string WAD = "wad";
+        }
     }
 }

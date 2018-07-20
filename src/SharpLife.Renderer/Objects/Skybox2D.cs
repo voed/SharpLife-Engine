@@ -44,6 +44,7 @@ namespace SharpLife.Renderer.Objects
         private DeviceBuffer _ib;
         private Pipeline _pipeline;
         private ResourceSet _resourceSet;
+        private ResourceLayout _layout;
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
         public Skybox2D(
@@ -224,7 +225,5 @@ namespace SharpLife.Renderer.Objects
             16,17,18, 16,18,19,
             20,21,22, 20,22,23,
         };
-
-        private ResourceLayout _layout;
     }
 }

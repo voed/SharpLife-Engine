@@ -25,16 +25,19 @@ namespace SharpLife.Renderer
 {
     public class Camera : IUpdateable
     {
+        private const float MinPitch = (float)(-70 * (Math.PI / 180));
+        private const float MaxPitch = (float)(80 * (Math.PI / 180));
+
         private float _fov = 1f;
         private float _near = 1f;
-        private float _far = 1000f;
+        private float _far = 32768;
 
         private Matrix4x4 _viewMatrix;
         private Matrix4x4 _projectionMatrix;
 
         private Vector3 _position = new Vector3(0, 3, 0);
         private Vector3 _lookDirection = new Vector3(0, -.3f, -1f);
-        private float _moveSpeed = 10.0f;
+        private float _moveSpeed = 1000.0f;
 
         private float _yaw;
         private float _pitch;
@@ -83,6 +86,16 @@ namespace SharpLife.Renderer
         public float Yaw { get => _yaw; set { _yaw = value; UpdateViewMatrix(); } }
         public float Pitch { get => _pitch; set { _pitch = value; UpdateViewMatrix(); } }
 
+        //GoldSource's coordinate system points Z up, X forward, and Y left
+        //See https://developer.valvesoftware.com/wiki/Coordinates
+        //Need to scale X so inputs produce the correct results,
+        //And rotate yaw 180 degrees so yaw 0 points to the east
+        //This does not look like Quake's code because it uses a different approach to view matrix construction
+        //Quake modifies the global settings by applying the inverse of the rotation and view origin
+        //This is the "standard" way of applying view settings by using matrices in normal model-view techniques
+        private Matrix4x4 RotationMatrix =>
+            Matrix4x4.Identity * Matrix4x4.CreateRotationY(Pitch) * Matrix4x4.CreateRotationZ((float)(Math.PI + Yaw)) * Matrix4x4.CreateScale(-1, 1, 1);
+
         public void Update(float deltaSeconds)
         {
             float sprintFactor = _inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_LCTRL)
@@ -91,34 +104,34 @@ namespace SharpLife.Renderer
                     ? 2.5f
                     : 1f;
             Vector3 motionDir = Vector3.Zero;
-            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_a))
-            {
-                motionDir += -Vector3.UnitX;
-            }
-            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_d))
-            {
-                motionDir += Vector3.UnitX;
-            }
-            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_w))
-            {
-                motionDir += -Vector3.UnitZ;
-            }
-            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_s))
-            {
-                motionDir += Vector3.UnitZ;
-            }
-            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_q))
+            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_LEFT))
             {
                 motionDir += -Vector3.UnitY;
             }
-            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_e))
+            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_RIGHT))
             {
                 motionDir += Vector3.UnitY;
+            }
+            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_UP))
+            {
+                motionDir += Vector3.UnitX;
+            }
+            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_DOWN))
+            {
+                motionDir += -Vector3.UnitX;
+            }
+            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_PAGEUP))
+            {
+                motionDir += Vector3.UnitZ;
+            }
+            if (_inputSystem.Snapshot.IsKeyDown(SDL.SDL_Keycode.SDLK_PAGEDOWN))
+            {
+                motionDir += -Vector3.UnitZ;
             }
 
             if (motionDir != Vector3.Zero)
             {
-                Quaternion lookRotation = Quaternion.CreateFromYawPitchRoll(Yaw, Pitch, 0f);
+                var lookRotation = RotationMatrix;
                 motionDir = Vector3.Transform(motionDir, lookRotation);
                 _position += motionDir * _moveSpeed * sprintFactor * deltaSeconds;
                 UpdateViewMatrix();
@@ -129,9 +142,9 @@ namespace SharpLife.Renderer
 
             if (!ImGui.IsAnyWindowHovered() && (_inputSystem.Snapshot.IsMouseDown(MouseButton.Left) || _inputSystem.Snapshot.IsMouseDown(MouseButton.Right)))
             {
-                Yaw += -mouseDelta.X * 0.01f;
-                Pitch += -mouseDelta.Y * 0.01f;
-                Pitch = Math.Clamp(Pitch, -1.55f, 1.55f);
+                Yaw += mouseDelta.X * 0.01f;
+                Pitch += mouseDelta.Y * 0.01f;
+                Pitch = Math.Clamp(Pitch, MinPitch, MaxPitch);
 
                 UpdateViewMatrix();
             }
@@ -158,10 +171,10 @@ namespace SharpLife.Renderer
 
         private void UpdateViewMatrix()
         {
-            Quaternion lookRotation = Quaternion.CreateFromYawPitchRoll(Yaw, Pitch, 0f);
-            Vector3 lookDir = Vector3.Transform(-Vector3.UnitZ, lookRotation);
-            _lookDirection = lookDir;
-            _viewMatrix = Matrix4x4.CreateLookAt(_position, _position + _lookDirection, Vector3.UnitY);
+            var lookRotation = RotationMatrix;
+
+            _lookDirection = Vector3.Transform(Vector3.UnitX, lookRotation);
+            _viewMatrix = Matrix4x4.CreateLookAt(_position, _position + _lookDirection, Vector3.UnitZ);
             ViewChanged?.Invoke(_viewMatrix);
         }
 

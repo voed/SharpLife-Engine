@@ -23,7 +23,7 @@ namespace SharpLife.Renderer.Objects
     /// Takes the rendered scene and draws it into the swap chain buffer
     /// The scene is flipped vertically in the shader to ensure it's right side up
     /// </summary>
-    internal class FinalPass : Renderable
+    public class FinalPass : Renderable
     {
         private DisposeCollector _disposeCollector;
         private Pipeline _pipeline;

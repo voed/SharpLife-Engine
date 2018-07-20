@@ -38,8 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SharpLife.FileFormats.BSP\SharpLife.FileFormats.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer.BSP\SharpLife.Renderer.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
   </ItemGroup>
 
@@ -49,6 +51,9 @@
     </Reference>
     <Reference Include="System">
       <HintPath>System</HintPath>
+    </Reference>
+    <Reference Include="Veldrid">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
     </Reference>
     <Reference Include="Veldrid.OpenGLBindings">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.OpenGLBindings.dll</HintPath>
