@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File ./GenerateTimestampResource.ps1" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File ./Resources/GenerateTimestampResource.ps1" />
   </Target>
 
   <ItemGroup>
