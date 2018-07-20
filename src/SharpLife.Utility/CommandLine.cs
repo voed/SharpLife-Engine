@@ -18,7 +18,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharpLife.Engine.Utility
+namespace SharpLife.Utility
 {
     public class CommandLine : ICommandLine
     {

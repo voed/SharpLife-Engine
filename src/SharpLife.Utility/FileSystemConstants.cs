@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.FileSystem
+namespace SharpLife.Utility
 {
     public static class FileSystemConstants
     {

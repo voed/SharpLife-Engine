@@ -15,7 +15,7 @@
 
 using System.Collections.Generic;
 
-namespace SharpLife.Engine.Utility
+namespace SharpLife.Utility
 {
     /// <summary>
     /// Provides easy access to command line arguments and common operations on it

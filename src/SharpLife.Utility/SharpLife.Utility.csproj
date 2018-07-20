@@ -17,4 +17,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
+  </ItemGroup>
+
 </Project>

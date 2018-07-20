@@ -21,11 +21,11 @@ using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.Engine.CommandSystem;
 using SharpLife.Engine.Configuration;
-using SharpLife.Engine.FileSystem;
 using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;
 using SharpLife.Engine.Video;
 using SharpLife.FileSystem;
+using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -304,59 +304,15 @@ namespace SharpLife.Engine.Host
             //Strip off the exe name
             var baseDir = Path.GetDirectoryName(_commandLine[0]);
 
-            string defaultGame = EngineConfiguration.DefaultGame;
-
-            var gameDir = SharpLifeGameDirectory;
-
-            //TODO: get language from SteamWorks
-            const string language = Framework.DefaultLanguage;
-
-            const bool addLanguage = language != Framework.DefaultLanguage;
-
-            //TODO: get from SteamWorks
-            const bool lowViolence = false;
-
-            var hdModels = !_commandLine.Contains("-nohdmodels") && EngineConfiguration.EnableHDModels;
-
-            var addons = _commandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder;
-
-            void AddGameDirectories(string gameDirectoryName, string pathID)
-            {
-                if (lowViolence)
-                {
-                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}{FileSystemConstants.Suffixes.LowViolence}", pathID, false);
-                }
-
-                if (addons)
-                {
-                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}{FileSystemConstants.Suffixes.Addon}", pathID, false);
-                }
-
-                if (addLanguage)
-                {
-                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}_{language}", pathID, false);
-                }
-
-                if (hdModels)
-                {
-                    _fileSystem.AddSearchPath($"{baseDir}/{gameDirectoryName}{FileSystemConstants.Suffixes.HD}", pathID, false);
-                }
-            }
-
-            AddGameDirectories(gameDir, FileSystemConstants.PathID.Game);
-
-            _fileSystem.AddSearchPath($"{baseDir}/{gameDir}", FileSystemConstants.PathID.Game);
-            _fileSystem.AddSearchPath($"{baseDir}/{gameDir}", FileSystemConstants.PathID.GameConfig);
-
-            _fileSystem.AddSearchPath($"{baseDir}/{gameDir}{FileSystemConstants.Suffixes.Downloads}", FileSystemConstants.PathID.GameDownload);
-
-            AddGameDirectories(defaultGame, FileSystemConstants.PathID.DefaultGame);
-
-            _fileSystem.AddSearchPath(baseDir, FileSystemConstants.PathID.Base);
-
-            _fileSystem.AddSearchPath($"{baseDir}/{defaultGame}", FileSystemConstants.PathID.Game, false);
-
-            _fileSystem.AddSearchPath($"{baseDir}/{FileSystemConstants.PlatformDirectory}", FileSystemConstants.PathID.Platform);
+            _fileSystem.SetupFileSystem(
+                baseDir,
+                EngineConfiguration.DefaultGame,
+                SharpLifeGameDirectory,
+                Framework.DefaultLanguage,
+                Framework.DefaultLanguage,
+                false,
+                !_commandLine.Contains("-nohdmodels") && EngineConfiguration.EnableHDModels,
+                _commandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder);
         }
 
         private void Update(float deltaSeconds)

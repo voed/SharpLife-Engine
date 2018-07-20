@@ -16,9 +16,9 @@
 using SDL2;
 using SharpLife.Engine.Configuration;
 using SharpLife.Engine.Loop;
-using SharpLife.Engine.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Input;
+using SharpLife.Utility;
 using SixLabors.ImageSharp;
 using System;
 using System.IO;

@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.Engine.CommandSystem.Commands;
-using SharpLife.Engine.Utility;
+using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
