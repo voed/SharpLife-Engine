@@ -13,26 +13,22 @@
 *
 ****/
 
-using System;
-using System.Text.RegularExpressions;
-
-namespace SharpLife.Engine.CommandSystem.Commands.VariableFilters
+namespace SharpLife.CommandSystem
 {
     /// <summary>
-    /// Denies any inputs that don't match a regular expression
+    /// The source of a command
+    /// Depending on whether commands are executing on the client or server this can affect filtering operations and output redirecting
     /// </summary>
-    public class RegexFilter : IConVarFilter
+    public enum CommandSource
     {
-        private readonly Regex _regex;
+        /// <summary>
+        /// Command was sent by a client
+        /// </summary>
+        Client = 0,
 
-        public RegexFilter(Regex regex)
-        {
-            _regex = regex ?? throw new ArgumentNullException(nameof(regex));
-        }
-
-        public bool Filter(ref string stringValue, ref float floatValue)
-        {
-            return _regex.IsMatch(stringValue);
-        }
+        /// <summary>
+        /// Command was sent locally
+        /// </summary>
+        Local
     }
 }

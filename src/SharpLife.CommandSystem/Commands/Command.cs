@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     public class Command : ICommand
     {

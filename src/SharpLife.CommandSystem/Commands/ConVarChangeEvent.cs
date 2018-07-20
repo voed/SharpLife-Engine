@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     public struct ConVarChangeEvent
     {

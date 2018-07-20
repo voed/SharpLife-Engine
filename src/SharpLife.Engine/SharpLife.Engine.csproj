@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SharpLife.CommandSystem\SharpLife.CommandSystem.csproj" />
     <ProjectReference Include="..\SharpLife.FileFormats.BSP\SharpLife.FileFormats.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />

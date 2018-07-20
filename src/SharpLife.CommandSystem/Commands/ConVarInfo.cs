@@ -13,11 +13,11 @@
 *
 ****/
 
-using SharpLife.Engine.CommandSystem.Commands.VariableFilters;
+using SharpLife.CommandSystem.Commands.VariableFilters;
 using System;
 using System.Collections.Generic;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     /// <summary>
     /// Contains information about a console variable

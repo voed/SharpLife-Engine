@@ -13,23 +13,14 @@
 *
 ****/
 
-
-namespace SharpLife.Engine.CommandSystem
+namespace SharpLife.CommandSystem.Commands
 {
-    /// <summary>
-    /// The source of a command
-    /// Depending on whether commands are executing on the client or server this can affect filtering operations and output redirecting
-    /// </summary>
-    public enum CommandSource
+    public interface IBaseConsoleCommand
     {
-        /// <summary>
-        /// Command was sent by a client
-        /// </summary>
-        Client = 0,
+        string Name { get; }
 
-        /// <summary>
-        /// Command was sent locally
-        /// </summary>
-        Local
+        CommandFlags Flags { get; }
+
+        string HelpInfo { get; }
     }
 }

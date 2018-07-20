@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     internal class ConCommand : BaseConsoleCommand, IConCommand
     {

@@ -13,13 +13,13 @@
 *
 ****/
 
-using SharpLife.Engine.CommandSystem.Commands;
+using SharpLife.CommandSystem.Commands;
 using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharpLife.Engine.CommandSystem
+namespace SharpLife.CommandSystem
 {
     public static class CommandUtils
     {

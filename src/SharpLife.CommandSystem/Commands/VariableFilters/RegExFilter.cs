@@ -14,28 +14,25 @@
 ****/
 
 using System;
+using System.Text.RegularExpressions;
 
-namespace SharpLife.Engine.CommandSystem
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
-    /// Thrown when a console command is invoked with the wrong syntax
+    /// Denies any inputs that don't match a regular expression
     /// </summary>
-    internal sealed class InvalidCommandSyntaxException : Exception
+    public class RegexFilter : IConVarFilter
     {
-        public InvalidCommandSyntaxException() : base()
+        private readonly Regex _regex;
+
+        public RegexFilter(Regex regex)
         {
+            _regex = regex ?? throw new ArgumentNullException(nameof(regex));
         }
 
-        public InvalidCommandSyntaxException(string message) : base(message)
+        public bool Filter(ref string stringValue, ref float floatValue)
         {
-        }
-
-        public InvalidCommandSyntaxException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        private InvalidCommandSyntaxException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
+            return _regex.IsMatch(stringValue);
         }
     }
 }

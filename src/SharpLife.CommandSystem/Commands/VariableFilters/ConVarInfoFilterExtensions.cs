@@ -16,7 +16,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace SharpLife.Engine.CommandSystem.Commands.VariableFilters
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
     /// Extensions to make adding filters to convars easier

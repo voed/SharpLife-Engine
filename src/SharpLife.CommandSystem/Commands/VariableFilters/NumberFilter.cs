@@ -13,28 +13,16 @@
 *
 ****/
 
-using System;
-
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
-    [Flags]
-    public enum CommandFlags
+    /// <summary>
+    /// Denies any non-numeric inputs
+    /// </summary>
+    public class NumberFilter : IConVarFilter
     {
-        None = 0,
-
-        /// <summary>
-        /// Save convar value during shutdown
-        /// </summary>
-        Archive = 1 << 0,
-
-        /// <summary>
-        /// Only servers can execute this command
-        /// </summary>
-        ServerOnly = 1 << 1,
-
-        /// <summary>
-        /// Only clients can execute this command
-        /// </summary>
-        ClientOnly = 1 << 2,
+        public bool Filter(ref string stringValue, ref float floatValue)
+        {
+            return float.TryParse(stringValue, out var _);
+        }
     }
 }

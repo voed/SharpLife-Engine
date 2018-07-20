@@ -13,13 +13,13 @@
 *
 ****/
 
-using SharpLife.Engine.CommandSystem.Commands.VariableFilters;
+using SharpLife.CommandSystem.Commands.VariableFilters;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     internal class ConVar : BaseConsoleCommand, IConVar
     {

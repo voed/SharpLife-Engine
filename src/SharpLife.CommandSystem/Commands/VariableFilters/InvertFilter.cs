@@ -13,16 +13,25 @@
 *
 ****/
 
-namespace SharpLife.Engine.CommandSystem.Commands.VariableFilters
+using System;
+
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
-    /// Denies any non-numeric inputs
+    /// Filter to invert the result of another filter
     /// </summary>
-    public class NumberFilter : IConVarFilter
+    public class InvertFilter : IConVarFilter
     {
+        private readonly IConVarFilter _filter;
+
+        public InvertFilter(IConVarFilter filter)
+        {
+            _filter = filter ?? throw new ArgumentNullException(nameof(filter));
+        }
+
         public bool Filter(ref string stringValue, ref float floatValue)
         {
-            return float.TryParse(stringValue, out var _);
+            return !_filter.Filter(ref stringValue, ref floatValue);
         }
     }
 }

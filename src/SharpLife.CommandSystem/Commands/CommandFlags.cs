@@ -13,14 +13,28 @@
 *
 ****/
 
+using System;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
-    public interface IConCommand : IBaseConsoleCommand
+    [Flags]
+    public enum CommandFlags
     {
+        None = 0,
+
         /// <summary>
-        /// Invoked when the command is executed
+        /// Save convar value during shutdown
         /// </summary>
-        event Delegates.ConCommandExecutor OnExecute;
+        Archive = 1 << 0,
+
+        /// <summary>
+        /// Only servers can execute this command
+        /// </summary>
+        ServerOnly = 1 << 1,
+
+        /// <summary>
+        /// Only clients can execute this command
+        /// </summary>
+        ClientOnly = 1 << 2,
     }
 }

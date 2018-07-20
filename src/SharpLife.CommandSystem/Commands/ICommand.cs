@@ -13,10 +13,9 @@
 *
 ****/
 
-
 using System.Collections.Generic;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     public interface ICommand : IEnumerable<string>
     {

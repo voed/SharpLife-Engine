@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Engine.CommandSystem.Commands.VariableFilters
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
     /// Clamps an input value to a numeric range

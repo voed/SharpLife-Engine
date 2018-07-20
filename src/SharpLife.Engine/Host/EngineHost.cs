@@ -19,7 +19,7 @@ using Serilog;
 using Serilog.Formatting;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
-using SharpLife.Engine.CommandSystem;
+using SharpLife.CommandSystem;
 using SharpLife.Engine.Configuration;
 using SharpLife.Engine.Loop;
 using SharpLife.Engine.Utility;

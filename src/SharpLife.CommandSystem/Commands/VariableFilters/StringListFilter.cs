@@ -14,24 +14,35 @@
 ****/
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace SharpLife.Engine.CommandSystem.Commands.VariableFilters
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
-    /// Filter to invert the result of another filter
+    /// Denies any inputs that are not found in a given list
     /// </summary>
-    public class InvertFilter : IConVarFilter
+    public class StringListFilter : IConVarFilter
     {
-        private readonly IConVarFilter _filter;
+        private readonly List<string> _strings;
 
-        public InvertFilter(IConVarFilter filter)
+        /// <summary>
+        /// Creates a new string list filter
+        /// </summary>
+        /// <param name="strings"></param>
+        public StringListFilter(IReadOnlyList<string> strings)
         {
-            _filter = filter ?? throw new ArgumentNullException(nameof(filter));
+            if (strings == null)
+            {
+                throw new ArgumentNullException(nameof(strings));
+            }
+
+            _strings = strings.ToList();
         }
 
         public bool Filter(ref string stringValue, ref float floatValue)
         {
-            return !_filter.Filter(ref stringValue, ref floatValue);
+            return _strings.Contains(stringValue);
         }
     }
 }

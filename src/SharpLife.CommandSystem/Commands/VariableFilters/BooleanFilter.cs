@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.CommandSystem.Commands.VariableFilters
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
     /// Clamps all input to 0 or 1

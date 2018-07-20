@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     /// <summary>
     /// Base class for info classes about specific command types

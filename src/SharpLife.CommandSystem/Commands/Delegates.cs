@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands
 {
     public static class Delegates
     {

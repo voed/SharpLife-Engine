@@ -13,9 +13,9 @@
 *
 ****/
 
-using SharpLife.Engine.CommandSystem.Commands;
+using SharpLife.CommandSystem.Commands;
 
-namespace SharpLife.Engine.CommandSystem
+namespace SharpLife.CommandSystem
 {
     /// <summary>
     /// Provides access to the console command system

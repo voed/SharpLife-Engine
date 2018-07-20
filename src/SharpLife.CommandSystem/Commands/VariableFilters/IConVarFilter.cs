@@ -13,14 +13,19 @@
 *
 ****/
 
-namespace SharpLife.Engine.CommandSystem.Commands
+namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
-    public interface IBaseConsoleCommand
+    /// <summary>
+    /// Console variable change filter
+    /// </summary>
+    public interface IConVarFilter
     {
-        string Name { get; }
-
-        CommandFlags Flags { get; }
-
-        string HelpInfo { get; }
+        /// <summary>
+        /// Invoked when a variable is about to change values, filters the new values
+        /// </summary>
+        /// <param name="stringValue">New string value</param>
+        /// <param name="floatValue">New float value</param>
+        /// <returns>Whether to allow the change at all</returns>
+        bool Filter(ref string stringValue, ref float floatValue);
     }
 }
