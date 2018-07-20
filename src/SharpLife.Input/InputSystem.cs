@@ -36,19 +36,22 @@ namespace SharpLife.Input
         {
             SDL.SDL_PumpEvents();
 
-            if (SDL.SDL_WaitEventTimeout(out var sdlEvent, milliSeconds) > 0)
             {
-                //Process all events
-                do
+                if (SDL.SDL_WaitEventTimeout(out var sdlEvent, milliSeconds) > 0)
                 {
-                    _privateSnapshot.Events.Add(sdlEvent);
+                    //Process all events
+                    do
+                    {
+                        _privateSnapshot.Events.Add(sdlEvent);
+                    }
+                    while (SDL.SDL_PollEvent(out sdlEvent) > 0);
                 }
-                while (SDL.SDL_PollEvent(out sdlEvent) > 0);
             }
 
             for (int i = 0; i < _privateSnapshot.Events.Count; ++i)
             {
                 //Preprocess keyboard and mouse input to provide more information
+                var sdlEvent = _privateSnapshot.Events[i];
                 ProcessEvent(ref sdlEvent);
             }
 
