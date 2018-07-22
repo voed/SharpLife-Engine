@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
+using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace SharpLife.CommandSystem
 {
     public class ConCommandSystem : IConCommandSystem
     {
+        private readonly IFileSystem _fileSystem;
+
         private readonly IList<Delegates.CommandFilter> _commandFilters = new List<Delegates.CommandFilter>();
 
         private readonly IDictionary<string, BaseConsoleCommand> _commands = new Dictionary<string, BaseConsoleCommand>();
@@ -40,8 +43,26 @@ namespace SharpLife.CommandSystem
         /// </summary>
         private bool _wait;
 
-        public ConCommandSystem(ICommandLine commandLine)
+        /// <summary>
+        /// Creates a new command system
+        /// </summary>
+        /// <param name="fileSystem"></param>
+        /// <param name="commandLine"></param>
+        /// <param name="gameConfigPathIDs">The game config path IDs to use for the exec command</param>
+        public ConCommandSystem(IFileSystem fileSystem, ICommandLine commandLine, IReadOnlyList<string> gameConfigPathIDs)
         {
+            if (gameConfigPathIDs == null)
+            {
+                throw new ArgumentNullException(nameof(gameConfigPathIDs));
+            }
+
+            if (gameConfigPathIDs.Count == 0)
+            {
+                throw new ArgumentException("You must provide at least one game config path ID", nameof(gameConfigPathIDs));
+            }
+
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
             _commandFilters.Add((commandToExecute, command) =>
             {
                 if (command.CommandSource == CommandSource.Client && (commandToExecute.Flags & CommandFlags.ServerOnly) != 0)
@@ -102,14 +123,59 @@ namespace SharpLife.CommandSystem
                     return;
                 }
 
-                //TODO: use filesystem
+                var fileName = arguments[0];
+
+                if (fileName.IndexOfAny(new[]
+                {
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar,
+                    Path.VolumeSeparatorChar,
+                    ':',
+                    '~'
+                }) != -1
+                || fileName.Contains(".."))
+                {
+                    Console.WriteLine($"exec {fileName}: invalid path.");
+                    return;
+                }
+
+                if (fileName.IndexOf('.') != fileName.LastIndexOf('.'))
+                {
+                    Console.WriteLine($"exec {fileName}: invalid filename.");
+                    return;
+                }
+
+                var extension = Path.GetExtension(fileName);
+
+                if (extension != "cfg" && extension != "rc")
+                {
+                    Console.WriteLine($"exec {fileName}: not a .cfg or .rc file");
+                    return;
+                }
+
                 try
                 {
-                    var text = File.ReadAllText(arguments[0]);
+                    var succeeded = false;
 
-                    Console.WriteLine($"execing {arguments[0]}");
+                    foreach (var pathID in gameConfigPathIDs)
+                    {
+                        if (_fileSystem.Exists(fileName, pathID))
+                        {
+                            var text = _fileSystem.ReadAllText(fileName, pathID);
 
-                    InsertCommands(CommandSource.Local, text);
+                            Console.WriteLine($"execing {arguments[0]}");
+
+                            InsertCommands(CommandSource.Local, text);
+
+                            succeeded = true;
+                            break;
+                        }
+                    }
+
+                    if (!succeeded)
+                    {
+                        throw new FileNotFoundException("Couldn't execute file", fileName);
+                    }
                 }
                 catch (Exception)
                 {
@@ -137,6 +203,7 @@ namespace SharpLife.CommandSystem
             })
             .WithHelpInfo("Aliases a command to a name"));
 
+            //TODO: move out of the command system
             RegisterConCommand(new ConCommandInfo("cmd", arguments => ForwardToServer(arguments, false)
             ).WithHelpInfo("Send the entire command line over to the server"));
 

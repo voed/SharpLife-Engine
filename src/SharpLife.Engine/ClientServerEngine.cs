@@ -42,6 +42,13 @@ namespace SharpLife.Engine
     {
         private static readonly List<string> CommandLineKeyPrefixes = new List<string> { "-", "+" };
 
+        private static readonly List<string> ExecPathIDs = new List<string>
+        {
+            FileSystemConstants.PathID.GameConfig,
+            FileSystemConstants.PathID.Game,
+            FileSystemConstants.PathID.All
+        };
+
         public ICommandLine CommandLine { get; private set; }
 
         public IFileSystem FileSystem { get; private set; }
@@ -247,11 +254,11 @@ namespace SharpLife.Engine
 
         private void HostInitialize(string gameDirectory)
         {
-            CommandSystem = new ConCommandSystem(CommandLine);
-
             FileSystem = new DiskFileSystem();
 
             SetupFileSystem(gameDirectory);
+
+            CommandSystem = new ConCommandSystem(FileSystem, CommandLine, ExecPathIDs);
 
             try
             {

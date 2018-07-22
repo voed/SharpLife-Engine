@@ -19,6 +19,10 @@ namespace SharpLife.Utility
     {
         public static class PathID
         {
+            /// <summary>
+            /// All path IDs will be searched
+            /// </summary>
+            public const string All = null;
             public const string DefaultGame = "DEFAULTGAME";
             public const string Game = "GAME";
             public const string Platform = "PLATFORM";
