@@ -32,7 +32,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Xml.Serialization;
 
-namespace SharpLife.Engine
+namespace SharpLife.Engine.Engines
 {
     /// <summary>
     /// A client-server based engine

@@ -19,7 +19,7 @@ using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
 
-namespace SharpLife.Engine
+namespace SharpLife.Engine.Engines
 {
     /// <summary>
     /// Manages top level engine components (client, server) and shared components
