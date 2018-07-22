@@ -13,17 +13,14 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Configuration
+using System.Reflection;
+
+namespace SharpLife.Engine.Shared.ModUtils
 {
-    public sealed class GameConfiguration
+    public class ModData<TEntryPoint>
     {
-        /// <summary>
-        /// The name of this game, used for the window title
-        /// </summary>
-        public string GameName { get; set; }
+        public Assembly assembly;
 
-        public ModAssemblyInfo ClientMod { get; set; }
-
-        public ModAssemblyInfo ServerMod { get; set; }
+        public TEntryPoint Entrypoint;
     }
 }

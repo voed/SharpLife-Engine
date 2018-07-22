@@ -15,8 +15,10 @@
 
 using ImGuiNET;
 using SDL2;
+using SharpLife.Engine.API.Game;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Engines;
+using SharpLife.Engine.Shared.ModUtils;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Utility;
 using System;
@@ -34,6 +36,8 @@ namespace SharpLife.Engine.Client.Host
         private readonly Renderer.Renderer _renderer;
 
         private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
+
+        private ModData<IClientMod> _mod;
 
         public EngineClientHost(IEngine engine)
         {
@@ -66,6 +70,12 @@ namespace SharpLife.Engine.Client.Host
         public void PostInitialize()
         {
             _window.Center();
+
+            //Load the game mod assembly
+            _mod = ModLoadUtils.LoadMod<IClientMod>(
+                _engine.GameDirectory,
+                _engine.GameConfiguration.ClientMod.AssemblyName,
+                _engine.GameConfiguration.ClientMod.EntrypointClass);
         }
 
         public void Shutdown()

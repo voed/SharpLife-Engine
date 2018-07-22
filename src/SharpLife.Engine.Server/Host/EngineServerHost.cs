@@ -13,7 +13,9 @@
 *
 ****/
 
+using SharpLife.Engine.API.Game;
 using SharpLife.Engine.Shared.Engines;
+using SharpLife.Engine.Shared.ModUtils;
 using System;
 
 namespace SharpLife.Engine.Server.Host
@@ -22,9 +24,17 @@ namespace SharpLife.Engine.Server.Host
     {
         private readonly IEngine _engine;
 
+        private ModData<IServerMod> _mod;
+
         public EngineServerHost(IEngine engine)
         {
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+
+            //Load the game mod assembly
+            _mod = ModLoadUtils.LoadMod<IServerMod>(
+                _engine.GameDirectory,
+                _engine.GameConfiguration.ServerMod.AssemblyName,
+                _engine.GameConfiguration.ServerMod.EntrypointClass);
         }
     }
 }

@@ -13,17 +13,19 @@
 *
 ****/
 
+using System.Xml.Serialization;
+
 namespace SharpLife.Engine.Shared.Configuration
 {
-    public sealed class GameConfiguration
+    /// <summary>
+    /// XML configuration class for mod assembly information
+    /// </summary>
+    public class ModAssemblyInfo
     {
-        /// <summary>
-        /// The name of this game, used for the window title
-        /// </summary>
-        public string GameName { get; set; }
+        [XmlAttribute]
+        public string AssemblyName { get; set; }
 
-        public ModAssemblyInfo ClientMod { get; set; }
-
-        public ModAssemblyInfo ServerMod { get; set; }
+        [XmlAttribute]
+        public string EntrypointClass { get; set; }
     }
 }

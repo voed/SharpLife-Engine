@@ -13,17 +13,9 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Configuration
+namespace SharpLife.Engine.API.Game
 {
-    public sealed class GameConfiguration
+    public interface IServerMod
     {
-        /// <summary>
-        /// The name of this game, used for the window title
-        /// </summary>
-        public string GameName { get; set; }
-
-        public ModAssemblyInfo ClientMod { get; set; }
-
-        public ModAssemblyInfo ServerMod { get; set; }
     }
 }
