@@ -41,28 +41,12 @@
     <ProjectReference Include="..\SharpLife.CommandSystem\SharpLife.CommandSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Engine.Client\SharpLife.Engine.Client.csproj" />
     <ProjectReference Include="..\SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj" />
-    <ProjectReference Include="..\SharpLife.FileFormats.BSP\SharpLife.FileFormats.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
-    <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />
-    <ProjectReference Include="..\SharpLife.Renderer.BSP\SharpLife.Renderer.BSP.csproj" />
-    <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="SDL2-CS">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SDL2-CS.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <HintPath>System</HintPath>
-    </Reference>
-    <Reference Include="Veldrid">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
-    </Reference>
-    <Reference Include="Veldrid.OpenGLBindings">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.OpenGLBindings.dll</HintPath>
-    </Reference>
-    <Reference Include="Veldrid.SDL2">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.SDL2.dll</HintPath>
     </Reference>
   </ItemGroup>
 

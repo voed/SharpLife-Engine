@@ -83,5 +83,35 @@ namespace SharpLife.Engine.Shared.UI
         {
             SDL.SDL_Quit();
         }
+
+        public void ShowMessageBox(MessageBoxIcon icon, string title, string message)
+        {
+            if (title == null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            SDL.SDL_MessageBoxFlags iconFlag = SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION;
+
+            switch (icon)
+            {
+                default:
+                    iconFlag = SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION;
+                    break;
+                case MessageBoxIcon.Warning:
+                    iconFlag = SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_WARNING;
+                    break;
+                case MessageBoxIcon.Error:
+                    iconFlag = SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR;
+                    break;
+            }
+
+            SDL.SDL_ShowSimpleMessageBox(iconFlag, title, message, IntPtr.Zero);
+        }
     }
 }

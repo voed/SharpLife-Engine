@@ -24,13 +24,13 @@
 
   <ItemGroup>
     <Reference Include="Veldrid">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
     </Reference>
     <Reference Include="Veldrid.ImageSharp">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.ImageSharp.dll</HintPath>
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.ImageSharp.dll</HintPath>
     </Reference>
     <Reference Include="Veldrid.Utilities">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.Utilities.dll</HintPath>
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.Utilities.dll</HintPath>
     </Reference>
   </ItemGroup>
 

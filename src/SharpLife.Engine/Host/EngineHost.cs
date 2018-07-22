@@ -13,10 +13,10 @@
 *
 ****/
 
-using SDL2;
 using Serilog;
 using SharpLife.Engine.Engines;
 using SharpLife.Engine.Shared.Engines;
+using SharpLife.Engine.Shared.UI;
 using System;
 
 namespace SharpLife.Engine.Host
@@ -28,9 +28,11 @@ namespace SharpLife.Engine.Host
     {
         public void Start(string[] args, HostType type)
         {
+            IEngine engine = null;
+
             try
             {
-                IEngine engine = new ClientServerEngine();
+                engine = new ClientServerEngine();
 
                 engine.Run(args);
             }
@@ -41,8 +43,8 @@ namespace SharpLife.Engine.Host
                 //Log first, in case user terminates program while messagebox is open
                 Log.Logger?.Error(e, "A fatal error occurred");
 
-                //Display an error message
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "SharpLife error", e.Message, IntPtr.Zero);
+                //Display an error message if a user interface is available
+                engine?.UserInterface?.ShowMessageBox(MessageBoxIcon.Error, "SharpLife error", e.Message);
 
                 throw;
             }

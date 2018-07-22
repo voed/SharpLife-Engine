@@ -21,13 +21,13 @@
 
   <ItemGroup>
     <Reference Include="SDL2-CS">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\SDL2-CS.dll</HintPath>
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SDL2-CS.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.ImageSharp">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
     </Reference>
     <Reference Include="Veldrid.SDL2">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.SDL2.dll</HintPath>
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.SDL2.dll</HintPath>
     </Reference>
   </ItemGroup>
 

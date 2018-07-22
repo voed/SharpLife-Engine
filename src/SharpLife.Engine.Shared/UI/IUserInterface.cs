@@ -56,5 +56,13 @@ namespace SharpLife.Engine.Shared.UI
         /// The interface can no longer be used after this
         /// </summary>
         void Shutdown();
+
+        /// <summary>
+        /// Displays a message box containing the given title, message and icon
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <param name="title"></param>
+        /// <param name="message"></param>
+        void ShowMessageBox(MessageBoxIcon icon, string title, string message);
     }
 }
