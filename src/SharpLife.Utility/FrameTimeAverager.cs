@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.Utility
+namespace SharpLife.Utility
 {
     public class FrameTimeAverager
     {

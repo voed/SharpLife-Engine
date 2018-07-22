@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.Configuration
+namespace SharpLife.Engine.Shared.Configuration
 {
     public sealed class EngineConfiguration
     {

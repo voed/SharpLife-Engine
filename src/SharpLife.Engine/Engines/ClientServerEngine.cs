@@ -20,10 +20,10 @@ using Serilog.Formatting;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
-using SharpLife.Engine.Configuration;
+using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.Engine.Shared.UI;
-using SharpLife.Engine.Utility;
+using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
@@ -59,6 +59,14 @@ namespace SharpLife.Engine.Engines
 
         public IUserInterface UserInterface { get; private set; }
 
+        private EngineTime EngineTime { get; } = new EngineTime();
+
+        IEngineTime IEngine.EngineTime => EngineTime;
+
+        public EngineConfiguration EngineConfiguration { get; private set; }
+
+        public GameConfiguration GameConfiguration { get; private set; }
+
         public DateTimeOffset BuildDate { get; private set; }
 
         private bool _exiting;
@@ -76,12 +84,6 @@ namespace SharpLife.Engine.Engines
                 }
             }
         }
-
-        private EngineConfiguration _engineConfiguration;
-
-        private GameConfiguration _gameConfiguration;
-
-        private readonly Stopwatch _stopwatch = new Stopwatch();
 
         private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
 
@@ -112,7 +114,7 @@ namespace SharpLife.Engine.Engines
                 throw new InvalidOperationException("No game directory specified, cannot continue");
             }
 
-            _engineConfiguration = LoadEngineConfiguration(GameDirectory);
+            EngineConfiguration = LoadEngineConfiguration(GameDirectory);
 
             Log.Logger = CreateLogger(GameDirectory);
 
@@ -126,12 +128,12 @@ namespace SharpLife.Engine.Engines
 
             while (!_exiting)
             {
-                var currentFrameTicks = _stopwatch.ElapsedTicks;
+                var currentFrameTicks = EngineTime.ElapsedTicks;
                 double deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
 
                 while (deltaSeconds < _desiredFrameLengthSeconds)
                 {
-                    currentFrameTicks = _stopwatch.ElapsedTicks;
+                    currentFrameTicks = EngineTime.ElapsedTicks;
                     deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
                 }
 
@@ -205,7 +207,7 @@ namespace SharpLife.Engine.Engines
 
             ITextFormatter formatter = null;
 
-            switch (_engineConfiguration.LoggingConfiguration.LogFormat)
+            switch (EngineConfiguration.LoggingConfiguration.LogFormat)
             {
                 case LoggingConfiguration.Format.Text:
                     {
@@ -224,14 +226,14 @@ namespace SharpLife.Engine.Engines
             config
                 .WriteTo.File(formatter, $"{gameDirectory}/logs/engine.log",
                 rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: _engineConfiguration.LoggingConfiguration.RetainedFileCountLimit);
+                retainedFileCountLimit: EngineConfiguration.LoggingConfiguration.RetainedFileCountLimit);
 
             return config.CreateLogger();
         }
 
         private void SystemInitialize()
         {
-            _stopwatch.Start();
+            EngineTime.Start();
 
             //Disable to prevent debugger from shutting down the game
             SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
@@ -266,7 +268,7 @@ namespace SharpLife.Engine.Engines
                 {
                     var serializer = new XmlSerializer(typeof(GameConfiguration));
 
-                    _gameConfiguration = (GameConfiguration)serializer.Deserialize(stream);
+                    GameConfiguration = (GameConfiguration)serializer.Deserialize(stream);
                 }
             }
             catch (Exception e)
@@ -276,11 +278,11 @@ namespace SharpLife.Engine.Engines
                 throw;
             }
 
-            var gameWindowName = _engineConfiguration.DefaultGameName;
+            var gameWindowName = EngineConfiguration.DefaultGameName;
 
-            if (!string.IsNullOrWhiteSpace(_gameConfiguration.GameName))
+            if (!string.IsNullOrWhiteSpace(GameConfiguration.GameName))
             {
-                gameWindowName = _gameConfiguration.GameName;
+                gameWindowName = GameConfiguration.GameName;
             }
 
             UserInterface = new UserInterface(FileSystem, this);
@@ -312,7 +314,7 @@ namespace SharpLife.Engine.Engines
                 Console.WriteLine($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
-            CommandSystem.QueueCommands(CommandSource.Local, $"exec {_engineConfiguration.DefaultGame}.rc");
+            CommandSystem.QueueCommands(CommandSource.Local, $"exec {EngineConfiguration.DefaultGame}.rc");
         }
 
         private void SetupFileSystem(string gameDirectory)
@@ -325,13 +327,13 @@ namespace SharpLife.Engine.Engines
 
             FileSystem.SetupFileSystem(
                 baseDir,
-                _engineConfiguration.DefaultGame,
+                EngineConfiguration.DefaultGame,
                 gameDirectory,
                 Framework.DefaultLanguage,
                 Framework.DefaultLanguage,
                 false,
-                !CommandLine.Contains("-nohdmodels") && _engineConfiguration.EnableHDModels,
-                CommandLine.Contains("-addons") || _engineConfiguration.EnableAddonsFolder);
+                !CommandLine.Contains("-nohdmodels") && EngineConfiguration.EnableHDModels,
+                CommandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder);
         }
     }
 }

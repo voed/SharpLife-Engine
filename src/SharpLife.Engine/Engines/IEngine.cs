@@ -14,7 +14,9 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.UI;
+using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
@@ -51,6 +53,21 @@ namespace SharpLife.Engine.Engines
         /// This component is optional and should be created only if needed
         /// </summary>
         IUserInterface UserInterface { get; }
+
+        /// <summary>
+        /// Gets the engine time
+        /// </summary>
+        IEngineTime EngineTime { get; }
+
+        /// <summary>
+        /// The engine configuration
+        /// </summary>
+        EngineConfiguration EngineConfiguration { get; }
+
+        /// <summary>
+        /// The game configuration
+        /// </summary>
+        GameConfiguration GameConfiguration { get; }
 
         /// <summary>
         /// Gets the date that the engine was built

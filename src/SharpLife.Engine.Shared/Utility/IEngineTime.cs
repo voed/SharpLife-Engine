@@ -13,26 +13,22 @@
 *
 ****/
 
+using System;
 
-namespace SharpLife.Engine.Configuration
+namespace SharpLife.Engine.Shared.Utility
 {
-    public class LoggingConfiguration
+    /// <summary>
+    /// Provides a means to query the engine's time
+    /// See <see cref="System.Diagnostics.Stopwatch"/> for API documentation
+    /// </summary>
+    public interface IEngineTime
     {
-        public enum Format
-        {
-            Text,
-            CompactJSON
-        }
+        long Frequency { get; }
 
-        /// <summary>
-        /// The maximum number of days to retain old log files
-        /// If not specified, logs are kept forever
-        /// </summary>
-        public int? RetainedFileCountLimit { get; set; }
+        TimeSpan Elapsed { get; }
 
-        /// <summary>
-        /// Which format to output log data as
-        /// </summary>
-        public Format LogFormat { get; set; }
+        long ElapsedMilliseconds { get; }
+
+        long ElapsedTicks { get; }
     }
 }
