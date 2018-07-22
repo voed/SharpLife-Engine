@@ -14,24 +14,30 @@
 ****/
 
 using SDL2;
-using SharpLife.Engine.Configuration;
-using SharpLife.Engine.Loop;
+using SharpLife.Engine.Shared.Loop;
 using SharpLife.FileSystem;
 using SharpLife.Input;
-using SharpLife.Utility;
 using SixLabors.ImageSharp;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace SharpLife.Engine.Video
+namespace SharpLife.Engine.Shared.UI
 {
     /// <summary>
     /// Manages the SDL2 window
     /// </summary>
-    public sealed class Window
+    internal sealed class Window : IWindow
     {
         private readonly IEngineLoop _engineLoop;
+
+        public bool Exists => WindowHandle != IntPtr.Zero;
+
+        public string Title
+        {
+            get => SDL.SDL_GetWindowTitle(WindowHandle);
+            set => SDL.SDL_SetWindowTitle(WindowHandle, value);
+        }
 
         public IntPtr WindowHandle { get; private set; }
 
@@ -43,7 +49,11 @@ namespace SharpLife.Engine.Video
 
         public event Action Resized;
 
-        public Window(ICommandLine commandLine, IFileSystem fileSystem, IEngineLoop engineLoop, EngineConfiguration engineConfiguration, GameConfiguration gameConfiguration)
+        public event Action Destroying;
+
+        public event Action Destroyed;
+
+        public Window(IFileSystem fileSystem, IEngineLoop engineLoop, string title, SDL.SDL_WindowFlags additionalFlags = 0)
         {
             _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
 
@@ -61,21 +71,12 @@ namespace SharpLife.Engine.Video
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 4);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, 0);
 
-            var gameWindowName = engineConfiguration.DefaultGameName;
+            var flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL
+                | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
+                | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE
+                | additionalFlags;
 
-            if (!string.IsNullOrWhiteSpace(gameConfiguration.GameName))
-            {
-                gameWindowName = gameConfiguration.GameName;
-            }
-
-            var flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
-
-            if (commandLine.Contains("-noborder"))
-            {
-                flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
-            }
-
-            WindowHandle = SDL.SDL_CreateWindow(gameWindowName, 0, 0, 640, 480, flags);
+            WindowHandle = SDL.SDL_CreateWindow(title, 0, 0, 640, 480, flags);
 
             if (WindowHandle == IntPtr.Zero)
             {
@@ -83,7 +84,7 @@ namespace SharpLife.Engine.Video
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, 3);
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, 3);
                 SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 3);
-                WindowHandle = SDL.SDL_CreateWindow(gameWindowName, 0, 0, 640, 480, flags);
+                WindowHandle = SDL.SDL_CreateWindow(title, 0, 0, 640, 480, flags);
 
                 if (WindowHandle == IntPtr.Zero)
                 {
@@ -178,27 +179,30 @@ namespace SharpLife.Engine.Video
             GC.SuppressFinalize(this);
         }
 
-        private void DestroyWindow()
+        internal void Destroy()
         {
-            if (GLContextHandle != IntPtr.Zero)
+            if (Exists)
             {
-                SDL.SDL_GL_DeleteContext(GLContextHandle);
-                GLContextHandle = IntPtr.Zero;
-            }
+                //Both a pre and post callback are provided to allow resource cleanup to occur at the right time
+                Destroying?.Invoke();
 
-            if (WindowHandle != IntPtr.Zero)
-            {
-                SDL.SDL_DestroyWindow(WindowHandle);
-                WindowHandle = IntPtr.Zero;
+                if (GLContextHandle != IntPtr.Zero)
+                {
+                    SDL.SDL_GL_DeleteContext(GLContextHandle);
+                    GLContextHandle = IntPtr.Zero;
+                }
+
+                if (WindowHandle != IntPtr.Zero)
+                {
+                    SDL.SDL_DestroyWindow(WindowHandle);
+                    WindowHandle = IntPtr.Zero;
+                }
+
+                Destroyed?.Invoke();
             }
         }
 
-        private void Destroy()
-        {
-            DestroyWindow();
-        }
-
-        public void CenterWindow()
+        public void Center()
         {
             SDL.SDL_GetWindowSize(WindowHandle, out var windowWidth, out var windowHeight);
 
@@ -208,10 +212,6 @@ namespace SharpLife.Engine.Video
             }
         }
 
-        /// <summary>
-        /// Sleep up to <paramref name="milliSeconds"/> milliseconds, waking to process events
-        /// </summary>
-        /// <param name="milliSeconds"></param>
         public void SleepUntilInput(int milliSeconds)
         {
             _inputSystem.ProcessEvents(milliSeconds);
@@ -237,7 +237,7 @@ namespace SharpLife.Engine.Video
                                 case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
                                     {
                                         _engineLoop.Exiting = true;
-                                        DestroyWindow();
+                                        Destroy();
                                         break;
                                     }
                             }

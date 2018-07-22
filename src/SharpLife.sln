@@ -19,7 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Renderer.BSP", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.FileFormats.WAD", "SharpLife.FileFormats.WAD\SharpLife.FileFormats.WAD.csproj", "{E35B4230-2298-4061-87B9-11DDB3030471}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.CommandSystem", "SharpLife.CommandSystem\SharpLife.CommandSystem.csproj", "{85FD0994-8837-47CC-9E81-D72FE86528B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.CommandSystem", "SharpLife.CommandSystem\SharpLife.CommandSystem.csproj", "{85FD0994-8837-47CC-9E81-D72FE86528B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.Engine.Shared", "SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj", "{CD9D4ECE-308F-4339-85FA-CDE1B97AC61A}"
+EndProject
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

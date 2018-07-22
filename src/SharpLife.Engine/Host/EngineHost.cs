@@ -21,9 +21,9 @@ using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
 using SharpLife.Engine.Configuration;
-using SharpLife.Engine.Loop;
+using SharpLife.Engine.Shared.Loop;
+using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Utility;
-using SharpLife.Engine.Video;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
@@ -70,7 +70,9 @@ namespace SharpLife.Engine.Host
 
         private ConCommandSystem _conCommandSystem;
 
-        private Window _window;
+        private IUserInterface _userInterface;
+
+        private IWindow _window;
 
         private Renderer.Renderer _renderer;
 
@@ -133,7 +135,7 @@ namespace SharpLife.Engine.Host
 
             HostInitialize();
 
-            _window.CenterWindow();
+            _window.Center();
 
             long previousFrameTicks = 0;
 
@@ -272,9 +274,18 @@ namespace SharpLife.Engine.Host
                 throw;
             }
 
-            _window = new Window(_commandLine, _fileSystem, this, EngineConfiguration, GameConfiguration);
+            var gameWindowName = EngineConfiguration.DefaultGameName;
 
-            _window.CenterWindow();
+            if (!string.IsNullOrWhiteSpace(GameConfiguration.GameName))
+            {
+                gameWindowName = GameConfiguration.GameName;
+            }
+
+            _userInterface = new UserInterface(_fileSystem, this);
+
+            _window = _userInterface.CreateMainWindow(gameWindowName, _commandLine.Contains("-noborder") ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0);
+
+            _window.Center();
 
             _renderer = new Renderer.Renderer(_window.WindowHandle, _window.GLContextHandle, _fileSystem, _window.InputSystem, Framework.Path.EnvironmentMaps, Framework.Path.Shaders);
 

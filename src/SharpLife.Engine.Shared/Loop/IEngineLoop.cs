@@ -13,8 +13,7 @@
 *
 ****/
 
-
-namespace SharpLife.Engine.Loop
+namespace SharpLife.Engine.Shared.Loop
 {
     /// <summary>
     /// The engine game loop controller
