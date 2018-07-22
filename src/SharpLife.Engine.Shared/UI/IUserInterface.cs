@@ -44,5 +44,11 @@ namespace SharpLife.Engine.Shared.UI
         /// Destroys the main window if exists
         /// </summary>
         void DestroyMainWindow();
+
+        /// <summary>
+        /// Sleep up to <paramref name="milliSeconds"/> milliseconds, waking to process events
+        /// </summary>
+        /// <param name="milliSeconds"></param>
+        void SleepUntilInput(int milliSeconds);
     }
 }

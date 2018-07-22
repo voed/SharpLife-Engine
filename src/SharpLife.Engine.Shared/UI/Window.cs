@@ -14,9 +14,7 @@
 ****/
 
 using SDL2;
-using SharpLife.Engine.Shared.Loop;
 using SharpLife.FileSystem;
-using SharpLife.Input;
 using SixLabors.ImageSharp;
 using System;
 using System.IO;
@@ -29,8 +27,6 @@ namespace SharpLife.Engine.Shared.UI
     /// </summary>
     internal sealed class Window : IWindow
     {
-        private readonly IEngineLoop _engineLoop;
-
         public bool Exists => WindowHandle != IntPtr.Zero;
 
         public string Title
@@ -43,20 +39,14 @@ namespace SharpLife.Engine.Shared.UI
 
         public IntPtr GLContextHandle { get; private set; }
 
-        private readonly InputSystem _inputSystem = new InputSystem();
-
-        public IInputSystem InputSystem => _inputSystem;
-
         public event Action Resized;
 
         public event Action Destroying;
 
         public event Action Destroyed;
 
-        public Window(IFileSystem fileSystem, IEngineLoop engineLoop, string title, SDL.SDL_WindowFlags additionalFlags = 0)
+        public Window(IFileSystem fileSystem, string title, SDL.SDL_WindowFlags additionalFlags = 0)
         {
-            _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
-
             //This differs from vanilla GoldSource; set the OpenGL context version to 3.0 so we can use shaders
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_FLAGS, (int)SDL.SDL_GLcontext.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -212,43 +202,28 @@ namespace SharpLife.Engine.Shared.UI
             }
         }
 
-        public void SleepUntilInput(int milliSeconds)
+        internal void ProcessEvent(ref SDL.SDL_Event sdlEvent)
         {
-            _inputSystem.ProcessEvents(milliSeconds);
-
-            var snapshot = _inputSystem.Snapshot;
-
-            for (var i = 0; i < snapshot.Events.Count; ++i)
+            switch (sdlEvent.type)
             {
-                var sdlEvent = snapshot.Events[i];
-
-                switch (sdlEvent.type)
-                {
-                    case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                    {
+                        switch (sdlEvent.window.windowEvent)
                         {
-                            switch (sdlEvent.window.windowEvent)
-                            {
-                                case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
-                                    {
-                                        Resized?.Invoke();
-                                        break;
-                                    }
+                            case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
+                                {
+                                    Resized?.Invoke();
+                                    break;
+                                }
 
-                                case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
-                                    {
-                                        _engineLoop.Exiting = true;
-                                        Destroy();
-                                        break;
-                                    }
-                            }
-                            break;
+                            case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
+                                {
+                                    Destroy();
+                                    break;
+                                }
                         }
-                    case SDL.SDL_EventType.SDL_QUIT:
-                        {
-                            _engineLoop.Exiting = true;
-                            break;
-                        }
-                }
+                        break;
+                    }
             }
         }
     }

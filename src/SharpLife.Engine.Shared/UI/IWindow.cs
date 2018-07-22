@@ -13,7 +13,6 @@
 *
 ****/
 
-using SharpLife.Input;
 using System;
 
 namespace SharpLife.Engine.Shared.UI
@@ -32,8 +31,6 @@ namespace SharpLife.Engine.Shared.UI
 
         IntPtr GLContextHandle { get; }
 
-        IInputSystem InputSystem { get; }
-
         event Action Resized;
 
         /// <summary>
@@ -47,11 +44,5 @@ namespace SharpLife.Engine.Shared.UI
         event Action Destroyed;
 
         void Center();
-
-        /// <summary>
-        /// Sleep up to <paramref name="milliSeconds"/> milliseconds, waking to process events
-        /// </summary>
-        /// <param name="milliSeconds"></param>
-        void SleepUntilInput(int milliSeconds);
     }
 }

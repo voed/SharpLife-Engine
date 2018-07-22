@@ -14,11 +14,14 @@
 ****/
 
 using SDL2;
+using SharpLife.Input;
 
 namespace SharpLife.Engine.Shared.UI
 {
     public interface IWindowManager
     {
+        IInputSystem InputSystem { get; }
+
         IWindow CreateWindow(string title, SDL.SDL_WindowFlags additionalFlags = 0);
 
         void DestroyWindow(IWindow window);
@@ -28,5 +31,11 @@ namespace SharpLife.Engine.Shared.UI
         /// All windows will become unusable
         /// </summary>
         void DestroyAllWindows();
+
+        /// <summary>
+        /// Sleep up to <paramref name="milliSeconds"/> milliseconds, waking to process events
+        /// </summary>
+        /// <param name="milliSeconds"></param>
+        void SleepUntilInput(int milliSeconds);
     }
 }

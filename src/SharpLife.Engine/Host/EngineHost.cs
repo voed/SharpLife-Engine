@@ -152,7 +152,7 @@ namespace SharpLife.Engine.Host
 
                 previousFrameTicks = currentFrameTicks;
 
-                _window.SleepUntilInput(0);
+                _userInterface.SleepUntilInput(0);
 
                 Update((float)deltaSeconds);
 
@@ -287,7 +287,7 @@ namespace SharpLife.Engine.Host
 
             _window.Center();
 
-            _renderer = new Renderer.Renderer(_window.WindowHandle, _window.GLContextHandle, _fileSystem, _window.InputSystem, Framework.Path.EnvironmentMaps, Framework.Path.Shaders);
+            _renderer = new Renderer.Renderer(_window.WindowHandle, _window.GLContextHandle, _fileSystem, _userInterface.WindowManager.InputSystem, Framework.Path.EnvironmentMaps, Framework.Path.Shaders);
 
             _window.Resized += _renderer.WindowResized;
 

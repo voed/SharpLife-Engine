@@ -16,6 +16,7 @@
 using SDL2;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.FileSystem;
+using SharpLife.Input;
 using System;
 using System.Collections.Generic;
 
@@ -23,6 +24,8 @@ namespace SharpLife.Engine.Shared.UI
 {
     public sealed class WindowManager : IWindowManager
     {
+        public IInputSystem InputSystem { get; } = new InputSystem();
+
         private readonly IFileSystem _fileSystem;
 
         private readonly IEngineLoop _engineLoop;
@@ -37,7 +40,7 @@ namespace SharpLife.Engine.Shared.UI
 
         public IWindow CreateWindow(string title, SDL.SDL_WindowFlags additionalFlags = 0)
         {
-            var window = new Window(_fileSystem, _engineLoop, title, additionalFlags);
+            var window = new Window(_fileSystem, title, additionalFlags);
 
             _windows.Add(window.WindowHandle, window);
 
@@ -69,6 +72,43 @@ namespace SharpLife.Engine.Shared.UI
             }
 
             _windows.Clear();
+        }
+
+        public void SleepUntilInput(int milliSeconds)
+        {
+            InputSystem.ProcessEvents(milliSeconds);
+
+            var snapshot = InputSystem.Snapshot;
+
+            for (var i = 0; i < snapshot.Events.Count; ++i)
+            {
+                var sdlEvent = snapshot.Events[i];
+
+                switch (sdlEvent.type)
+                {
+                    case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                        {
+                            var windowID = sdlEvent.window.windowID;
+
+                            var windowHandle = SDL.SDL_GetWindowFromID(windowID);
+
+                            if (windowHandle != IntPtr.Zero)
+                            {
+                                if (_windows.TryGetValue(windowHandle, out var window))
+                                {
+                                    window.ProcessEvent(ref sdlEvent);
+                                }
+                            }
+
+                            break;
+                        }
+                    case SDL.SDL_EventType.SDL_QUIT:
+                        {
+                            _engineLoop.Exiting = true;
+                            break;
+                        }
+                }
+            }
         }
     }
 }

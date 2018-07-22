@@ -55,5 +55,14 @@ namespace SharpLife.Engine.Shared.UI
                 MainWindow = null;
             }
         }
+
+        /// <summary>
+        /// Sleep up to <paramref name="milliSeconds"/> milliseconds, waking to process events
+        /// </summary>
+        /// <param name="milliSeconds"></param>
+        public void SleepUntilInput(int milliSeconds)
+        {
+            WindowManager.SleepUntilInput(milliSeconds);
+        }
     }
 }
