@@ -13,6 +13,7 @@
 *
 ****/
 
+using SDL2;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.FileSystem;
 using System;
@@ -25,8 +26,21 @@ namespace SharpLife.Engine.Shared.UI
 
         public IWindow MainWindow { get; private set; }
 
-        public UserInterface(IFileSystem fileSystem, IEngineLoop engineLoop)
+        public UserInterface(IFileSystem fileSystem, IEngineLoop engineLoop, bool noOnTop)
         {
+            //Disable to prevent debugger from shutting down the game
+            SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
+
+            if (noOnTop)
+            {
+                SDL.SDL_SetHint(SDL.SDL_HINT_ALLOW_TOPMOST, "0");
+            }
+
+            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XRANDR, "1");
+            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XVIDMODE, "1");
+
+            SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+
             WindowManager = new WindowManager(fileSystem, engineLoop);
         }
 
@@ -63,6 +77,11 @@ namespace SharpLife.Engine.Shared.UI
         public void SleepUntilInput(int milliSeconds)
         {
             WindowManager.SleepUntilInput(milliSeconds);
+        }
+
+        public void Shutdown()
+        {
+            SDL.SDL_Quit();
         }
     }
 }

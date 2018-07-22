@@ -16,6 +16,7 @@
 using SDL2;
 using Serilog;
 using SharpLife.Engine.Engines;
+using SharpLife.Engine.Shared.Engines;
 using System;
 
 namespace SharpLife.Engine.Host

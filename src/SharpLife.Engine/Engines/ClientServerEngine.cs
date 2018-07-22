@@ -13,14 +13,15 @@
 *
 ****/
 
-using ImGuiNET;
-using SDL2;
 using Serilog;
 using Serilog.Formatting;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Client.Host;
+using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Configuration;
+using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
@@ -85,20 +86,18 @@ namespace SharpLife.Engine.Engines
             }
         }
 
-        private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
-
         private readonly double _desiredFrameLengthSeconds = 1.0 / 60.0;
 
-        private IWindow _window;
+        private IEngineClientHost _client;
 
-        private Renderer.Renderer _renderer;
-
-        public void CreateUserInterface()
+        public IUserInterface CreateUserInterface()
         {
             if (UserInterface == null)
             {
-                UserInterface = new UserInterface(FileSystem, this);
+                UserInterface = new UserInterface(FileSystem, this, CommandLine.Contains("-noontop"));
             }
+
+            return UserInterface;
         }
 
         public void Run(string[] args)
@@ -118,11 +117,9 @@ namespace SharpLife.Engine.Engines
 
             Log.Logger = CreateLogger(GameDirectory);
 
-            SystemInitialize();
+            Initialize(GameDirectory);
 
-            HostInitialize(GameDirectory);
-
-            _window.Center();
+            _client?.PostInitialize();
 
             long previousFrameTicks = 0;
 
@@ -139,7 +136,7 @@ namespace SharpLife.Engine.Engines
 
                 previousFrameTicks = currentFrameTicks;
 
-                UserInterface.SleepUntilInput(0);
+                UserInterface?.SleepUntilInput(0);
 
                 Update((float)deltaSeconds);
 
@@ -148,27 +145,15 @@ namespace SharpLife.Engine.Engines
                     break;
                 }
 
-                _renderer.Draw();
+                _client?.Draw();
             }
 
-            SystemShutdown();
+            Shutdown();
         }
 
         private void Update(float deltaSeconds)
         {
-            _fta.AddTime(deltaSeconds);
-            _renderer.Update(deltaSeconds);
-
-            if (ImGui.BeginMainMenuBar())
-            {
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
-
-                var cameraPosition = _renderer.Scene.Camera.Position.ToString();
-
-                ImGui.TextUnformatted($"Camera Position: {cameraPosition} Camera Angles: Pitch {_renderer.Scene.Camera.Pitch} Yaw {_renderer.Scene.Camera.Yaw}");
-
-                ImGui.EndMainMenuBar();
-            }
+            _client?.Update(deltaSeconds);
         }
 
         private static EngineConfiguration LoadEngineConfiguration(string gameDirectory)
@@ -231,31 +216,10 @@ namespace SharpLife.Engine.Engines
             return config.CreateLogger();
         }
 
-        private void SystemInitialize()
+        private void Initialize(string gameDirectory)
         {
             EngineTime.Start();
 
-            //Disable to prevent debugger from shutting down the game
-            SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
-
-            if (CommandLine.Contains("-noontop"))
-            {
-                SDL.SDL_SetHint(SDL.SDL_HINT_ALLOW_TOPMOST, "0");
-            }
-
-            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XRANDR, "1");
-            SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_X11_XVIDMODE, "1");
-
-            SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
-        }
-
-        private void SystemShutdown()
-        {
-            SDL.SDL_Quit();
-        }
-
-        private void HostInitialize(string gameDirectory)
-        {
             FileSystem = new DiskFileSystem();
 
             SetupFileSystem(gameDirectory);
@@ -278,31 +242,6 @@ namespace SharpLife.Engine.Engines
                 throw;
             }
 
-            var gameWindowName = EngineConfiguration.DefaultGameName;
-
-            if (!string.IsNullOrWhiteSpace(GameConfiguration.GameName))
-            {
-                gameWindowName = GameConfiguration.GameName;
-            }
-
-            UserInterface = new UserInterface(FileSystem, this);
-
-            _window = UserInterface.CreateMainWindow(gameWindowName, CommandLine.Contains("-noborder") ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0);
-
-            _window.Center();
-
-            _renderer = new Renderer.Renderer(
-                _window.WindowHandle,
-                _window.GLContextHandle,
-                FileSystem,
-                UserInterface.WindowManager.InputSystem,
-                Framework.Path.EnvironmentMaps,
-                Framework.Path.Shaders);
-
-            _window.Resized += _renderer.WindowResized;
-
-            //TODO: initialize subsystems
-
             //Get the build date from the generated resource file
             var assembly = typeof(ClientServerEngine).Assembly;
             using (var reader = new StreamReader(assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.BuildDate.txt")))
@@ -314,7 +253,18 @@ namespace SharpLife.Engine.Engines
                 Console.WriteLine($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
+            _client = new EngineClientHost(this);
+
+            //TODO: initialize subsystems
+
             CommandSystem.QueueCommands(CommandSource.Local, $"exec {EngineConfiguration.DefaultGame}.rc");
+        }
+
+        private void Shutdown()
+        {
+            _client?.Shutdown();
+
+            UserInterface?.Shutdown();
         }
 
         private void SetupFileSystem(string gameDirectory)

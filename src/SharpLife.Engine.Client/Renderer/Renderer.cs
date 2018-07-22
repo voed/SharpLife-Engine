@@ -14,6 +14,7 @@
 ****/
 
 using SDL2;
+using SharpLife.Engine.Shared;
 using SharpLife.FileSystem;
 using SharpLife.Input;
 using SharpLife.Renderer;
@@ -22,7 +23,7 @@ using SharpLife.Renderer.Objects;
 using System;
 using Veldrid;
 
-namespace SharpLife.Engine.Renderer
+namespace SharpLife.Engine.Client.Renderer
 {
     /// <summary>
     /// The main renderer

@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine
+namespace SharpLife.Engine.Shared
 {
     /// <summary>
     /// Framework constants

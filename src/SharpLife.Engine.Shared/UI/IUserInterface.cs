@@ -50,5 +50,11 @@ namespace SharpLife.Engine.Shared.UI
         /// </summary>
         /// <param name="milliSeconds"></param>
         void SleepUntilInput(int milliSeconds);
+
+        /// <summary>
+        /// Shuts down the user interface
+        /// The interface can no longer be used after this
+        /// </summary>
+        void Shutdown();
     }
 }

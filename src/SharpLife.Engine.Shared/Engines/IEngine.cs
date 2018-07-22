@@ -21,7 +21,7 @@ using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
 
-namespace SharpLife.Engine.Engines
+namespace SharpLife.Engine.Shared.Engines
 {
     /// <summary>
     /// Manages top level engine components (client, server) and shared components
@@ -77,7 +77,7 @@ namespace SharpLife.Engine.Engines
         /// <summary>
         /// Creates the user interface if it does not exist
         /// </summary>
-        void CreateUserInterface();
+        IUserInterface CreateUserInterface();
 
         void Run(string[] args);
     }

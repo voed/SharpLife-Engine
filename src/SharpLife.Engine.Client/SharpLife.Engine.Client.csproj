@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer.BSP\SharpLife.Renderer.BSP.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SDL2-CS">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\SDL2-CS.dll</HintPath>
+    </Reference>
+    <Reference Include="Veldrid">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
