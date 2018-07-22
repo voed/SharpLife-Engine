@@ -32,6 +32,18 @@ namespace SharpLife.Renderer.Objects
     /// </summary>
     public class Skybox2D : Renderable
     {
+        private struct CubemapPosition
+        {
+            public Vector3 vertex;
+            public Vector3 textureCoords;
+
+            public CubemapPosition(Vector3 vertex, Vector3 textureCoords)
+            {
+                this.vertex = vertex;
+                this.textureCoords = textureCoords;
+            }
+        }
+
         private readonly Image<Rgba32> _front;
         private readonly Image<Rgba32> _back;
         private readonly Image<Rgba32> _left;
@@ -94,12 +106,12 @@ namespace SharpLife.Renderer.Objects
                                         TextureUsage.Sampled | TextureUsage.Cubemap));
 
                                     uint faceSize = (uint)(_front.Width * _front.Height * Unsafe.SizeOf<Rgba32>());
-                                    gd.UpdateTexture(textureCube, (IntPtr)frontPin, faceSize, 0, 0, 0, width, height, 1, 0, 0);
-                                    gd.UpdateTexture(textureCube, (IntPtr)backPin, faceSize, 0, 0, 0, width, height, 1, 0, 1);
-                                    gd.UpdateTexture(textureCube, (IntPtr)topPin, faceSize, 0, 0, 0, width, height, 1, 0, 2);
-                                    gd.UpdateTexture(textureCube, (IntPtr)bottomPin, faceSize, 0, 0, 0, width, height, 1, 0, 3);
-                                    gd.UpdateTexture(textureCube, (IntPtr)rightPin, faceSize, 0, 0, 0, width, height, 1, 0, 4);
-                                    gd.UpdateTexture(textureCube, (IntPtr)leftPin, faceSize, 0, 0, 0, width, height, 1, 0, 5);
+                                    gd.UpdateTexture(textureCube, (IntPtr)leftPin, faceSize, 0, 0, 0, width, height, 1, 0, 0);
+                                    gd.UpdateTexture(textureCube, (IntPtr)rightPin, faceSize, 0, 0, 0, width, height, 1, 0, 1);
+                                    gd.UpdateTexture(textureCube, (IntPtr)backPin, faceSize, 0, 0, 0, width, height, 1, 0, 2);
+                                    gd.UpdateTexture(textureCube, (IntPtr)frontPin, faceSize, 0, 0, 0, width, height, 1, 0, 3);
+                                    gd.UpdateTexture(textureCube, (IntPtr)topPin, faceSize, 0, 0, 0, width, height, 1, 0, 4);
+                                    gd.UpdateTexture(textureCube, (IntPtr)bottomPin, faceSize, 0, 0, 0, width, height, 1, 0, 5);
 
                                     textureView = factory.CreateTextureView(new TextureViewDescription(textureCube));
                                 }
@@ -109,10 +121,12 @@ namespace SharpLife.Renderer.Objects
                 }
             }
 
+            //Because GoldSource's coordinate system isn't the default OpenGL one, we have to pass texture coordinates seperately
             VertexLayoutDescription[] vertexLayouts = new VertexLayoutDescription[]
             {
                 new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3))
+                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3))
             };
 
             (Shader vs, Shader fs) = sc.ResourceCache.GetShaders(gd, gd.ResourceFactory, "Skybox2D");
@@ -182,38 +196,38 @@ namespace SharpLife.Renderer.Objects
             return new RenderOrderKey(ulong.MaxValue);
         }
 
-        private static readonly VertexPosition[] s_vertices = new VertexPosition[]
+        private static readonly CubemapPosition[] s_vertices = new CubemapPosition[]
         {
-            // Top
-            new VertexPosition(new Vector3(-20.0f,20.0f,-20.0f)),
-            new VertexPosition(new Vector3(20.0f,20.0f,-20.0f)),
-            new VertexPosition(new Vector3(20.0f,20.0f,20.0f)),
-            new VertexPosition(new Vector3(-20.0f,20.0f,20.0f)),
-            // Bottom
-            new VertexPosition(new Vector3(-20.0f,-20.0f,20.0f)),
-            new VertexPosition(new Vector3(20.0f,-20.0f,20.0f)),
-            new VertexPosition(new Vector3(20.0f,-20.0f,-20.0f)),
-            new VertexPosition(new Vector3(-20.0f,-20.0f,-20.0f)),
             // Left
-            new VertexPosition(new Vector3(-20.0f,20.0f,-20.0f)),
-            new VertexPosition(new Vector3(-20.0f,20.0f,20.0f)),
-            new VertexPosition(new Vector3(-20.0f,-20.0f,20.0f)),
-            new VertexPosition(new Vector3(-20.0f,-20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,20.0f,-20.0f), new Vector3(20.0f,20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,20.0f,-20.0f), new Vector3(-20.0f,20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,20.0f,20.0f), new Vector3(-20.0f,20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,20.0f,20.0f), new Vector3(20.0f,20.0f,-20.0f)),
             // Right
-            new VertexPosition(new Vector3(20.0f,20.0f,20.0f)),
-            new VertexPosition(new Vector3(20.0f,20.0f,-20.0f)),
-            new VertexPosition(new Vector3(20.0f,-20.0f,-20.0f)),
-            new VertexPosition(new Vector3(20.0f,-20.0f,20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,-20.0f,20.0f), new Vector3(-20.0f,-20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,-20.0f,20.0f), new Vector3(20.0f,-20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,-20.0f,-20.0f), new Vector3(20.0f,-20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,-20.0f,-20.0f), new Vector3(-20.0f,-20.0f,-20.0f)),
             // Back
-            new VertexPosition(new Vector3(20.0f,20.0f,-20.0f)),
-            new VertexPosition(new Vector3(-20.0f,20.0f,-20.0f)),
-            new VertexPosition(new Vector3(-20.0f,-20.0f,-20.0f)),
-            new VertexPosition(new Vector3(20.0f,-20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,20.0f,-20.0f), new Vector3(-20.0f,-20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,20.0f,20.0f), new Vector3(-20.0f,20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,-20.0f,20.0f), new Vector3(-20.0f,20.0f,20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,-20.0f,-20.0f), new Vector3(-20.0f,-20.0f,20.0f)),
             // Front
-            new VertexPosition(new Vector3(-20.0f,20.0f,20.0f)),
-            new VertexPosition(new Vector3(20.0f,20.0f,20.0f)),
-            new VertexPosition(new Vector3(20.0f,-20.0f,20.0f)),
-            new VertexPosition(new Vector3(-20.0f,-20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,20.0f,20.0f), new Vector3(20.0f,20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(20.0f,20.0f,-20.0f), new Vector3(20.0f,-20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(20.0f,-20.0f,-20.0f), new Vector3(20.0f,-20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,-20.0f,20.0f), new Vector3(20.0f,20.0f,20.0f)),
+            // Top
+            new CubemapPosition(new Vector3(-20.0f,20.0f,20.0f), new Vector3(-20.0f,-20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,20.0f,20.0f), new Vector3(-20.0f,20.0f,20.0f)),
+            new CubemapPosition(new Vector3(20.0f,-20.0f,20.0f), new Vector3(20.0f,20.0f,20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,-20.0f,20.0f), new Vector3(20.0f,-20.0f,20.0f)),
+            // Bottom
+            new CubemapPosition(new Vector3(20.0f,20.0f,-20.0f), new Vector3(20.0f,-20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,20.0f,-20.0f), new Vector3(20.0f,20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(-20.0f,-20.0f,-20.0f), new Vector3(-20.0f,20.0f,-20.0f)),
+            new CubemapPosition(new Vector3(20.0f,-20.0f,-20.0f), new Vector3(-20.0f,-20.0f,-20.0f)),
         };
 
         private static readonly ushort[] s_indices = new ushort[]
