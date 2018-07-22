@@ -19,6 +19,7 @@ using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
 using SharpLife.Engine.Client.Host;
+using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
@@ -89,6 +90,7 @@ namespace SharpLife.Engine.Engines
         private readonly double _desiredFrameLengthSeconds = 1.0 / 60.0;
 
         private IEngineClientHost _client;
+        private IEngineServerHost _server;
 
         public IUserInterface CreateUserInterface()
         {
@@ -100,7 +102,7 @@ namespace SharpLife.Engine.Engines
             return UserInterface;
         }
 
-        public void Run(string[] args)
+        public void Run(string[] args, HostType hostType)
         {
             CommandLine = new CommandLine(args, CommandLineKeyPrefixes);
 
@@ -117,7 +119,7 @@ namespace SharpLife.Engine.Engines
 
             Log.Logger = CreateLogger(GameDirectory);
 
-            Initialize(GameDirectory);
+            Initialize(GameDirectory, hostType);
 
             _client?.PostInitialize();
 
@@ -216,7 +218,7 @@ namespace SharpLife.Engine.Engines
             return config.CreateLogger();
         }
 
-        private void Initialize(string gameDirectory)
+        private void Initialize(string gameDirectory, HostType hostType)
         {
             EngineTime.Start();
 
@@ -253,7 +255,16 @@ namespace SharpLife.Engine.Engines
                 Console.WriteLine($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
-            _client = new EngineClientHost(this);
+            if (hostType == HostType.Client)
+            {
+                _client = new EngineClientHost(this);
+            }
+
+            //For listen servers, the server is created when the client actually starts a map
+            if (hostType == HostType.DedicatedServer)
+            {
+                _server = CreateServer();
+            }
 
             //TODO: initialize subsystems
 
@@ -284,6 +295,11 @@ namespace SharpLife.Engine.Engines
                 false,
                 !CommandLine.Contains("-nohdmodels") && EngineConfiguration.EnableHDModels,
                 CommandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder);
+        }
+
+        private IEngineServerHost CreateServer()
+        {
+            return new EngineServerHost(this);
         }
     }
 }

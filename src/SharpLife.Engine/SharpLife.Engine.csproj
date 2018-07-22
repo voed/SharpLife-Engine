@@ -40,6 +40,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.CommandSystem\SharpLife.CommandSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Engine.Client\SharpLife.Engine.Client.csproj" />
+    <ProjectReference Include="..\SharpLife.Engine.Server\SharpLife.Engine.Server.csproj" />
     <ProjectReference Include="..\SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
   </ItemGroup>

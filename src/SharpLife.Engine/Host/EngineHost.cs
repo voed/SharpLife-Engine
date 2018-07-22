@@ -34,7 +34,7 @@ namespace SharpLife.Engine.Host
             {
                 engine = new ClientServerEngine();
 
-                engine.Run(args);
+                engine.Run(args, type);
             }
 #pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception.
             catch (Exception e)

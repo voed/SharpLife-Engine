@@ -79,6 +79,6 @@ namespace SharpLife.Engine.Shared.Engines
         /// </summary>
         IUserInterface CreateUserInterface();
 
-        void Run(string[] args);
+        void Run(string[] args, HostType hostType);
     }
 }
