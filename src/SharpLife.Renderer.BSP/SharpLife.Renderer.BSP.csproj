@@ -18,11 +18,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SharpLife.FileFormats.BSP\SharpLife.FileFormats.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="SixLabors.ImageSharp">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Veldrid">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
     </Reference>

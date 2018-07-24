@@ -18,12 +18,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-dev001535" />
+    <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SixLabors.ImageSharp">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
