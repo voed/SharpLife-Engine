@@ -13,6 +13,8 @@
 *
 ****/
 
+using SharpLife.CommandSystem;
+
 namespace SharpLife.Engine.Server.Host
 {
     /// <summary>
@@ -20,6 +22,26 @@ namespace SharpLife.Engine.Server.Host
     /// </summary>
     public interface IEngineServerHost
     {
+        /// <summary>
+        /// The command system used by the server
+        /// </summary>
+        IConCommandSystem CommandSystem { get; }
 
+        bool GameAssemblyLoaded { get; }
+
+        void Shutdown();
+
+        void LoadGameAssembly();
+
+        /// <summary>
+        /// Starts a new server on the given map
+        /// TODO: remove startspot and use generic data carryover to pass data between maps
+        /// </summary>
+        /// <param name="mapName"></param>
+        /// <param name="startSpot">Name of the entity where players should respawn</param>
+        /// <param name="flags"></param>
+        bool Start(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None);
+
+        void Stop();
     }
 }

@@ -13,34 +13,16 @@
 *
 ****/
 
-using SharpLife.CommandSystem;
-
-namespace SharpLife.Engine.Client.Host
+namespace SharpLife.Engine.Shared.Networking
 {
     /// <summary>
-    /// The client host, responsible for all engine level client operations
+    /// Known network addresses used by the engine
     /// </summary>
-    public interface IEngineClientHost
+    public static class NetAddresses
     {
         /// <summary>
-        /// The command system used by the client
+        /// Indicates that the client should connect to a listen server hosted by this instance
         /// </summary>
-        IConCommandSystem CommandSystem { get; }
-
-        void PostInitialize();
-
-        void Shutdown();
-
-        void Update(float deltaSeconds);
-
-        void Draw();
-
-        /// <summary>
-        /// Connect to a server via address
-        /// </summary>
-        /// <param name="address"></param>
-        void Connect(string address);
-
-        void Disconnect();
+        public const string Local = "local";
     }
 }

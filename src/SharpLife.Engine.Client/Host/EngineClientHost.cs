@@ -15,6 +15,8 @@
 
 using ImGuiNET;
 using SDL2;
+using SharpLife.CommandSystem;
+using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.API.Game;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Engines;
@@ -27,6 +29,8 @@ namespace SharpLife.Engine.Client.Host
 {
     public class EngineClientHost : IEngineClientHost
     {
+        public IConCommandSystem CommandSystem => _engine.CommandSystem;
+
         private readonly IEngine _engine;
 
         private readonly IUserInterface _userInterface;
@@ -65,6 +69,8 @@ namespace SharpLife.Engine.Client.Host
                 Framework.Path.Shaders);
 
             _window.Resized += _renderer.WindowResized;
+
+            CommandSystem.RegisterConCommand(new ConCommandInfo("connect", Connect).WithHelpInfo("Connect to a server"));
         }
 
         public void PostInitialize()
@@ -102,6 +108,44 @@ namespace SharpLife.Engine.Client.Host
         public void Draw()
         {
             _renderer.Draw();
+        }
+
+        /// <summary>
+        /// Connect to a server
+        /// </summary>
+        /// <param name="command"></param>
+        private void Connect(ICommand command)
+        {
+            if (command.Count == 0)
+            {
+                Console.WriteLine("usage: connect <server>");
+                return;
+            }
+
+            var name = command.ArgumentsString;
+
+            Connect(name);
+        }
+
+        public void Connect(string address)
+        {
+            if (address == null)
+            {
+                throw new ArgumentNullException(nameof(address));
+            }
+
+            Disconnect();
+
+            //TODO: initialize client state
+
+            //TODO: store server name
+
+            //TODO: configure networking
+        }
+
+        public void Disconnect()
+        {
+            //TODO: implement
         }
     }
 }

@@ -30,6 +30,7 @@ namespace SharpLife.Engine.Shared
             public const string Graphics = "gfx";
             public const string EnvironmentMaps = "env";
             public const string Shaders = "shaders";
+            public const string Maps = "maps";
         }
 
         public static class Path
@@ -43,6 +44,11 @@ namespace SharpLife.Engine.Shared
             /// Shared are stored here
             /// </summary>
             public static readonly string Shaders = System.IO.Path.Combine(Directory.Graphics, Directory.Shaders);
+
+            /// <summary>
+            /// Maps are stored here
+            /// </summary>
+            public static readonly string Maps = Directory.Maps;
         }
 
         /// <summary>
@@ -52,6 +58,7 @@ namespace SharpLife.Engine.Shared
         public static class Extension
         {
             public const string WAD = "wad";
+            public const string BSP = "bsp";
         }
     }
 }

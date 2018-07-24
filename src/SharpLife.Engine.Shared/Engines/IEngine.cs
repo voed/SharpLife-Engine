@@ -15,6 +15,7 @@
 
 using SharpLife.CommandSystem;
 using SharpLife.Engine.Shared.Configuration;
+using SharpLife.Engine.Shared.Maps;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
@@ -58,6 +59,8 @@ namespace SharpLife.Engine.Shared.Engines
         /// Gets the engine time
         /// </summary>
         IEngineTime EngineTime { get; }
+
+        IMapManager MapManager { get; }
 
         /// <summary>
         /// The engine configuration

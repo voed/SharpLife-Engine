@@ -18,12 +18,15 @@ using Serilog.Formatting;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
+using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Loop;
+using SharpLife.Engine.Shared.Maps;
+using SharpLife.Engine.Shared.Networking;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
@@ -65,11 +68,17 @@ namespace SharpLife.Engine.Engines
 
         IEngineTime IEngine.EngineTime => EngineTime;
 
+        public IMapManager MapManager { get; private set; }
+
         public EngineConfiguration EngineConfiguration { get; private set; }
 
         public GameConfiguration GameConfiguration { get; private set; }
 
         public DateTimeOffset BuildDate { get; private set; }
+
+        public bool IsDedicatedServer => _hostType == HostType.Client;
+
+        private HostType _hostType;
 
         private bool _exiting;
 
@@ -104,6 +113,8 @@ namespace SharpLife.Engine.Engines
 
         public void Run(string[] args, HostType hostType)
         {
+            _hostType = hostType;
+
             CommandLine = new CommandLine(args, CommandLineKeyPrefixes);
 
             GameDirectory = CommandLine.GetValue("-game");
@@ -155,6 +166,8 @@ namespace SharpLife.Engine.Engines
 
         private void Update(float deltaSeconds)
         {
+            CommandSystem.Execute();
+
             _client?.Update(deltaSeconds);
         }
 
@@ -260,11 +273,17 @@ namespace SharpLife.Engine.Engines
                 _client = new EngineClientHost(this);
             }
 
-            //For listen servers, the server is created when the client actually starts a map
+            _server = new EngineServerHost(this);
+
+            //For listen servers, the server game assembly is created when the client actually starts a map
             if (hostType == HostType.DedicatedServer)
             {
-                _server = CreateServer();
+                _server.LoadGameAssembly();
             }
+
+            MapManager = new MapManager(FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
+
+            CommandSystem.RegisterConCommand(new ConCommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
 
             //TODO: initialize subsystems
 
@@ -273,6 +292,7 @@ namespace SharpLife.Engine.Engines
 
         private void Shutdown()
         {
+            _server.Shutdown();
             _client?.Shutdown();
 
             UserInterface?.Shutdown();
@@ -297,9 +317,89 @@ namespace SharpLife.Engine.Engines
                 CommandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder);
         }
 
-        private IEngineServerHost CreateServer()
+        private void InitializeGameAssembly()
         {
-            return new EngineServerHost(this);
+            if (!_server.GameAssemblyLoaded)
+            {
+                CommandSystem.Execute();
+
+                //TODO: configure networking
+
+                _server.LoadGameAssembly();
+            }
+            else
+            {
+                Console.WriteLine("LoadGameAssembly called twice, skipping second call");
+            }
+        }
+
+        /// <summary>
+        /// Start a new map, loading entities from the map entity data string
+        /// </summary>
+        /// <param name="command"></param>
+        private void StartNewMap(ICommand command)
+        {
+            if (command.CommandSource != CommandSource.Local)
+            {
+                return;
+            }
+
+            if (command.Count == 0)
+            {
+                Console.WriteLine("map <levelname> : changes server to specified map");
+                return;
+            }
+
+            _client?.Disconnect();
+
+            var mapName = command[0];
+
+            //Remove BSP extension
+            if (mapName.EndsWith(FileExtensionUtils.AsExtension(Framework.Extension.BSP)))
+            {
+                mapName = Path.GetFileNameWithoutExtension(mapName);
+            }
+
+            InitializeGameAssembly();
+
+            if (!MapManager.IsMapValid(mapName))
+            {
+                Console.WriteLine($"map change failed: '{mapName}' not found on server.");
+                return;
+            }
+
+            StartMap(mapName);
+        }
+
+        /// <summary>
+        /// Starts a new server on the given map, optionally loading a saved game
+        /// </summary>
+        /// <param name="mapName"></param>
+        /// <param name="startSpot"></param>
+        /// <param name="flags"></param>
+        private void StartMap(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None)
+        {
+            _server.Stop();
+
+            if (!_server.Start(mapName, startSpot, flags))
+            {
+                return;
+            }
+
+            if ((flags & ServerStartFlags.LoadGame) != 0)
+            {
+                //TODO: load game
+            }
+            else
+            {
+                //TODO: initialize entities through game assembly
+            }
+
+            //Listen server hosts need to connect to their own server
+            if (!IsDedicatedServer)
+            {
+                CommandSystem.QueueCommands(CommandSource.Local, $"connect {NetAddresses.Local}");
+            }
         }
     }
 }

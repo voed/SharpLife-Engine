@@ -15,12 +15,13 @@
 
 using System;
 
-namespace SharpLife.Engine.API.Game
+namespace SharpLife.Engine.Server.Host
 {
-    public interface IServerMod
+    [Flags]
+    public enum ServerStartFlags
     {
-        void Initialize(IServiceProvider serviceProvider);
-
-        void Shutdown();
+        None = 0,
+        IsDemo = 1 << 0,
+        LoadGame = 1 << 1
     }
 }

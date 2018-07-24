@@ -14,10 +14,21 @@
 ****/
 
 using SharpLife.Engine.API.Game;
+using System;
 
 namespace SharpLife.Game.Server.API
 {
     public class ServerMod : IServerMod
     {
+        private IServiceProvider _serviceProvider;
+
+        public void Initialize(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        }
+
+        public void Shutdown()
+        {
+        }
     }
 }
