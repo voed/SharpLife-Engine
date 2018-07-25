@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Server.Host
 {
@@ -26,6 +27,11 @@ namespace SharpLife.Engine.Server.Host
         /// The command system used by the server
         /// </summary>
         IConCommandSystem CommandSystem { get; }
+
+        /// <summary>
+        /// The event system used by the server
+        /// </summary>
+        IEventSystem EventSystem { get; }
 
         bool GameAssemblyLoaded { get; }
 

@@ -31,6 +31,7 @@ using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
+using SharpLife.Utility.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -69,6 +70,8 @@ namespace SharpLife.Engine.Engines
         IEngineTime IEngine.EngineTime => EngineTime;
 
         public IMapManager MapManager { get; private set; }
+
+        public IEventSystem EventSystem { get; } = new EventSystem();
 
         public EngineConfiguration EngineConfiguration { get; private set; }
 

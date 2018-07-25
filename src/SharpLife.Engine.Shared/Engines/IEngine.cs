@@ -20,6 +20,7 @@ using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
+using SharpLife.Utility.Events;
 using System;
 
 namespace SharpLife.Engine.Shared.Engines
@@ -61,6 +62,11 @@ namespace SharpLife.Engine.Shared.Engines
         IEngineTime EngineTime { get; }
 
         IMapManager MapManager { get; }
+
+        /// <summary>
+        /// The engine wide event system
+        /// </summary>
+        IEventSystem EventSystem { get; }
 
         /// <summary>
         /// The engine configuration

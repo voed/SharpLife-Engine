@@ -19,6 +19,7 @@ using SharpLife.CommandSystem;
 using SharpLife.Engine.API.Game;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.ModUtils;
+using SharpLife.Utility.Events;
 using System;
 
 namespace SharpLife.Engine.Server.Host
@@ -26,6 +27,8 @@ namespace SharpLife.Engine.Server.Host
     public class EngineServerHost : IEngineServerHost
     {
         public IConCommandSystem CommandSystem => _engine.CommandSystem;
+
+        public IEventSystem EventSystem => _engine.EventSystem;
 
         public bool GameAssemblyLoaded => _mod != null;
 

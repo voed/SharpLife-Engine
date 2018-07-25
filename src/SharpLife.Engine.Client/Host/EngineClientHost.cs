@@ -23,6 +23,7 @@ using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.ModUtils;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Utility;
+using SharpLife.Utility.Events;
 using System;
 
 namespace SharpLife.Engine.Client.Host
@@ -30,6 +31,8 @@ namespace SharpLife.Engine.Client.Host
     public class EngineClientHost : IEngineClientHost
     {
         public IConCommandSystem CommandSystem => _engine.CommandSystem;
+
+        public IEventSystem EventSystem => _engine.EventSystem;
 
         private readonly IEngine _engine;
 

@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Client.Host
 {
@@ -26,6 +27,11 @@ namespace SharpLife.Engine.Client.Host
         /// The command system used by the client
         /// </summary>
         IConCommandSystem CommandSystem { get; }
+
+        /// <summary>
+        /// The event system used by the client
+        /// </summary>
+        IEventSystem EventSystem { get; }
 
         void PostInitialize();
 
