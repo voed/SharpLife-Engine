@@ -15,7 +15,7 @@
 
 namespace SharpLife.FileFormats.BSP.Disk
 {
-    internal class Header
+    internal sealed class Header
     {
         public BSPVersion Version;
         public Lump[] Lumps;

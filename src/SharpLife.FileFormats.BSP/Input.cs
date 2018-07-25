@@ -13,6 +13,7 @@
 *
 ****/
 
+using Force.Crc32;
 using SharpLife.FileFormats.BSP.Disk;
 using SharpLife.FileFormats.WAD;
 using SharpLife.Utility;
@@ -491,8 +492,7 @@ namespace SharpLife.FileFormats.BSP
             //It can only contain planes if the length is a multiple of the plane data structure size,
             //AND the entities lump is a multiple of the size
             //These 2 lumps are switched in those BSP files
-            var isBlueShiftBSP = (header.Lumps[(int)LumpId.Planes].filelen % Marshal.SizeOf<Disk.Plane>()) != 0
-                && (header.Lumps[(int)LumpId.Entities].filelen % Marshal.SizeOf<Disk.Plane>()) == 0;
+            var isBlueShiftBSP = IsBlueShiftBSP(header);
 
             var entitiesLumpId = isBlueShiftBSP ? LumpId.Planes : LumpId.Entities;
             var planesLumpId = isBlueShiftBSP ? LumpId.Entities : LumpId.Planes;
@@ -543,7 +543,109 @@ namespace SharpLife.FileFormats.BSP
 
         public static BSPFile ReadBSPFile(Stream stream)
         {
-            return ReadBSPFile(new BinaryReader(stream));
+            using (var reader = new BinaryReader(stream))
+            {
+                return ReadBSPFile(reader);
+            }
+        }
+
+        private static bool IsBlueShiftBSP(Header header)
+        {
+            //Determine if this is a Blue Shift BSP file
+            //This works by checking if the planes lump actually contains planes
+            //It can only contain planes if the length is a multiple of the plane data structure size,
+            //AND the entities lump is a multiple of the size
+            //These 2 lumps are switched in those BSP files
+            return (header.Lumps[(int)LumpId.Planes].filelen % Marshal.SizeOf<Disk.Plane>()) != 0
+                && (header.Lumps[(int)LumpId.Entities].filelen % Marshal.SizeOf<Disk.Plane>()) == 0;
+        }
+
+        /// <summary>
+        /// Identifies whether the given reader contains a Blue Shift BSP file
+        /// </summary>
+        /// <param name="reader"></param>
+        public static bool IsBlueShiftBSP(BinaryReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            var position = reader.BaseStream.Position;
+
+            try
+            {
+                var header = ReadHeader(reader);
+
+                return IsBlueShiftBSP(header);
+            }
+            finally
+            {
+                //Restore original position since this is a query operation
+                reader.BaseStream.Position = position;
+            }
+        }
+
+        /// <summary>
+        /// <see cref="IsBlueShiftBSP(BinaryReader)"/>
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public static bool IsBlueShiftBSP(Stream stream)
+        {
+            using (var reader = new BinaryReader(stream))
+            {
+                return IsBlueShiftBSP(new BinaryReader(stream));
+            }
+        }
+
+        public static uint ComputeCRC(Stream stream)
+        {
+            using (var reader = new BinaryReader(stream))
+            {
+                var header = ReadHeader(reader);
+
+                var isBlueShiftBSP = IsBlueShiftBSP(header);
+
+                var ignoreLump = isBlueShiftBSP ? LumpId.Planes : LumpId.Entities;
+
+                uint crc = 0;
+
+                //Append each lump to CRC, except entities lump since servers should be able to run Ripented maps
+
+                var buffer = new byte[1024];
+
+                foreach (var i in Enumerable.Range((int)LumpId.FirstLump, (LumpId.LastLump - LumpId.FirstLump) + 1))
+                {
+                    if (i == (int)ignoreLump)
+                    {
+                        continue;
+                    }
+
+                    reader.BaseStream.Position = header.Lumps[i].fileofs;
+
+                    var bytesLeft = header.Lumps[i].filelen;
+
+                    while (bytesLeft > 0)
+                    {
+                        var bytesToRead = bytesLeft < buffer.Length ? bytesLeft : buffer.Length;
+
+                        var bytesRead = reader.Read(buffer, 0, bytesToRead);
+
+                        if (bytesRead != bytesToRead)
+                        {
+                            var totalRead = header.Lumps[i].filelen - bytesLeft - (bytesToRead - bytesRead);
+                            throw new InvalidOperationException($"BSP lump {i} has invalid file length data, expected {header.Lumps[i].filelen}, got {totalRead}");
+                        }
+
+                        crc = Crc32Algorithm.Append(crc, buffer, 0, bytesToRead);
+
+                        bytesLeft -= bytesToRead;
+                    }
+                }
+
+                return crc;
+            }
         }
     }
 }
