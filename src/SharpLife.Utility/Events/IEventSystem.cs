@@ -13,6 +13,7 @@
 *
 ****/
 
+using System;
 
 namespace SharpLife.Utility.Events
 {
@@ -50,6 +51,13 @@ namespace SharpLife.Utility.Events
         void RegisterEvent<TDataType>(string name) where TDataType : EventData;
 
         /// <summary>
+        /// Registers an event name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="dataType"></param>
+        void RegisterEvent(string name, Type dataType);
+
+        /// <summary>
         /// Unregisters an event
         /// Also removes all listeners for the event
         /// </summary>
@@ -72,12 +80,28 @@ namespace SharpLife.Utility.Events
         void AddListener<TDataType>(string name, Delegates.Listener listener) where TDataType : EventData;
 
         /// <summary>
+        /// Adds a listener for a specific event
+        /// The event name is inferred from the type
+        /// </summary>
+        /// <typeparam name="TDataType">Event data type</typeparam>
+        /// <param name="listener"></param>
+        void AddListener<TDataType>(Delegates.Listener listener) where TDataType : EventData;
+
+        /// <summary>
         /// Adds a listener for a specific event, taking the data as a separate argument
         /// </summary>
         /// <typeparam name="TDataType"></typeparam>
         /// <param name="name"></param>
         /// <param name="listener"></param>
         void AddListener<TDataType>(string name, Delegates.DataListener<TDataType> listener) where TDataType : EventData;
+
+        /// <summary>
+        /// Adds a listener for a specific event, taking the data as a separate argument
+        /// The event name is inferred from the type
+        /// </summary>
+        /// <typeparam name="TDataType"></typeparam>
+        /// <param name="listener"></param>
+        void AddListener<TDataType>(Delegates.DataListener<TDataType> listener) where TDataType : EventData;
 
         /// <summary>
         /// Adds a listener to multiple events
@@ -141,6 +165,15 @@ namespace SharpLife.Utility.Events
         /// <param name="data">Data to provide to listeners</param>
         /// <exception cref="ArgumentNullException">If name or data are null</exception>
         void DispatchEvent<TDataType>(string name, TDataType data) where TDataType : EventData;
+
+        /// <summary>
+        /// Dispatches an event to all listeners of that event
+        /// The event name is inferred from the data type
+        /// </summary>
+        /// <typeparam name="TDataType">Event data type</typeparam>
+        /// <param name="data">Data to provide to listeners</param>
+        /// <exception cref="ArgumentNullException">If name or data are null</exception>
+        void DispatchEvent<TDataType>(TDataType data) where TDataType : EventData;
 
         /// <summary>
         /// Adds a post dispatch callback

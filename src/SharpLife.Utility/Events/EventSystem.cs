@@ -46,15 +46,8 @@ namespace SharpLife.Utility.Events
             return _events.ContainsKey(name);
         }
 
-        public void RegisterEvent(string name)
+        private void InternalRegisterEvent(string name, Type dataType)
         {
-            RegisterEvent<EmptyEventData>(name);
-        }
-
-        public void RegisterEvent<TDataType>(string name) where TDataType : EventData
-        {
-            ValidateName(name);
-
             if (IsDispatching)
             {
                 throw new InvalidOperationException("Cannot register events while dispatching");
@@ -65,7 +58,36 @@ namespace SharpLife.Utility.Events
                 throw new ArgumentException($"Event \"{name}\" has already been registered");
             }
 
-            _events.Add(name, new EventMetaData(name, typeof(TDataType)));
+            _events.Add(name, new EventMetaData(name, dataType));
+        }
+
+        public void RegisterEvent(string name)
+        {
+            RegisterEvent<EmptyEventData>(name);
+        }
+
+        public void RegisterEvent<TDataType>(string name) where TDataType : EventData
+        {
+            ValidateName(name);
+
+            InternalRegisterEvent(name, typeof(TDataType));
+        }
+
+        public void RegisterEvent(string name, Type dataType)
+        {
+            ValidateName(name);
+
+            if (dataType == null)
+            {
+                throw new ArgumentNullException(nameof(dataType));
+            }
+
+            if (!typeof(EventData).IsAssignableFrom(dataType))
+            {
+                throw new InvalidOperationException($"Event \"{name}\" has data type {dataType.FullName}\", not compatible with data type \"{typeof(EventData).FullName}\"");
+            }
+
+            InternalRegisterEvent(name, dataType);
         }
 
         public void UnregisterEvent(string name)
@@ -119,6 +141,23 @@ namespace SharpLife.Utility.Events
             InternalAddListener<TDataType>(name, new PlainInvoker(listener));
         }
 
+        public void AddListener<TDataType>(Delegates.Listener listener) where TDataType : EventData
+        {
+            if (listener == null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+
+            if (IsDispatching)
+            {
+                throw new InvalidOperationException("Cannot add listeners while dispatching");
+            }
+
+            var name = EventUtils.EventName<TDataType>();
+
+            InternalAddListener<TDataType>(name, new PlainInvoker(listener));
+        }
+
         public void AddListener<TDataType>(string name, Delegates.DataListener<TDataType> listener) where TDataType : EventData
         {
             ValidateName(name);
@@ -139,6 +178,23 @@ namespace SharpLife.Utility.Events
         public void AddListeners(string[] names, Delegates.Listener listener)
         {
             AddListeners<EmptyEventData>(names, listener);
+        }
+
+        public void AddListener<TDataType>(Delegates.DataListener<TDataType> listener) where TDataType : EventData
+        {
+            if (listener == null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+
+            if (IsDispatching)
+            {
+                throw new InvalidOperationException("Cannot add listeners while dispatching");
+            }
+
+            var name = EventUtils.EventName<TDataType>();
+
+            InternalAddListener<TDataType>(name, new DataInvoker<TDataType>(listener));
         }
 
         public void AddListeners<TDataType>(string[] names, Delegates.Listener listener) where TDataType : EventData
@@ -258,10 +314,8 @@ namespace SharpLife.Utility.Events
             DispatchEvent(name, EmptyEventData.Instance);
         }
 
-        public void DispatchEvent<TDataType>(string name, TDataType data) where TDataType : EventData
+        private void InternalDispatchEvent<TDataType>(string name, TDataType data) where TDataType : EventData
         {
-            ValidateName(name);
-
             if (_events.TryGetValue(name, out var metaData))
             {
                 var @event = new Event(this, name, data);
@@ -283,6 +337,30 @@ namespace SharpLife.Utility.Events
                     _postDispatchCallbacks.Capacity = 0;
                 }
             }
+        }
+
+        public void DispatchEvent<TDataType>(string name, TDataType data) where TDataType : EventData
+        {
+            ValidateName(name);
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            InternalDispatchEvent(name, data);
+        }
+
+        public void DispatchEvent<TDataType>(TDataType data) where TDataType : EventData
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            var name = EventUtils.EventName<TDataType>();
+
+            InternalDispatchEvent(name, data);
         }
 
         public void AddPostDispatchCallback(Delegates.PostDispatchCallback callback)
