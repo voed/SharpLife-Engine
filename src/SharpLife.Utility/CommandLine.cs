@@ -58,6 +58,13 @@ namespace SharpLife.Utility
             return GetValue(key, _keyPrefixes);
         }
 
+        public bool TryGetValue(string key, out string value)
+        {
+            value = GetValue(key);
+
+            return value != null;
+        }
+
         public string GetValue(string key, IEnumerable<string> keyPrefixes)
         {
             if (keyPrefixes == null)

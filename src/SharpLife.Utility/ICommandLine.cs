@@ -64,6 +64,14 @@ namespace SharpLife.Utility
         string GetValue(string key);
 
         /// <summary>
+        /// <see cref="GetValue(string)"/>
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        bool TryGetValue(string key, out string value);
+
+        /// <summary>
         /// Overload to allow use of a custom key prefix list
         /// </summary>
         /// <param name="key"></param>
