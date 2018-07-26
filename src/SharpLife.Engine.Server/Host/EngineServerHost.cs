@@ -377,6 +377,24 @@ namespace SharpLife.Engine.Server.Host
         {
             var status = (NetConnectionStatus)message.ReadByte();
 
+            //Since we look up the client below we have to make sure only those states that we care about are handled
+            //Some states will occur before the client is given a slot, so don't process those
+            var ignore = true;
+
+            switch (status)
+            {
+                case NetConnectionStatus.Connected:
+                case NetConnectionStatus.Disconnecting:
+                case NetConnectionStatus.Disconnected:
+                    ignore = false;
+                    break;
+            }
+
+            if (ignore)
+            {
+                return;
+            }
+
             string reason = message.ReadString();
 
             var client = FindClient(message.SenderEndPoint);
