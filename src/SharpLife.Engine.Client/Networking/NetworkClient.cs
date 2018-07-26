@@ -154,6 +154,7 @@ namespace SharpLife.Engine.Client.Networking
             while ((im = _client.ReadMessage()) != null)
             {
                 handler(im);
+                _client.Recycle(im);
             }
         }
     }

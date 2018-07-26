@@ -78,6 +78,8 @@ namespace SharpLife.Engine.Server.Networking
             while ((im = _server.ReadMessage()) != null)
             {
                 handler(im);
+
+                _server.Recycle(im);
             }
         }
 
