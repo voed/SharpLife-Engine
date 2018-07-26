@@ -147,7 +147,8 @@ namespace SharpLife.CommandSystem
 
                 var extension = Path.GetExtension(fileName);
 
-                if (extension != "cfg" && extension != "rc")
+                //TODO: need to define these extensions
+                if (extension != ".cfg" && extension != ".rc")
                 {
                     Console.WriteLine($"exec {fileName}: not a .cfg or .rc file");
                     return;
