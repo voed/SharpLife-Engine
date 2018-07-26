@@ -13,16 +13,16 @@
 *
 ****/
 
-using System;
-
-namespace SharpLife.Engine.Server.Host
+namespace SharpLife.Networking.Shared
 {
-    [Flags]
-    public enum ServerStartFlags
+    /// <summary>
+    /// Known network addresses used by the engine
+    /// </summary>
+    public static class NetAddresses
     {
-        None = 0,
-        IsDemo = 1 << 0,
-        LoadGame = 1 << 1,
-        ChangeLevel = 1 << 2
+        /// <summary>
+        /// Indicates that the client should connect to a listen server hosted by this instance
+        /// </summary>
+        public const string Local = "local";
     }
 }

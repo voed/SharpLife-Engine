@@ -20,16 +20,18 @@ using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Client.Host;
+using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
+using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.Engine.Shared.Maps;
-using SharpLife.Engine.Shared.Networking;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
+using SharpLife.Networking.Shared;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
@@ -79,7 +81,9 @@ namespace SharpLife.Engine.Engines
 
         public DateTimeOffset BuildDate { get; private set; }
 
-        public bool IsDedicatedServer => _hostType == HostType.Client;
+        public bool IsDedicatedServer => _hostType == HostType.DedicatedServer;
+
+        public bool IsServerActive => _server?.Active == true;
 
         private HostType _hostType;
 
@@ -171,6 +175,8 @@ namespace SharpLife.Engine.Engines
         {
             CommandSystem.Execute();
 
+            _server?.RunFrame(deltaSeconds);
+
             _client?.Update(deltaSeconds);
         }
 
@@ -238,6 +244,8 @@ namespace SharpLife.Engine.Engines
         {
             EngineTime.Start();
 
+            EventUtils.RegisterEvents(EventSystem, new EngineEvents());
+
             FileSystem = new DiskFileSystem();
 
             SetupFileSystem(gameDirectory);
@@ -299,6 +307,8 @@ namespace SharpLife.Engine.Engines
             _client?.Shutdown();
 
             UserInterface?.Shutdown();
+
+            EventUtils.UnregisterEvents(EventSystem, new EngineEvents());
         }
 
         private void SetupFileSystem(string gameDirectory)
@@ -353,7 +363,7 @@ namespace SharpLife.Engine.Engines
                 return;
             }
 
-            _client?.Disconnect();
+            _client?.Disconnect(false);
 
             var mapName = command[0];
 
@@ -365,30 +375,41 @@ namespace SharpLife.Engine.Engines
 
             InitializeGameAssembly();
 
+            EventSystem.DispatchEvent(EngineEvents.EngineNewMapRequest);
+
             if (!MapManager.IsMapValid(mapName))
             {
                 Console.WriteLine($"map change failed: '{mapName}' not found on server.");
                 return;
             }
 
-            StartMap(mapName);
-        }
-
-        /// <summary>
-        /// Starts a new server on the given map, optionally loading a saved game
-        /// </summary>
-        /// <param name="mapName"></param>
-        /// <param name="startSpot"></param>
-        /// <param name="flags"></param>
-        private void StartMap(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None)
-        {
             _server.Stop();
 
-            if (!_server.Start(mapName, startSpot, flags))
+            EventSystem.DispatchEvent(EngineEvents.EngineStartingServer);
+
+            const ServerStartFlags flags = ServerStartFlags.None;
+
+            if (!_server.Start(mapName, null, flags))
             {
                 return;
             }
 
+            FinishLoadMap(null, flags);
+
+            //Listen server hosts need to connect to their own server
+            if (!IsDedicatedServer)
+            {
+                _client.CommandSystem.QueueCommands(CommandSource.Local, $"connect {NetAddresses.Local}");
+            }
+        }
+
+        /// <summary>
+        /// Finishes loading a map and activates the server
+        /// </summary>
+        /// <param name="startSpot"></param>
+        /// <param name="flags"></param>
+        private void FinishLoadMap(string startSpot = null, ServerStartFlags flags = ServerStartFlags.None)
+        {
             if ((flags & ServerStartFlags.LoadGame) != 0)
             {
                 //TODO: load game
@@ -398,10 +419,32 @@ namespace SharpLife.Engine.Engines
                 //TODO: initialize entities through game assembly
             }
 
-            //Listen server hosts need to connect to their own server
-            if (!IsDedicatedServer)
+            _server?.Activate();
+        }
+
+        public void EndGame(string reason)
+        {
+            if (reason == null)
             {
-                CommandSystem.QueueCommands(CommandSource.Local, $"connect {NetAddresses.Local}");
+                throw new ArgumentNullException(nameof(reason));
+            }
+
+            Log.Logger.Debug($"Host_EndGame: {reason}");
+
+            StopServer();
+
+            if (_client != null && _client.ConnectionStatus != ClientConnectionStatus.NotConnected)
+            {
+                //Disconnected by server
+                _client.Disconnect(false);
+            }
+        }
+
+        public void StopServer()
+        {
+            if (_server?.Active == true)
+            {
+                _server.Stop();
             }
         }
     }

@@ -35,6 +35,11 @@ namespace SharpLife.Engine.Server.Host
 
         bool GameAssemblyLoaded { get; }
 
+        /// <summary>
+        /// Whether the server is running
+        /// </summary>
+        bool Active { get; }
+
         void Shutdown();
 
         void LoadGameAssembly();
@@ -48,6 +53,12 @@ namespace SharpLife.Engine.Server.Host
         /// <param name="flags"></param>
         bool Start(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None);
 
+        void Activate();
+
+        void Deactivate();
+
         void Stop();
+
+        void RunFrame(float deltaSeconds);
     }
 }

@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Client.Networking;
 using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Client.Host
@@ -33,6 +34,8 @@ namespace SharpLife.Engine.Client.Host
         /// </summary>
         IEventSystem EventSystem { get; }
 
+        ClientConnectionStatus ConnectionStatus { get; }
+
         void PostInitialize();
 
         void Shutdown();
@@ -47,6 +50,10 @@ namespace SharpLife.Engine.Client.Host
         /// <param name="address"></param>
         void Connect(string address);
 
-        void Disconnect();
+        /// <summary>
+        /// Disconnects the client from the current server, if any
+        /// </summary>
+        /// <param name="shutdownServer">Whether to shut down the local server, if running</param>
+        void Disconnect(bool shutdownServer);
     }
 }

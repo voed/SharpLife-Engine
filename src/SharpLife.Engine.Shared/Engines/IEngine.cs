@@ -84,10 +84,32 @@ namespace SharpLife.Engine.Shared.Engines
         DateTimeOffset BuildDate { get; }
 
         /// <summary>
+        /// Whether this is a dedicated server
+        /// </summary>
+        bool IsDedicatedServer { get; }
+
+        /// <summary>
+        /// Whether the local server is running
+        /// </summary>
+        bool IsServerActive { get; }
+
+        /// <summary>
         /// Creates the user interface if it does not exist
         /// </summary>
         IUserInterface CreateUserInterface();
 
         void Run(string[] args, HostType hostType);
+
+        /// <summary>
+        /// Ends the game, if running
+        /// Servers are shut down, clients are disconnected
+        /// </summary>
+        /// <param name="reason">Reason why the game is being ended</param>
+        void EndGame(string reason);
+
+        /// <summary>
+        /// Stops the server if it is running
+        /// </summary>
+        void StopServer();
     }
 }

@@ -14,17 +14,24 @@
 ****/
 
 using ImGuiNET;
+using Lidgren.Network;
 using SDL2;
+using Serilog;
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
+using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.API.Game;
+using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Engines;
+using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.ModUtils;
 using SharpLife.Engine.Shared.UI;
+using SharpLife.Networking.Shared;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
+using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
@@ -33,6 +40,8 @@ namespace SharpLife.Engine.Client.Host
         public IConCommandSystem CommandSystem => _engine.CommandSystem;
 
         public IEventSystem EventSystem => _engine.EventSystem;
+
+        public ClientConnectionStatus ConnectionStatus { get; set; }
 
         private readonly IEngine _engine;
 
@@ -45,6 +54,12 @@ namespace SharpLife.Engine.Client.Host
         private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
 
         private ModData<IClientMod> _mod;
+
+        private readonly IConVar _clientport;
+        private readonly IConVar _cl_resend;
+        private readonly IConVar _cl_timeout;
+
+        private NetworkClient _netClient;
 
         public EngineClientHost(IEngine engine)
         {
@@ -74,6 +89,25 @@ namespace SharpLife.Engine.Client.Host
             _window.Resized += _renderer.WindowResized;
 
             CommandSystem.RegisterConCommand(new ConCommandInfo("connect", Connect).WithHelpInfo("Connect to a server"));
+            CommandSystem.RegisterConCommand(new ConCommandInfo("disconnect", Disconnect).WithHelpInfo("Disconnect from a server"));
+
+            _clientport = CommandSystem.RegisterConVar(new ConVarInfo("clientport")
+                .WithHelpInfo("Client port to use for connections")
+                .WithValue(NetConstants.DefaultClientPort)
+                .WithMinMaxFilter(IPEndPoint.MinPort, IPEndPoint.MaxPort, true));
+
+            _cl_resend = CommandSystem.RegisterConVar(new ConVarInfo("cl_resend")
+                .WithHelpInfo("Maximum time to wait before resending a client connection request")
+                .WithValue(6.0f)
+                .WithMinMaxFilter(1.5f, 20.0f));
+
+            _cl_timeout = CommandSystem.RegisterConVar(new ConVarInfo("cl_timeout")
+                .WithHelpInfo("Maximum time to wait before timing out server connections")
+                .WithValue(60)
+                .WithFlags(CommandFlags.Archive));
+
+            //TODO: need to delay this until user config has been processed
+            CreateNetworkClient();
         }
 
         public void PostInitialize()
@@ -89,11 +123,18 @@ namespace SharpLife.Engine.Client.Host
 
         public void Shutdown()
         {
+            Disconnect(false);
         }
 
         public void Update(float deltaSeconds)
         {
             _fta.AddTime(deltaSeconds);
+
+            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
+            {
+                _netClient.ReadPackets(HandlePacket);
+            }
+
             _renderer.Update(deltaSeconds);
 
             if (ImGui.BeginMainMenuBar())
@@ -111,6 +152,92 @@ namespace SharpLife.Engine.Client.Host
         public void Draw()
         {
             _renderer.Draw();
+        }
+
+        /// <summary>
+        /// (Re)creates the network client, using current client configuration values
+        /// </summary>
+        private void CreateNetworkClient()
+        {
+            //Disconnect any previous connection
+            if (_netClient != null)
+            {
+                Disconnect(false);
+            }
+
+            //TODO: could combine the app identifier with the mod name to allow concurrent mod hosts
+            //Not possible since the original engine launcher blocks launching multiple instances
+            //Should be possible for servers though
+
+            _netClient = new NetworkClient(
+                NetConstants.AppIdentifier,
+                _clientport.Integer,
+                _cl_resend.Float,
+                _cl_timeout.Float);
+        }
+
+        private void HandlePacket(NetIncomingMessage message)
+        {
+            switch (message.MessageType)
+            {
+                case NetIncomingMessageType.StatusChanged:
+                    HandleStatusChanged(message);
+                    break;
+
+                case NetIncomingMessageType.UnconnectedData:
+                    //TODO: implement
+                    break;
+
+                case NetIncomingMessageType.Data:
+                    HandleData(message);
+                    break;
+
+                case NetIncomingMessageType.VerboseDebugMessage:
+                    Log.Logger.Verbose(message.ReadString());
+                    break;
+
+                case NetIncomingMessageType.DebugMessage:
+                    Log.Logger.Debug(message.ReadString());
+                    break;
+
+                case NetIncomingMessageType.WarningMessage:
+                    Log.Logger.Warning(message.ReadString());
+                    break;
+
+                case NetIncomingMessageType.ErrorMessage:
+                    Log.Logger.Error(message.ReadString());
+                    break;
+            }
+        }
+
+        private void HandleStatusChanged(NetIncomingMessage message)
+        {
+            var status = (NetConnectionStatus)message.ReadByte();
+
+            string reason = message.ReadString();
+
+            switch (status)
+            {
+                case NetConnectionStatus.Connected:
+                    ConnectionStatus = ClientConnectionStatus.Connected;
+                    break;
+
+                case NetConnectionStatus.Disconnected:
+                    {
+                        if (ConnectionStatus != ClientConnectionStatus.NotConnected)
+                        {
+                            //Disconnected by server
+                            _engine.EndGame("Server disconnected");
+                            //TODO: discard remaining incoming packets?
+                        }
+                        break;
+                    }
+            }
+        }
+
+        private void HandleData(NetIncomingMessage message)
+        {
+            //TODO: implement
         }
 
         /// <summary>
@@ -137,18 +264,54 @@ namespace SharpLife.Engine.Client.Host
                 throw new ArgumentNullException(nameof(address));
             }
 
-            Disconnect();
+            Disconnect(false);
+
+            EventSystem.DispatchEvent(EngineEvents.ClientStartConnect);
 
             //TODO: initialize client state
 
-            //TODO: store server name
+            CreateNetworkClient();
 
-            //TODO: configure networking
+            _netClient.Start();
+
+            ConnectionStatus = ClientConnectionStatus.Connecting;
+
+            //Told to connect to listen server, translate address
+            if (address == NetAddresses.Local)
+            {
+                address = NetConstants.LocalHost;
+            }
+
+            _netClient.Connect(address);
         }
 
-        public void Disconnect()
+        private void Disconnect(ICommand command)
         {
-            //TODO: implement
+            Disconnect(true);
+        }
+
+        public void Disconnect(bool shutdownServer)
+        {
+            //Always dispatch even if we're not connected
+            EventSystem.DispatchEvent(EngineEvents.ClientStartDisconnect);
+
+            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
+            {
+                //TODO: implement
+                _netClient.Shutdown(NetMessages.DisconnectMessage);
+
+                //The client considers itself disconnected immediately
+                ConnectionStatus = ClientConnectionStatus.NotConnected;
+
+                EventSystem.DispatchEvent(EngineEvents.ClientDisconnectSent);
+            }
+
+            EventSystem.DispatchEvent(EngineEvents.ClientEndDisconnect);
+
+            if (shutdownServer)
+            {
+                _engine.StopServer();
+            }
         }
     }
 }

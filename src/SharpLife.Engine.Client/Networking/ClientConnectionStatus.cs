@@ -13,16 +13,33 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Networking
+namespace SharpLife.Engine.Client.Networking
 {
-    /// <summary>
-    /// Known network addresses used by the engine
-    /// </summary>
-    public static class NetAddresses
+    public enum ClientConnectionStatus
     {
         /// <summary>
-        /// Indicates that the client should connect to a listen server hosted by this instance
+        /// Not connected to any server
         /// </summary>
-        public const string Local = "local";
+        NotConnected = 0,
+
+        /// <summary>
+        /// In the process of connecting to a server
+        /// </summary>
+        Connecting,
+
+        /// <summary>
+        /// Connected to a server
+        /// </summary>
+        Connected,
+
+        /// <summary>
+        /// Initializing the client with server data
+        /// </summary>
+        Initializing,
+
+        /// <summary>
+        /// Connected, initialized and active on the server
+        /// </summary>
+        Active
     }
 }

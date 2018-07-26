@@ -13,16 +13,21 @@
 *
 ****/
 
-using System;
-
-namespace SharpLife.Engine.Server.Host
+namespace SharpLife.Networking.Shared
 {
-    [Flags]
-    public enum ServerStartFlags
+    /// <summary>
+    /// String message identifiers used by networking code
+    /// </summary>
+    public static class NetMessages
     {
-        None = 0,
-        IsDemo = 1 << 0,
-        LoadGame = 1 << 1,
-        ChangeLevel = 1 << 2
+        public const string DisconnectMessage = "dropclient";
+
+        public const string ServerShutdownUnknown = "Server shutting down for unknown reason";
+
+        public const string ServerShutdownMessage = "Server shutting down";
+
+        public const string ServerChangeLevel = "Server changing level";
+
+        public const string ServerClientDeniedNoFreeSlots = "Server is full.";
     }
 }
