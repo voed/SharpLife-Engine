@@ -93,5 +93,29 @@ namespace SharpLife.Engine.Shared.Maps
                 MapName = null;
             }
         }
+
+        public bool ComputeCRC(string mapName, out uint crc)
+        {
+            var fileName = FormatMapFileName(mapName);
+
+            try
+            {
+                crc = FileFormats.BSP.Input.ComputeCRC(_fileSystem.OpenRead(fileName));
+            }
+            catch (Exception e)
+            {
+                if (e is InvalidOperationException
+                    || e is InvalidBSPVersionException
+                    || e is IOException)
+                {
+                    crc = 0;
+                    return false;
+                }
+
+                throw;
+            }
+
+            return true;
+        }
     }
 }

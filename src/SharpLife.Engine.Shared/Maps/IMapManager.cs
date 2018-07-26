@@ -69,5 +69,13 @@ namespace SharpLife.Engine.Shared.Maps
         /// Clears all map data
         /// </summary>
         void Clear();
+
+        /// <summary>
+        /// Computes the CRC32 value for a given map
+        /// </summary>
+        /// <param name="mapName"></param>
+        /// <param name="crc"></param>
+        /// <returns></returns>
+        bool ComputeCRC(string mapName, out uint crc);
     }
 }
