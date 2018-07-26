@@ -62,5 +62,10 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
         {
             return @this.WithFilter(new InvertFilter(filter));
         }
+
+        public static ConVarInfo WithDelegateFilter(this ConVarInfo @this, DelegateFilter.FilterDelegate @delegate)
+        {
+            return @this.WithFilter(new DelegateFilter(@delegate));
+        }
     }
 }
