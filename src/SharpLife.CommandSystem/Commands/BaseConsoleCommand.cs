@@ -19,14 +19,21 @@ namespace SharpLife.CommandSystem.Commands
 {
     internal abstract class BaseConsoleCommand : IBaseConsoleCommand
     {
+        protected readonly ConCommandSystem _commandSystem;
+
         public string Name { get; }
 
         public CommandFlags Flags { get; }
 
         public string HelpInfo { get; }
 
-        protected BaseConsoleCommand(string name, CommandFlags flags = CommandFlags.None, string helpInfo = "")
+        protected BaseConsoleCommand(ConCommandSystem commandSystem, string name, CommandFlags flags = CommandFlags.None, string helpInfo = "")
         {
+            if (commandSystem == null)
+            {
+                throw new ArgumentNullException(nameof(commandSystem));
+            }
+
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
@@ -37,6 +44,7 @@ namespace SharpLife.CommandSystem.Commands
                 throw new ArgumentException(nameof(name));
             }
 
+            _commandSystem = commandSystem;
             Name = name;
             Flags = flags;
             HelpInfo = helpInfo ?? throw new ArgumentNullException(nameof(helpInfo));

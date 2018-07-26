@@ -87,6 +87,9 @@ namespace SharpLife.Engine.Engines
 
         private HostType _hostType;
 
+        //Internal so the host can access it if needed
+        internal ILogger Logger { get; private set; }
+
         private bool _exiting;
 
         public bool Exiting
@@ -112,7 +115,7 @@ namespace SharpLife.Engine.Engines
         {
             if (UserInterface == null)
             {
-                UserInterface = new UserInterface(FileSystem, this, CommandLine.Contains("-noontop"));
+                UserInterface = new UserInterface(Logger, FileSystem, this, CommandLine.Contains("-noontop"));
             }
 
             return UserInterface;
@@ -135,7 +138,7 @@ namespace SharpLife.Engine.Engines
 
             EngineConfiguration = LoadEngineConfiguration(GameDirectory);
 
-            Log.Logger = CreateLogger(GameDirectory);
+            Log.Logger = Logger = CreateLogger(GameDirectory);
 
             Initialize(GameDirectory, hostType);
 
@@ -250,7 +253,7 @@ namespace SharpLife.Engine.Engines
 
             SetupFileSystem(gameDirectory);
 
-            CommandSystem = new ConCommandSystem(FileSystem, CommandLine, ExecPathIDs);
+            CommandSystem = new ConCommandSystem(Logger, FileSystem, CommandLine, ExecPathIDs);
 
             try
             {
@@ -263,7 +266,7 @@ namespace SharpLife.Engine.Engines
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Couldn't load game configuration file\n{e}");
+                Logger.Error($"Couldn't load game configuration file\n{e}");
 
                 throw;
             }
@@ -276,15 +279,16 @@ namespace SharpLife.Engine.Engines
 
                 BuildDate = DateTimeOffset.Parse(buildTimestamp);
 
-                Console.WriteLine($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
+                Logger.Information($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
             if (hostType == HostType.Client)
             {
-                _client = new EngineClientHost(this);
+                _client = new EngineClientHost(this, Logger);
             }
 
-            _server = new EngineServerHost(this);
+            //TODO: should be delayed until client starts listen server, or if this is a dedicated server
+            _server = new EngineServerHost(this, Logger);
 
             //For listen servers, the server game assembly is created when the client actually starts a map
             if (hostType == HostType.DedicatedServer)
@@ -292,7 +296,7 @@ namespace SharpLife.Engine.Engines
                 _server.LoadGameAssembly();
             }
 
-            MapManager = new MapManager(FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
+            MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
 
             CommandSystem.RegisterConCommand(new ConCommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
 
@@ -342,7 +346,7 @@ namespace SharpLife.Engine.Engines
             }
             else
             {
-                Console.WriteLine("LoadGameAssembly called twice, skipping second call");
+                Logger.Debug("LoadGameAssembly called twice, skipping second call");
             }
         }
 
@@ -359,7 +363,7 @@ namespace SharpLife.Engine.Engines
 
             if (command.Count == 0)
             {
-                Console.WriteLine("map <levelname> : changes server to specified map");
+                Logger.Information("map <levelname> : changes server to specified map");
                 return;
             }
 
@@ -379,7 +383,7 @@ namespace SharpLife.Engine.Engines
 
             if (!MapManager.IsMapValid(mapName))
             {
-                Console.WriteLine($"map change failed: '{mapName}' not found on server.");
+                Logger.Error($"map change failed: '{mapName}' not found on server.");
                 return;
             }
 
@@ -429,7 +433,7 @@ namespace SharpLife.Engine.Engines
                 throw new ArgumentNullException(nameof(reason));
             }
 
-            Log.Logger.Debug($"Host_EndGame: {reason}");
+            Logger.Debug($"Host_EndGame: {reason}");
 
             StopServer();
 

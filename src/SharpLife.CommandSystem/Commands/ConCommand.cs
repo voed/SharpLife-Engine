@@ -22,8 +22,8 @@ namespace SharpLife.CommandSystem.Commands
     {
         public event Delegates.ConCommandExecutor OnExecute;
 
-        public ConCommand(string name, IReadOnlyList<Delegates.ConCommandExecutor> executors, CommandFlags flags = CommandFlags.None, string helpInfo = "")
-            : base(name, flags, helpInfo)
+        public ConCommand(ConCommandSystem commandSystem, string name, IReadOnlyList<Delegates.ConCommandExecutor> executors, CommandFlags flags = CommandFlags.None, string helpInfo = "")
+            : base(commandSystem, name, flags, helpInfo)
         {
             if (executors == null)
             {

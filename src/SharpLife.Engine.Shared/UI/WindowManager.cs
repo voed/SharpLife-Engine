@@ -14,6 +14,7 @@
 ****/
 
 using SDL2;
+using Serilog;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.FileSystem;
 using SharpLife.Input;
@@ -26,21 +27,24 @@ namespace SharpLife.Engine.Shared.UI
     {
         public IInputSystem InputSystem { get; } = new InputSystem();
 
+        private readonly ILogger _logger;
+
         private readonly IFileSystem _fileSystem;
 
         private readonly IEngineLoop _engineLoop;
 
         private readonly Dictionary<IntPtr, Window> _windows = new Dictionary<IntPtr, Window>();
 
-        public WindowManager(IFileSystem fileSystem, IEngineLoop engineLoop)
+        public WindowManager(ILogger logger, IFileSystem fileSystem, IEngineLoop engineLoop)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _engineLoop = engineLoop ?? throw new ArgumentNullException(nameof(engineLoop));
         }
 
         public IWindow CreateWindow(string title, SDL.SDL_WindowFlags additionalFlags = 0)
         {
-            var window = new Window(_fileSystem, title, additionalFlags);
+            var window = new Window(_logger, _fileSystem, title, additionalFlags);
 
             _windows.Add(window.WindowHandle, window);
 

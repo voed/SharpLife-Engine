@@ -45,6 +45,8 @@ namespace SharpLife.Engine.Client.Host
 
         private readonly IEngine _engine;
 
+        private readonly ILogger _logger;
+
         private readonly IUserInterface _userInterface;
 
         private readonly IWindow _window;
@@ -61,9 +63,10 @@ namespace SharpLife.Engine.Client.Host
 
         private NetworkClient _netClient;
 
-        public EngineClientHost(IEngine engine)
+        public EngineClientHost(IEngine engine, ILogger logger)
         {
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _userInterface = _engine.CreateUserInterface();
 
@@ -170,6 +173,7 @@ namespace SharpLife.Engine.Client.Host
             //Should be possible for servers though
 
             _netClient = new NetworkClient(
+                _logger,
                 NetConstants.AppIdentifier,
                 _clientport.Integer,
                 _cl_resend.Float,
@@ -193,19 +197,19 @@ namespace SharpLife.Engine.Client.Host
                     break;
 
                 case NetIncomingMessageType.VerboseDebugMessage:
-                    Log.Logger.Verbose(message.ReadString());
+                    _logger.Verbose(message.ReadString());
                     break;
 
                 case NetIncomingMessageType.DebugMessage:
-                    Log.Logger.Debug(message.ReadString());
+                    _logger.Debug(message.ReadString());
                     break;
 
                 case NetIncomingMessageType.WarningMessage:
-                    Log.Logger.Warning(message.ReadString());
+                    _logger.Warning(message.ReadString());
                     break;
 
                 case NetIncomingMessageType.ErrorMessage:
-                    Log.Logger.Error(message.ReadString());
+                    _logger.Error(message.ReadString());
                     break;
             }
         }
@@ -248,7 +252,7 @@ namespace SharpLife.Engine.Client.Host
         {
             if (command.Count == 0)
             {
-                Console.WriteLine("usage: connect <server>");
+                _logger.Information("usage: connect <server>");
                 return;
             }
 

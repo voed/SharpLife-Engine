@@ -14,6 +14,7 @@
 ****/
 
 using SDL2;
+using Serilog;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.FileSystem;
 using System;
@@ -26,7 +27,7 @@ namespace SharpLife.Engine.Shared.UI
 
         public IWindow MainWindow { get; private set; }
 
-        public UserInterface(IFileSystem fileSystem, IEngineLoop engineLoop, bool noOnTop)
+        public UserInterface(ILogger logger, IFileSystem fileSystem, IEngineLoop engineLoop, bool noOnTop)
         {
             //Disable to prevent debugger from shutting down the game
             SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
@@ -41,10 +42,10 @@ namespace SharpLife.Engine.Shared.UI
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
 
-            WindowManager = new WindowManager(fileSystem, engineLoop);
+            WindowManager = new WindowManager(logger, fileSystem, engineLoop);
         }
 
-        public IWindow CreateMainWindow(string title, SDL2.SDL.SDL_WindowFlags additionalFlags = 0, bool recreate = false)
+        public IWindow CreateMainWindow(string title, SDL.SDL_WindowFlags additionalFlags = 0, bool recreate = false)
         {
             if (MainWindow != null)
             {

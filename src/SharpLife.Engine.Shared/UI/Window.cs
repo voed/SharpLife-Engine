@@ -14,6 +14,7 @@
 ****/
 
 using SDL2;
+using Serilog;
 using SharpLife.FileSystem;
 using SixLabors.ImageSharp;
 using System;
@@ -45,8 +46,13 @@ namespace SharpLife.Engine.Shared.UI
 
         public event Action Destroyed;
 
-        public Window(IFileSystem fileSystem, string title, SDL.SDL_WindowFlags additionalFlags = 0)
+        public Window(ILogger logger, IFileSystem fileSystem, string title, SDL.SDL_WindowFlags additionalFlags = 0)
         {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             //This differs from vanilla GoldSource; set the OpenGL context version to 3.0 so we can use shaders
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_FLAGS, (int)SDL.SDL_GLcontext.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -123,34 +129,34 @@ namespace SharpLife.Engine.Shared.UI
             if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, out var r))
             {
                 r = 0;
-                Console.WriteLine("Failed to get GL RED size ({0})", SDL.SDL_GetError());
+                logger.Information("Failed to get GL RED size ({0})", SDL.SDL_GetError());
             }
 
             if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, out var g))
             {
                 g = 0;
-                Console.WriteLine("Failed to get GL GREEN size ({0})", SDL.SDL_GetError());
+                logger.Information("Failed to get GL GREEN size ({0})", SDL.SDL_GetError());
             }
 
             if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, out var b))
             {
                 b = 0;
-                Console.WriteLine("Failed to get GL BLUE size ({0})", SDL.SDL_GetError());
+                logger.Information("Failed to get GL BLUE size ({0})", SDL.SDL_GetError());
             }
 
             if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, out var a))
             {
                 a = 0;
-                Console.WriteLine("Failed to get GL ALPHA size ({0})", SDL.SDL_GetError());
+                logger.Information("Failed to get GL ALPHA size ({0})", SDL.SDL_GetError());
             }
 
             if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, out var depth))
             {
                 depth = 0;
-                Console.WriteLine("Failed to get GL DEPTH size ({0})", SDL.SDL_GetError());
+                logger.Information("Failed to get GL DEPTH size ({0})", SDL.SDL_GetError());
             }
 
-            Console.WriteLine($"GL_SIZES:  r:{r} g:{g} b:{b} a:{a} depth:{depth}");
+            logger.Information($"GL_SIZES:  r:{r} g:{g} b:{b} a:{a} depth:{depth}");
 
             if (r <= 4 || g <= 4 || b <= 4 || depth <= 15 /*|| gl_renderer && Q_strstr(gl_renderer, "GDI Generic")*/)
             {

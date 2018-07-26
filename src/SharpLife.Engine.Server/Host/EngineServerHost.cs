@@ -44,6 +44,8 @@ namespace SharpLife.Engine.Server.Host
 
         private readonly IEngine _engine;
 
+        private readonly ILogger _logger;
+
         private ModData<IServerMod> _mod;
 
         private NetworkServer _netServer;
@@ -59,9 +61,10 @@ namespace SharpLife.Engine.Server.Host
 
         private readonly ServerClientList _clientList;
 
-        public EngineServerHost(IEngine engine)
+        public EngineServerHost(IEngine engine, ILogger logger)
         {
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _ipname = CommandSystem.RegisterConVar(new ConVarInfo("ip")
                 .WithHelpInfo("The IP address to use for server hosts")
@@ -86,7 +89,7 @@ namespace SharpLife.Engine.Server.Host
                 {
                     if (Active)
                     {
-                        Log.Logger.Information("maxplayers cannot be changed while a server is running.");
+                        _logger.Information("maxplayers cannot be changed while a server is running.");
                     }
 
                     return !Active;
@@ -171,7 +174,7 @@ namespace SharpLife.Engine.Server.Host
 
             CreateNetworkServer();
 
-            Log.Logger.Information($"Loading map \"{mapName}\"");
+            _logger.Information($"Loading map \"{mapName}\"");
 
             //TODO: print server vars
 
@@ -179,11 +182,11 @@ namespace SharpLife.Engine.Server.Host
 
             if (startSpot != null)
             {
-                Log.Logger.Debug($"Spawn Server {mapName}: [{startSpot}]\n");
+                _logger.Debug($"Spawn Server {mapName}: [{startSpot}]\n");
             }
             else
             {
-                Log.Logger.Debug($"Spawn Server {mapName}\n");
+                _logger.Debug($"Spawn Server {mapName}\n");
             }
 
             //TODO: clear custom data if size exceeds maximum
@@ -194,7 +197,7 @@ namespace SharpLife.Engine.Server.Host
 
             if (!_engine.MapManager.LoadMap(mapName))
             {
-                Log.Logger.Information($"Couldn't spawn server {_engine.MapManager.FormatMapFileName(mapName)}\n");
+                _logger.Information($"Couldn't spawn server {_engine.MapManager.FormatMapFileName(mapName)}\n");
                 Stop();
                 return false;
             }
@@ -274,7 +277,7 @@ namespace SharpLife.Engine.Server.Host
                 return client;
             }
 
-            Log.Logger.Warning($"Client with IP {endPoint} has no associated client instance");
+            _logger.Warning($"Client with IP {endPoint} has no associated client instance");
 
             return null;
         }
@@ -293,7 +296,7 @@ namespace SharpLife.Engine.Server.Host
 
             //TODO: notify game
 
-            Log.Logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
+            _logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
 
             client.Disconnect(reason);
 
@@ -308,7 +311,7 @@ namespace SharpLife.Engine.Server.Host
             switch (message.MessageType)
             {
                 case NetIncomingMessageType.Error:
-                    Log.Logger.Error("An unknown error occurred");
+                    _logger.Error("An unknown error occurred");
                     break;
 
                 case NetIncomingMessageType.StatusChanged:
@@ -329,19 +332,19 @@ namespace SharpLife.Engine.Server.Host
                     break;
 
                 case NetIncomingMessageType.VerboseDebugMessage:
-                    Log.Logger.Verbose(message.ReadString());
+                    _logger.Verbose(message.ReadString());
                     break;
 
                 case NetIncomingMessageType.DebugMessage:
-                    Log.Logger.Debug(message.ReadString());
+                    _logger.Debug(message.ReadString());
                     break;
 
                 case NetIncomingMessageType.WarningMessage:
-                    Log.Logger.Warning(message.ReadString());
+                    _logger.Warning(message.ReadString());
                     break;
 
                 case NetIncomingMessageType.ErrorMessage:
-                    Log.Logger.Error(message.ReadString());
+                    _logger.Error(message.ReadString());
                     break;
             }
         }

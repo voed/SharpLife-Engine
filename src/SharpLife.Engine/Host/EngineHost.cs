@@ -13,7 +13,6 @@
 *
 ****/
 
-using Serilog;
 using SharpLife.Engine.Engines;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.UI;
@@ -28,7 +27,7 @@ namespace SharpLife.Engine.Host
     {
         public void Start(string[] args, HostType type)
         {
-            IEngine engine = null;
+            ClientServerEngine engine = null;
 
             try
             {
@@ -40,11 +39,14 @@ namespace SharpLife.Engine.Host
             catch (Exception e)
 #pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception.
             {
-                //Log first, in case user terminates program while messagebox is open
-                Log.Logger?.Error(e, "A fatal error occurred");
+                if (engine != null)
+                {
+                    //Log first, in case user terminates program while messagebox is open
+                    engine.Logger?.Error(e, "A fatal error occurred");
 
-                //Display an error message if a user interface is available
-                engine?.UserInterface?.ShowMessageBox(MessageBoxIcon.Error, "SharpLife error", e.Message);
+                    //Display an error message if a user interface is available
+                    engine.UserInterface?.ShowMessageBox(MessageBoxIcon.Error, "SharpLife error", e.Message);
+                }
 
                 throw;
             }

@@ -13,6 +13,7 @@
 *
 ****/
 
+using Serilog;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
@@ -23,6 +24,8 @@ namespace SharpLife.Engine.Shared.Maps
 {
     public class MapManager : IMapManager
     {
+        private readonly ILogger _logger;
+
         private readonly IFileSystem _fileSystem;
 
         private readonly string _mapDirectory;
@@ -37,8 +40,9 @@ namespace SharpLife.Engine.Shared.Maps
 
         public event Action OnClear;
 
-        public MapManager(IFileSystem fileSystem, string mapDirectory, string bspExtension)
+        public MapManager(ILogger logger, IFileSystem fileSystem, string mapDirectory, string bspExtension)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _mapDirectory = mapDirectory ?? throw new ArgumentNullException(nameof(mapDirectory));
             _bspExtension = bspExtension ?? throw new ArgumentNullException(nameof(bspExtension));
@@ -71,7 +75,7 @@ namespace SharpLife.Engine.Shared.Maps
             }
             catch (InvalidBSPVersionException e)
             {
-                Console.WriteLine($"Error loading map: {e.Message}");
+                _logger.Error($"Error loading map: {e.Message}");
                 return false;
             }
 

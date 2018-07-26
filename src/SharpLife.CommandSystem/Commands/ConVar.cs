@@ -68,24 +68,24 @@ namespace SharpLife.CommandSystem.Commands
 
         public event Delegates.ConVarChangeHandler OnChange;
 
-        public ConVar(string name, string value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
-            : base(name, flags, helpInfo)
+        public ConVar(ConCommandSystem commandSystem, string name, string value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+            : base(commandSystem, name, flags, helpInfo)
         {
             SetString(value, true);
 
             Construct(filters, changeHandlers);
         }
 
-        public ConVar(string name, float value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
-            : base(name, flags, helpInfo)
+        public ConVar(ConCommandSystem commandSystem, string name, float value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+            : base(commandSystem, name, flags, helpInfo)
         {
             SetFloat(value, true);
 
             Construct(filters, changeHandlers);
         }
 
-        public ConVar(string name, int value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
-            : base(name, flags, helpInfo)
+        public ConVar(ConCommandSystem commandSystem, string name, int value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+            : base(commandSystem, name, flags, helpInfo)
         {
             SetInteger(value, true);
 
@@ -168,7 +168,7 @@ namespace SharpLife.CommandSystem.Commands
             if (!suppressChangeMessage && String != changeEvent.OldString)
             {
                 //If none of the change handlers reverted the change, print a change message
-                Console.WriteLine($"\"{Name}\" changed to \"{String}\"");
+                _commandSystem._logger.Information($"\"{Name}\" changed to \"{String}\"");
             }
         }
 
@@ -176,7 +176,7 @@ namespace SharpLife.CommandSystem.Commands
         {
             if (command.Count == 0)
             {
-                Console.WriteLine($"\"{Name}\" is \"{String}\"");
+                _commandSystem._logger.Information($"\"{Name}\" is \"{String}\"");
                 return;
             }
 

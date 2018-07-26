@@ -30,6 +30,8 @@ namespace SharpLife.Engine.Client.Networking
 
         public bool Connected => _serverConnection != null;
 
+        private readonly ILogger _logger;
+
         private readonly NetClient _client;
 
         private NetConnection _serverConnection;
@@ -60,8 +62,10 @@ namespace SharpLife.Engine.Client.Networking
         /// <param name="port">Port to use</param>
         /// <param name="resendHandshakeInterval"></param>
         /// <param name="connectionTimeout"></param>
-        public NetworkClient(string appIdentifier, int port, float resendHandshakeInterval, float connectionTimeout)
+        public NetworkClient(ILogger logger, string appIdentifier, int port, float resendHandshakeInterval, float connectionTimeout)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
             var config = new NetPeerConfiguration(appIdentifier)
             {
                 //Clients can connect to servers, nobody can connect to clients
@@ -107,7 +111,7 @@ namespace SharpLife.Engine.Client.Networking
             {
                 if (e is FormatException || e is ArgumentOutOfRangeException)
                 {
-                    Log.Logger.Information($"Unable to resolve {address}");
+                    _logger.Information($"Unable to resolve {address}");
                     return;
                 }
 

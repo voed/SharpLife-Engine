@@ -13,6 +13,7 @@
 *
 ****/
 
+using Serilog;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.FileSystem;
 using SharpLife.Utility;
@@ -24,6 +25,8 @@ namespace SharpLife.CommandSystem
 {
     public class ConCommandSystem : IConCommandSystem
     {
+        internal readonly ILogger _logger;
+
         private readonly IFileSystem _fileSystem;
 
         private readonly IList<Delegates.CommandFilter> _commandFilters = new List<Delegates.CommandFilter>();
@@ -46,11 +49,20 @@ namespace SharpLife.CommandSystem
         /// <summary>
         /// Creates a new command system
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="fileSystem"></param>
         /// <param name="commandLine"></param>
         /// <param name="gameConfigPathIDs">The game config path IDs to use for the exec command</param>
-        public ConCommandSystem(IFileSystem fileSystem, ICommandLine commandLine, IReadOnlyList<string> gameConfigPathIDs)
+        public ConCommandSystem(ILogger logger, IFileSystem fileSystem, ICommandLine commandLine, IReadOnlyList<string> gameConfigPathIDs)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
+            if (commandLine == null)
+            {
+                throw new ArgumentNullException(nameof(commandLine));
+            }
+
             if (gameConfigPathIDs == null)
             {
                 throw new ArgumentNullException(nameof(gameConfigPathIDs));
@@ -61,8 +73,7 @@ namespace SharpLife.CommandSystem
                 throw new ArgumentException("You must provide at least one game config path ID", nameof(gameConfigPathIDs));
             }
 
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-
+            //TODO: consider moving this out so users can define these
             _commandFilters.Add((commandToExecute, command) =>
             {
                 if (command.CommandSource == CommandSource.Client && (commandToExecute.Flags & CommandFlags.ServerOnly) != 0)
@@ -70,7 +81,7 @@ namespace SharpLife.CommandSystem
                     return false;
                 }
 
-                Console.WriteLine("Clients cannot execute server commands");
+                _logger.Error("Clients cannot execute server commands");
 
                 return true;
             });
@@ -83,7 +94,7 @@ namespace SharpLife.CommandSystem
                     return false;
                 }
 
-                Console.WriteLine("Servers cannot execute client commands");
+                _logger.Error("Servers cannot execute client commands");
 
                 return true;
             });
@@ -92,7 +103,7 @@ namespace SharpLife.CommandSystem
             {
                 if (arguments.Count > 0)
                 {
-                    Console.WriteLine("stuffcmds : execute command line parameters");
+                    _logger.Information("stuffcmds : execute command line parameters");
                     return;
                 }
 
@@ -119,7 +130,7 @@ namespace SharpLife.CommandSystem
             {
                 if (arguments.Count < 1)
                 {
-                    Console.WriteLine("exec <filename> : execute a script file");
+                    _logger.Information("exec <filename> : execute a script file");
                     return;
                 }
 
@@ -135,13 +146,13 @@ namespace SharpLife.CommandSystem
                 }) != -1
                 || fileName.Contains(".."))
                 {
-                    Console.WriteLine($"exec {fileName}: invalid path.");
+                    _logger.Error($"exec {fileName}: invalid path.");
                     return;
                 }
 
                 if (fileName.IndexOf('.') != fileName.LastIndexOf('.'))
                 {
-                    Console.WriteLine($"exec {fileName}: invalid filename.");
+                    _logger.Error($"exec {fileName}: invalid filename.");
                     return;
                 }
 
@@ -150,7 +161,7 @@ namespace SharpLife.CommandSystem
                 //TODO: need to define these extensions
                 if (extension != ".cfg" && extension != ".rc")
                 {
-                    Console.WriteLine($"exec {fileName}: not a .cfg or .rc file");
+                    _logger.Error($"exec {fileName}: not a .cfg or .rc file");
                     return;
                 }
 
@@ -164,7 +175,7 @@ namespace SharpLife.CommandSystem
                         {
                             var text = _fileSystem.ReadAllText(fileName, pathID);
 
-                            Console.WriteLine($"execing {arguments[0]}");
+                            _logger.Debug($"execing {arguments[0]}");
 
                             InsertCommands(CommandSource.Local, text);
 
@@ -180,21 +191,21 @@ namespace SharpLife.CommandSystem
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Couldn't exec {arguments[0]}");
+                    _logger.Error($"Couldn't exec {arguments[0]}");
                 }
             })
             .WithHelpInfo("Executes a file containing console commands"));
 
-            RegisterConCommand(new ConCommandInfo("echo", arguments => Console.WriteLine(arguments.ArgumentsString)).WithHelpInfo("Echoes the arguments to the console"));
+            RegisterConCommand(new ConCommandInfo("echo", arguments => _logger.Information(arguments.ArgumentsString)).WithHelpInfo("Echoes the arguments to the console"));
 
             RegisterConCommand(new ConCommandInfo("alias", arguments =>
             {
                 if (arguments.Count == 0)
                 {
-                    Console.WriteLine("Current alias commands:");
+                    _logger.Information("Current alias commands:");
                     foreach (var entry in _aliases)
                     {
-                        Console.WriteLine($"{entry.Key}: {entry.Value}\n");
+                        _logger.Information($"{entry.Key}: {entry.Value}\n");
                     }
                     return;
                 }
@@ -240,7 +251,7 @@ namespace SharpLife.CommandSystem
                 throw new ArgumentException($"Cannot add duplicate console command \"{info.Name}\"");
             }
 
-            var command = new ConCommand(info.Name, info.Executors, info.Flags, info.HelpInfo);
+            var command = new ConCommand(this, info.Name, info.Executors, info.Flags, info.HelpInfo);
 
             _commands.Add(command.Name, command);
 
@@ -263,15 +274,15 @@ namespace SharpLife.CommandSystem
 
             if (info.StringValue != null)
             {
-                variable = new ConVar(info.Name, info.StringValue, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new ConVar(this, info.Name, info.StringValue, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
             }
             else if (info.FloatValue != null)
             {
-                variable = new ConVar(info.Name, info.FloatValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new ConVar(this, info.Name, info.FloatValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
             }
             else if (info.IntegerValue != null)
             {
-                variable = new ConVar(info.Name, info.IntegerValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new ConVar(this, info.Name, info.IntegerValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
             }
             else
             {
@@ -324,7 +335,7 @@ namespace SharpLife.CommandSystem
                     }
                     catch (InvalidCommandSyntaxException e)
                     {
-                        Console.WriteLine(e.Message);
+                        _logger.Information(e.Message);
                     }
                 }
                 //This is different from the original; there aliases are checked before cvars
@@ -334,7 +345,7 @@ namespace SharpLife.CommandSystem
                 }
                 else
                 {
-                    Console.WriteLine($"Could not find command {command.Name}");
+                    _logger.Information($"Could not find command {command.Name}");
                 }
             }
 
