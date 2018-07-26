@@ -20,7 +20,7 @@ namespace SharpLife.Networking.Shared
     /// </summary>
     public static class NetMessages
     {
-        public const string DisconnectMessage = "dropclient";
+        public const string ClientDisconnectMessage = "dropclient";
 
         public const string ServerShutdownUnknown = "Server shutting down for unknown reason";
 

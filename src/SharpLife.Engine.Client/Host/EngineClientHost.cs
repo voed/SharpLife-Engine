@@ -302,7 +302,7 @@ namespace SharpLife.Engine.Client.Host
             if (ConnectionStatus != ClientConnectionStatus.NotConnected)
             {
                 //TODO: implement
-                _netClient.Shutdown(NetMessages.DisconnectMessage);
+                _netClient.Shutdown(NetMessages.ClientDisconnectMessage);
 
                 //The client considers itself disconnected immediately
                 ConnectionStatus = ClientConnectionStatus.NotConnected;
