@@ -13,9 +13,19 @@
 *
 ****/
 
-namespace SharpLife.Engine.API.Game.Client
+using System.Xml.Serialization;
+
+namespace SharpLife.Engine.Shared.Configuration
 {
-    public interface IClientMod
+    /// <summary>
+    /// XML configuration class for game assembly information
+    /// </summary>
+    public class GameAssemblyInfo
     {
+        [XmlAttribute]
+        public string AssemblyName { get; set; }
+
+        [XmlAttribute]
+        public string EntrypointClass { get; set; }
     }
 }

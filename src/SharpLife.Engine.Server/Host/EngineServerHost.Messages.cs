@@ -70,7 +70,7 @@ namespace SharpLife.Engine.Server.Host
                 MapCrc = _mapCRC,
                 ClientDllMd5 = ByteString.Empty, //TODO: define
                 MaxClients = (uint)_maxPlayers.Integer,
-                ModName = _engine.GameDirectory,
+                GameName = _engine.GameDirectory,
                 HostName = "", //TODO: define cvar
                 //In case the file format/directory ever changes, use the full file name
                 MapFileName = _engine.MapManager.FormatMapFileName(_engine.MapManager.MapName),

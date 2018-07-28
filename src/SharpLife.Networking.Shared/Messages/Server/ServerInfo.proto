@@ -9,7 +9,7 @@ message ServerInfo
 	uint32 map_crc = 3;
 	bytes client_dll_md5 = 4;
 	uint32 max_clients = 5;
-	string mod_name = 6;
+	string game_name = 6;
 	string host_name = 7;
 	string map_file_name = 8;
 	bool allow_cheats = 9;

@@ -114,7 +114,7 @@ namespace SharpLife.FileFormats.WAD
 
                 //Read the palette
                 //Located directly after the pixel data
-                //This calculation came from Quake, it determines the total size of all of the pixel data
+                //This calculation came from Half-Life utility code, it determines the total size of all of the pixel data
                 var pixelDataSize = width * height / 64 * 85;
 
                 reader.BaseStream.Position = startPos + MipTexSize + pixelDataSize;

@@ -13,14 +13,11 @@
 *
 ****/
 
-using System;
+using SharpLife.Engine.API.Game.Client;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Client.API
 {
-    public interface IServerMod
+    public class GameClient : IGameClient
     {
-        void Initialize(IServiceProvider serviceProvider);
-
-        void Shutdown();
     }
 }

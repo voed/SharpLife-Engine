@@ -90,8 +90,8 @@ namespace SharpLife.Renderer
         //See https://developer.valvesoftware.com/wiki/Coordinates
         //Need to scale X so inputs produce the correct results,
         //And rotate yaw 180 degrees so yaw 0 points to the east
-        //This does not look like Quake's code because it uses a different approach to view matrix construction
-        //Quake modifies the global settings by applying the inverse of the rotation and view origin
+        //This does not look like GoldSource's code because it uses a different approach to view matrix construction
+        //GoldSource modifies the global settings by applying the inverse of the rotation and view origin
         //This is the "standard" way of applying view settings by using matrices in normal model-view techniques
         private Matrix4x4 RotationMatrix =>
             Matrix4x4.Identity * Matrix4x4.CreateRotationY(Pitch) * Matrix4x4.CreateRotationZ((float)(Math.PI + Yaw)) * Matrix4x4.CreateScale(-1, 1, 1);

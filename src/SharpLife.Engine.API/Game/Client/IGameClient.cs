@@ -13,14 +13,9 @@
 *
 ****/
 
-using System.Reflection;
-
-namespace SharpLife.Engine.Shared.ModUtils
+namespace SharpLife.Engine.API.Game.Client
 {
-    public class ModData<TEntryPoint>
+    public interface IGameClient
     {
-        public Assembly assembly;
-
-        public TEntryPoint Entrypoint;
     }
 }

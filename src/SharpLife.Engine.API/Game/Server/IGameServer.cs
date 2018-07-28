@@ -13,19 +13,14 @@
 *
 ****/
 
-using System.Xml.Serialization;
+using System;
 
-namespace SharpLife.Engine.Shared.Configuration
+namespace SharpLife.Engine.API.Game.Server
 {
-    /// <summary>
-    /// XML configuration class for mod assembly information
-    /// </summary>
-    public class ModAssemblyInfo
+    public interface IGameServer
     {
-        [XmlAttribute]
-        public string AssemblyName { get; set; }
+        void Initialize(IServiceProvider serviceProvider);
 
-        [XmlAttribute]
-        public string EntrypointClass { get; set; }
+        void Shutdown();
     }
 }

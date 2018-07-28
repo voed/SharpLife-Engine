@@ -25,16 +25,16 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChBTZXJ2ZXJJbmZvLnByb3RvEitTaGFycExpZmUuTmV0d29ya2luZy5TaGFy",
-            "ZWQuTWVzc2FnZXMuU2VydmVyIssBCgpTZXJ2ZXJJbmZvEhgKEHByb3RvY29s",
+            "ZWQuTWVzc2FnZXMuU2VydmVyIswBCgpTZXJ2ZXJJbmZvEhgKEHByb3RvY29s",
             "X3ZlcnNpb24YASABKA0SEwoLc3Bhd25fY291bnQYAiABKAUSDwoHbWFwX2Ny",
             "YxgDIAEoDRIWCg5jbGllbnRfZGxsX21kNRgEIAEoDBITCgttYXhfY2xpZW50",
-            "cxgFIAEoDRIQCghtb2RfbmFtZRgGIAEoCRIRCglob3N0X25hbWUYByABKAkS",
-            "FQoNbWFwX2ZpbGVfbmFtZRgIIAEoCRIUCgxhbGxvd19jaGVhdHMYCSABKAhi",
-            "BnByb3RvMw=="));
+            "cxgFIAEoDRIRCglnYW1lX25hbWUYBiABKAkSEQoJaG9zdF9uYW1lGAcgASgJ",
+            "EhUKDW1hcF9maWxlX25hbWUYCCABKAkSFAoMYWxsb3dfY2hlYXRzGAkgASgI",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.Server.ServerInfo), global::SharpLife.Networking.Shared.Messages.Server.ServerInfo.Parser, new[]{ "ProtocolVersion", "SpawnCount", "MapCrc", "ClientDllMd5", "MaxClients", "ModName", "HostName", "MapFileName", "AllowCheats" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.Server.ServerInfo), global::SharpLife.Networking.Shared.Messages.Server.ServerInfo.Parser, new[]{ "ProtocolVersion", "SpawnCount", "MapCrc", "ClientDllMd5", "MaxClients", "GameName", "HostName", "MapFileName", "AllowCheats" }, null, null, null)
           }));
     }
     #endregion
@@ -74,7 +74,7 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       mapCrc_ = other.mapCrc_;
       clientDllMd5_ = other.clientDllMd5_;
       maxClients_ = other.maxClients_;
-      modName_ = other.modName_;
+      gameName_ = other.gameName_;
       hostName_ = other.hostName_;
       mapFileName_ = other.mapFileName_;
       allowCheats_ = other.allowCheats_;
@@ -141,14 +141,14 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       }
     }
 
-    /// <summary>Field number for the "mod_name" field.</summary>
-    public const int ModNameFieldNumber = 6;
-    private string modName_ = "";
+    /// <summary>Field number for the "game_name" field.</summary>
+    public const int GameNameFieldNumber = 6;
+    private string gameName_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string ModName {
-      get { return modName_; }
+    public string GameName {
+      get { return gameName_; }
       set {
-        modName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        gameName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -203,7 +203,7 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       if (MapCrc != other.MapCrc) return false;
       if (ClientDllMd5 != other.ClientDllMd5) return false;
       if (MaxClients != other.MaxClients) return false;
-      if (ModName != other.ModName) return false;
+      if (GameName != other.GameName) return false;
       if (HostName != other.HostName) return false;
       if (MapFileName != other.MapFileName) return false;
       if (AllowCheats != other.AllowCheats) return false;
@@ -218,7 +218,7 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       if (MapCrc != 0) hash ^= MapCrc.GetHashCode();
       if (ClientDllMd5.Length != 0) hash ^= ClientDllMd5.GetHashCode();
       if (MaxClients != 0) hash ^= MaxClients.GetHashCode();
-      if (ModName.Length != 0) hash ^= ModName.GetHashCode();
+      if (GameName.Length != 0) hash ^= GameName.GetHashCode();
       if (HostName.Length != 0) hash ^= HostName.GetHashCode();
       if (MapFileName.Length != 0) hash ^= MapFileName.GetHashCode();
       if (AllowCheats != false) hash ^= AllowCheats.GetHashCode();
@@ -255,9 +255,9 @@ namespace SharpLife.Networking.Shared.Messages.Server {
         output.WriteRawTag(40);
         output.WriteUInt32(MaxClients);
       }
-      if (ModName.Length != 0) {
+      if (GameName.Length != 0) {
         output.WriteRawTag(50);
-        output.WriteString(ModName);
+        output.WriteString(GameName);
       }
       if (HostName.Length != 0) {
         output.WriteRawTag(58);
@@ -294,8 +294,8 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       if (MaxClients != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(MaxClients);
       }
-      if (ModName.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(ModName);
+      if (GameName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(GameName);
       }
       if (HostName.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(HostName);
@@ -332,8 +332,8 @@ namespace SharpLife.Networking.Shared.Messages.Server {
       if (other.MaxClients != 0) {
         MaxClients = other.MaxClients;
       }
-      if (other.ModName.Length != 0) {
-        ModName = other.ModName;
+      if (other.GameName.Length != 0) {
+        GameName = other.GameName;
       }
       if (other.HostName.Length != 0) {
         HostName = other.HostName;
@@ -376,7 +376,7 @@ namespace SharpLife.Networking.Shared.Messages.Server {
             break;
           }
           case 50: {
-            ModName = input.ReadString();
+            GameName = input.ReadString();
             break;
           }
           case 58: {

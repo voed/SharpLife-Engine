@@ -18,7 +18,7 @@ namespace SharpLife.Engine.Shared.Configuration
     public sealed class EngineConfiguration
     {
         /// <summary>
-        /// The mod name of the default game to load
+        /// The game name of the default game to load
         /// </summary>
         public string DefaultGame { get; set; }
 

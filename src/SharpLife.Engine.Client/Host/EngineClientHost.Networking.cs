@@ -38,7 +38,7 @@ namespace SharpLife.Engine.Client.Host
                 Disconnect(false);
             }
 
-            //TODO: could combine the app identifier with the mod name to allow concurrent mod hosts
+            //TODO: could combine the app identifier with the game name to allow concurrent game hosts
             //Not possible since the original engine launcher blocks launching multiple instances
             //Should be possible for servers though
 

@@ -18,7 +18,7 @@ using System;
 
 namespace SharpLife.Game.Server.API
 {
-    public class ServerMod : IServerMod
+    public class GameServer : IGameServer
     {
         private IServiceProvider _serviceProvider;
 

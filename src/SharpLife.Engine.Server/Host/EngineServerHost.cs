@@ -22,7 +22,7 @@ using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
-using SharpLife.Engine.Shared.ModUtils;
+using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility.Events;
 using System;
@@ -35,7 +35,7 @@ namespace SharpLife.Engine.Server.Host
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
-        public bool GameAssemblyLoaded => _mod != null;
+        public bool GameAssemblyLoaded => _game != null;
 
         public bool Active { get; private set; }
 
@@ -43,7 +43,7 @@ namespace SharpLife.Engine.Server.Host
 
         private readonly ILogger _logger;
 
-        private ModData<IServerMod> _mod;
+        private GameData<IGameServer> _game;
 
         private readonly IConVar _ipname;
         private readonly IConVar _hostport;
@@ -112,24 +112,24 @@ namespace SharpLife.Engine.Server.Host
         {
             Stop();
 
-            _mod?.Entrypoint.Shutdown();
+            _game?.Entrypoint.Shutdown();
         }
 
         public void LoadGameAssembly()
         {
-            if (_mod == null)
+            if (_game == null)
             {
-                //Load the game mod assembly
-                _mod = ModLoadUtils.LoadMod<IServerMod>(
+                //Load the game assembly
+                _game = GameLoadUtils.LoadGame<IGameServer>(
                     _engine.GameDirectory,
-                    _engine.GameConfiguration.ServerMod.AssemblyName,
-                    _engine.GameConfiguration.ServerMod.EntrypointClass);
+                    _engine.GameConfiguration.GameServer.AssemblyName,
+                    _engine.GameConfiguration.GameServer.EntrypointClass);
 
                 var collection = new ServiceCollection();
 
                 var serviceProvider = collection.BuildServiceProvider();
 
-                _mod.Entrypoint.Initialize(serviceProvider);
+                _game.Entrypoint.Initialize(serviceProvider);
             }
         }
 
@@ -205,11 +205,11 @@ namespace SharpLife.Engine.Server.Host
             //TODO: implement
             //TODO: notify Steam
 
-            if (_mod != null)
+            if (_game != null)
             {
                 if (Active)
                 {
-                    //TODO: deactivate mod
+                    //TODO: deactivate game
                 }
             }
         }

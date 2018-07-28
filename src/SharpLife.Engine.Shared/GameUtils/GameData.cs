@@ -13,11 +13,14 @@
 *
 ****/
 
-using SharpLife.Engine.API.Game.Client;
+using System.Reflection;
 
-namespace SharpLife.Game.Client.API
+namespace SharpLife.Engine.Shared.GameUtils
 {
-    public class ClientMod : IClientMod
+    public class GameData<TEntryPoint>
     {
+        public Assembly assembly;
+
+        public TEntryPoint Entrypoint;
     }
 }

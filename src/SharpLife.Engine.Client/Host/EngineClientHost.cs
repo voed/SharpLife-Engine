@@ -23,7 +23,7 @@ using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Engines;
-using SharpLife.Engine.Shared.ModUtils;
+using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility;
@@ -53,7 +53,7 @@ namespace SharpLife.Engine.Client.Host
 
         private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
 
-        private ModData<IClientMod> _mod;
+        private GameData<IGameClient> _game;
 
         private readonly IConVar _clientport;
         private readonly IConVar _cl_resend;
@@ -119,11 +119,11 @@ namespace SharpLife.Engine.Client.Host
         {
             _window.Center();
 
-            //Load the game mod assembly
-            _mod = ModLoadUtils.LoadMod<IClientMod>(
+            //Load the game assembly
+            _game = GameLoadUtils.LoadGame<IGameClient>(
                 _engine.GameDirectory,
-                _engine.GameConfiguration.ClientMod.AssemblyName,
-                _engine.GameConfiguration.ClientMod.EntrypointClass);
+                _engine.GameConfiguration.GameClient.AssemblyName,
+                _engine.GameConfiguration.GameClient.EntrypointClass);
         }
 
         public void Shutdown()

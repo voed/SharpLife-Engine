@@ -22,8 +22,8 @@ namespace SharpLife.Engine.Shared.Configuration
         /// </summary>
         public string GameName { get; set; }
 
-        public ModAssemblyInfo ClientMod { get; set; }
+        public GameAssemblyInfo GameClient { get; set; }
 
-        public ModAssemblyInfo ServerMod { get; set; }
+        public GameAssemblyInfo GameServer { get; set; }
     }
 }

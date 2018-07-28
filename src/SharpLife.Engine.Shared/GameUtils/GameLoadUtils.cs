@@ -17,19 +17,19 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace SharpLife.Engine.Shared.ModUtils
+namespace SharpLife.Engine.Shared.GameUtils
 {
-    public static class ModLoadUtils
+    public static class GameLoadUtils
     {
         /// <summary>
-        /// Loads a mod assembly and creates an instance of its entry point
+        /// Loads a game assembly and creates an instance of its entry point
         /// </summary>
         /// <typeparam name="TEntryPoint"></typeparam>
         /// <param name="gameDirectory"></param>
         /// <param name="assemblyName"></param>
         /// <param name="entrypointClass"></param>
         /// <returns></returns>
-        public static ModData<TEntryPoint> LoadMod<TEntryPoint>(string gameDirectory, string assemblyName, string entrypointClass)
+        public static GameData<TEntryPoint> LoadGame<TEntryPoint>(string gameDirectory, string assemblyName, string entrypointClass)
         {
             if (gameDirectory == null)
             {
@@ -54,7 +54,7 @@ namespace SharpLife.Engine.Shared.ModUtils
 
             if (entrypointType == null)
             {
-                throw new InvalidOperationException($"Couldn't find entry point {entrypointClass} in mod assembly {assemblyName}");
+                throw new InvalidOperationException($"Couldn't find entry point {entrypointClass} in game assembly {assemblyName}");
             }
 
             var entryPointBaseType = typeof(TEntryPoint);
@@ -66,12 +66,12 @@ namespace SharpLife.Engine.Shared.ModUtils
             if (!isEntryPointImplementation)
             {
                 throw new InvalidOperationException(
-                    $"Entry point \"{entrypointClass}\" in mod assembly \"{assemblyName}\" does not implement entry point type \"{entryPointBaseType.FullName}\"");
+                    $"Entry point \"{entrypointClass}\" in game assembly \"{assemblyName}\" does not implement entry point type \"{entryPointBaseType.FullName}\"");
             }
 
             var entrypoint = (TEntryPoint)Activator.CreateInstance(entrypointType);
 
-            return new ModData<TEntryPoint>
+            return new GameData<TEntryPoint>
             {
                 assembly = assembly,
                 Entrypoint = entrypoint
