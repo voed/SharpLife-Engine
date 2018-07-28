@@ -20,4 +20,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File ./Messages/GenerateMessages.ps1" />
+  </Target>
+
 </Project>

@@ -1,0 +1,9 @@
+﻿syntax = "proto3";
+
+package SharpLife.Networking.Shared.Messages;
+
+//Contains the list of messages to send to a remote host
+message MessagesList
+{
+	repeated uint32 message_ids = 1;
+}

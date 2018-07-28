@@ -13,10 +13,15 @@
 *
 ****/
 
+using Google.Protobuf.Reflection;
+using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.Server;
+using System.Collections.Generic;
+
 namespace SharpLife.Networking.Shared
 {
     /// <summary>
-    /// String message identifiers used by networking code
+    /// String message identifiers and protobuf messages used by networking code
     /// </summary>
     public static class NetMessages
     {
@@ -29,5 +34,32 @@ namespace SharpLife.Networking.Shared
         public const string ServerChangeLevel = "Server changing level";
 
         public const string ServerClientDeniedNoFreeSlots = "Server is full.";
+
+        public const string ServerClientDeniedProtocolVersionOlder = "You are running an older version";
+
+        public const string ServerClientDeniedProtocolVersionNewer = "You are running a newer version";
+
+        /// <summary>
+        /// List of client-to-server messages used by the engine
+        /// The order of these messages is important; the client maps messages to their index, the server maps indices to messages
+        /// If you change this in any way, update <see cref="NetConstants.ProtocolVersion"/>
+        /// </summary>
+        public static IReadOnlyList<MessageDescriptor> ClientToServerMessages { get; } = new List<MessageDescriptor>
+        {
+            //ClientUserInfo message is not included in this since it's the first message that gets sent
+            NewConnection.Descriptor,
+        };
+
+        /// <summary>
+        /// List of server-to-client messages used by the engine
+        /// The order of these messages is important; the server maps messages to their index, the client maps indices to messages
+        /// If you change this in any way, update <see cref="NetConstants.ProtocolVersion"/>
+        /// </summary>
+        public static IReadOnlyList<MessageDescriptor> ServerToClientMessages { get; } = new List<MessageDescriptor>
+        {
+            ConnectAcknowledgement.Descriptor,
+            ServerInfo.Descriptor,
+            Print.Descriptor,
+        };
     }
 }

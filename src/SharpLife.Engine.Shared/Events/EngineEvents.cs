@@ -81,6 +81,11 @@ namespace SharpLife.Engine.Shared.Events
         public const string ClientStartConnect = nameof(ClientStartConnect);
 
         /// <summary>
+        /// Dispatched when the client has received the connection ackowledgement message
+        /// </summary>
+        public const string ClientReceivedAck = nameof(ClientReceivedAck);
+
+        /// <summary>
         /// Dispatched right before the client starts the disconnect action
         /// </summary>
         public const string ClientStartDisconnect = nameof(ClientStartDisconnect);

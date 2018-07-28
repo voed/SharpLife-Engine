@@ -14,15 +14,18 @@
 ****/
 
 using Lidgren.Network;
+using SharpLife.Engine.Server.Clients;
 using SharpLife.Networking.Shared;
 using System;
 using System.Net;
 
 namespace SharpLife.Engine.Server.Networking
 {
-    internal sealed class NetworkServer
+    internal sealed class NetworkServer : NetworkPeer
     {
         private readonly NetServer _server;
+
+        protected override NetPeer Peer => _server;
 
         /// <summary>
         /// Creates a new server network handler
@@ -56,36 +59,34 @@ namespace SharpLife.Engine.Server.Networking
             _server = new NetServer(config);
         }
 
-        public void Start()
+        /// <summary>
+        /// Sends all pending messages for the given client
+        /// </summary>
+        /// <param name="client"></param>
+        public void SendClientMessages(ServerClient client)
         {
-            _server.Start();
-        }
-
-        public void Shutdown(string bye)
-        {
-            _server.Shutdown(bye);
-        }
-
-        public void ReadPackets(Action<NetIncomingMessage> handler)
-        {
-            if (handler == null)
+            if (client == null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            NetIncomingMessage im;
-
-            while ((im = _server.ReadMessage()) != null)
+            if (client.HasPendingMessages(true))
             {
-                handler(im);
+                var reliable = CreatePacket();
 
-                _server.Recycle(im);
+                client.WriteMessages(reliable, true);
+
+                SendPacket(reliable, client.Connection, NetDeliveryMethod.ReliableOrdered);
             }
-        }
 
-        public void FlushOutgoingPackets()
-        {
-            _server.FlushSendQueue();
+            if (client.HasPendingMessages(false))
+            {
+                var unreliable = CreatePacket();
+
+                client.WriteMessages(unreliable, false);
+
+                SendPacket(unreliable, client.Connection, NetDeliveryMethod.UnreliableSequenced);
+            }
         }
     }
 }

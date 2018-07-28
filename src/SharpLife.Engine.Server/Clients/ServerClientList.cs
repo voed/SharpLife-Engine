@@ -111,7 +111,7 @@ namespace SharpLife.Engine.Server.Clients
             --Count;
         }
 
-        public ServerClient FindClientByEndPoint(IPEndPoint endPoint)
+        public ServerClient FindClientByEndPoint(IPEndPoint endPoint, bool throwOnNotFound = true)
         {
             if (endPoint == null)
             {
@@ -124,6 +124,11 @@ namespace SharpLife.Engine.Server.Clients
                 {
                     return _clients[i];
                 }
+            }
+
+            if (throwOnNotFound)
+            {
+                throw new InvalidOperationException($"Couldn't find client for end point {endPoint}");
             }
 
             return null;

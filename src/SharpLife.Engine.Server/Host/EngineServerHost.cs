@@ -13,7 +13,6 @@
 *
 ****/
 
-using Lidgren.Network;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SharpLife.CommandSystem;
@@ -21,18 +20,16 @@ using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.API.Game;
 using SharpLife.Engine.Server.Clients;
-using SharpLife.Engine.Server.Networking;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.ModUtils;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility.Events;
 using System;
-using System.Net;
 
 namespace SharpLife.Engine.Server.Host
 {
-    public class EngineServerHost : IEngineServerHost
+    public partial class EngineServerHost : IEngineServerHost
     {
         public IConCommandSystem CommandSystem => _engine.CommandSystem;
 
@@ -48,8 +45,6 @@ namespace SharpLife.Engine.Server.Host
 
         private ModData<IServerMod> _mod;
 
-        private NetworkServer _netServer;
-
         private readonly IConVar _ipname;
         private readonly IConVar _hostport;
         private readonly IConVar _defport;
@@ -57,9 +52,9 @@ namespace SharpLife.Engine.Server.Host
 
         private readonly IConVar _maxPlayers;
 
-        private long _mapCRC = 0;
+        private uint _mapCRC = 0;
 
-        private readonly ServerClientList _clientList;
+        private int _spawnCount = 0;
 
         public EngineServerHost(IEngine engine, ILogger logger)
         {
@@ -108,6 +103,9 @@ namespace SharpLife.Engine.Server.Host
             }
 
             _clientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
+
+            CreateMessageHandlers();
+            RegisterMessageHandlers();
         }
 
         public void Shutdown()
@@ -132,33 +130,6 @@ namespace SharpLife.Engine.Server.Host
                 var serviceProvider = collection.BuildServiceProvider();
 
                 _mod.Entrypoint.Initialize(serviceProvider);
-            }
-        }
-
-        private void CreateNetworkServer()
-        {
-            if (_netServer == null)
-            {
-                var port = _hostport.Integer;
-
-                if (port == 0)
-                {
-                    port = _defport.Integer;
-
-                    _hostport.Integer = _defport.Integer;
-                }
-
-                var ipAddress = NetUtilities.StringToIPAddress(_ipname.String, port);
-
-                //Always allow the maximum number of clients since we can't just recreate the server whenever we want (clients stay connected through map changes)
-                _netServer = new NetworkServer(
-                    NetConstants.AppIdentifier,
-                    ipAddress,
-                    NetConstants.MaxClients,
-                    _sv_timeout.Float
-                    );
-
-                _netServer.Start();
             }
         }
 
@@ -188,6 +159,8 @@ namespace SharpLife.Engine.Server.Host
             {
                 _logger.Debug($"Spawn Server {mapName}\n");
             }
+
+            ++_spawnCount;
 
             //TODO: clear custom data if size exceeds maximum
 
@@ -268,161 +241,11 @@ namespace SharpLife.Engine.Server.Host
             }
 
             _netServer.ReadPackets(HandlePacket);
-        }
 
-        private ServerClient FindClient(IPEndPoint endPoint)
-        {
-            var client = _clientList.FindClientByEndPoint(endPoint);
-
-            if (client != null)
+            foreach (var client in _clientList)
             {
-                return client;
+                _netServer.SendClientMessages(client);
             }
-
-            _logger.Warning($"Client with IP {endPoint} has no associated client instance");
-
-            return null;
-        }
-
-        private void DropClient(ServerClient client, string reason)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            if (reason == null)
-            {
-                throw new ArgumentNullException(nameof(reason));
-            }
-
-            //TODO: notify game
-
-            _logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
-
-            client.Disconnect(reason);
-
-            //To ensure that clients get the disconnect order
-            _netServer.FlushOutgoingPackets();
-        }
-
-        private void HandlePacket(NetIncomingMessage message)
-        {
-            //TODO: filter packets
-
-            switch (message.MessageType)
-            {
-                case NetIncomingMessageType.Error:
-                    _logger.Error("An unknown error occurred");
-                    break;
-
-                case NetIncomingMessageType.StatusChanged:
-                    HandleStatusChanged(message);
-                    break;
-
-                case NetIncomingMessageType.UnconnectedData:
-                    //TODO: implement
-                    //RCON or query
-                    break;
-
-                case NetIncomingMessageType.ConnectionApproval:
-                    HandleConnectionApproval(message);
-                    break;
-
-                case NetIncomingMessageType.Data:
-                    HandleData(message);
-                    break;
-
-                case NetIncomingMessageType.VerboseDebugMessage:
-                    _logger.Verbose(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.DebugMessage:
-                    _logger.Debug(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.WarningMessage:
-                    _logger.Warning(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.ErrorMessage:
-                    _logger.Error(message.ReadString());
-                    break;
-            }
-        }
-
-        private void HandleConnectionApproval(NetIncomingMessage message)
-        {
-            //TODO: implement
-            //Query IP ban list, other things
-
-            //Check if there is a slot to put the client in
-            var slot = _clientList.FindEmptySlot();
-
-            if (slot == -1)
-            {
-                message.SenderConnection.Deny(NetMessages.ServerClientDeniedNoFreeSlots);
-                return;
-            }
-
-            //TODO: validate input data
-
-            message.SenderConnection.Approve();
-
-            //TODO: get user name
-            var client = ServerClient.CreateClient(message.SenderConnection, slot, "unnamed");
-
-            _clientList.AddClientToSlot(client);
-        }
-
-        private void HandleStatusChanged(NetIncomingMessage message)
-        {
-            var status = (NetConnectionStatus)message.ReadByte();
-
-            //Since we look up the client below we have to make sure only those states that we care about are handled
-            //Some states will occur before the client is given a slot, so don't process those
-            var ignore = true;
-
-            switch (status)
-            {
-                case NetConnectionStatus.Connected:
-                case NetConnectionStatus.Disconnecting:
-                case NetConnectionStatus.Disconnected:
-                    ignore = false;
-                    break;
-            }
-
-            if (ignore)
-            {
-                return;
-            }
-
-            string reason = message.ReadString();
-
-            var client = FindClient(message.SenderEndPoint);
-
-            if (client != null)
-            {
-                switch (status)
-                {
-                    case NetConnectionStatus.Connected:
-                        client.Connected = true;
-                        break;
-
-                    case NetConnectionStatus.Disconnecting:
-                        client.Connected = false;
-                        break;
-
-                    case NetConnectionStatus.Disconnected:
-                        _clientList.RemoveClient(client);
-                        break;
-                }
-            }
-        }
-
-        private void HandleData(NetIncomingMessage message)
-        {
-            //TODO: implement
         }
     }
 }

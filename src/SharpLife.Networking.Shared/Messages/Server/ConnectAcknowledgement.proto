@@ -1,0 +1,18 @@
+syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.Server;
+
+//The first message sent from the server to the client, allowing the client to finish connecting
+message ConnectAcknowledgement
+{
+	//The client's userid on the server
+	int32 user_id = 1;
+
+	//The client's IP address as seen by the server
+	string true_address = 2;
+
+	//Whether the server is running as VAC secure
+	bool is_secure = 3;
+
+	//The server's build number
+	int32 build_number = 4;
+}

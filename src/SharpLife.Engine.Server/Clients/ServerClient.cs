@@ -13,7 +13,10 @@
 *
 ****/
 
+using Google.Protobuf;
 using Lidgren.Network;
+using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.MessageMapping;
 using System;
 using System.Net;
 
@@ -24,6 +27,8 @@ namespace SharpLife.Engine.Server.Clients
     /// </summary>
     internal sealed class ServerClient
     {
+        private readonly SendMappings _sendMappings;
+
         public NetConnection Connection { get; }
 
         public IPEndPoint RemoteEndPoint => Connection?.RemoteEndPoint;
@@ -34,47 +39,76 @@ namespace SharpLife.Engine.Server.Clients
         public int Index { get; }
 
         /// <summary>
+        /// The client's user id
+        /// </summary>
+        public int UserId { get; }
+
+        /// <summary>
         /// Whether this is a fake client (server only bot)
         /// </summary>
         public bool IsFakeClient { get; }
 
         public bool Connected { get; set; }
 
+        public double ConnectionStarted { get; set; }
+
+        /// <summary>
+        /// Whether the client has spawned in the world
+        /// </summary>
+        public bool Spawned { get; set; }
+
+        /// <summary>
+        /// Whether the client is active
+        /// </summary>
+        public bool Active { get; set; }
+
         public string Name { get; set; }
 
-        private ServerClient(NetConnection connection, int index, string name)
+        private readonly PendingMessages _reliableMessages;
+
+        private readonly PendingMessages _unreliableMessages;
+
+        private ServerClient(SendMappings sendMappings, NetConnection connection, int index, int userId, string name)
         {
+            _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
             Index = index;
+            UserId = userId;
             Name = name ?? throw new ArgumentNullException(nameof(name));
+
+            _reliableMessages = new PendingMessages(_sendMappings);
+            _unreliableMessages = new PendingMessages(_sendMappings);
         }
 
         /// <summary>
         /// Creates a fake client
         /// </summary>
         /// <param name="index"></param>
+        /// <param name="userId"></param>
         /// <param name="name"></param>
-        private ServerClient(int index, string name)
+        private ServerClient(int index, int userId, string name)
         {
             IsFakeClient = true;
             Index = index;
+            UserId = userId;
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        public static ServerClient CreateClient(NetConnection connection, int index, string name)
+        public static ServerClient CreateClient(SendMappings sendMappings, NetConnection connection, int index, int userId, string name)
         {
-            return new ServerClient(connection, index, name);
+            return new ServerClient(sendMappings, connection, index, userId, name);
         }
 
         /// <summary>
         /// Creates a fake client that will behave like a client on the server, but has no network connection
         /// </summary>
         /// <param name="index"></param>
+        /// <param name="userId"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static ServerClient CreateFakeClient(int index, string name)
+        public static ServerClient CreateFakeClient(int index, int userId, string name)
         {
-            return new ServerClient(index, name);
+            return new ServerClient(index, userId, name);
         }
 
         public void Disconnect(string reason)
@@ -88,6 +122,46 @@ namespace SharpLife.Engine.Server.Clients
             {
                 Connection.Disconnect(reason);
             }
+        }
+
+        private PendingMessages GetMessages(bool reliable)
+        {
+            return reliable ? _reliableMessages : _unreliableMessages;
+        }
+
+        public bool HasPendingMessages(bool reliable)
+        {
+            return GetMessages(reliable).MessageCount > 0;
+        }
+
+        public void AddMessage(IMessage message, bool reliable)
+        {
+            if (IsFakeClient)
+            {
+                return;
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            GetMessages(reliable).Add(message);
+        }
+
+        /// <summary>
+        /// Writes all pending messages to the outgoing message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="reliable"></param>
+        public void WriteMessages(NetOutgoingMessage message, bool reliable)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            GetMessages(reliable).Write(message);
         }
     }
 }

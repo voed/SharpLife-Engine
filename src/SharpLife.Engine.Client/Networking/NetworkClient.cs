@@ -13,9 +13,13 @@
 *
 ****/
 
+using Google.Protobuf;
 using Lidgren.Network;
 using Serilog;
+using SharpLife.Engine.Client.Servers;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.MessageMapping;
+using SharpLife.Networking.Shared.Messages.Client;
 using System;
 using System.Net;
 
@@ -24,47 +28,33 @@ namespace SharpLife.Engine.Client.Networking
     /// <summary>
     /// Lidgren client networking handler
     /// </summary>
-    internal class NetworkClient
+    internal class NetworkClient : NetworkPeer
     {
         public NetConnectionStatus ConnectionStatus => _client.ConnectionStatus;
 
-        public bool Connected => _serverConnection != null;
-
         private readonly ILogger _logger;
+
+        private readonly SendMappings _sendMappings;
 
         private readonly NetClient _client;
 
-        private NetConnection _serverConnection;
+        protected override NetPeer Peer => _client;
 
-        //Always have a valid instance for this member
-        private ServerData _data = new ServerData();
-
-        /// <summary>
-        /// Name of the server being connected to
-        /// May contain a port value
-        /// </summary>
-        public string ServerName => _data.ServerName;
-
-        /// <summary>
-        /// The resolved server address
-        /// </summary>
-        public IPEndPoint ServerAddress => _serverConnection?.RemoteEndPoint ?? new IPEndPoint(IPAddress.None, 0);
-
-        /// <summary>
-        /// Our IP address as reported by the server
-        /// </summary>
-        public IPEndPoint TrueAddress => _data.TrueAddress;
+        public ClientServer Server { get; private set; }
 
         /// <summary>
         /// Creates a new client network handler
         /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="sendMappings"></param>
         /// <param name="appIdentifier">App identifier to use for networking. Must match the identifier given to servers</param>
         /// <param name="port">Port to use</param>
         /// <param name="resendHandshakeInterval"></param>
         /// <param name="connectionTimeout"></param>
-        public NetworkClient(ILogger logger, string appIdentifier, int port, float resendHandshakeInterval, float connectionTimeout)
+        public NetworkClient(ILogger logger, SendMappings sendMappings, string appIdentifier, int port, float resendHandshakeInterval, float connectionTimeout)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
 
             var config = new NetPeerConfiguration(appIdentifier)
             {
@@ -89,18 +79,13 @@ namespace SharpLife.Engine.Client.Networking
             _client = new NetClient(config);
         }
 
-        public void Start()
+        public void Connect(string address, ClientUserInfo userInfo)
         {
-            _client.Start();
-        }
+            if (userInfo == null)
+            {
+                throw new ArgumentNullException(nameof(userInfo));
+            }
 
-        public void Shutdown(string bye)
-        {
-            _client.Shutdown(bye);
-        }
-
-        public void Connect(string address)
-        {
             IPEndPoint ipAddress;
 
             try
@@ -122,9 +107,17 @@ namespace SharpLife.Engine.Client.Networking
 
             var message = _client.CreateMessage();
 
-            _serverConnection = _client.Connect(ipAddress, message);
+            //Send protocol version first so compatibility is known
+            message.WriteVariableUInt32(NetConstants.ProtocolVersion);
 
-            _data.ServerName = address;
+            using (var stream = new NetBufferStream(message))
+            {
+                userInfo.WriteDelimitedTo(stream);
+            }
+
+            var connection = _client.Connect(ipAddress, message);
+
+            Server = new ClientServer(_sendMappings, address, connection);
         }
 
         /// <summary>
@@ -135,26 +128,29 @@ namespace SharpLife.Engine.Client.Networking
         {
             _client.Disconnect(byeMessage);
 
-            _serverConnection = null;
-
-            _data = new ServerData();
+            Server = null;
 
             //TODO: close Steam connection
         }
 
-        public void ReadPackets(Action<NetIncomingMessage> handler)
+        /// <summary>
+        /// Sends all pending messages for the given server
+        /// </summary>
+        /// <param name="server"></param>
+        public void SendServerMessages(ClientServer server)
         {
-            if (handler == null)
+            if (server == null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new ArgumentNullException(nameof(server));
             }
 
-            NetIncomingMessage im;
-
-            while ((im = _client.ReadMessage()) != null)
+            if (server.HasPendingMessages())
             {
-                handler(im);
-                _client.Recycle(im);
+                var reliable = CreatePacket();
+
+                server.WriteMessages(reliable);
+
+                SendPacket(reliable, server.Connection, NetDeliveryMethod.ReliableOrdered);
             }
         }
     }

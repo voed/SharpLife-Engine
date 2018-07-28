@@ -1,0 +1,8 @@
+syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.Client;
+
+//The first real message sent to the server,
+//tells the server that client has accepted the connection and to set up a connection for the client
+message NewConnection
+{
+}

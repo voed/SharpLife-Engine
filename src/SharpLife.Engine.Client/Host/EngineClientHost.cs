@@ -14,7 +14,6 @@
 ****/
 
 using ImGuiNET;
-using Lidgren.Network;
 using SDL2;
 using Serilog;
 using SharpLife.CommandSystem;
@@ -24,7 +23,6 @@ using SharpLife.Engine.API.Game;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Engines;
-using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.ModUtils;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Networking.Shared;
@@ -35,7 +33,7 @@ using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
-    public class EngineClientHost : IEngineClientHost
+    public partial class EngineClientHost : IEngineClientHost
     {
         public IConCommandSystem CommandSystem => _engine.CommandSystem;
 
@@ -61,7 +59,10 @@ namespace SharpLife.Engine.Client.Host
         private readonly IConVar _cl_resend;
         private readonly IConVar _cl_timeout;
 
-        private NetworkClient _netClient;
+        private readonly IConVar _cl_name;
+
+        private int _userId;
+        private int _buildNumber;
 
         public EngineClientHost(IEngine engine, ILogger logger)
         {
@@ -109,8 +110,9 @@ namespace SharpLife.Engine.Client.Host
                 .WithValue(60)
                 .WithFlags(CommandFlags.Archive));
 
-            //TODO: need to delay this until user config has been processed
-            CreateNetworkClient();
+            //TODO: add change handler to send update to server if connected
+            _cl_name = CommandSystem.RegisterConVar(new ConVarInfo("name")
+                .WithHelpInfo("Your name as seen by other players"));
         }
 
         public void PostInitialize()
@@ -150,172 +152,13 @@ namespace SharpLife.Engine.Client.Host
 
                 ImGui.EndMainMenuBar();
             }
+
+            _netClient.SendServerMessages(_netClient.Server);
         }
 
         public void Draw()
         {
             _renderer.Draw();
-        }
-
-        /// <summary>
-        /// (Re)creates the network client, using current client configuration values
-        /// </summary>
-        private void CreateNetworkClient()
-        {
-            //Disconnect any previous connection
-            if (_netClient != null)
-            {
-                Disconnect(false);
-            }
-
-            //TODO: could combine the app identifier with the mod name to allow concurrent mod hosts
-            //Not possible since the original engine launcher blocks launching multiple instances
-            //Should be possible for servers though
-
-            _netClient = new NetworkClient(
-                _logger,
-                NetConstants.AppIdentifier,
-                _clientport.Integer,
-                _cl_resend.Float,
-                _cl_timeout.Float);
-        }
-
-        private void HandlePacket(NetIncomingMessage message)
-        {
-            switch (message.MessageType)
-            {
-                case NetIncomingMessageType.StatusChanged:
-                    HandleStatusChanged(message);
-                    break;
-
-                case NetIncomingMessageType.UnconnectedData:
-                    //TODO: implement
-                    break;
-
-                case NetIncomingMessageType.Data:
-                    HandleData(message);
-                    break;
-
-                case NetIncomingMessageType.VerboseDebugMessage:
-                    _logger.Verbose(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.DebugMessage:
-                    _logger.Debug(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.WarningMessage:
-                    _logger.Warning(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.ErrorMessage:
-                    _logger.Error(message.ReadString());
-                    break;
-            }
-        }
-
-        private void HandleStatusChanged(NetIncomingMessage message)
-        {
-            var status = (NetConnectionStatus)message.ReadByte();
-
-            string reason = message.ReadString();
-
-            switch (status)
-            {
-                case NetConnectionStatus.Connected:
-                    ConnectionStatus = ClientConnectionStatus.Connected;
-                    break;
-
-                case NetConnectionStatus.Disconnected:
-                    {
-                        if (ConnectionStatus != ClientConnectionStatus.NotConnected)
-                        {
-                            //Disconnected by server
-                            _engine.EndGame("Server disconnected");
-                            //TODO: discard remaining incoming packets?
-                        }
-                        break;
-                    }
-            }
-        }
-
-        private void HandleData(NetIncomingMessage message)
-        {
-            //TODO: implement
-        }
-
-        /// <summary>
-        /// Connect to a server
-        /// </summary>
-        /// <param name="command"></param>
-        private void Connect(ICommand command)
-        {
-            if (command.Count == 0)
-            {
-                _logger.Information("usage: connect <server>");
-                return;
-            }
-
-            var name = command.ArgumentsString;
-
-            Connect(name);
-        }
-
-        public void Connect(string address)
-        {
-            if (address == null)
-            {
-                throw new ArgumentNullException(nameof(address));
-            }
-
-            Disconnect(false);
-
-            EventSystem.DispatchEvent(EngineEvents.ClientStartConnect);
-
-            //TODO: initialize client state
-
-            CreateNetworkClient();
-
-            _netClient.Start();
-
-            ConnectionStatus = ClientConnectionStatus.Connecting;
-
-            //Told to connect to listen server, translate address
-            if (address == NetAddresses.Local)
-            {
-                address = NetConstants.LocalHost;
-            }
-
-            _netClient.Connect(address);
-        }
-
-        private void Disconnect(ICommand command)
-        {
-            Disconnect(true);
-        }
-
-        public void Disconnect(bool shutdownServer)
-        {
-            //Always dispatch even if we're not connected
-            EventSystem.DispatchEvent(EngineEvents.ClientStartDisconnect);
-
-            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
-            {
-                //TODO: implement
-                _netClient.Shutdown(NetMessages.ClientDisconnectMessage);
-
-                //The client considers itself disconnected immediately
-                ConnectionStatus = ClientConnectionStatus.NotConnected;
-
-                EventSystem.DispatchEvent(EngineEvents.ClientDisconnectSent);
-            }
-
-            EventSystem.DispatchEvent(EngineEvents.ClientEndDisconnect);
-
-            if (shutdownServer)
-            {
-                _engine.StopServer();
-            }
         }
     }
 }

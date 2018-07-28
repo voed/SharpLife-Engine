@@ -47,7 +47,7 @@ namespace SharpLife.Networking.Shared
         /// Used to determine if the network protocol used by the client and server are compatible
         /// Allows connections to be rejected trivially during approval
         /// </summary>
-        public const int ProtocolVersion = 1;
+        public const uint ProtocolVersion = 1;
 
         /// <summary>
         /// The minimum number of clients that can be connected to a server

@@ -1,0 +1,9 @@
+syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.Client;
+
+//The initial message sent to the server during client connection
+message ClientUserInfo
+{
+	//The client's name
+	string name = 1;
+}
