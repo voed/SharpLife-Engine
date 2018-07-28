@@ -21,6 +21,7 @@ using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.MessageMapping;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
+using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
@@ -58,7 +59,7 @@ namespace SharpLife.Engine.Client.Host
             _netClient.Server.TrueAddress = NetUtilities.StringToIPAddress(message.TrueAddress, NetConstants.DefaultServerPort);
             _buildNumber = message.BuildNumber;
 
-            if (message.TrueAddress != NetConstants.Loopback)
+            if (_netClient.Server.Connection.RemoteEndPoint.Address != IPAddress.Loopback)
             {
                 _logger.Information($"Connection accepted by {_netClient.Server.Name}");
             }
