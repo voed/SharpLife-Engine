@@ -52,6 +52,14 @@ namespace SharpLife.Engine.Shared.Maps
         string FormatMapFileName(string mapName);
 
         /// <summary>
+        /// Extracts the base map name from a file name
+        /// </summary>
+        /// <param name="mapFileName"></param>
+        /// <returns></returns>
+        /// <exception cref="FormatException">If the file name is not a map file name</exception>
+        string ExtractMapBaseName(string mapFileName);
+
+        /// <summary>
         /// Returns whether a map name is valid
         /// </summary>
         /// <param name="mapName">The name of the map, without directory or extension</param>
@@ -61,9 +69,9 @@ namespace SharpLife.Engine.Shared.Maps
         /// <summary>
         /// Attempts to load a map
         /// </summary>
-        /// <param name="mapName"></param>
+        /// <param name="mapFileName"></param>
         /// <returns>Whether the map was loaded</returns>
-        bool LoadMap(string mapName);
+        bool LoadMap(string mapFileName);
 
         /// <summary>
         /// Clears all map data

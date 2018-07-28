@@ -19,6 +19,7 @@ using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace SharpLife.Engine.Shared.Maps
 {
@@ -31,6 +32,8 @@ namespace SharpLife.Engine.Shared.Maps
         private readonly string _mapDirectory;
 
         private readonly string _bspExtension;
+
+        private readonly string _mapFileNameBaseRegexString;
 
         public string MapName { get; private set; }
 
@@ -46,6 +49,12 @@ namespace SharpLife.Engine.Shared.Maps
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _mapDirectory = mapDirectory ?? throw new ArgumentNullException(nameof(mapDirectory));
             _bspExtension = bspExtension ?? throw new ArgumentNullException(nameof(bspExtension));
+
+            //Match on a string like "maps/bounce.bsp"
+            _mapFileNameBaseRegexString =
+                _mapDirectory
+                + $"[{Regex.Escape(Path.DirectorySeparatorChar.ToString() + Path.AltDirectorySeparatorChar.ToString())}](\\w+)"
+                + Regex.Escape(FileExtensionUtils.AsExtension(_bspExtension));
         }
 
         public string FormatMapFileName(string mapName)
@@ -58,20 +67,35 @@ namespace SharpLife.Engine.Shared.Maps
             return Path.Combine(_mapDirectory, mapName + FileExtensionUtils.AsExtension(_bspExtension));
         }
 
+        public string ExtractMapBaseName(string mapFileName)
+        {
+            if (mapFileName == null)
+            {
+                throw new ArgumentNullException(nameof(mapFileName));
+            }
+
+            var match = Regex.Match(mapFileName, _mapFileNameBaseRegexString);
+
+            if (!match.Success)
+            {
+                throw new FormatException($"Could not extract map base name from {mapFileName}");
+            }
+
+            return match.Groups[1].Captures[0].Value;
+        }
+
         public bool IsMapValid(string mapName)
         {
             return _fileSystem.Exists(FormatMapFileName(mapName));
         }
 
-        public bool LoadMap(string mapName)
+        public bool LoadMap(string mapFileName)
         {
-            var fileName = FormatMapFileName(mapName);
-
             try
             {
-                BSPFile = FileFormats.BSP.Input.ReadBSPFile(_fileSystem.OpenRead(fileName));
+                BSPFile = FileFormats.BSP.Input.ReadBSPFile(_fileSystem.OpenRead(mapFileName));
 
-                BSPFile.Name = fileName;
+                BSPFile.Name = mapFileName;
             }
             catch (InvalidBSPVersionException e)
             {
@@ -82,7 +106,7 @@ namespace SharpLife.Engine.Shared.Maps
             //TODO: this may be better off stored elsewhere
             PreviousMapName = MapName;
 
-            MapName = mapName;
+            MapName = ExtractMapBaseName(mapFileName);
 
             return true;
         }

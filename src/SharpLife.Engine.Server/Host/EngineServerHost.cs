@@ -195,9 +195,11 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapDataStartLoad);
 
-            if (!_engine.MapManager.LoadMap(mapName))
+            var mapFileName = _engine.MapManager.FormatMapFileName(mapName);
+
+            if (!_engine.MapManager.LoadMap(mapFileName))
             {
-                _logger.Information($"Couldn't spawn server {_engine.MapManager.FormatMapFileName(mapName)}\n");
+                _logger.Information($"Couldn't spawn server {mapFileName}\n");
                 Stop();
                 return false;
             }
