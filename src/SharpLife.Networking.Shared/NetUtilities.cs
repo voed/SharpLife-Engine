@@ -46,7 +46,12 @@ namespace SharpLife.Networking.Shared
             IPAddress ip;
             string portString;
 
-            if (address.Contains('.'))
+            if (address == NetConstants.Loopback)
+            {
+                ip = IPAddress.Loopback;
+                portString = defaultPort.ToString();
+            }
+            else if (address.Contains('.'))
             {
                 //If it's dots, assume IPv4
 

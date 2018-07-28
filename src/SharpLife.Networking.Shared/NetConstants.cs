@@ -27,6 +27,11 @@ namespace SharpLife.Networking.Shared
         /// </summary>
         public static readonly string LocalHost = "localhost";
 
+        /// <summary>
+        /// Identifies an IP address as being loopback, a connection on the same machine
+        /// </summary>
+        public static readonly string Loopback = "loopback";
+
         public const int DefaultServerPort = 27015;
 
         public const int DefaultClientPort = 27005;
