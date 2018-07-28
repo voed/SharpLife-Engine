@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.API.Game
+namespace SharpLife.Engine.API.Game.Client
 {
     public interface IClientMod
     {

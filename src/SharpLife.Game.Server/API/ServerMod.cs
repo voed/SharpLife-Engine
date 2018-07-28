@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Game;
+using SharpLife.Engine.API.Game.Server;
 using System;
 
 namespace SharpLife.Game.Server.API

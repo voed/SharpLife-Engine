@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Engine.API.Game
+namespace SharpLife.Engine.API.Game.Server
 {
     public interface IServerMod
     {
