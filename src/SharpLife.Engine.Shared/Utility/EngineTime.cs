@@ -32,6 +32,8 @@ namespace SharpLife.Engine.Shared.Utility
 
         public bool IsRunning => _stopwatch.IsRunning;
 
+        public double ElapsedTime => ElapsedTicks / (double)Stopwatch.Frequency;
+
         public EngineTime()
         {
         }

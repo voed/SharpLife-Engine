@@ -30,5 +30,10 @@ namespace SharpLife.Engine.Shared.Utility
         long ElapsedMilliseconds { get; }
 
         long ElapsedTicks { get; }
+
+        /// <summary>
+        /// Time in seconds
+        /// </summary>
+        double ElapsedTime { get; }
     }
 }
