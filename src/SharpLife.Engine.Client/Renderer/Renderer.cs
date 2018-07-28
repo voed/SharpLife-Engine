@@ -14,6 +14,7 @@
 ****/
 
 using SDL2;
+using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.Shared;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileSystem;
@@ -21,7 +22,9 @@ using SharpLife.Input;
 using SharpLife.Renderer;
 using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Objects;
+using SharpLife.Utility;
 using System;
+using System.Numerics;
 using Veldrid;
 
 namespace SharpLife.Engine.Client.Renderer
@@ -30,7 +33,7 @@ namespace SharpLife.Engine.Client.Renderer
     /// The main renderer
     /// Manages current graphics state, devices, etc
     /// </summary>
-    public class Renderer
+    public class Renderer : IViewState
     {
         private readonly IntPtr _window;
         private readonly IntPtr _glContext;
@@ -52,6 +55,10 @@ namespace SharpLife.Engine.Client.Renderer
         private event Action<int, int> _resizeHandled;
 
         public Scene Scene => _scene;
+
+        public Vector3 Origin => _scene.Camera.Position;
+
+        public Vector3 Angles => VectorUtils.VectorToAngles(Vector3.Transform(Camera.DefaultLookDirection, _scene.Camera.RotationMatrix));
 
         public Renderer(IntPtr window, IntPtr glContext, IFileSystem fileSystem, IInputSystem inputSystem, string envMapDirectory, string shadersDirectory)
         {

@@ -119,7 +119,6 @@ namespace SharpLife.Engine.Server.Host
         {
             if (_game == null)
             {
-                //Load the game assembly
                 _game = GameLoadUtils.LoadGame<IGameServer>(
                     _engine.GameDirectory,
                     _engine.GameConfiguration.GameServer.AssemblyName,

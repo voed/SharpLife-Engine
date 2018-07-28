@@ -13,9 +13,25 @@
 *
 ****/
 
+using Microsoft.Extensions.DependencyInjection;
+using System;
+
 namespace SharpLife.Engine.API.Game.Client
 {
     public interface IGameClient
     {
+        /// <summary>
+        /// Allows the client to add services to the shared engine/client service collection
+        /// </summary>
+        /// <param name="serviceCollection"></param>
+        void Initialize(IServiceCollection serviceCollection);
+
+        /// <summary>
+        /// Allows the client to query for services exposed by the engine and itself
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        void Startup(IServiceProvider serviceProvider);
+
+        void Shutdown();
     }
 }

@@ -13,12 +13,13 @@
 *
 ****/
 
-using ImGuiNET;
+using Microsoft.Extensions.DependencyInjection;
 using SDL2;
 using Serilog;
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
+using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
@@ -26,7 +27,6 @@ using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Networking.Shared;
-using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
 using System.Net;
@@ -51,9 +51,9 @@ namespace SharpLife.Engine.Client.Host
 
         private readonly Renderer.Renderer _renderer;
 
-        private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
-
         private GameData<IGameClient> _game;
+
+        private IClientUI _clientUI;
 
         private readonly IConVar _clientport;
         private readonly IConVar _cl_resend;
@@ -119,11 +119,28 @@ namespace SharpLife.Engine.Client.Host
         {
             _window.Center();
 
-            //Load the game assembly
+            LoadGameAssembly();
+        }
+
+        private void LoadGameAssembly()
+        {
             _game = GameLoadUtils.LoadGame<IGameClient>(
                 _engine.GameDirectory,
                 _engine.GameConfiguration.GameClient.AssemblyName,
                 _engine.GameConfiguration.GameClient.EntrypointClass);
+
+            //Set up services
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddSingleton<IViewState>(_renderer);
+
+            _game.Entrypoint.Initialize(serviceCollection);
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            _clientUI = serviceProvider.GetRequiredService<IClientUI>();
+
+            _game.Entrypoint.Startup(serviceProvider);
         }
 
         public void Shutdown()
@@ -133,8 +150,6 @@ namespace SharpLife.Engine.Client.Host
 
         public void Update(float deltaSeconds)
         {
-            _fta.AddTime(deltaSeconds);
-
             if (ConnectionStatus != ClientConnectionStatus.NotConnected)
             {
                 _netClient.ReadPackets(HandlePacket);
@@ -142,22 +157,15 @@ namespace SharpLife.Engine.Client.Host
 
             _renderer.Update(deltaSeconds);
 
-            if (ImGui.BeginMainMenuBar())
-            {
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
-
-                var cameraPosition = _renderer.Scene.Camera.Position.ToString();
-
-                ImGui.TextUnformatted($"Camera Position: {cameraPosition} Camera Angles: Pitch {_renderer.Scene.Camera.Pitch} Yaw {_renderer.Scene.Camera.Yaw}");
-
-                ImGui.EndMainMenuBar();
-            }
+            _clientUI.Update(deltaSeconds);
 
             _netClient.SendServerMessages(_netClient.Server);
         }
 
         public void Draw()
         {
+            _clientUI.Draw();
+
             _renderer.Draw();
         }
     }

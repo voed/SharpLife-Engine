@@ -13,11 +13,35 @@
 *
 ****/
 
+using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.API.Game.Client;
+using SharpLife.Game.Client.UI;
+using System;
 
 namespace SharpLife.Game.Client.API
 {
-    public class GameClient : IGameClient
+    public sealed class GameClient : IGameClient
     {
+        public void Initialize(IServiceCollection serviceCollection)
+        {
+            if (serviceCollection == null)
+            {
+                throw new ArgumentNullException(nameof(serviceCollection));
+            }
+
+            serviceCollection.AddSingleton<IClientUI, ImGuiInterface>();
+        }
+
+        public void Startup(IServiceProvider serviceProvider)
+        {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+        }
+
+        public void Shutdown()
+        {
+        }
     }
 }

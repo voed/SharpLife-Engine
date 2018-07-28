@@ -28,6 +28,8 @@ namespace SharpLife.Renderer
         private const float MinPitch = (float)(-70 * (Math.PI / 180));
         private const float MaxPitch = (float)(80 * (Math.PI / 180));
 
+        public static readonly Vector3 DefaultLookDirection = Vector3.UnitX;
+
         private float _fov = 1f;
         private float _near = 1f;
         private float _far = 32768;
@@ -93,7 +95,7 @@ namespace SharpLife.Renderer
         //This does not look like GoldSource's code because it uses a different approach to view matrix construction
         //GoldSource modifies the global settings by applying the inverse of the rotation and view origin
         //This is the "standard" way of applying view settings by using matrices in normal model-view techniques
-        private Matrix4x4 RotationMatrix =>
+        public Matrix4x4 RotationMatrix =>
             Matrix4x4.Identity * Matrix4x4.CreateRotationY(Pitch) * Matrix4x4.CreateRotationZ((float)(Math.PI + Yaw)) * Matrix4x4.CreateScale(-1, 1, 1);
 
         public void Update(float deltaSeconds)
@@ -173,7 +175,7 @@ namespace SharpLife.Renderer
         {
             var lookRotation = RotationMatrix;
 
-            _lookDirection = Vector3.Transform(Vector3.UnitX, lookRotation);
+            _lookDirection = Vector3.Transform(DefaultLookDirection, lookRotation);
             _viewMatrix = Matrix4x4.CreateLookAt(_position, _position + _lookDirection, Vector3.UnitZ);
             ViewChanged?.Invoke(_viewMatrix);
         }
