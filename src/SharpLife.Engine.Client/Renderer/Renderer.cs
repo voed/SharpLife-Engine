@@ -15,6 +15,7 @@
 
 using SDL2;
 using SharpLife.Engine.Shared;
+using SharpLife.FileFormats.BSP;
 using SharpLife.FileSystem;
 using SharpLife.Input;
 using SharpLife.Renderer;
@@ -36,9 +37,13 @@ namespace SharpLife.Engine.Client.Renderer
         private readonly GraphicsDevice _gd;
         private readonly Scene _scene;
 
+        private readonly IFileSystem _fileSystem;
+
         private readonly SceneContext _sc;
 
         private readonly ImGuiRenderable _imGuiRenderable;
+
+        private BSPWorldRenderable _bspWorldRenderable;
 
         private readonly CommandList _frameCommands;
 
@@ -52,6 +57,8 @@ namespace SharpLife.Engine.Client.Renderer
         {
             _window = window;
             _glContext = glContext;
+
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
             _sc = new SceneContext(fileSystem, shadersDirectory);
 
@@ -80,11 +87,6 @@ namespace SharpLife.Engine.Client.Renderer
             _resizeHandled += _imGuiRenderable.WindowResized;
             _scene.AddRenderable(_imGuiRenderable);
             _scene.AddUpdateable(_imGuiRenderable);
-
-            var bspFile = FileFormats.BSP.Input.ReadBSPFile(fileSystem.OpenRead("maps/bounce.bsp"));
-
-            var bspWorld = new BSPWorldRenderable(fileSystem, bspFile, Framework.Extension.WAD);
-            _scene.AddRenderable(bspWorld);
 
             var coordinateAxes = new CoordinateAxes();
             _scene.AddRenderable(coordinateAxes);
@@ -141,6 +143,32 @@ namespace SharpLife.Engine.Client.Renderer
 
             _scene.RenderAllStages(_gd, _frameCommands, _sc);
             _gd.SwapBuffers();
+        }
+
+        public void LoadBSP(BSPFile bspFile)
+        {
+            if (bspFile == null)
+            {
+                throw new ArgumentNullException(nameof(bspFile));
+            }
+
+            if (_bspWorldRenderable != null)
+            {
+                _scene.RemoveRenderable(_bspWorldRenderable);
+            }
+
+            _bspWorldRenderable = new BSPWorldRenderable(_fileSystem, bspFile, Framework.Extension.WAD);
+
+            _scene.AddRenderable(_bspWorldRenderable);
+
+            //Set up graphics data
+            CommandList initCL = _gd.ResourceFactory.CreateCommandList();
+            initCL.Name = "BSP Initialization Command List";
+            initCL.Begin();
+            _bspWorldRenderable.CreateDeviceObjects(_gd, initCL, _sc);
+            initCL.End();
+            _gd.SubmitCommands(initCL);
+            initCL.Dispose();
         }
     }
 }

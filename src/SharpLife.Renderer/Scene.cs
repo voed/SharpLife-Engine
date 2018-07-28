@@ -56,6 +56,18 @@ namespace SharpLife.Renderer
             }
         }
 
+        public void RemoveRenderable(Renderable r)
+        {
+            if (r is CullRenderable cr)
+            {
+                _octree.RemoveItem(cr);
+            }
+            else
+            {
+                _freeRenderables.Remove(r);
+            }
+        }
+
         public void AddUpdateable(IUpdateable updateable)
         {
             Debug.Assert(updateable != null);
