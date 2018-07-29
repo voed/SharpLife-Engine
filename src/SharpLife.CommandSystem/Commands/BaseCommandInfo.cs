@@ -29,6 +29,8 @@ namespace SharpLife.CommandSystem.Commands
 
         public CommandFlags Flags { get; private set; }
 
+        public object Tag { get; set; }
+
         protected BaseCommandInfo(string name)
         {
             if (name == null)
@@ -68,6 +70,13 @@ namespace SharpLife.CommandSystem.Commands
         public TDerived RemoveFlags(CommandFlags flags)
         {
             Flags &= ~flags;
+
+            return this as TDerived;
+        }
+
+        public TDerived WithTag(object tag)
+        {
+            Tag = tag;
 
             return this as TDerived;
         }

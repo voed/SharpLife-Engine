@@ -96,7 +96,7 @@ namespace SharpLife.CommandSystem
                 throw new ArgumentException($"Cannot add duplicate command \"{info.Name}\"");
             }
 
-            var command = new Command(this, info.Name, info.Executors, info.Flags, info.HelpInfo);
+            var command = new Command(this, info.Name, info.Executors, info.Flags, info.HelpInfo, info.Tag);
 
             _commands.Add(command.Name, command);
 
@@ -119,15 +119,15 @@ namespace SharpLife.CommandSystem
 
             if (info.StringValue != null)
             {
-                variable = new Variable(this, info.Name, info.StringValue, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new Variable(this, info.Name, info.StringValue, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers, info.Tag);
             }
             else if (info.FloatValue != null)
             {
-                variable = new Variable(this, info.Name, info.FloatValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new Variable(this, info.Name, info.FloatValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers, info.Tag);
             }
             else if (info.IntegerValue != null)
             {
-                variable = new Variable(this, info.Name, info.IntegerValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new Variable(this, info.Name, info.IntegerValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers, info.Tag);
             }
             else
             {

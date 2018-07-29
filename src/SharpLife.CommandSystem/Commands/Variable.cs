@@ -70,8 +70,9 @@ namespace SharpLife.CommandSystem.Commands
 
         public Variable(CommandContext commandContext, string name, string value, CommandFlags flags, string helpInfo,
             IReadOnlyList<IVariableFilter> filters,
-            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
-            : base(commandContext, name, flags, helpInfo)
+            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers,
+            object tag = null)
+            : base(commandContext, name, flags, helpInfo, tag)
         {
             SetString(value, true);
 
@@ -80,8 +81,9 @@ namespace SharpLife.CommandSystem.Commands
 
         public Variable(CommandContext commandContext, string name, float value, CommandFlags flags, string helpInfo,
             IReadOnlyList<IVariableFilter> filters,
-            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
-            : base(commandContext, name, flags, helpInfo)
+            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers,
+            object tag = null)
+            : base(commandContext, name, flags, helpInfo, tag)
         {
             SetFloat(value, true);
 
@@ -90,8 +92,9 @@ namespace SharpLife.CommandSystem.Commands
 
         public Variable(CommandContext commandContext, string name, int value, CommandFlags flags, string helpInfo,
             IReadOnlyList<IVariableFilter> filters,
-            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
-            : base(commandContext, name, flags, helpInfo)
+            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers,
+            object tag = null)
+            : base(commandContext, name, flags, helpInfo, tag)
         {
             SetInteger(value, true);
 

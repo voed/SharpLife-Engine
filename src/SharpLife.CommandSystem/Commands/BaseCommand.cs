@@ -27,7 +27,9 @@ namespace SharpLife.CommandSystem.Commands
 
         public string HelpInfo { get; }
 
-        protected BaseCommand(CommandContext commandContext, string name, CommandFlags flags = CommandFlags.None, string helpInfo = "")
+        public object Tag { get; }
+
+        protected BaseCommand(CommandContext commandContext, string name, CommandFlags flags = CommandFlags.None, string helpInfo = "", object tag = null)
         {
             _commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext));
 
@@ -44,6 +46,7 @@ namespace SharpLife.CommandSystem.Commands
             Name = name;
             Flags = flags;
             HelpInfo = helpInfo ?? throw new ArgumentNullException(nameof(helpInfo));
+            Tag = tag;
         }
 
         /// <summary>
