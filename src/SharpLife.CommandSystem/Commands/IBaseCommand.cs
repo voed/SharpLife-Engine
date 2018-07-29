@@ -22,5 +22,7 @@ namespace SharpLife.CommandSystem.Commands
         CommandFlags Flags { get; }
 
         string HelpInfo { get; }
+
+        object Tag { get; }
     }
 }
