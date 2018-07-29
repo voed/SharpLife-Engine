@@ -26,10 +26,15 @@ namespace SharpLife.CommandSystem
         /// <summary>
         /// Parses a string into the commands that it contains
         /// </summary>
-        /// <param name="commandSource"></param>
+        /// <param name="context"></param>
         /// <param name="commands"></param>
-        public static List<ICommandArgs> ParseCommands(CommandSource commandSource, string commands)
+        public static List<ICommandArgs> ParseCommands(ICommandContext context, string commands)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             if (commands == null)
             {
                 throw new ArgumentNullException(nameof(commands));
@@ -44,7 +49,7 @@ namespace SharpLife.CommandSystem
             {
                 foreach (var commandList in SplitCommandList(tokens))
                 {
-                    list.Add(new CommandArgs(commandSource, commandList[0], commandList.Skip(1).ToList()));
+                    list.Add(new CommandArgs(context, commandList[0], commandList.Skip(1).ToList()));
                 }
             }
 

@@ -31,7 +31,7 @@ namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost : IEngineServerHost
     {
-        public ICommandSystem CommandSystem => _engine.CommandSystem;
+        public ICommandContext CommandContext { get; }
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
@@ -61,23 +61,25 @@ namespace SharpLife.Engine.Server.Host
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _ipname = CommandSystem.RegisterVariable(new VariableInfo("ip")
+            CommandContext = _engine.CommandSystem.CreateContext("ServerContext");
+
+            _ipname = CommandContext.RegisterVariable(new VariableInfo("ip")
                 .WithHelpInfo("The IP address to use for server hosts")
                 .WithValue(NetConstants.LocalHost));
 
-            _hostport = CommandSystem.RegisterVariable(new VariableInfo("hostport")
+            _hostport = CommandContext.RegisterVariable(new VariableInfo("hostport")
                 .WithHelpInfo("The port to use for server hosts")
                 .WithValue(0));
 
-            _defport = CommandSystem.RegisterVariable(new VariableInfo("port")
+            _defport = CommandContext.RegisterVariable(new VariableInfo("port")
                .WithHelpInfo("The default port to use for server hosts")
                .WithValue(NetConstants.DefaultServerPort));
 
-            _sv_timeout = CommandSystem.RegisterVariable(new VariableInfo("sv_timeout")
+            _sv_timeout = CommandContext.RegisterVariable(new VariableInfo("sv_timeout")
                 .WithHelpInfo("Maximum time to wait before timing out client connections")
                 .WithValue(60));
 
-            _maxPlayers = CommandSystem.RegisterVariable(new VariableInfo("maxplayers")
+            _maxPlayers = CommandContext.RegisterVariable(new VariableInfo("maxplayers")
                 .WithHelpInfo("The maximum number of players that can connect to this server")
                 .WithValue(_engine.IsDedicatedServer ? 6 : NetConstants.MinClients)
                 .WithDelegateFilter((ref string _, ref float __) =>
@@ -113,6 +115,8 @@ namespace SharpLife.Engine.Server.Host
             Stop();
 
             _game?.Entrypoint.Shutdown();
+
+            _engine.CommandSystem.DestroyContext(CommandContext);
         }
 
         public void LoadGameAssembly()

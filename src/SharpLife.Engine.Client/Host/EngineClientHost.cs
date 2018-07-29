@@ -35,7 +35,7 @@ namespace SharpLife.Engine.Client.Host
 {
     public partial class EngineClientHost : IEngineClientHost
     {
-        public ICommandSystem CommandSystem => _engine.CommandSystem;
+        public ICommandContext CommandContext { get; }
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
@@ -69,6 +69,8 @@ namespace SharpLife.Engine.Client.Host
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+            CommandContext = _engine.CommandSystem.CreateContext("ClientContext");
+
             _userInterface = _engine.CreateUserInterface();
 
             var gameWindowName = _engine.EngineConfiguration.DefaultGameName;
@@ -92,26 +94,26 @@ namespace SharpLife.Engine.Client.Host
 
             _window.Resized += _renderer.WindowResized;
 
-            CommandSystem.RegisterCommand(new CommandInfo("connect", Connect).WithHelpInfo("Connect to a server"));
-            CommandSystem.RegisterCommand(new CommandInfo("disconnect", Disconnect).WithHelpInfo("Disconnect from a server"));
+            CommandContext.RegisterCommand(new CommandInfo("connect", Connect).WithHelpInfo("Connect to a server"));
+            CommandContext.RegisterCommand(new CommandInfo("disconnect", Disconnect).WithHelpInfo("Disconnect from a server"));
 
-            _clientport = CommandSystem.RegisterVariable(new VariableInfo("clientport")
+            _clientport = CommandContext.RegisterVariable(new VariableInfo("clientport")
                 .WithHelpInfo("Client port to use for connections")
                 .WithValue(NetConstants.DefaultClientPort)
                 .WithMinMaxFilter(IPEndPoint.MinPort, IPEndPoint.MaxPort, true));
 
-            _cl_resend = CommandSystem.RegisterVariable(new VariableInfo("cl_resend")
+            _cl_resend = CommandContext.RegisterVariable(new VariableInfo("cl_resend")
                 .WithHelpInfo("Maximum time to wait before resending a client connection request")
                 .WithValue(6.0f)
                 .WithMinMaxFilter(1.5f, 20.0f));
 
-            _cl_timeout = CommandSystem.RegisterVariable(new VariableInfo("cl_timeout")
+            _cl_timeout = CommandContext.RegisterVariable(new VariableInfo("cl_timeout")
                 .WithHelpInfo("Maximum time to wait before timing out server connections")
                 .WithValue(60)
                 .WithFlags(CommandFlags.Archive));
 
             //TODO: add change handler to send update to server if connected
-            _cl_name = CommandSystem.RegisterVariable(new VariableInfo("name")
+            _cl_name = CommandContext.RegisterVariable(new VariableInfo("name")
                 .WithHelpInfo("Your name as seen by other players"));
         }
 
@@ -146,6 +148,8 @@ namespace SharpLife.Engine.Client.Host
         public void Shutdown()
         {
             Disconnect(false);
+
+            _engine.CommandSystem.DestroyContext(CommandContext);
         }
 
         public void Update(float deltaSeconds)

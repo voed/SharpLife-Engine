@@ -29,11 +29,11 @@ namespace SharpLife.Engine.Shared.Commands
     /// </summary>
     public static class CommonCommands
     {
-        public static ICommand AddStuffCmds(ICommandSystem commandSystem, ILogger logger, ICommandLine commandLine)
+        public static ICommand AddStuffCmds(ICommandContext commandContext, ILogger logger, ICommandLine commandLine)
         {
-            if (commandSystem == null)
+            if (commandContext == null)
             {
-                throw new ArgumentNullException(nameof(commandSystem));
+                throw new ArgumentNullException(nameof(commandContext));
             }
 
             if (logger == null)
@@ -46,7 +46,7 @@ namespace SharpLife.Engine.Shared.Commands
                 throw new ArgumentNullException(nameof(commandLine));
             }
 
-            return commandSystem.RegisterCommand(new CommandInfo("stuffcmds", arguments =>
+            return commandContext.RegisterCommand(new CommandInfo("stuffcmds", arguments =>
             {
                 if (arguments.Count > 0)
                 {
@@ -65,7 +65,7 @@ namespace SharpLife.Engine.Shared.Commands
                         //Grab all arguments until the next key
                         var values = commandLine.GetValues(key);
 
-                        commandSystem.InsertCommands(CommandSource.Local, $"{key.Substring(1)} {string.Join(' ', values)}", cmdIndex++);
+                        commandContext.InsertCommands($"{key.Substring(1)} {string.Join(' ', values)}", cmdIndex++);
 
                         i += values.Count;
                     }
@@ -77,16 +77,16 @@ namespace SharpLife.Engine.Shared.Commands
         /// <summary>
         /// Adds the exec command, to execute commands in cfg files
         /// </summary>
-        /// <param name="commandSystem"></param>
+        /// <param name="commandContext"></param>
         /// <param name="logger"></param>
         /// <param name="fileSystem"></param>
         /// <param name="gameConfigPathIDs">he game config path IDs to use for the exec command</param>
         /// <returns></returns>
-        public static ICommand AddExec(ICommandSystem commandSystem, ILogger logger, IFileSystem fileSystem, IReadOnlyList<string> gameConfigPathIDs)
+        public static ICommand AddExec(ICommandContext commandContext, ILogger logger, IFileSystem fileSystem, IReadOnlyList<string> gameConfigPathIDs)
         {
-            if (commandSystem == null)
+            if (commandContext == null)
             {
-                throw new ArgumentNullException(nameof(commandSystem));
+                throw new ArgumentNullException(nameof(commandContext));
             }
 
             if (logger == null)
@@ -104,7 +104,7 @@ namespace SharpLife.Engine.Shared.Commands
                 throw new ArgumentException("You must provide at least one game config path ID", nameof(gameConfigPathIDs));
             }
 
-            return commandSystem.RegisterCommand(new CommandInfo("exec", arguments =>
+            return commandContext.RegisterCommand(new CommandInfo("exec", arguments =>
             {
                 if (arguments.Count < 1)
                 {
@@ -155,7 +155,7 @@ namespace SharpLife.Engine.Shared.Commands
 
                             logger.Debug($"execing {arguments[0]}");
 
-                            commandSystem.InsertCommands(CommandSource.Local, text);
+                            commandContext.InsertCommands(text);
 
                             succeeded = true;
                             break;
@@ -175,11 +175,11 @@ namespace SharpLife.Engine.Shared.Commands
             .WithHelpInfo("Executes a file containing commands"));
         }
 
-        public static ICommand AddEcho(ICommandSystem commandSystem, ILogger logger)
+        public static ICommand AddEcho(ICommandContext commandContext, ILogger logger)
         {
-            if (commandSystem == null)
+            if (commandContext == null)
             {
-                throw new ArgumentNullException(nameof(commandSystem));
+                throw new ArgumentNullException(nameof(commandContext));
             }
 
             if (logger == null)
@@ -187,15 +187,15 @@ namespace SharpLife.Engine.Shared.Commands
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            return commandSystem.RegisterCommand(new CommandInfo("echo", arguments => logger.Information(arguments.ArgumentsString))
+            return commandContext.RegisterCommand(new CommandInfo("echo", arguments => logger.Information(arguments.ArgumentsString))
                 .WithHelpInfo("Echoes the arguments to the console"));
         }
 
-        public static ICommand AddAlias(ICommandSystem commandSystem, ILogger logger)
+        public static ICommand AddAlias(ICommandContext commandContext, ILogger logger)
         {
-            if (commandSystem == null)
+            if (commandContext == null)
             {
-                throw new ArgumentNullException(nameof(commandSystem));
+                throw new ArgumentNullException(nameof(commandContext));
             }
 
             if (logger == null)
@@ -203,12 +203,12 @@ namespace SharpLife.Engine.Shared.Commands
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            return commandSystem.RegisterCommand(new CommandInfo("alias", arguments =>
+            return commandContext.RegisterCommand(new CommandInfo("alias", arguments =>
             {
                 if (arguments.Count == 0)
                 {
                     logger.Information("Current alias commands:");
-                    foreach (var entry in commandSystem.Aliases)
+                    foreach (var entry in commandContext.Aliases)
                     {
                         logger.Information($"{entry.Key}: {entry.Value}\n");
                     }
@@ -216,7 +216,7 @@ namespace SharpLife.Engine.Shared.Commands
                 }
 
                 // if the alias already exists, reuse it
-                commandSystem.SetAlias(arguments[0], arguments.ArgumentsAsString(1));
+                commandContext.SetAlias(arguments[0], arguments.ArgumentsAsString(1));
             })
             .WithHelpInfo("Aliases a command to a name"));
         }

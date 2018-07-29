@@ -20,9 +20,9 @@ namespace SharpLife.CommandSystem.Commands
     public interface ICommandArgs : IEnumerable<string>
     {
         /// <summary>
-        /// Where this command came from
+        /// The context that this command came from
         /// </summary>
-        CommandSource CommandSource { get; }
+        ICommandContext Context { get; }
 
         /// <summary>
         /// Gets the name of the command to execute

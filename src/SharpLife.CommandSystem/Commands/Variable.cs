@@ -68,24 +68,30 @@ namespace SharpLife.CommandSystem.Commands
 
         public event Delegates.VariableChangeHandler OnChange;
 
-        public Variable(CommandSystem commandSystem, string name, string value, CommandFlags flags, string helpInfo, IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
-            : base(commandSystem, name, flags, helpInfo)
+        public Variable(CommandContext commandContext, string name, string value, CommandFlags flags, string helpInfo,
+            IReadOnlyList<IVariableFilter> filters,
+            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
+            : base(commandContext, name, flags, helpInfo)
         {
             SetString(value, true);
 
             Construct(filters, changeHandlers);
         }
 
-        public Variable(CommandSystem commandSystem, string name, float value, CommandFlags flags, string helpInfo, IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
-            : base(commandSystem, name, flags, helpInfo)
+        public Variable(CommandContext commandContext, string name, float value, CommandFlags flags, string helpInfo,
+            IReadOnlyList<IVariableFilter> filters,
+            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
+            : base(commandContext, name, flags, helpInfo)
         {
             SetFloat(value, true);
 
             Construct(filters, changeHandlers);
         }
 
-        public Variable(CommandSystem commandSystem, string name, int value, CommandFlags flags, string helpInfo, IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
-            : base(commandSystem, name, flags, helpInfo)
+        public Variable(CommandContext commandContext, string name, int value, CommandFlags flags, string helpInfo,
+            IReadOnlyList<IVariableFilter> filters,
+            IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
+            : base(commandContext, name, flags, helpInfo)
         {
             SetInteger(value, true);
 
@@ -168,7 +174,7 @@ namespace SharpLife.CommandSystem.Commands
             if (!suppressChangeMessage && String != changeEvent.OldString)
             {
                 //If none of the change handlers reverted the change, print a change message
-                _commandSystem._logger.Information($"\"{Name}\" changed to \"{String}\"");
+                _commandContext._logger.Information($"\"{Name}\" changed to \"{String}\"");
             }
         }
 
@@ -176,7 +182,7 @@ namespace SharpLife.CommandSystem.Commands
         {
             if (command.Count == 0)
             {
-                _commandSystem._logger.Information($"\"{Name}\" is \"{String}\"");
+                _commandContext._logger.Information($"\"{Name}\" is \"{String}\"");
                 return;
             }
 

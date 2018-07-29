@@ -256,10 +256,10 @@ namespace SharpLife.Engine.Engines
 
             CommandSystem = new CommandSystem.CommandSystem(Logger);
 
-            CommonCommands.AddStuffCmds(CommandSystem, Logger, CommandLine);
-            CommonCommands.AddExec(CommandSystem, Logger, FileSystem, ExecPathIDs);
-            CommonCommands.AddEcho(CommandSystem, Logger);
-            CommonCommands.AddAlias(CommandSystem, Logger);
+            CommonCommands.AddStuffCmds(CommandSystem.SharedContext, Logger, CommandLine);
+            CommonCommands.AddExec(CommandSystem.SharedContext, Logger, FileSystem, ExecPathIDs);
+            CommonCommands.AddEcho(CommandSystem.SharedContext, Logger);
+            CommonCommands.AddAlias(CommandSystem.SharedContext, Logger);
 
             try
             {
@@ -304,11 +304,12 @@ namespace SharpLife.Engine.Engines
 
             MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
 
-            CommandSystem.RegisterCommand(new CommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
+            CommandSystem.SharedContext.RegisterCommand(new CommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
 
             //TODO: initialize subsystems
 
-            CommandSystem.QueueCommands(CommandSource.Local, $"exec {EngineConfiguration.DefaultGame}.rc");
+            _client?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}_client.rc");
+            _server?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}_server.rc");
         }
 
         private void Shutdown()
@@ -362,11 +363,6 @@ namespace SharpLife.Engine.Engines
         /// <param name="command"></param>
         private void StartNewMap(ICommandArgs command)
         {
-            if (command.CommandSource != CommandSource.Local)
-            {
-                return;
-            }
-
             if (command.Count == 0)
             {
                 Logger.Information("map <levelname> : changes server to specified map");
@@ -409,7 +405,7 @@ namespace SharpLife.Engine.Engines
             //Listen server hosts need to connect to their own server
             if (!IsDedicatedServer)
             {
-                _client.CommandSystem.QueueCommands(CommandSource.Local, $"connect {NetAddresses.Local}");
+                _client.CommandContext.QueueCommands($"connect {NetAddresses.Local}");
             }
         }
 

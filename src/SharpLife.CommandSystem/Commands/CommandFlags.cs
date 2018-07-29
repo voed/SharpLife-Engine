@@ -26,15 +26,5 @@ namespace SharpLife.CommandSystem.Commands
         /// Save variable value during shutdown
         /// </summary>
         Archive = 1 << 0,
-
-        /// <summary>
-        /// Only servers can execute this command
-        /// </summary>
-        ServerOnly = 1 << 1,
-
-        /// <summary>
-        /// Only clients can execute this command
-        /// </summary>
-        ClientOnly = 1 << 2,
     }
 }

@@ -23,7 +23,7 @@ namespace SharpLife.CommandSystem.Commands
 {
     public class CommandArgs : ICommandArgs
     {
-        public CommandSource CommandSource { get; }
+        public ICommandContext Context { get; }
 
         public string Name { get; }
 
@@ -72,8 +72,10 @@ namespace SharpLife.CommandSystem.Commands
             return builder;
         }
 
-        public CommandArgs(CommandSource commandSource, string name, IList<string> arguments)
+        public CommandArgs(ICommandContext context, string name, IList<string> arguments)
         {
+            Context = context ?? throw new ArgumentNullException(nameof(context));
+
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
@@ -83,8 +85,6 @@ namespace SharpLife.CommandSystem.Commands
             {
                 throw new ArgumentException(nameof(name));
             }
-
-            CommandSource = commandSource;
 
             Name = name;
 

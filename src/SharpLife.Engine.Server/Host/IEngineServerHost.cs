@@ -24,9 +24,9 @@ namespace SharpLife.Engine.Server.Host
     public interface IEngineServerHost
     {
         /// <summary>
-        /// The command system used by the server
+        /// The command context used by the server
         /// </summary>
-        ICommandSystem CommandSystem { get; }
+        ICommandContext CommandContext { get; }
 
         /// <summary>
         /// The event system used by the server
