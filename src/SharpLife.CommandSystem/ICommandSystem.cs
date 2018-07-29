@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
+using System.Collections.Generic;
 
 namespace SharpLife.CommandSystem
 {
@@ -24,6 +25,13 @@ namespace SharpLife.CommandSystem
     /// </summary>
     public interface ICommandSystem
     {
+        /// <summary>
+        /// The number of commands that have been queued up
+        /// </summary>
+        int QueuedCommandCount { get; }
+
+        IReadOnlyDictionary<string, string> Aliases { get; }
+
         TCommand FindCommand<TCommand>(string name) where TCommand : class, IBaseCommand;
 
         ICommand RegisterCommand(CommandInfo info);
@@ -31,6 +39,21 @@ namespace SharpLife.CommandSystem
         IVariable RegisterVariable(VariableInfo info);
 
         void QueueCommands(CommandSource commandSource, string commandText);
+
+        /// <summary>
+        /// Insert commands at a given position in the queue
+        /// </summary>
+        /// <param name="commandSource"></param>
+        /// <param name="commandText"></param>
+        /// <param name="index">Where to insert the command. Must be larger than or equal to 0 and smaller than or equal to <see cref="QueuedCommandCount"/></param>
+        void InsertCommands(CommandSource commandSource, string commandText, int index = 0);
+
+        /// <summary>
+        /// Sets an alias to the given command text
+        /// </summary>
+        /// <param name="aliasName"></param>
+        /// <param name="commandText"></param>
+        void SetAlias(string aliasName, string commandText);
 
         void Execute();
     }

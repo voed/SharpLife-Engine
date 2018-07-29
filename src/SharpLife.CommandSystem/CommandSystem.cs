@@ -15,19 +15,18 @@
 
 using Serilog;
 using SharpLife.CommandSystem.Commands;
-using SharpLife.FileSystem;
-using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace SharpLife.CommandSystem
 {
     public class CommandSystem : ICommandSystem
     {
-        internal readonly ILogger _logger;
+        public int QueuedCommandCount => _commandsToExecute.Count;
 
-        private readonly IFileSystem _fileSystem;
+        public IReadOnlyDictionary<string, string> Aliases => _aliases;
+
+        internal readonly ILogger _logger;
 
         private readonly IList<Delegates.CommandFilter> _commandFilters = new List<Delegates.CommandFilter>();
 
@@ -38,7 +37,7 @@ namespace SharpLife.CommandSystem
         /// </summary>
         private readonly List<ICommandArgs> _commandsToExecute = new List<ICommandArgs>();
 
-        private readonly IDictionary<string, string> _aliases = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _aliases = new Dictionary<string, string>();
 
         /// <summary>
         /// If true, <see cref="Execute"/> will stop executing commands and returns
@@ -50,28 +49,9 @@ namespace SharpLife.CommandSystem
         /// Creates a new command system
         /// </summary>
         /// <param name="logger"></param>
-        /// <param name="fileSystem"></param>
-        /// <param name="commandLine"></param>
-        /// <param name="gameConfigPathIDs">The game config path IDs to use for the exec command</param>
-        public CommandSystem(ILogger logger, IFileSystem fileSystem, ICommandLine commandLine, IReadOnlyList<string> gameConfigPathIDs)
+        public CommandSystem(ILogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-
-            if (commandLine == null)
-            {
-                throw new ArgumentNullException(nameof(commandLine));
-            }
-
-            if (gameConfigPathIDs == null)
-            {
-                throw new ArgumentNullException(nameof(gameConfigPathIDs));
-            }
-
-            if (gameConfigPathIDs.Count == 0)
-            {
-                throw new ArgumentException("You must provide at least one game config path ID", nameof(gameConfigPathIDs));
-            }
 
             //TODO: consider moving this out so users can define these
             _commandFilters.Add((commandToExecute, command) =>
@@ -98,126 +78,6 @@ namespace SharpLife.CommandSystem
 
                 return true;
             });
-
-            RegisterCommand(new CommandInfo("stuffcmds", arguments =>
-            {
-                if (arguments.Count > 0)
-                {
-                    _logger.Information("stuffcmds : execute command line parameters");
-                    return;
-                }
-
-                var cmdIndex = 0;
-
-                for (var i = 0; i < commandLine.Count - 1; ++i)
-                {
-                    var key = commandLine[i];
-
-                    if (key.StartsWith("+"))
-                    {
-                        //Grab all arguments until the next key
-                        var values = commandLine.GetValues(key);
-
-                        _commandsToExecute.Insert(cmdIndex++, new CommandArgs(CommandSource.Local, key.Substring(1), values));
-
-                        i += values.Count;
-                    }
-                }
-            })
-            .WithHelpInfo("Stuffs all command line arguments that contain commands into the command queue"));
-
-            RegisterCommand(new CommandInfo("exec", arguments =>
-            {
-                if (arguments.Count < 1)
-                {
-                    _logger.Information("exec <filename> : execute a script file");
-                    return;
-                }
-
-                var fileName = arguments[0];
-
-                if (fileName.IndexOfAny(new[]
-                {
-                    Path.DirectorySeparatorChar,
-                    Path.AltDirectorySeparatorChar,
-                    Path.VolumeSeparatorChar,
-                    ':',
-                    '~'
-                }) != -1
-                || fileName.Contains(".."))
-                {
-                    _logger.Error($"exec {fileName}: invalid path.");
-                    return;
-                }
-
-                if (fileName.IndexOf('.') != fileName.LastIndexOf('.'))
-                {
-                    _logger.Error($"exec {fileName}: invalid filename.");
-                    return;
-                }
-
-                var extension = Path.GetExtension(fileName);
-
-                //TODO: need to define these extensions
-                if (extension != ".cfg" && extension != ".rc")
-                {
-                    _logger.Error($"exec {fileName}: not a .cfg or .rc file");
-                    return;
-                }
-
-                try
-                {
-                    var succeeded = false;
-
-                    foreach (var pathID in gameConfigPathIDs)
-                    {
-                        if (_fileSystem.Exists(fileName, pathID))
-                        {
-                            var text = _fileSystem.ReadAllText(fileName, pathID);
-
-                            _logger.Debug($"execing {arguments[0]}");
-
-                            InsertCommands(CommandSource.Local, text);
-
-                            succeeded = true;
-                            break;
-                        }
-                    }
-
-                    if (!succeeded)
-                    {
-                        throw new FileNotFoundException("Couldn't execute file", fileName);
-                    }
-                }
-                catch (Exception)
-                {
-                    _logger.Error($"Couldn't exec {arguments[0]}");
-                }
-            })
-            .WithHelpInfo("Executes a file containing commands"));
-
-            RegisterCommand(new CommandInfo("echo", arguments => _logger.Information(arguments.ArgumentsString)).WithHelpInfo("Echoes the arguments to the console"));
-
-            RegisterCommand(new CommandInfo("alias", arguments =>
-            {
-                if (arguments.Count == 0)
-                {
-                    _logger.Information("Current alias commands:");
-                    foreach (var entry in _aliases)
-                    {
-                        _logger.Information($"{entry.Key}: {entry.Value}\n");
-                    }
-                    return;
-                }
-
-                // if the alias already exists, reuse it
-                _aliases[arguments[0]] = arguments.ArgumentsAsString(1);
-            })
-            .WithHelpInfo("Aliases a command to a name"));
-
-            //TODO: move out of the command system
-            RegisterCommand(new CommandInfo("cmd", arguments => ForwardToServer(arguments, false)
-            ).WithHelpInfo("Send the entire command line over to the server"));
 
             RegisterCommand(new CommandInfo("wait", _ => _wait = true)
                 .WithHelpInfo("Delay execution of remaining commands by one frame"));
@@ -306,18 +166,51 @@ namespace SharpLife.CommandSystem
             commands.ForEach(_commandsToExecute.Add);
         }
 
-        public void InsertCommands(CommandSource commandSource, string commandText)
+        public void InsertCommands(CommandSource commandSource, string commandText, int index = 0)
         {
             if (commandText == null)
             {
                 throw new ArgumentNullException(nameof(commandText));
             }
 
+            if (index < 0 || index > _commandsToExecute.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
             var commands = CommandUtils.ParseCommands(commandSource, commandText);
 
-            var startIndex = 0;
+            var startIndex = index;
 
             commands.ForEach(command => _commandsToExecute.Insert(startIndex++, command));
+        }
+
+        public void SetAlias(string aliasName, string commandText)
+        {
+            if (aliasName == null)
+            {
+                throw new ArgumentNullException(nameof(aliasName));
+            }
+
+            if (string.IsNullOrWhiteSpace(aliasName))
+            {
+                throw new ArgumentException(nameof(aliasName));
+            }
+
+            if (commandText == null)
+            {
+                throw new ArgumentNullException(nameof(commandText));
+            }
+
+            if (!string.IsNullOrEmpty(commandText))
+            {
+                _aliases[aliasName] = commandText;
+            }
+            else
+            {
+                //Remove empty aliases to save memory
+                _aliases.Remove(aliasName);
+            }
         }
 
         public void Execute()
@@ -353,21 +246,6 @@ namespace SharpLife.CommandSystem
             {
                 _wait = false;
             }
-        }
-
-        private void ForwardToServer(ICommandArgs command, bool includeCommandName)
-        {
-            if (command == null)
-            {
-                throw new ArgumentNullException(nameof(command));
-            }
-
-            //TODO: implement
-        }
-
-        public void ForwardToServer(ICommandArgs command)
-        {
-            ForwardToServer(command, true);
         }
     }
 }

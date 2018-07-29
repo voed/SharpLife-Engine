@@ -23,6 +23,7 @@ using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.Commands;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
@@ -253,7 +254,12 @@ namespace SharpLife.Engine.Engines
 
             SetupFileSystem(gameDirectory);
 
-            CommandSystem = new CommandSystem.CommandSystem(Logger, FileSystem, CommandLine, ExecPathIDs);
+            CommandSystem = new CommandSystem.CommandSystem(Logger);
+
+            CommonCommands.AddStuffCmds(CommandSystem, Logger, CommandLine);
+            CommonCommands.AddExec(CommandSystem, Logger, FileSystem, ExecPathIDs);
+            CommonCommands.AddEcho(CommandSystem, Logger);
+            CommonCommands.AddAlias(CommandSystem, Logger);
 
             try
             {
