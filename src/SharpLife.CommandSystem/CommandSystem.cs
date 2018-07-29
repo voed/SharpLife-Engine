@@ -53,9 +53,9 @@ namespace SharpLife.CommandSystem
                 .WithHelpInfo("Delay execution of remaining commands until the next execution"));
         }
 
-        public ICommandContext CreateContext(string name, object tag = null)
+        public ICommandContext CreateContext(string name, object tag = null, string protectedVariableChangeString = null)
         {
-            var context = new CommandContext(_logger, this, name, tag);
+            var context = new CommandContext(_logger, this, name, tag, protectedVariableChangeString);
 
             _commandContexts.Add(context);
 

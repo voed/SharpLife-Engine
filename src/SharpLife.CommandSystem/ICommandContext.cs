@@ -31,6 +31,11 @@ namespace SharpLife.CommandSystem
         /// </summary>
         object Tag { get; }
 
+        /// <summary>
+        /// The string to display when changes to protected variables are logged
+        /// </summary>
+        string ProtectedVariableChangeString { get; }
+
         IReadOnlyDictionary<string, IBaseCommand> Commands { get; }
 
         IReadOnlyDictionary<string, string> Aliases { get; }

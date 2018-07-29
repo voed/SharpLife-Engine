@@ -171,10 +171,14 @@ namespace SharpLife.CommandSystem.Commands
 
             OnChange?.Invoke(ref changeEvent);
 
-            if (!suppressChangeMessage && String != changeEvent.OldString)
+            if (!suppressChangeMessage
+                && (Flags & CommandFlags.UnLogged) == 0
+                && String != changeEvent.OldString)
             {
                 //If none of the change handlers reverted the change, print a change message
-                _commandContext._logger.Information($"\"{Name}\" changed to \"{String}\"");
+                var newValue = (Flags & CommandFlags.Protected) != 0 ? _commandContext.ProtectedVariableChangeString : String;
+
+                _commandContext._logger.Information($"\"{Name}\" changed to \"{newValue}\"");
             }
         }
 

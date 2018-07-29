@@ -22,9 +22,13 @@ namespace SharpLife.CommandSystem
 {
     internal class CommandContext : ICommandContext
     {
+        private const string DefaultProtectedVariableChangeString = "***PROTECTED***";
+
         public string Name { get; }
 
         public object Tag { get; }
+
+        public string ProtectedVariableChangeString { get; }
 
         public IReadOnlyDictionary<string, IBaseCommand> Commands => _commands;
 
@@ -37,7 +41,7 @@ namespace SharpLife.CommandSystem
 
         private readonly Dictionary<string, string> _aliases = new Dictionary<string, string>();
 
-        public CommandContext(ILogger logger, CommandSystem commandSystem, string name, object tag = null)
+        public CommandContext(ILogger logger, CommandSystem commandSystem, string name, object tag = null, string protectedVariableChangeString = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _commandSystem = commandSystem ?? throw new ArgumentNullException(nameof(commandSystem));
@@ -54,6 +58,14 @@ namespace SharpLife.CommandSystem
 
             Name = name;
             Tag = tag;
+
+            //Allow empty strings
+            if (protectedVariableChangeString == null)
+            {
+                protectedVariableChangeString = DefaultProtectedVariableChangeString;
+            }
+
+            ProtectedVariableChangeString = protectedVariableChangeString;
         }
 
         public TCommand FindCommand<TCommand>(string name)

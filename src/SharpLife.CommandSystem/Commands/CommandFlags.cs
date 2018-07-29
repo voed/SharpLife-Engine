@@ -26,5 +26,15 @@ namespace SharpLife.CommandSystem.Commands
         /// Save variable value during shutdown
         /// </summary>
         Archive = 1 << 0,
+
+        /// <summary>
+        /// Don't log variable changes
+        /// </summary>
+        UnLogged = 1 << 1,
+
+        /// <summary>
+        /// Log variable changes using a user-defined string
+        /// </summary>
+        Protected = 1 << 2,
     }
 }

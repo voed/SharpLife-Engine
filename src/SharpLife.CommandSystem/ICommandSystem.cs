@@ -26,7 +26,14 @@ namespace SharpLife.CommandSystem
         /// </summary>
         ICommandContext SharedContext { get; }
 
-        ICommandContext CreateContext(string name, object tag = null);
+        /// <summary>
+        /// Creates a new context
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="tag">Optional tag object</param>
+        /// <param name="protectedVariableChangeString">Optional string to display in logs when a protected variable is changed</param>
+        /// <returns></returns>
+        ICommandContext CreateContext(string name, object tag = null, string protectedVariableChangeString = null);
 
         void DestroyContext(ICommandContext context);
 
