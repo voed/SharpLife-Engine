@@ -20,10 +20,10 @@ using System.Collections.Generic;
 namespace SharpLife.CommandSystem.Commands
 {
     /// <summary>
-    /// Contains information about a console variable
-    /// A convar can only have a value of one type at any given time, changing value types resets the other types
+    /// Contains information about a command variable
+    /// A command variable can only have a value of one type at any given time, changing value types resets the other types
     /// </summary>
-    public sealed class ConVarInfo : BaseCommandInfo<ConVarInfo>
+    public sealed class VariableInfo : BaseCommandInfo<VariableInfo>
     {
         //Default to empty string value
         public string StringValue { get; private set; } = string.Empty;
@@ -32,20 +32,20 @@ namespace SharpLife.CommandSystem.Commands
 
         public int? IntegerValue { get; private set; }
 
-        private List<IConVarFilter> _filters;
+        private List<IVariableFilter> _filters;
 
-        public IReadOnlyList<IConVarFilter> Filters => _filters;
+        public IReadOnlyList<IVariableFilter> Filters => _filters;
 
-        private readonly List<Delegates.ConVarChangeHandler> _onChangeDelegates = new List<Delegates.ConVarChangeHandler>();
+        private readonly List<Delegates.VariableChangeHandler> _onChangeDelegates = new List<Delegates.VariableChangeHandler>();
 
-        public IReadOnlyList<Delegates.ConVarChangeHandler> ChangeHandlers => _onChangeDelegates;
+        public IReadOnlyList<Delegates.VariableChangeHandler> ChangeHandlers => _onChangeDelegates;
 
-        public ConVarInfo(string name)
+        public VariableInfo(string name)
             : base(name)
         {
         }
 
-        public ConVarInfo WithValue(string value)
+        public VariableInfo WithValue(string value)
         {
             StringValue = value ?? throw new ArgumentNullException(nameof(value));
 
@@ -55,7 +55,7 @@ namespace SharpLife.CommandSystem.Commands
             return this;
         }
 
-        public ConVarInfo WithValue(float value)
+        public VariableInfo WithValue(float value)
         {
             FloatValue = value;
             StringValue = null;
@@ -64,7 +64,7 @@ namespace SharpLife.CommandSystem.Commands
             return this;
         }
 
-        public ConVarInfo WithValue(int value)
+        public VariableInfo WithValue(int value)
         {
             IntegerValue = value;
             StringValue = null;
@@ -73,19 +73,19 @@ namespace SharpLife.CommandSystem.Commands
             return this;
         }
 
-        public ConVarInfo WithFilter(IConVarFilter filter)
+        public VariableInfo WithFilter(IVariableFilter filter)
         {
             if (filter == null)
             {
                 throw new ArgumentNullException(nameof(filter));
             }
 
-            (_filters ?? (_filters = new List<IConVarFilter>())).Add(filter);
+            (_filters ?? (_filters = new List<IVariableFilter>())).Add(filter);
 
             return this;
         }
 
-        public ConVarInfo WithChangeHandler(Delegates.ConVarChangeHandler changeHandler)
+        public VariableInfo WithChangeHandler(Delegates.VariableChangeHandler changeHandler)
         {
             if (changeHandler == null)
             {

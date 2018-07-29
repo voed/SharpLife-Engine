@@ -14,100 +14,31 @@
 ****/
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SharpLife.CommandSystem.Commands
 {
-    public class Command : ICommand
+    internal class Command : BaseCommand, ICommand
     {
-        public CommandSource CommandSource { get; }
+        public event Delegates.CommandExecutor OnExecute;
 
-        public string Name { get; }
-
-        public int Count => _arguments.Count;
-
-        public string this[int index] => _arguments[index];
-
-        private readonly IList<string> _arguments;
-
-        IList<string> ICommand.Arguments => _arguments.ToList();
-
-        public string CommandString
+        public Command(CommandSystem commandSystem, string name, IReadOnlyList<Delegates.CommandExecutor> executors, CommandFlags flags = CommandFlags.None, string helpInfo = "")
+            : base(commandSystem, name, flags, helpInfo)
         {
-            get
+            if (executors == null)
             {
-                var builder = new StringBuilder();
+                throw new ArgumentNullException(nameof(executors));
+            }
 
-                builder.Append(Name);
-
-                builder = AddArguments(builder);
-
-                return builder.ToString();
+            foreach (var executor in executors)
+            {
+                OnExecute += executor;
             }
         }
 
-        public string ArgumentsString => ArgumentsAsString(0);
-
-        private StringBuilder AddArguments(StringBuilder builder, int firstArgumentIndex = 0)
+        internal override void OnCommand(ICommandArgs command)
         {
-            for (var index = firstArgumentIndex; index < _arguments.Count; ++index)
-            {
-                var arg = _arguments[index];
-
-                builder.Append(' ');
-
-                if (arg.Any(char.IsWhiteSpace))
-                {
-                    builder.Append('\"').Append(arg).Append('\"');
-                }
-                else
-                {
-                    builder.Append(arg);
-                }
-            }
-
-            return builder;
-        }
-
-        public Command(CommandSource commandSource, string name, IList<string> arguments)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException(nameof(name));
-            }
-
-            CommandSource = commandSource;
-
-            Name = name;
-
-            _arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
-        }
-
-        public string ArgumentsAsString(int firstArgumentIndex)
-        {
-            var builder = AddArguments(new StringBuilder(), firstArgumentIndex);
-
-            return builder.ToString(1, builder.Length - 1);
-        }
-
-        public IEnumerator<string> GetEnumerator()
-        {
-            return _arguments.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            OnExecute?.Invoke(command);
         }
     }
 }
-
-

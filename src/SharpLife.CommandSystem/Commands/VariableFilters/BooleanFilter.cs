@@ -18,19 +18,19 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Clamps all input to 0 or 1
     /// </summary>
-    public class BooleanFilter : IConVarFilter
+    public class BooleanFilter : IVariableFilter
     {
         public bool Filter(ref string stringValue, ref float floatValue)
         {
             if (!float.TryParse(stringValue, out var _))
             {
                 floatValue = 0;
-                stringValue = CommandUtils.FloatToConVarString(floatValue);
+                stringValue = CommandUtils.FloatToVariableString(floatValue);
             }
             else if (floatValue != 0 && floatValue != 1)
             {
                 floatValue = 1;
-                stringValue = CommandUtils.FloatToConVarString(floatValue);
+                stringValue = CommandUtils.FloatToVariableString(floatValue);
             }
 
             return true;

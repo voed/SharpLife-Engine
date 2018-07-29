@@ -63,7 +63,7 @@ namespace SharpLife.Engine.Engines
 
         public string GameDirectory { get; private set; }
 
-        public IConCommandSystem CommandSystem { get; private set; }
+        public ICommandSystem CommandSystem { get; private set; }
 
         public IUserInterface UserInterface { get; private set; }
 
@@ -253,7 +253,7 @@ namespace SharpLife.Engine.Engines
 
             SetupFileSystem(gameDirectory);
 
-            CommandSystem = new ConCommandSystem(Logger, FileSystem, CommandLine, ExecPathIDs);
+            CommandSystem = new CommandSystem.CommandSystem(Logger, FileSystem, CommandLine, ExecPathIDs);
 
             try
             {
@@ -298,7 +298,7 @@ namespace SharpLife.Engine.Engines
 
             MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
 
-            CommandSystem.RegisterConCommand(new ConCommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
+            CommandSystem.RegisterCommand(new CommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
 
             //TODO: initialize subsystems
 
@@ -354,7 +354,7 @@ namespace SharpLife.Engine.Engines
         /// Start a new map, loading entities from the map entity data string
         /// </summary>
         /// <param name="command"></param>
-        private void StartNewMap(ICommand command)
+        private void StartNewMap(ICommandArgs command)
         {
             if (command.CommandSource != CommandSource.Local)
             {

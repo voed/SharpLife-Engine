@@ -19,51 +19,51 @@ using System.Text.RegularExpressions;
 namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
-    /// Extensions to make adding filters to convars easier
+    /// Extensions to make adding filters to variables easier
     /// </summary>
-    public static class ConVarInfoFilterExtensions
+    public static class VariableInfoFilterExtensions
     {
-        public static ConVarInfo WithBooleanFilter(this ConVarInfo @this)
+        public static VariableInfo WithBooleanFilter(this VariableInfo @this)
         {
             return @this.WithFilter(new BooleanFilter());
         }
 
-        public static ConVarInfo WithNumberFilter(this ConVarInfo @this)
+        public static VariableInfo WithNumberFilter(this VariableInfo @this)
         {
             return @this.WithFilter(new NumberFilter());
         }
 
-        public static ConVarInfo WithMinMaxFilter(this ConVarInfo @this, float? min, float? max, bool denyOutOfRangeValues = false)
+        public static VariableInfo WithMinMaxFilter(this VariableInfo @this, float? min, float? max, bool denyOutOfRangeValues = false)
         {
             return @this.WithFilter(new MinMaxFilter(min, max, denyOutOfRangeValues));
         }
 
-        public static ConVarInfo WithRegexFilter(this ConVarInfo @this, Regex regex)
+        public static VariableInfo WithRegexFilter(this VariableInfo @this, Regex regex)
         {
             return @this.WithFilter(new RegexFilter(regex));
         }
 
-        public static ConVarInfo WithRegexFilter(this ConVarInfo @this, string pattern)
+        public static VariableInfo WithRegexFilter(this VariableInfo @this, string pattern)
         {
             return @this.WithFilter(new RegexFilter(new Regex(pattern)));
         }
 
-        public static ConVarInfo WithStringListFilter(this ConVarInfo @this, IReadOnlyList<string> strings)
+        public static VariableInfo WithStringListFilter(this VariableInfo @this, IReadOnlyList<string> strings)
         {
             return @this.WithFilter(new StringListFilter(strings));
         }
 
-        public static ConVarInfo WithStringListFilter(this ConVarInfo @this, params string[] strings)
+        public static VariableInfo WithStringListFilter(this VariableInfo @this, params string[] strings)
         {
             return @this.WithFilter(new StringListFilter(strings));
         }
 
-        public static ConVarInfo WithInvertedFilter(this ConVarInfo @this, IConVarFilter filter)
+        public static VariableInfo WithInvertedFilter(this VariableInfo @this, IVariableFilter filter)
         {
             return @this.WithFilter(new InvertFilter(filter));
         }
 
-        public static ConVarInfo WithDelegateFilter(this ConVarInfo @this, DelegateFilter.FilterDelegate @delegate)
+        public static VariableInfo WithDelegateFilter(this VariableInfo @this, DelegateFilter.FilterDelegate @delegate)
         {
             return @this.WithFilter(new DelegateFilter(@delegate));
         }

@@ -21,7 +21,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Denies any inputs that don't match a regular expression
     /// </summary>
-    public class RegexFilter : IConVarFilter
+    public class RegexFilter : IVariableFilter
     {
         private readonly Regex _regex;
 

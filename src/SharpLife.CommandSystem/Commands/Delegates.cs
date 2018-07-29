@@ -23,18 +23,18 @@ namespace SharpLife.CommandSystem.Commands
         /// <param name="commandToExecute"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        public delegate bool CommandFilter(IBaseConsoleCommand commandToExecute, ICommand command);
+        public delegate bool CommandFilter(IBaseCommand commandToExecute, ICommandArgs command);
 
         /// <summary>
-        /// Console command execution delegate
+        /// Command execution delegate
         /// </summary>
         /// <param name="command"></param>
-        public delegate void ConCommandExecutor(ICommand command);
+        public delegate void CommandExecutor(ICommandArgs command);
 
         /// <summary>
-        /// Console variable change handler
+        /// Variable change handler
         /// </summary>
         /// <param name="changeEvent">Contains information about which variable changed and what the old value was</param>
-        public delegate void ConVarChangeHandler(ref ConVarChangeEvent changeEvent);
+        public delegate void VariableChangeHandler(ref VariableChangeEvent changeEvent);
     }
 }

@@ -27,7 +27,7 @@ namespace SharpLife.Engine.Client.Host
         /// <summary>
         /// The command system used by the client
         /// </summary>
-        IConCommandSystem CommandSystem { get; }
+        ICommandSystem CommandSystem { get; }
 
         /// <summary>
         /// The event system used by the client

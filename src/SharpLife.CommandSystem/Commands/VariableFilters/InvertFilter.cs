@@ -20,11 +20,11 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Filter to invert the result of another filter
     /// </summary>
-    public class InvertFilter : IConVarFilter
+    public class InvertFilter : IVariableFilter
     {
-        private readonly IConVarFilter _filter;
+        private readonly IVariableFilter _filter;
 
-        public InvertFilter(IConVarFilter filter)
+        public InvertFilter(IVariableFilter filter)
         {
             _filter = filter ?? throw new ArgumentNullException(nameof(filter));
         }

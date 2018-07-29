@@ -18,7 +18,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Denies any non-numeric inputs
     /// </summary>
-    public class NumberFilter : IConVarFilter
+    public class NumberFilter : IVariableFilter
     {
         public bool Filter(ref string stringValue, ref float floatValue)
         {

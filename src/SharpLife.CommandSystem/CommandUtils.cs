@@ -28,7 +28,7 @@ namespace SharpLife.CommandSystem
         /// </summary>
         /// <param name="commandSource"></param>
         /// <param name="commands"></param>
-        public static List<ICommand> ParseCommands(CommandSource commandSource, string commands)
+        public static List<ICommandArgs> ParseCommands(CommandSource commandSource, string commands)
         {
             if (commands == null)
             {
@@ -38,13 +38,13 @@ namespace SharpLife.CommandSystem
             //A command is delimited by either newlines, semicolons or the end of the string, quoted semicolons don't delimit
             var tokensList = commands.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(Tokenizer.GetTokens).ToList();
 
-            var list = new List<ICommand>();
+            var list = new List<ICommandArgs>();
 
             foreach (var tokens in tokensList)
             {
                 foreach (var commandList in SplitCommandList(tokens))
                 {
-                    list.Add(new Command(commandSource, commandList[0], commandList.Skip(1).ToList()));
+                    list.Add(new CommandArgs(commandSource, commandList[0], commandList.Skip(1).ToList()));
                 }
             }
 
@@ -83,7 +83,7 @@ namespace SharpLife.CommandSystem
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string FloatToConVarString(float value)
+        public static string FloatToVariableString(float value)
         {
             return value.ToString();
         }

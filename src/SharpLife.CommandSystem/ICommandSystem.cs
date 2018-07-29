@@ -18,17 +18,17 @@ using SharpLife.CommandSystem.Commands;
 namespace SharpLife.CommandSystem
 {
     /// <summary>
-    /// Provides access to the console command system
+    /// Provides access to the command system
     /// Direct registration of command instances is not permitted, instead you provide info objects that describe the commands
     /// This prevents users from needing to know about the concrete layout of the command classes
     /// </summary>
-    public interface IConCommandSystem
+    public interface ICommandSystem
     {
-        TCommand FindCommand<TCommand>(string name) where TCommand : class, IBaseConsoleCommand;
+        TCommand FindCommand<TCommand>(string name) where TCommand : class, IBaseCommand;
 
-        IConCommand RegisterConCommand(ConCommandInfo info);
+        ICommand RegisterCommand(CommandInfo info);
 
-        IConVar RegisterConVar(ConVarInfo info);
+        IVariable RegisterVariable(VariableInfo info);
 
         void QueueCommands(CommandSource commandSource, string commandText);
 

@@ -23,7 +23,7 @@ namespace SharpLife.CommandSystem.Commands
         None = 0,
 
         /// <summary>
-        /// Save convar value during shutdown
+        /// Save variable value during shutdown
         /// </summary>
         Archive = 1 << 0,
 

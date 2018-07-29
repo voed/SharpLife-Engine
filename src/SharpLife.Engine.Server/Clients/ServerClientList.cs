@@ -35,9 +35,9 @@ namespace SharpLife.Engine.Server.Clients
         /// </summary>
         public int Count { get; private set; }
 
-        private readonly IConVar _maxPlayers;
+        private readonly IVariable _maxPlayers;
 
-        public ServerClientList(int maxClients, IConVar maxPlayers)
+        public ServerClientList(int maxClients, IVariable maxPlayers)
         {
             _clients = new List<ServerClient>(maxClients);
             _maxPlayers = maxPlayers ?? throw new ArgumentNullException(nameof(maxPlayers));

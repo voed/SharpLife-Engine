@@ -123,7 +123,7 @@ namespace SharpLife.Engine.Client.Host
         /// Connect to a server
         /// </summary>
         /// <param name="command"></param>
-        private void Connect(ICommand command)
+        private void Connect(ICommandArgs command)
         {
             if (command.Count == 0)
             {
@@ -169,7 +169,7 @@ namespace SharpLife.Engine.Client.Host
             _netClient.Connect(address, userInfo);
         }
 
-        private void Disconnect(ICommand command)
+        private void Disconnect(ICommandArgs command)
         {
             Disconnect(true);
         }

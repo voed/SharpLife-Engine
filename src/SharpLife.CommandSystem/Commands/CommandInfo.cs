@@ -19,20 +19,20 @@ using System.Collections.Generic;
 namespace SharpLife.CommandSystem.Commands
 {
     /// <summary>
-    /// Contains information about a console command
+    /// Contains information about a command
     /// </summary>
-    public sealed class ConCommandInfo : BaseCommandInfo<ConCommandInfo>
+    public sealed class CommandInfo : BaseCommandInfo<CommandInfo>
     {
-        private readonly List<Delegates.ConCommandExecutor> _onExecuteDelegates = new List<Delegates.ConCommandExecutor>();
+        private readonly List<Delegates.CommandExecutor> _onExecuteDelegates = new List<Delegates.CommandExecutor>();
 
-        public IReadOnlyList<Delegates.ConCommandExecutor> Executors => _onExecuteDelegates;
+        public IReadOnlyList<Delegates.CommandExecutor> Executors => _onExecuteDelegates;
 
         /// <summary>
         /// Creates a new info instance
         /// </summary>
         /// <param name="name"></param>
         /// <param name="executor">Must be valid</param>
-        public ConCommandInfo(string name, Delegates.ConCommandExecutor executor)
+        public CommandInfo(string name, Delegates.CommandExecutor executor)
             : base(name)
         {
             _onExecuteDelegates.Add(executor ?? throw new ArgumentNullException(nameof(executor)));
@@ -43,7 +43,7 @@ namespace SharpLife.CommandSystem.Commands
         /// </summary>
         /// <param name="executor">Must be valid</param>
         /// <returns></returns>
-        public ConCommandInfo WithCallback(Delegates.ConCommandExecutor executor)
+        public CommandInfo WithCallback(Delegates.CommandExecutor executor)
         {
             _onExecuteDelegates.Add(executor ?? throw new ArgumentNullException(nameof(executor)));
 

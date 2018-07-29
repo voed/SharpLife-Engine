@@ -14,15 +14,16 @@
 ****/
 
 using System;
+using System.Runtime.Serialization;
 
 namespace SharpLife.CommandSystem
 {
     /// <summary>
-    /// Thrown when a console command is invoked with the wrong syntax
+    /// Thrown when a command is invoked with the wrong syntax
     /// </summary>
     internal sealed class InvalidCommandSyntaxException : Exception
     {
-        public InvalidCommandSyntaxException() : base()
+        public InvalidCommandSyntaxException()
         {
         }
 
@@ -34,7 +35,7 @@ namespace SharpLife.CommandSystem
         {
         }
 
-        private InvalidCommandSyntaxException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        private InvalidCommandSyntaxException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

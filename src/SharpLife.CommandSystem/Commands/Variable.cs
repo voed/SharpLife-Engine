@@ -21,7 +21,7 @@ using System.Linq;
 
 namespace SharpLife.CommandSystem.Commands
 {
-    internal class ConVar : BaseConsoleCommand, IConVar
+    internal class Variable : BaseCommand, IVariable
     {
         public string InitialValue { get; private set; }
 
@@ -62,13 +62,13 @@ namespace SharpLife.CommandSystem.Commands
             }
         }
 
-        private List<IConVarFilter> _filters;
+        private List<IVariableFilter> _filters;
 
-        public IReadOnlyList<IConVarFilter> Filters => _filters;
+        public IReadOnlyList<IVariableFilter> Filters => _filters;
 
-        public event Delegates.ConVarChangeHandler OnChange;
+        public event Delegates.VariableChangeHandler OnChange;
 
-        public ConVar(ConCommandSystem commandSystem, string name, string value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+        public Variable(CommandSystem commandSystem, string name, string value, CommandFlags flags, string helpInfo, IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
             : base(commandSystem, name, flags, helpInfo)
         {
             SetString(value, true);
@@ -76,7 +76,7 @@ namespace SharpLife.CommandSystem.Commands
             Construct(filters, changeHandlers);
         }
 
-        public ConVar(ConCommandSystem commandSystem, string name, float value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+        public Variable(CommandSystem commandSystem, string name, float value, CommandFlags flags, string helpInfo, IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
             : base(commandSystem, name, flags, helpInfo)
         {
             SetFloat(value, true);
@@ -84,7 +84,7 @@ namespace SharpLife.CommandSystem.Commands
             Construct(filters, changeHandlers);
         }
 
-        public ConVar(ConCommandSystem commandSystem, string name, int value, CommandFlags flags, string helpInfo, IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+        public Variable(CommandSystem commandSystem, string name, int value, CommandFlags flags, string helpInfo, IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
             : base(commandSystem, name, flags, helpInfo)
         {
             SetInteger(value, true);
@@ -92,7 +92,7 @@ namespace SharpLife.CommandSystem.Commands
             Construct(filters, changeHandlers);
         }
 
-        private void Construct(IReadOnlyList<IConVarFilter> filters, IReadOnlyList<Delegates.ConVarChangeHandler> changeHandlers)
+        private void Construct(IReadOnlyList<IVariableFilter> filters, IReadOnlyList<Delegates.VariableChangeHandler> changeHandlers)
         {
             InitialValue = String;
 
@@ -112,14 +112,14 @@ namespace SharpLife.CommandSystem.Commands
             String = InitialValue;
         }
 
-        public void AddFilter(IConVarFilter filter)
+        public void AddFilter(IVariableFilter filter)
         {
             if (filter == null)
             {
                 throw new ArgumentNullException(nameof(filter));
             }
 
-            (_filters ?? (_filters = new List<IConVarFilter>())).Add(filter);
+            (_filters ?? (_filters = new List<IVariableFilter>())).Add(filter);
         }
 
         internal void SetString(string value, bool suppressChangeMessage)
@@ -131,7 +131,7 @@ namespace SharpLife.CommandSystem.Commands
 
         internal void SetFloat(float value, bool suppressChangeMessage)
         {
-            SetValue(CommandUtils.FloatToConVarString(value), value, suppressChangeMessage);
+            SetValue(CommandUtils.FloatToVariableString(value), value, suppressChangeMessage);
         }
 
         internal void SetInteger(int value, bool suppressChangeMessage)
@@ -158,7 +158,7 @@ namespace SharpLife.CommandSystem.Commands
                 }
             }
 
-            var changeEvent = new ConVarChangeEvent(this, String, Float, Integer, Boolean);
+            var changeEvent = new VariableChangeEvent(this, String, Float, Integer, Boolean);
 
             _stringValue = stringValue ?? throw new ArgumentNullException(nameof(stringValue));
             _floatValue = floatValue;
@@ -172,7 +172,7 @@ namespace SharpLife.CommandSystem.Commands
             }
         }
 
-        internal override void OnCommand(ICommand command)
+        internal override void OnCommand(ICommandArgs command)
         {
             if (command.Count == 0)
             {
@@ -186,7 +186,7 @@ namespace SharpLife.CommandSystem.Commands
                 return;
             }
 
-            throw new InvalidCommandSyntaxException("Console variables can only be set with syntax \"name value\"");
+            throw new InvalidCommandSyntaxException("Variables can only be set with syntax \"name value\"");
         }
     }
 }

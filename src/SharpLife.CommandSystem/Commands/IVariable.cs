@@ -18,7 +18,7 @@ using System.Collections.Generic;
 
 namespace SharpLife.CommandSystem.Commands
 {
-    public interface IConVar : IBaseConsoleCommand
+    public interface IVariable : IBaseCommand
     {
         /// <summary>
         /// The initial value assigned to this variable
@@ -33,14 +33,14 @@ namespace SharpLife.CommandSystem.Commands
 
         bool Boolean { get; set; }
 
-        IReadOnlyList<IConVarFilter> Filters { get; }
+        IReadOnlyList<IVariableFilter> Filters { get; }
 
         /// <summary>
         /// Invoked after the variable has changed
         /// Change handlers may change the variable by using the change event interface
         /// If the variable is reset to its old value, the change message is suppressed
         /// </summary>
-        event Delegates.ConVarChangeHandler OnChange;
+        event Delegates.VariableChangeHandler OnChange;
 
         /// <summary>
         /// Resets this variable to <see cref="InitialValue"/>
@@ -51,6 +51,6 @@ namespace SharpLife.CommandSystem.Commands
         /// Adds a filter to the variable
         /// </summary>
         /// <param name="filter"></param>
-        void AddFilter(IConVarFilter filter);
+        void AddFilter(IVariableFilter filter);
     }
 }

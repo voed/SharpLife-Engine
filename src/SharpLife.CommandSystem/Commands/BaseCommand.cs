@@ -17,9 +17,9 @@ using System;
 
 namespace SharpLife.CommandSystem.Commands
 {
-    internal abstract class BaseConsoleCommand : IBaseConsoleCommand
+    internal abstract class BaseCommand : IBaseCommand
     {
-        protected readonly ConCommandSystem _commandSystem;
+        protected readonly CommandSystem _commandSystem;
 
         public string Name { get; }
 
@@ -27,12 +27,9 @@ namespace SharpLife.CommandSystem.Commands
 
         public string HelpInfo { get; }
 
-        protected BaseConsoleCommand(ConCommandSystem commandSystem, string name, CommandFlags flags = CommandFlags.None, string helpInfo = "")
+        protected BaseCommand(CommandSystem commandSystem, string name, CommandFlags flags = CommandFlags.None, string helpInfo = "")
         {
-            if (commandSystem == null)
-            {
-                throw new ArgumentNullException(nameof(commandSystem));
-            }
+            _commandSystem = commandSystem ?? throw new ArgumentNullException(nameof(commandSystem));
 
             if (name == null)
             {
@@ -44,7 +41,6 @@ namespace SharpLife.CommandSystem.Commands
                 throw new ArgumentException(nameof(name));
             }
 
-            _commandSystem = commandSystem;
             Name = name;
             Flags = flags;
             HelpInfo = helpInfo ?? throw new ArgumentNullException(nameof(helpInfo));
@@ -55,6 +51,6 @@ namespace SharpLife.CommandSystem.Commands
         /// </summary>
         /// <param name="command"></param>
         /// <exception cref="InvalidCommandSyntaxException">When the command is invoked with the wrong syntax</exception>
-        internal abstract void OnCommand(ICommand command);
+        internal abstract void OnCommand(ICommandArgs command);
     }
 }

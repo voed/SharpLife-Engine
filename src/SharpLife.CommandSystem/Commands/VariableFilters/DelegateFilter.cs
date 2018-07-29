@@ -20,7 +20,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Filter that delegates the filter task to a delegate
     /// </summary>
-    public class DelegateFilter : IConVarFilter
+    public class DelegateFilter : IVariableFilter
     {
         public delegate bool FilterDelegate(ref string stringValue, ref float floatValue);
 

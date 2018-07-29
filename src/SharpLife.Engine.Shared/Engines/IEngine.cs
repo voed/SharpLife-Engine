@@ -48,7 +48,7 @@ namespace SharpLife.Engine.Shared.Engines
         /// <summary>
         /// Gets the command system
         /// </summary>
-        IConCommandSystem CommandSystem { get; }
+        ICommandSystem CommandSystem { get; }
 
         /// <summary>
         /// Gets the user interface component

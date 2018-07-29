@@ -20,7 +20,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Clamps an input value to a numeric range
     /// </summary>
-    public class MinMaxFilter : IConVarFilter
+    public class MinMaxFilter : IVariableFilter
     {
         private readonly float? _min;
 
@@ -63,7 +63,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
                     return false;
                 }
 
-                stringValue = CommandUtils.FloatToConVarString(floatValue);
+                stringValue = CommandUtils.FloatToVariableString(floatValue);
                 floatValue = clampedValue;
             }
 

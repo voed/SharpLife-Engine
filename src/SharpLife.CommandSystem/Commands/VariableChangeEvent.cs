@@ -17,11 +17,11 @@ using System;
 
 namespace SharpLife.CommandSystem.Commands
 {
-    public struct ConVarChangeEvent
+    public struct VariableChangeEvent
     {
-        private readonly ConVar _variable;
+        private readonly Variable _variable;
 
-        public IConVar Variable => _variable;
+        public IVariable Variable => _variable;
 
         public string String
         {
@@ -60,7 +60,7 @@ namespace SharpLife.CommandSystem.Commands
         /// </summary>
         public bool Different => Variable.String != OldString;
 
-        internal ConVarChangeEvent(ConVar variable, string oldString, float oldFloat, int oldInteger, bool oldBoolean)
+        internal VariableChangeEvent(Variable variable, string oldString, float oldFloat, int oldInteger, bool oldBoolean)
         {
             _variable = variable ?? throw new ArgumentNullException(nameof(variable));
             OldString = oldString ?? throw new ArgumentNullException(nameof(oldString));

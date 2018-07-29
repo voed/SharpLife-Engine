@@ -31,7 +31,7 @@ namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost : IEngineServerHost
     {
-        public IConCommandSystem CommandSystem => _engine.CommandSystem;
+        public ICommandSystem CommandSystem => _engine.CommandSystem;
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
@@ -45,12 +45,12 @@ namespace SharpLife.Engine.Server.Host
 
         private GameData<IGameServer> _game;
 
-        private readonly IConVar _ipname;
-        private readonly IConVar _hostport;
-        private readonly IConVar _defport;
-        private readonly IConVar _sv_timeout;
+        private readonly IVariable _ipname;
+        private readonly IVariable _hostport;
+        private readonly IVariable _defport;
+        private readonly IVariable _sv_timeout;
 
-        private readonly IConVar _maxPlayers;
+        private readonly IVariable _maxPlayers;
 
         private uint _mapCRC = 0;
 
@@ -61,23 +61,23 @@ namespace SharpLife.Engine.Server.Host
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _ipname = CommandSystem.RegisterConVar(new ConVarInfo("ip")
+            _ipname = CommandSystem.RegisterVariable(new VariableInfo("ip")
                 .WithHelpInfo("The IP address to use for server hosts")
                 .WithValue(NetConstants.LocalHost));
 
-            _hostport = CommandSystem.RegisterConVar(new ConVarInfo("hostport")
+            _hostport = CommandSystem.RegisterVariable(new VariableInfo("hostport")
                 .WithHelpInfo("The port to use for server hosts")
                 .WithValue(0));
 
-            _defport = CommandSystem.RegisterConVar(new ConVarInfo("port")
+            _defport = CommandSystem.RegisterVariable(new VariableInfo("port")
                .WithHelpInfo("The default port to use for server hosts")
                .WithValue(NetConstants.DefaultServerPort));
 
-            _sv_timeout = CommandSystem.RegisterConVar(new ConVarInfo("sv_timeout")
+            _sv_timeout = CommandSystem.RegisterVariable(new VariableInfo("sv_timeout")
                 .WithHelpInfo("Maximum time to wait before timing out client connections")
                 .WithValue(60));
 
-            _maxPlayers = CommandSystem.RegisterConVar(new ConVarInfo("maxplayers")
+            _maxPlayers = CommandSystem.RegisterVariable(new VariableInfo("maxplayers")
                 .WithHelpInfo("The maximum number of players that can connect to this server")
                 .WithValue(_engine.IsDedicatedServer ? 6 : NetConstants.MinClients)
                 .WithDelegateFilter((ref string _, ref float __) =>

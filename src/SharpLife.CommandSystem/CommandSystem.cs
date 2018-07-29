@@ -23,7 +23,7 @@ using System.IO;
 
 namespace SharpLife.CommandSystem
 {
-    public class ConCommandSystem : IConCommandSystem
+    public class CommandSystem : ICommandSystem
     {
         internal readonly ILogger _logger;
 
@@ -31,12 +31,12 @@ namespace SharpLife.CommandSystem
 
         private readonly IList<Delegates.CommandFilter> _commandFilters = new List<Delegates.CommandFilter>();
 
-        private readonly IDictionary<string, BaseConsoleCommand> _commands = new Dictionary<string, BaseConsoleCommand>();
+        private readonly IDictionary<string, BaseCommand> _commands = new Dictionary<string, BaseCommand>();
 
         /// <summary>
         /// Commands that have been queued up for execution
         /// </summary>
-        private readonly List<ICommand> _commandsToExecute = new List<ICommand>();
+        private readonly List<ICommandArgs> _commandsToExecute = new List<ICommandArgs>();
 
         private readonly IDictionary<string, string> _aliases = new Dictionary<string, string>();
 
@@ -53,7 +53,7 @@ namespace SharpLife.CommandSystem
         /// <param name="fileSystem"></param>
         /// <param name="commandLine"></param>
         /// <param name="gameConfigPathIDs">The game config path IDs to use for the exec command</param>
-        public ConCommandSystem(ILogger logger, IFileSystem fileSystem, ICommandLine commandLine, IReadOnlyList<string> gameConfigPathIDs)
+        public CommandSystem(ILogger logger, IFileSystem fileSystem, ICommandLine commandLine, IReadOnlyList<string> gameConfigPathIDs)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -99,7 +99,7 @@ namespace SharpLife.CommandSystem
                 return true;
             });
 
-            RegisterConCommand(new ConCommandInfo("stuffcmds", arguments =>
+            RegisterCommand(new CommandInfo("stuffcmds", arguments =>
             {
                 if (arguments.Count > 0)
                 {
@@ -118,15 +118,15 @@ namespace SharpLife.CommandSystem
                         //Grab all arguments until the next key
                         var values = commandLine.GetValues(key);
 
-                        _commandsToExecute.Insert(cmdIndex++, new Command(CommandSource.Local, key.Substring(1), values));
+                        _commandsToExecute.Insert(cmdIndex++, new CommandArgs(CommandSource.Local, key.Substring(1), values));
 
                         i += values.Count;
                     }
                 }
             })
-            .WithHelpInfo("Stuffs all command line arguments that contain console commands into the command queue"));
+            .WithHelpInfo("Stuffs all command line arguments that contain commands into the command queue"));
 
-            RegisterConCommand(new ConCommandInfo("exec", arguments =>
+            RegisterCommand(new CommandInfo("exec", arguments =>
             {
                 if (arguments.Count < 1)
                 {
@@ -194,11 +194,11 @@ namespace SharpLife.CommandSystem
                     _logger.Error($"Couldn't exec {arguments[0]}");
                 }
             })
-            .WithHelpInfo("Executes a file containing console commands"));
+            .WithHelpInfo("Executes a file containing commands"));
 
-            RegisterConCommand(new ConCommandInfo("echo", arguments => _logger.Information(arguments.ArgumentsString)).WithHelpInfo("Echoes the arguments to the console"));
+            RegisterCommand(new CommandInfo("echo", arguments => _logger.Information(arguments.ArgumentsString)).WithHelpInfo("Echoes the arguments to the console"));
 
-            RegisterConCommand(new ConCommandInfo("alias", arguments =>
+            RegisterCommand(new CommandInfo("alias", arguments =>
             {
                 if (arguments.Count == 0)
                 {
@@ -216,15 +216,15 @@ namespace SharpLife.CommandSystem
             .WithHelpInfo("Aliases a command to a name"));
 
             //TODO: move out of the command system
-            RegisterConCommand(new ConCommandInfo("cmd", arguments => ForwardToServer(arguments, false)
+            RegisterCommand(new CommandInfo("cmd", arguments => ForwardToServer(arguments, false)
             ).WithHelpInfo("Send the entire command line over to the server"));
 
-            RegisterConCommand(new ConCommandInfo("wait", _ => _wait = true)
+            RegisterCommand(new CommandInfo("wait", _ => _wait = true)
                 .WithHelpInfo("Delay execution of remaining commands by one frame"));
         }
 
         public TCommand FindCommand<TCommand>(string name)
-            where TCommand : class, IBaseConsoleCommand
+            where TCommand : class, IBaseCommand
         {
             if (name == null)
             {
@@ -239,7 +239,7 @@ namespace SharpLife.CommandSystem
             return null;
         }
 
-        public IConCommand RegisterConCommand(ConCommandInfo info)
+        public ICommand RegisterCommand(CommandInfo info)
         {
             if (info == null)
             {
@@ -248,17 +248,17 @@ namespace SharpLife.CommandSystem
 
             if (_commands.ContainsKey(info.Name))
             {
-                throw new ArgumentException($"Cannot add duplicate console command \"{info.Name}\"");
+                throw new ArgumentException($"Cannot add duplicate command \"{info.Name}\"");
             }
 
-            var command = new ConCommand(this, info.Name, info.Executors, info.Flags, info.HelpInfo);
+            var command = new Command(this, info.Name, info.Executors, info.Flags, info.HelpInfo);
 
             _commands.Add(command.Name, command);
 
             return command;
         }
 
-        public IConVar RegisterConVar(ConVarInfo info)
+        public IVariable RegisterVariable(VariableInfo info)
         {
             if (info == null)
             {
@@ -267,26 +267,26 @@ namespace SharpLife.CommandSystem
 
             if (_commands.ContainsKey(info.Name))
             {
-                throw new ArgumentException($"Cannot add duplicate console command \"{info.Name}\"");
+                throw new ArgumentException($"Cannot add duplicate command \"{info.Name}\"");
             }
 
-            ConVar variable = null;
+            Variable variable = null;
 
             if (info.StringValue != null)
             {
-                variable = new ConVar(this, info.Name, info.StringValue, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new Variable(this, info.Name, info.StringValue, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
             }
             else if (info.FloatValue != null)
             {
-                variable = new ConVar(this, info.Name, info.FloatValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new Variable(this, info.Name, info.FloatValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
             }
             else if (info.IntegerValue != null)
             {
-                variable = new ConVar(this, info.Name, info.IntegerValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
+                variable = new Variable(this, info.Name, info.IntegerValue.Value, info.Flags, info.HelpInfo, info.Filters, info.ChangeHandlers);
             }
             else
             {
-                throw new ArgumentException("Console variables must have a value specified", nameof(info));
+                throw new ArgumentException("Command variables must have a value specified", nameof(info));
             }
 
             _commands.Add(variable.Name, variable);
@@ -324,14 +324,14 @@ namespace SharpLife.CommandSystem
         {
             while (!_wait && _commandsToExecute.Count > 0)
             {
-                var command = _commandsToExecute[0];
+                var commandArgs = _commandsToExecute[0];
                 _commandsToExecute.RemoveAt(0);
 
-                if (_commands.TryGetValue(command.Name, out var conCommand))
+                if (_commands.TryGetValue(commandArgs.Name, out var command))
                 {
                     try
                     {
-                        conCommand.OnCommand(command);
+                        command.OnCommand(commandArgs);
                     }
                     catch (InvalidCommandSyntaxException e)
                     {
@@ -339,13 +339,13 @@ namespace SharpLife.CommandSystem
                     }
                 }
                 //This is different from the original; there aliases are checked before cvars
-                else if (_aliases.TryGetValue(command.Name, out var aliasedCommand))
+                else if (_aliases.TryGetValue(commandArgs.Name, out var aliasedCommand))
                 {
                     InsertCommands(CommandSource.Local, aliasedCommand);
                 }
                 else
                 {
-                    _logger.Information($"Could not find command {command.Name}");
+                    _logger.Information($"Could not find command {commandArgs.Name}");
                 }
             }
 
@@ -355,7 +355,7 @@ namespace SharpLife.CommandSystem
             }
         }
 
-        private void ForwardToServer(ICommand command, bool includeCommandName)
+        private void ForwardToServer(ICommandArgs command, bool includeCommandName)
         {
             if (command == null)
             {
@@ -365,7 +365,7 @@ namespace SharpLife.CommandSystem
             //TODO: implement
         }
 
-        public void ForwardToServer(ICommand command)
+        public void ForwardToServer(ICommandArgs command)
         {
             ForwardToServer(command, true);
         }

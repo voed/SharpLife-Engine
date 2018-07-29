@@ -22,7 +22,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// <summary>
     /// Denies any inputs that are not found in a given list
     /// </summary>
-    public class StringListFilter : IConVarFilter
+    public class StringListFilter : IVariableFilter
     {
         private readonly List<string> _strings;
 
