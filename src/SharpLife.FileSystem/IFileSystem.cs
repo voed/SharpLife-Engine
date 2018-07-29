@@ -48,9 +48,10 @@ namespace SharpLife.FileSystem
         /// </summary>
         /// <param name="relativePath"></param>
         /// <param name="pathID">If not null, specifies that only paths with this Id should be checked for the file's existence</param>
+        /// <param name="mustExist">If false, only the path to the file must exist, otherwise the file must also exist</param>
         /// <returns>The absolute path if it could be resolved</returns>
-        /// <exception cref="System.IO.FileNotFoundException">If the file could not be resolved</exception>
-        string GetAbsolutePath(string relativePath, string pathID = null);
+        /// <exception cref="FileNotFoundException">If the file could not be resolved</exception>
+        string GetAbsolutePath(string relativePath, string pathID = null, bool mustExist = true);
 
         /// <summary>
         /// Given an absolute path, attempts to resolve the path to a relative path
@@ -58,7 +59,7 @@ namespace SharpLife.FileSystem
         /// <param name="absolutePath"></param>
         /// <param name="pathID">If not null, specifies that only paths with this Id should be used to resolve the path</param>
         /// <returns>The relative path if it could be resolved</returns>
-        /// <exception cref="System.IO.FileNotFoundException">If the file could not be resolved</exception>
+        /// <exception cref="FileNotFoundException">If the file could not be resolved</exception>
         string GetRelativePath(string absolutePath, string pathID = null);
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace SharpLife.FileSystem
         /// <param name="relativePath"></param>
         /// <param name="pathID">If not null, specifies that only paths with this Id should be used to construct the path</param>
         /// <returns>The absolute path if it could be constructed</returns>
-        /// <exception cref="System.IO.FileNotFoundException">If the file could not be resolved</exception>
+        /// <exception cref="FileNotFoundException">If the file could not be resolved</exception>
         string GetWritePath(string relativePath, string pathID = null);
 
         /// <summary>

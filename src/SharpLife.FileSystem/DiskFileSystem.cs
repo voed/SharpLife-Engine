@@ -97,7 +97,7 @@ namespace SharpLife.FileSystem
             SearchPaths.TrimExcess();
         }
 
-        public string GetAbsolutePath(string relativePath, string pathID = null)
+        public string GetAbsolutePath(string relativePath, string pathID = null, bool mustExist = true)
         {
             if (string.IsNullOrWhiteSpace(relativePath))
             {
@@ -111,9 +111,9 @@ namespace SharpLife.FileSystem
                     continue;
                 }
 
-                var absolutePath = $"{searchPath.BasePath}{Path.DirectorySeparatorChar}{relativePath}";
+                var absolutePath = Path.Combine(searchPath.BasePath, relativePath);
 
-                if (Directory.Exists(absolutePath) || File.Exists(absolutePath))
+                if (Directory.Exists(absolutePath) || (mustExist ? File.Exists(absolutePath) : File.Exists(Path.GetDirectoryName(absolutePath))))
                 {
                     return absolutePath;
                 }
@@ -159,7 +159,7 @@ namespace SharpLife.FileSystem
                     continue;
                 }
 
-                var absolutePath = $"{searchPath.BasePath}{Path.DirectorySeparatorChar}{relativePath}";
+                var absolutePath = Path.Combine(searchPath.BasePath, relativePath);
 
                 //Create the directory so it exists when code tries to write to it
                 Directory.CreateDirectory(Path.GetDirectoryName(absolutePath));
@@ -172,7 +172,7 @@ namespace SharpLife.FileSystem
 
         public bool CreateDirectoryHierarchy(string relativePath, string pathID = null)
         {
-            var absolutePath = GetAbsolutePath(relativePath, pathID);
+            var absolutePath = GetAbsolutePath(relativePath, pathID, true);
 
             try
             {
@@ -189,7 +189,7 @@ namespace SharpLife.FileSystem
         {
             try
             {
-                var path = GetAbsolutePath(fileName, pathID);
+                var path = GetAbsolutePath(fileName, pathID, true);
 
                 return path != null;
             }
@@ -201,7 +201,17 @@ namespace SharpLife.FileSystem
 
         public Stream Open(string relativePath, FileMode mode, FileAccess access, FileShare share, string pathID = null)
         {
-            return File.Open(GetAbsolutePath(relativePath, pathID), mode, access, share);
+            var isRead = mode == FileMode.Append
+                    || mode == FileMode.Open
+                    || mode == FileMode.Truncate;
+
+            var absolutePath = isRead ? GetAbsolutePath(relativePath, pathID, true) : GetWritePath(relativePath, pathID);
+
+            return File.Open(
+                absolutePath,
+                mode,
+                access,
+                share);
         }
     }
 }
