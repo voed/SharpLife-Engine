@@ -67,5 +67,15 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
         {
             return @this.WithFilter(new DelegateFilter(@delegate));
         }
+
+        public static VariableInfo WithPrintableCharactersFilter(this VariableInfo @this, string emptyValue = "")
+        {
+            return @this.WithFilter(new UnprintableCharactersFilter(emptyValue));
+        }
+
+        public static VariableInfo WithWhitespaceFilter(this VariableInfo @this)
+        {
+            return @this.WithFilter(new StripWhitespaceFilter());
+        }
     }
 }
