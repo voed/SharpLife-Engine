@@ -293,13 +293,9 @@ namespace SharpLife.Engine.Engines
                 _client = new EngineClientHost(this, Logger);
             }
 
-            //TODO: should be delayed until client starts listen server, or if this is a dedicated server
-            _server = new EngineServerHost(this, Logger);
-
-            //For listen servers, the server game assembly is created when the client actually starts a map
             if (hostType == HostType.DedicatedServer)
             {
-                _server.LoadGameAssembly();
+                CreateServer();
             }
 
             MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
@@ -308,13 +304,14 @@ namespace SharpLife.Engine.Engines
 
             //TODO: initialize subsystems
 
-            _client?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}_client.rc");
-            _server?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}_server.rc");
+            //Only one of these will exist right now
+            _client?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}.rc");
+            _server?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}.rc");
         }
 
         private void Shutdown()
         {
-            _server.Shutdown();
+            _server?.Shutdown();
             _client?.Shutdown();
 
             UserInterface?.Shutdown();
@@ -341,19 +338,11 @@ namespace SharpLife.Engine.Engines
                 CommandLine.Contains("-addons") || EngineConfiguration.EnableAddonsFolder);
         }
 
-        private void InitializeGameAssembly()
+        private void CreateServer()
         {
-            if (!_server.GameAssemblyLoaded)
+            if (_server == null)
             {
-                CommandSystem.Execute();
-
-                //TODO: configure networking
-
-                _server.LoadGameAssembly();
-            }
-            else
-            {
-                Logger.Debug("LoadGameAssembly called twice, skipping second call");
+                _server = new EngineServerHost(this, Logger);
             }
         }
 
@@ -379,7 +368,7 @@ namespace SharpLife.Engine.Engines
                 mapName = Path.GetFileNameWithoutExtension(mapName);
             }
 
-            InitializeGameAssembly();
+            CreateServer();
 
             EventSystem.DispatchEvent(EngineEvents.EngineNewMapRequest);
 

@@ -42,8 +42,6 @@ namespace SharpLife.Engine.Server.Host
 
         void Shutdown();
 
-        void LoadGameAssembly();
-
         /// <summary>
         /// Starts a new server on the given map
         /// TODO: remove startspot and use generic data carryover to pass data between maps

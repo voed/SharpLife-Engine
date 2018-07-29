@@ -106,8 +106,24 @@ namespace SharpLife.Engine.Server.Host
 
             _clientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
 
+            LoadGameAssembly();
+
             CreateMessageHandlers();
             RegisterMessageHandlers();
+        }
+
+        private void LoadGameAssembly()
+        {
+            _game = GameLoadUtils.LoadGame<IGameServer>(
+                _engine.GameDirectory,
+                _engine.GameConfiguration.GameServer.AssemblyName,
+                _engine.GameConfiguration.GameServer.EntrypointClass);
+
+            var collection = new ServiceCollection();
+
+            var serviceProvider = collection.BuildServiceProvider();
+
+            _game.Entrypoint.Initialize(serviceProvider);
         }
 
         public void Shutdown()
@@ -117,23 +133,6 @@ namespace SharpLife.Engine.Server.Host
             _game?.Entrypoint.Shutdown();
 
             _engine.CommandSystem.DestroyContext(CommandContext);
-        }
-
-        public void LoadGameAssembly()
-        {
-            if (_game == null)
-            {
-                _game = GameLoadUtils.LoadGame<IGameServer>(
-                    _engine.GameDirectory,
-                    _engine.GameConfiguration.GameServer.AssemblyName,
-                    _engine.GameConfiguration.GameServer.EntrypointClass);
-
-                var collection = new ServiceCollection();
-
-                var serviceProvider = collection.BuildServiceProvider();
-
-                _game.Entrypoint.Initialize(serviceProvider);
-            }
         }
 
         public bool Start(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None)
