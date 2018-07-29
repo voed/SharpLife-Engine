@@ -13,21 +13,15 @@
 *
 ****/
 
-namespace SharpLife.CommandSystem.Commands
+using SharpLife.CommandSystem.Commands;
+
+namespace SharpLife.Engine.Shared.CommandSystem
 {
-    public interface IBaseCommand
+    public static class BaseCommandExtensions
     {
-        string Name { get; }
-
-        CommandFlags Flags { get; }
-
-        /// <summary>
-        /// Gets user defined flags
-        /// </summary>
-        uint UserFlags { get; }
-
-        string HelpInfo { get; }
-
-        object Tag { get; }
+        public static EngineCommandFlags EngineFlags(this IBaseCommand command)
+        {
+            return (EngineCommandFlags)command.UserFlags;
+        }
     }
 }

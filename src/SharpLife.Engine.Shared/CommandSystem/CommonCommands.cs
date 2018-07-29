@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SharpLife.Engine.Shared.Commands
+namespace SharpLife.Engine.Shared.CommandSystem
 {
     /// <summary>
     /// Utility functions to add common commands

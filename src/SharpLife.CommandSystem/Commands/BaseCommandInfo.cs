@@ -62,14 +62,37 @@ namespace SharpLife.CommandSystem.Commands
 
         public TDerived AddFlags(CommandFlags flags)
         {
-            Flags |= flags;
+            //Don't allow modification of user flags
+            Flags |= flags & CommandFlags.AllCommandFlags;
 
             return this as TDerived;
         }
 
         public TDerived RemoveFlags(CommandFlags flags)
         {
-            Flags &= ~flags;
+            Flags &= ~flags | (Flags & ~CommandFlags.AllCommandFlags);
+
+            return this as TDerived;
+        }
+
+        public TDerived WithUserFlags(uint flags)
+        {
+            Flags = (((CommandFlags)flags) & ~CommandFlags.AllCommandFlags) | (Flags & CommandFlags.AllCommandFlags);
+
+            return this as TDerived;
+        }
+
+        public TDerived AddUserFlags(uint flags)
+        {
+            //Don't allow modification of builtin flags
+            Flags |= ((CommandFlags)flags) & ~CommandFlags.AllCommandFlags;
+
+            return this as TDerived;
+        }
+
+        public TDerived RemoveUserFlags(uint flags)
+        {
+            Flags &= ((CommandFlags)~flags) | (Flags & CommandFlags.AllCommandFlags);
 
             return this as TDerived;
         }

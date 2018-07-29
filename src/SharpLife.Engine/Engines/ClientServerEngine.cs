@@ -23,7 +23,7 @@ using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
-using SharpLife.Engine.Shared.Commands;
+using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;

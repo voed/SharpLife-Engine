@@ -25,6 +25,8 @@ namespace SharpLife.CommandSystem.Commands
 
         public CommandFlags Flags { get; }
 
+        public uint UserFlags => (uint)(Flags & ~CommandFlags.AllCommandFlags);
+
         public string HelpInfo { get; }
 
         public object Tag { get; }

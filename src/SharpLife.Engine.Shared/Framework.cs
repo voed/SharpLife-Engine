@@ -59,6 +59,7 @@ namespace SharpLife.Engine.Shared
         {
             public const string WAD = "wad";
             public const string BSP = "bsp";
+            public const string CFG = "cfg";
         }
     }
 }

@@ -18,23 +18,25 @@ using System;
 namespace SharpLife.CommandSystem.Commands
 {
     [Flags]
-    public enum CommandFlags
+    public enum CommandFlags : uint
     {
         None = 0,
 
         /// <summary>
-        /// Save variable value during shutdown
-        /// </summary>
-        Archive = 1 << 0,
-
-        /// <summary>
         /// Don't log variable changes
         /// </summary>
-        UnLogged = 1 << 1,
+        UnLogged = 1 << 0,
 
         /// <summary>
         /// Log variable changes using a user-defined string
         /// </summary>
-        Protected = 1 << 2,
+        Protected = 1 << 1,
+
+        AllCommandFlags = UnLogged | Protected,
+
+        /// <summary>
+        /// The first user defined flag value
+        /// </summary>
+        FirstUserFlag = 1 << 2,
     }
 }

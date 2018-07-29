@@ -13,21 +13,22 @@
 *
 ****/
 
-namespace SharpLife.CommandSystem.Commands
-{
-    public interface IBaseCommand
-    {
-        string Name { get; }
+using SharpLife.CommandSystem.Commands;
+using System;
 
-        CommandFlags Flags { get; }
+namespace SharpLife.Engine.Shared.CommandSystem
+{
+    /// <summary>
+    /// Engine command flags
+    /// </summary>
+    [Flags]
+    public enum EngineCommandFlags : uint
+    {
+        None = 0,
 
         /// <summary>
-        /// Gets user defined flags
+        /// Save variable value during shutdown
         /// </summary>
-        uint UserFlags { get; }
-
-        string HelpInfo { get; }
-
-        object Tag { get; }
+        Archive = CommandFlags.FirstUserFlag << 0,
     }
 }

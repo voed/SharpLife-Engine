@@ -23,12 +23,16 @@ using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Engine.Shared.UI;
+using SharpLife.FileSystem;
 using SharpLife.Networking.Shared;
+using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
+using System.IO;
 using System.Net;
 
 namespace SharpLife.Engine.Client.Host
@@ -110,7 +114,7 @@ namespace SharpLife.Engine.Client.Host
             _cl_timeout = CommandContext.RegisterVariable(new VariableInfo("cl_timeout")
                 .WithHelpInfo("Maximum time to wait before timing out server connections")
                 .WithValue(60)
-                .WithFlags(CommandFlags.Archive));
+                .WithEngineFlags(EngineCommandFlags.Archive));
 
             //TODO: add change handler to send update to server if connected
             _cl_name = CommandContext.RegisterVariable(new VariableInfo("name")
@@ -147,9 +151,48 @@ namespace SharpLife.Engine.Client.Host
 
         public void Shutdown()
         {
+            WriteConfigFile();
+
             Disconnect(false);
 
             _engine.CommandSystem.DestroyContext(CommandContext);
+        }
+
+        private void WriteConfigFile()
+        {
+            var configFileName = $"cfg/config{FileExtensionUtils.AsExtension(Framework.Extension.CFG)}";
+
+            try
+            {
+                using (var writer = _engine.FileSystem.CreateText(configFileName, FileSystemConstants.PathID.GameConfig))
+                {
+                    writer.WriteLine("// This file is overwritten whenever you change your user settings in the game.");
+                    writer.WriteLine("// Add custom configurations to the file \"userconfig.cfg\".");
+                    writer.WriteLine();
+
+                    writer.WriteLine("unbindall");
+
+                    WriteCommandVariables(writer);
+
+                    //TODO: save all config vars
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                _logger.Information($"Couldn't write {configFileName}.");
+            }
+        }
+
+        private void WriteCommandVariables(TextWriter writer)
+        {
+            foreach (var command in CommandContext.Commands.Values)
+            {
+                if (command is IVariable var
+                    && (var.EngineFlags() & EngineCommandFlags.Archive) != 0)
+                {
+                    writer.WriteLine($"{var.Name} \"{var.String}\"");
+                }
+            }
         }
 
         public void Update(float deltaSeconds)
