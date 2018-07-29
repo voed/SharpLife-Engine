@@ -18,14 +18,6 @@ namespace SharpLife.CommandSystem.Commands
     public static class Delegates
     {
         /// <summary>
-        /// Filters commands when executing them
-        /// </summary>
-        /// <param name="commandToExecute"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public delegate bool CommandFilter(IBaseCommand commandToExecute, ICommandArgs command);
-
-        /// <summary>
         /// Command execution delegate
         /// </summary>
         /// <param name="command"></param>
