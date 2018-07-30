@@ -142,7 +142,9 @@ namespace SharpLife.Renderer
             Vector2 mouseDelta = _inputSystem.Snapshot.MousePosition - _previousMousePos;
             _previousMousePos = _inputSystem.Snapshot.MousePosition;
 
-            if (!ImGui.IsAnyWindowHovered() && (_inputSystem.Snapshot.IsMouseDown(MouseButton.Left) || _inputSystem.Snapshot.IsMouseDown(MouseButton.Right)))
+            if (!ImGui.IsAnyWindowHovered()
+                && !ImGui.GetIO().WantCaptureMouse
+                && (_inputSystem.Snapshot.IsMouseDown(MouseButton.Left) || _inputSystem.Snapshot.IsMouseDown(MouseButton.Right)))
             {
                 Yaw += mouseDelta.X * 0.01f;
                 Pitch += mouseDelta.Y * 0.01f;
