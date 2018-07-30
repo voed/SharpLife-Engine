@@ -95,6 +95,11 @@ namespace SharpLife.CommandSystem.Commands
         {
             var builder = AddArguments(new StringBuilder(), firstArgumentIndex);
 
+            if (builder.Length <= 0)
+            {
+                return string.Empty;
+            }
+
             return builder.ToString(1, builder.Length - 1);
         }
 
