@@ -27,6 +27,7 @@ using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
+using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.Engine.Shared.Maps;
 using SharpLife.Engine.Shared.UI;
@@ -85,6 +86,8 @@ namespace SharpLife.Engine.Engines
         public bool IsDedicatedServer => _hostType == HostType.DedicatedServer;
 
         public bool IsServerActive => _server?.Active == true;
+
+        public ForwardingTextWriter LogTextWriter { get; } = new ForwardingTextWriter();
 
         private HostType _hostType;
 
@@ -218,28 +221,33 @@ namespace SharpLife.Engine.Engines
         {
             var config = new LoggerConfiguration();
 
-            ITextFormatter formatter = null;
+            ITextFormatter fileFormatter = null;
 
             switch (EngineConfiguration.LoggingConfiguration.LogFormat)
             {
                 case LoggingConfiguration.Format.Text:
                     {
-                        formatter = new MessageTemplateTextFormatter("{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}", null);
+                        fileFormatter = new MessageTemplateTextFormatter("{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}", null);
                         break;
                     }
 
                 case LoggingConfiguration.Format.CompactJSON:
                     {
-                        formatter = new CompactJsonFormatter();
+                        fileFormatter = new CompactJsonFormatter();
                         break;
                     }
             }
 
             //Invalid config setting for RetainedFileCountLimit will throw
             config
-                .WriteTo.File(formatter, $"{gameDirectory}/logs/engine.log",
+                .WriteTo.File(fileFormatter, $"{gameDirectory}/logs/engine.log",
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: EngineConfiguration.LoggingConfiguration.RetainedFileCountLimit);
+
+            //Use basic formatting for console output
+            var logFormatter = new MessageTemplateTextFormatter("{Message:lj}{NewLine}", null);
+
+            config.WriteTo.TextWriter(logFormatter, LogTextWriter);
 
             return config.CreateLogger();
         }

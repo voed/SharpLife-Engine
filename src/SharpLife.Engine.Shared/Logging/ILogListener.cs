@@ -13,15 +13,12 @@
 *
 ****/
 
-using SharpLife.CommandSystem;
-using SharpLife.Engine.Shared.Logging;
-
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Engine.Shared.Logging
 {
-    public interface IClientEngine
+    public interface ILogListener
     {
-        ICommandContext CommandContext { get; }
+        void Write(char value);
 
-        ILogListener LogListener { get; set; }
+        void Write(char[] buffer, int index, int count);
     }
 }

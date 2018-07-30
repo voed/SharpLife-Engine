@@ -26,6 +26,7 @@ using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.GameUtils;
+using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.FileSystem;
 using SharpLife.Networking.Shared;
@@ -37,13 +38,19 @@ using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
-    public partial class EngineClientHost : IEngineClientHost
+    public partial class EngineClientHost : IEngineClientHost, IClientEngine
     {
         public ICommandContext CommandContext { get; }
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
         public ClientConnectionStatus ConnectionStatus { get; set; }
+
+        public ILogListener LogListener
+        {
+            get => _engine.LogTextWriter.Listener;
+            set => _engine.LogTextWriter.Listener = value;
+        }
 
         private readonly IEngine _engine;
 
@@ -138,6 +145,8 @@ namespace SharpLife.Engine.Client.Host
             //Set up services
             var serviceCollection = new ServiceCollection();
 
+            serviceCollection.AddSingleton(_logger);
+            serviceCollection.AddSingleton<IClientEngine>(this);
             serviceCollection.AddSingleton<IViewState>(_renderer);
 
             _game.Entrypoint.Initialize(serviceCollection);

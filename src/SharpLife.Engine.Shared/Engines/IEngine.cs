@@ -15,6 +15,7 @@
 
 using SharpLife.CommandSystem;
 using SharpLife.Engine.Shared.Configuration;
+using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.Maps;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
@@ -92,6 +93,11 @@ namespace SharpLife.Engine.Shared.Engines
         /// Whether the local server is running
         /// </summary>
         bool IsServerActive { get; }
+
+        /// <summary>
+        /// Gets the log text writer used to forward logs to the console
+        /// </summary>
+        ForwardingTextWriter LogTextWriter { get; }
 
         /// <summary>
         /// Creates the user interface if it does not exist
