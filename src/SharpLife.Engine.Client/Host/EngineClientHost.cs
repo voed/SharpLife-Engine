@@ -215,7 +215,10 @@ namespace SharpLife.Engine.Client.Host
 
             _clientUI.Update(deltaSeconds);
 
-            _netClient.SendServerMessages(_netClient.Server);
+            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
+            {
+                _netClient.SendServerMessages(_netClient.Server);
+            }
         }
 
         public void Draw()
