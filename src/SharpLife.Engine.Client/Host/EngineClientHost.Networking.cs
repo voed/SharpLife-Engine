@@ -190,6 +190,8 @@ namespace SharpLife.Engine.Client.Host
                 EventSystem.DispatchEvent(EngineEvents.ClientDisconnectSent);
             }
 
+            _renderer.ClearBSP();
+
             EventSystem.DispatchEvent(EngineEvents.ClientEndDisconnect);
 
             if (shutdownServer)

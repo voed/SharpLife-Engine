@@ -42,11 +42,15 @@ namespace SharpLife.Engine.Client.Renderer
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly string _envMapDirectory;
+
         private readonly SceneContext _sc;
 
         private readonly ImGuiRenderable _imGuiRenderable;
 
         private BSPWorldRenderable _bspWorldRenderable;
+
+        private Skybox2D _skyboxRenderable;
 
         private readonly CommandList _frameCommands;
 
@@ -66,6 +70,7 @@ namespace SharpLife.Engine.Client.Renderer
             _glContext = glContext;
 
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _envMapDirectory = envMapDirectory ?? throw new ArgumentNullException(nameof(envMapDirectory));
 
             _sc = new SceneContext(fileSystem, shadersDirectory);
 
@@ -97,10 +102,6 @@ namespace SharpLife.Engine.Client.Renderer
 
             var coordinateAxes = new CoordinateAxes();
             _scene.AddRenderable(coordinateAxes);
-
-            //TODO: define default in config
-            Skybox2D skybox = Skybox2D.LoadDefaultSkybox(fileSystem, envMapDirectory, "2desert");
-            _scene.AddRenderable(skybox);
 
             FinalPass finalPass = new FinalPass();
             _scene.AddRenderable(finalPass);
@@ -159,23 +160,44 @@ namespace SharpLife.Engine.Client.Renderer
                 throw new ArgumentNullException(nameof(bspFile));
             }
 
-            if (_bspWorldRenderable != null)
-            {
-                _scene.RemoveRenderable(_bspWorldRenderable);
-            }
+            ClearBSP();
 
             _bspWorldRenderable = new BSPWorldRenderable(_fileSystem, bspFile, Framework.Extension.WAD);
 
             _scene.AddRenderable(_bspWorldRenderable);
+
+            //TODO: define default in config
+            _skyboxRenderable = Skybox2D.LoadDefaultSkybox(_fileSystem, _envMapDirectory, "2desert");
+            _scene.AddRenderable(_skyboxRenderable);
 
             //Set up graphics data
             CommandList initCL = _gd.ResourceFactory.CreateCommandList();
             initCL.Name = "BSP Initialization Command List";
             initCL.Begin();
             _bspWorldRenderable.CreateDeviceObjects(_gd, initCL, _sc);
+            _skyboxRenderable.CreateDeviceObjects(_gd, initCL, _sc);
             initCL.End();
             _gd.SubmitCommands(initCL);
             initCL.Dispose();
+        }
+
+        public void ClearBSP()
+        {
+            if (_bspWorldRenderable != null)
+            {
+                _scene.RemoveRenderable(_bspWorldRenderable);
+                _bspWorldRenderable = null;
+            }
+
+            if (_skyboxRenderable != null)
+            {
+                _scene.RemoveRenderable(_skyboxRenderable);
+                _skyboxRenderable = null;
+            }
+
+            //Clear all graphics data
+            //TODO: need to create separate caches for per-map and persistent data
+            _sc.ResourceCache.DestroyAllDeviceObjects();
         }
     }
 }
