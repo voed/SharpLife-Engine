@@ -220,6 +220,8 @@ namespace SharpLife.Engine.Engines
         {
             var config = new LoggerConfiguration();
 
+            config.MinimumLevel.Verbose();
+
             ITextFormatter fileFormatter = null;
 
             switch (EngineConfiguration.LoggingConfiguration.LogFormat)
