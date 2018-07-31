@@ -27,6 +27,11 @@ namespace SharpLife.Engine.Server.Host
 
         private ServerClient FindClient(IPEndPoint endPoint)
         {
+            if (endPoint == null)
+            {
+                throw new ArgumentNullException(nameof(endPoint));
+            }
+
             var client = _clientList.FindClientByEndPoint(endPoint, false);
 
             if (client != null)
