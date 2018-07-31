@@ -34,7 +34,10 @@ namespace SharpLife.Engine.Client.Host
         /// </summary>
         IEventSystem EventSystem { get; }
 
-        ClientConnectionStatus ConnectionStatus { get; }
+        /// <summary>
+        /// Which connection setup stage the client is in right now
+        /// </summary>
+        ClientConnectionSetupStatus ConnectionSetupStatus { get; set; }
 
         void PostInitialize();
 
@@ -55,5 +58,7 @@ namespace SharpLife.Engine.Client.Host
         /// </summary>
         /// <param name="shutdownServer">Whether to shut down the local server, if running</param>
         void Disconnect(bool shutdownServer);
+
+        void EndGame(string reason);
     }
 }

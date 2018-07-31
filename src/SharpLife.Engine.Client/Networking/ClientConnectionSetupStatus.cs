@@ -15,7 +15,7 @@
 
 namespace SharpLife.Engine.Client.Networking
 {
-    public enum ClientConnectionStatus
+    public enum ClientConnectionSetupStatus
     {
         /// <summary>
         /// Not connected to any server
@@ -40,6 +40,6 @@ namespace SharpLife.Engine.Client.Networking
         /// <summary>
         /// Connected, initialized and active on the server
         /// </summary>
-        Active
+        Active,
     }
 }

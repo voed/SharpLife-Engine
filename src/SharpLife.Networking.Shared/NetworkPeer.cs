@@ -14,7 +14,6 @@
 ****/
 
 using Lidgren.Network;
-using System;
 
 namespace SharpLife.Networking.Shared
 {
@@ -35,22 +34,19 @@ namespace SharpLife.Networking.Shared
             Peer.Shutdown(bye);
         }
 
-        public void ReadPackets(Action<NetIncomingMessage> handler)
+        public void ReadPackets()
         {
-            if (handler == null)
-            {
-                throw new ArgumentNullException(nameof(handler));
-            }
-
             NetIncomingMessage im;
 
             while ((im = Peer.ReadMessage()) != null)
             {
-                handler(im);
+                HandlePacket(im);
 
                 Peer.Recycle(im);
             }
         }
+
+        protected abstract void HandlePacket(NetIncomingMessage message);
 
         public void FlushOutgoingPackets()
         {

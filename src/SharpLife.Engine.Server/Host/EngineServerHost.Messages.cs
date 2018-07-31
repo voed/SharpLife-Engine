@@ -18,7 +18,6 @@ using Lidgren.Network;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
-using SharpLife.Networking.Shared.MessageMapping;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
 
@@ -26,23 +25,14 @@ namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost : IMessageReceiveHandler<NewConnection>
     {
-        private SendMappings _netSendMappings;
-        private MessagesReceiveHandler _netReceiveHandler;
-
-        private void CreateMessageHandlers()
+        private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
-            _netSendMappings = new SendMappings(NetMessages.ServerToClientMessages);
-            _netReceiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ClientToServerMessages, true);
-        }
-
-        private void RegisterMessageHandlers()
-        {
-            _netReceiveHandler.RegisterHandler<NewConnection>(this);
+            receiveHandler.RegisterHandler<NewConnection>(this);
         }
 
         public void ReceiveMessage(NetConnection connection, NewConnection message)
         {
-            var client = _clientList.FindClientByEndPoint(connection.RemoteEndPoint);
+            var client = ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
 
             if (!client.Spawned || client.Active)
             {
@@ -51,8 +41,6 @@ namespace SharpLife.Engine.Server.Host
                 //TODO: send custom user messages
 
                 SendServerInfo(client);
-
-                client.Connected = true;
             }
         }
 

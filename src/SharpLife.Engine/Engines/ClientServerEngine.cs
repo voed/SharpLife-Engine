@@ -20,7 +20,6 @@ using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Client.Host;
-using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.CommandSystem;
@@ -436,11 +435,8 @@ namespace SharpLife.Engine.Engines
 
             StopServer();
 
-            if (_client != null && _client.ConnectionStatus != ClientConnectionStatus.NotConnected)
-            {
-                //Disconnected by server
-                _client.Disconnect(false);
-            }
+            //Disconnected by server
+            _client?.Disconnect(false);
         }
 
         public void StopServer()

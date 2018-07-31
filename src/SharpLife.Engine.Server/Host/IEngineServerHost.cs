@@ -14,7 +14,9 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Server.Clients;
 using SharpLife.Utility.Events;
+using System.Net;
 
 namespace SharpLife.Engine.Server.Host
 {
@@ -40,6 +42,8 @@ namespace SharpLife.Engine.Server.Host
         /// </summary>
         bool Active { get; }
 
+        ServerClientList ClientList { get; }
+
         void Shutdown();
 
         /// <summary>
@@ -58,5 +62,7 @@ namespace SharpLife.Engine.Server.Host
         void Stop();
 
         void RunFrame(float deltaSeconds);
+
+        ServerClient FindClient(IPEndPoint endPoint);
     }
 }

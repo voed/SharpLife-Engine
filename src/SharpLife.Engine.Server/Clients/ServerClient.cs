@@ -25,7 +25,7 @@ namespace SharpLife.Engine.Server.Clients
     /// <summary>
     /// Represents a single client on a server
     /// </summary>
-    internal sealed class ServerClient
+    public sealed class ServerClient
     {
         private readonly SendMappings _sendMappings;
 

@@ -18,7 +18,6 @@ using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
-using SharpLife.Networking.Shared.MessageMapping;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
 using System.Net;
@@ -29,31 +28,24 @@ namespace SharpLife.Engine.Client.Host
         IMessageReceiveHandler<ServerInfo>,
         IMessageReceiveHandler<Print>
     {
-        private SendMappings _netSendMappings;
-        private MessagesReceiveHandler _netReceiveHandler;
-
-        private void CreateMessageHandlers()
+        private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
-            _netSendMappings = new SendMappings(NetMessages.ClientToServerMessages);
-            _netReceiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ServerToClientMessages, true);
-        }
-
-        private void RegisterMessageHandlers()
-        {
-            _netReceiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
-            _netReceiveHandler.RegisterHandler<ServerInfo>(this);
-            _netReceiveHandler.RegisterHandler<Print>(this);
+            receiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
+            receiveHandler.RegisterHandler<ServerInfo>(this);
+            receiveHandler.RegisterHandler<Print>(this);
         }
 
         public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
         {
             EventSystem.DispatchEvent(EngineEvents.ClientReceivedAck);
 
-            if (ConnectionStatus == ClientConnectionStatus.Connected)
+            if (ConnectionSetupStatus == ClientConnectionSetupStatus.Connected)
             {
                 _logger.Debug("Duplicate connect ack. received.  Ignored.");
                 return;
             }
+
+            ConnectionSetupStatus = ClientConnectionSetupStatus.Connected;
 
             _userId = message.UserId;
             _netClient.Server.TrueAddress = NetUtilities.StringToIPAddress(message.TrueAddress, NetConstants.DefaultServerPort);
@@ -67,8 +59,6 @@ namespace SharpLife.Engine.Client.Host
             {
                 _logger.Debug("Connection accepted.");
             }
-
-            ConnectionStatus = ClientConnectionStatus.Connected;
 
             //TODO: set state variables
 

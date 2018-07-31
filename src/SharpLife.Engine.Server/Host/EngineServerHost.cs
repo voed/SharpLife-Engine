@@ -104,12 +104,9 @@ namespace SharpLife.Engine.Server.Host
                 _maxPlayers.String = maxPlayersValue;
             }
 
-            _clientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
+            ClientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
 
             LoadGameAssembly();
-
-            CreateMessageHandlers();
-            RegisterMessageHandlers();
         }
 
         private void LoadGameAssembly()
@@ -129,6 +126,9 @@ namespace SharpLife.Engine.Server.Host
         public void Shutdown()
         {
             Stop();
+
+            //Always shut down the networking system, even if we weren't active
+            _netServer?.Shutdown(NetMessages.ServerShutdownMessage);
 
             _game?.Entrypoint.Shutdown();
 
@@ -225,28 +225,29 @@ namespace SharpLife.Engine.Server.Host
 
                 Active = false;
 
-                foreach (var client in _clientList)
+                foreach (var client in ClientList)
                 {
                     DropClient(client, NetMessages.ServerShutdownMessage);
                 }
             }
-
-            //Always shut down the networking system, even if we weren't active
-            _netServer?.Shutdown(NetMessages.ServerShutdownMessage);
         }
 
         public void RunFrame(float deltaSeconds)
         {
+            //Always process packets so we can handle disconnection properly after listen server shutdown
+            _netServer?.ReadPackets();
+
             if (!Active)
             {
                 return;
             }
 
-            _netServer.ReadPackets(HandlePacket);
-
-            foreach (var client in _clientList)
+            if (_netServer != null)
             {
-                _netServer.SendClientMessages(client);
+                foreach (var client in ClientList)
+                {
+                    _netServer.SendClientMessages(client);
+                }
             }
         }
     }

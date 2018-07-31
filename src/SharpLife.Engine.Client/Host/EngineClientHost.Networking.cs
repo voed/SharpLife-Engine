@@ -13,12 +13,12 @@
 *
 ****/
 
-using Lidgren.Network;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
-using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Communication;
+using SharpLife.Networking.Shared.MessageMapping;
 using System;
 
 namespace SharpLife.Engine.Client.Host
@@ -28,95 +28,29 @@ namespace SharpLife.Engine.Client.Host
         private NetworkClient _netClient;
 
         /// <summary>
-        /// (Re)creates the network client, using current client configuration values
+        /// Creates the network client, using current client configuration values
         /// </summary>
-        private void CreateNetworkClient()
-        {
-            //Disconnect any previous connection
-            if (_netClient != null)
-            {
-                Disconnect(false);
-            }
-
-            //TODO: could combine the app identifier with the game name to allow concurrent game hosts
-            //Not possible since the original engine launcher blocks launching multiple instances
-            //Should be possible for servers though
-
-            _netClient = new NetworkClient(
-                _logger,
-                _netSendMappings,
-                NetConstants.AppIdentifier,
-                _clientport.Integer,
-                _cl_resend.Float,
-                _cl_timeout.Float);
-        }
-
         private void SetupNetworking()
         {
-            CreateMessageHandlers();
-            RegisterMessageHandlers();
-
-            CreateNetworkClient();
-        }
-
-        private void HandlePacket(NetIncomingMessage message)
-        {
-            switch (message.MessageType)
+            if (_netClient == null)
             {
-                case NetIncomingMessageType.StatusChanged:
-                    HandleStatusChanged(message);
-                    break;
+                var receiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ServerToClientMessages, true);
 
-                case NetIncomingMessageType.UnconnectedData:
-                    //TODO: implement
-                    break;
+                RegisterMessageHandlers(receiveHandler);
 
-                case NetIncomingMessageType.Data:
-                    HandleData(message);
-                    break;
+                _netClient = new NetworkClient(
+                    _logger,
+                    this,
+                    new SendMappings(NetMessages.ClientToServerMessages),
+                    receiveHandler,
+                    _cl_name,
+                    NetConstants.AppIdentifier,
+                    _clientport.Integer,
+                    _cl_resend.Float,
+                    _cl_timeout.Float);
 
-                case NetIncomingMessageType.VerboseDebugMessage:
-                    _logger.Verbose(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.DebugMessage:
-                    _logger.Debug(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.WarningMessage:
-                    _logger.Warning(message.ReadString());
-                    break;
-
-                case NetIncomingMessageType.ErrorMessage:
-                    _logger.Error(message.ReadString());
-                    break;
+                _netClient.Start();
             }
-        }
-
-        private void HandleStatusChanged(NetIncomingMessage message)
-        {
-            var status = (NetConnectionStatus)message.ReadByte();
-
-            string reason = message.ReadString();
-
-            switch (status)
-            {
-                case NetConnectionStatus.Disconnected:
-                    {
-                        if (ConnectionStatus != ClientConnectionStatus.NotConnected)
-                        {
-                            //Disconnected by server
-                            _engine.EndGame("Server disconnected");
-                            //TODO: discard remaining incoming packets?
-                        }
-                        break;
-                    }
-            }
-        }
-
-        private void HandleData(NetIncomingMessage message)
-        {
-            _netReceiveHandler.ReadMessages(message.SenderConnection, message);
         }
 
         /// <summary>
@@ -145,28 +79,14 @@ namespace SharpLife.Engine.Client.Host
 
             SetupNetworking();
 
-            EventSystem.DispatchEvent(EngineEvents.ClientStartConnect);
-
             //TODO: initialize client state
 
-            CreateNetworkClient();
-
-            _netClient.Start();
-
-            ConnectionStatus = ClientConnectionStatus.Connecting;
-
-            //Told to connect to listen server, translate address
-            if (address == NetAddresses.Local)
+            if (_netClient.IsConnected && !_netClient.IsDisconnecting)
             {
-                address = NetConstants.LocalHost;
+                Disconnect(false);
             }
 
-            var userInfo = new ClientUserInfo
-            {
-                Name = _cl_name.String
-            };
-
-            _netClient.Connect(address, userInfo);
+            _netClient.Connect(address);
         }
 
         private void Disconnect(ICommandArgs command)
@@ -176,21 +96,12 @@ namespace SharpLife.Engine.Client.Host
 
         public void Disconnect(bool shutdownServer)
         {
-            //Always dispatch even if we're not connected
+            //Always dispatch, even if we're not connected
             EventSystem.DispatchEvent(EngineEvents.ClientStartDisconnect);
 
-            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
-            {
-                //TODO: implement
-                _netClient.Shutdown(NetMessages.ClientDisconnectMessage);
+            _netClient?.Disconnect(NetMessages.ClientDisconnectMessage);
 
-                //The client considers itself disconnected immediately
-                ConnectionStatus = ClientConnectionStatus.NotConnected;
-
-                EventSystem.DispatchEvent(EngineEvents.ClientDisconnectSent);
-            }
-
-            _renderer.ClearBSP();
+            ConnectionSetupStatus = ClientConnectionSetupStatus.NotConnected;
 
             EventSystem.DispatchEvent(EngineEvents.ClientEndDisconnect);
 
@@ -198,6 +109,10 @@ namespace SharpLife.Engine.Client.Host
             {
                 _engine.StopServer();
             }
+
+            _renderer.ClearBSP();
+
+            //TODO: reset client state
         }
     }
 }

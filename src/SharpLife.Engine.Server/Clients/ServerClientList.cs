@@ -26,7 +26,7 @@ namespace SharpLife.Engine.Server.Clients
     /// Maintains the list of clients and provides common operations on them
     /// Enumerable enumerates all active clients
     /// </summary>
-    internal sealed class ServerClientList : IEnumerable<ServerClient>
+    public sealed class ServerClientList : IEnumerable<ServerClient>
     {
         private readonly List<ServerClient> _clients;
 

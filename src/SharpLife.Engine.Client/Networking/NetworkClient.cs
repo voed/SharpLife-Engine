@@ -16,8 +16,12 @@
 using Google.Protobuf;
 using Lidgren.Network;
 using Serilog;
+using SharpLife.CommandSystem.Commands;
+using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Client.Servers;
+using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.MessageMapping;
 using SharpLife.Networking.Shared.Messages.Client;
 using System;
@@ -30,11 +34,24 @@ namespace SharpLife.Engine.Client.Networking
     /// </summary>
     internal class NetworkClient : NetworkPeer
     {
-        public NetConnectionStatus ConnectionStatus => _client.ConnectionStatus;
+        /// <summary>
+        /// The current connection status, based on last processed status change message
+        /// </summary>
+        public NetConnectionStatus ConnectionStatus { get; private set; }
+
+        public bool IsConnected => ConnectionStatus != NetConnectionStatus.None && ConnectionStatus != NetConnectionStatus.Disconnected;
+
+        public bool IsDisconnecting { get; private set; }
 
         private readonly ILogger _logger;
 
+        private readonly IEngineClientHost _clientHost;
+
         private readonly SendMappings _sendMappings;
+
+        private readonly MessagesReceiveHandler _receiveHandler;
+
+        private readonly IVariable _cl_name;
 
         private readonly NetClient _client;
 
@@ -43,18 +60,39 @@ namespace SharpLife.Engine.Client.Networking
         public ClientServer Server { get; private set; }
 
         /// <summary>
+        /// Invoked when the client has fully disconnected from a server
+        /// </summary>
+        public event Action OnFullyDisconnected;
+
+        private bool _doFullDisconnectCallback;
+
+        /// <summary>
         /// Creates a new client network handler
         /// </summary>
         /// <param name="logger"></param>
+        /// <param name="clientHost"></param>
         /// <param name="sendMappings"></param>
+        /// <param name="receiveHandler"></param>
+        /// <param name="cl_name"></param>
         /// <param name="appIdentifier">App identifier to use for networking. Must match the identifier given to servers</param>
         /// <param name="port">Port to use</param>
         /// <param name="resendHandshakeInterval"></param>
         /// <param name="connectionTimeout"></param>
-        public NetworkClient(ILogger logger, SendMappings sendMappings, string appIdentifier, int port, float resendHandshakeInterval, float connectionTimeout)
+        public NetworkClient(ILogger logger,
+            IEngineClientHost clientHost,
+            SendMappings sendMappings,
+            MessagesReceiveHandler receiveHandler,
+            IVariable cl_name,
+            string appIdentifier,
+            int port,
+            float resendHandshakeInterval,
+            float connectionTimeout)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _clientHost = clientHost ?? throw new ArgumentNullException(nameof(clientHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
+            _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+            _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
 
             var config = new NetPeerConfiguration(appIdentifier)
             {
@@ -79,11 +117,50 @@ namespace SharpLife.Engine.Client.Networking
             _client = new NetClient(config);
         }
 
-        public void Connect(string address, ClientUserInfo userInfo)
+        public void RunFrame()
         {
-            if (userInfo == null)
+            //This is done here to ensure that we've got no more packets to read
+            if (_doFullDisconnectCallback)
             {
-                throw new ArgumentNullException(nameof(userInfo));
+                _doFullDisconnectCallback = false;
+
+                OnFullyDisconnected?.Invoke();
+                OnFullyDisconnected = null;
+            }
+        }
+
+        public void Connect(string address)
+        {
+            if (address == null)
+            {
+                throw new ArgumentNullException(nameof(address));
+            }
+
+            if (_clientHost.ConnectionSetupStatus == ClientConnectionSetupStatus.Connecting)
+            {
+                _logger.Information($"Already connecting to a server; connect command to {address} ignored");
+                return;
+            }
+
+            if (IsConnected)
+            {
+                //Disconnect from current server first
+                if (!IsDisconnecting)
+                {
+                    Disconnect(NetMessages.ClientDisconnectMessage);
+                }
+
+                //Delay until we've fully disconnected
+                OnFullyDisconnected += () => Connect(address);
+                return;
+            }
+
+            _clientHost.EventSystem.DispatchEvent(EngineEvents.ClientStartConnect);
+
+            //Told to connect to listen server, translate address
+            if (address == NetAddresses.Local)
+            {
+                address = NetConstants.LocalHost;
             }
 
             IPEndPoint ipAddress;
@@ -110,12 +187,27 @@ namespace SharpLife.Engine.Client.Networking
             //Send protocol version first so compatibility is known
             message.WriteVariableUInt32(NetConstants.ProtocolVersion);
 
+            var userInfo = new ClientUserInfo
+            {
+                Name = _cl_name.String
+            };
+
             using (var stream = new NetBufferStream(message))
             {
                 userInfo.WriteDelimitedTo(stream);
             }
 
             var connection = _client.Connect(ipAddress, message);
+
+            if (connection == null)
+            {
+                //Already started connecting, but status hasn't updated yet
+                //Should always be caught by the setup status check above
+                _logger.Debug("Lidgren returned null connection from Connect()");
+                return;
+            }
+
+            _clientHost.ConnectionSetupStatus = ClientConnectionSetupStatus.Connecting;
 
             Server = new ClientServer(_sendMappings, address, connection);
         }
@@ -126,11 +218,98 @@ namespace SharpLife.Engine.Client.Networking
         /// <param name="byeMessage"></param>
         public void Disconnect(string byeMessage)
         {
-            _client.Disconnect(byeMessage);
+            //Don't disconnect if not connected or if already disconnecting
+            if (IsConnected && !IsDisconnecting)
+            {
+                IsDisconnecting = true;
 
-            Server = null;
+                _client.Disconnect(byeMessage);
 
-            //TODO: close Steam connection
+                //TODO: close Steam connection
+
+                _clientHost.EventSystem.DispatchEvent(EngineEvents.ClientDisconnectSent);
+            }
+        }
+
+        protected override void HandlePacket(NetIncomingMessage message)
+        {
+            switch (message.MessageType)
+            {
+                case NetIncomingMessageType.StatusChanged:
+                    HandleStatusChanged(message);
+                    break;
+
+                case NetIncomingMessageType.UnconnectedData:
+                    //TODO: implement
+                    break;
+
+                case NetIncomingMessageType.Data:
+                    HandleData(message);
+                    break;
+
+                case NetIncomingMessageType.VerboseDebugMessage:
+                    _logger.Verbose(message.ReadString());
+                    break;
+
+                case NetIncomingMessageType.DebugMessage:
+                    _logger.Debug(message.ReadString());
+                    break;
+
+                case NetIncomingMessageType.WarningMessage:
+                    _logger.Warning(message.ReadString());
+                    break;
+
+                case NetIncomingMessageType.ErrorMessage:
+                    _logger.Error(message.ReadString());
+                    break;
+            }
+        }
+
+        private void HandleStatusChanged(NetIncomingMessage message)
+        {
+            var status = (NetConnectionStatus)message.ReadByte();
+
+            ConnectionStatus = status;
+
+            string reason = message.ReadString();
+
+            _logger.Verbose($"Server status changed: {status} {reason}");
+
+            switch (status)
+            {
+                //Clear our server data only once we're fully disconnected so we can process the packets
+                case NetConnectionStatus.Disconnected:
+                    {
+                        if (_clientHost.ConnectionSetupStatus != ClientConnectionSetupStatus.NotConnected)
+                        {
+                            _clientHost.ConnectionSetupStatus = ClientConnectionSetupStatus.NotConnected;
+
+                            //Don't process disconnect initiated by us
+                            if (reason != NetMessages.ClientDisconnectMessage)
+                            {
+                                //Disconnected by server
+                                _clientHost.EndGame("Server disconnected");
+                            }
+                        }
+
+                        Server = null;
+
+                        IsDisconnecting = false;
+                        _doFullDisconnectCallback = true;
+
+                        break;
+                    }
+            }
+        }
+
+        private void HandleData(NetIncomingMessage message)
+        {
+            if (_clientHost.ConnectionSetupStatus == ClientConnectionSetupStatus.NotConnected)
+            {
+                return;
+            }
+
+            _receiveHandler.ReadMessages(message.SenderConnection, message);
         }
 
         /// <summary>

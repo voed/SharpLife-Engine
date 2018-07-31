@@ -44,7 +44,7 @@ namespace SharpLife.Engine.Client.Host
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
-        public ClientConnectionStatus ConnectionStatus { get; set; }
+        public ClientConnectionSetupStatus ConnectionSetupStatus { get; set; }
 
         public ILogListener LogListener
         {
@@ -164,6 +164,12 @@ namespace SharpLife.Engine.Client.Host
 
             Disconnect(false);
 
+            if (_netClient != null)
+            {
+                _netClient.Shutdown(NetMessages.ClientShutdownMessage);
+                _netClient = null;
+            }
+
             _engine.CommandSystem.DestroyContext(CommandContext);
         }
 
@@ -206,16 +212,19 @@ namespace SharpLife.Engine.Client.Host
 
         public void Update(float deltaSeconds)
         {
-            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
+            if (_netClient != null)
             {
-                _netClient.ReadPackets(HandlePacket);
+                //Always read packets, even if not connected to process disconnects fully
+                _netClient.ReadPackets();
+                _netClient.RunFrame();
             }
 
             _renderer.Update(deltaSeconds);
 
             _clientUI.Update(deltaSeconds);
 
-            if (ConnectionStatus != ClientConnectionStatus.NotConnected)
+            //Only send messages if we're still actively connected, once we start disconnecting all user messages should be stopped
+            if (_netClient != null && _netClient.IsConnected && !_netClient.IsDisconnecting)
             {
                 _netClient.SendServerMessages(_netClient.Server);
             }
@@ -226,6 +235,11 @@ namespace SharpLife.Engine.Client.Host
             _clientUI.Draw();
 
             _renderer.Draw();
+        }
+
+        public void EndGame(string reason)
+        {
+            _engine.EndGame(reason);
         }
     }
 }

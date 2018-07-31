@@ -21,18 +21,16 @@ namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost
     {
-        private readonly ServerClientList _clientList;
+        public ServerClientList ClientList { get; }
 
-        private int _nextUserId = 1;
-
-        private ServerClient FindClient(IPEndPoint endPoint)
+        public ServerClient FindClient(IPEndPoint endPoint)
         {
             if (endPoint == null)
             {
                 throw new ArgumentNullException(nameof(endPoint));
             }
 
-            var client = _clientList.FindClientByEndPoint(endPoint, false);
+            var client = ClientList.FindClientByEndPoint(endPoint, false);
 
             if (client != null)
             {
@@ -61,9 +59,6 @@ namespace SharpLife.Engine.Server.Host
             _logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
 
             client.Disconnect(reason);
-
-            //To ensure that clients get the disconnect order
-            _netServer.FlushOutgoingPackets();
         }
     }
 }
