@@ -209,7 +209,7 @@ namespace SharpLife.Engine.Server.Host
 
         private void HandleData(NetIncomingMessage message)
         {
-            _netReceiveHandler.ReadMessages(message);
+            _netReceiveHandler.ReadMessages(message.SenderConnection, message);
         }
     }
 }

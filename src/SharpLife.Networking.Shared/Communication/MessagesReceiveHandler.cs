@@ -16,6 +16,7 @@
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using Lidgren.Network;
+using Serilog;
 using SharpLife.Networking.Shared.Messages;
 using System;
 using System.Collections.Generic;
@@ -42,16 +43,30 @@ namespace SharpLife.Networking.Shared.Communication
             public MessageDescriptor MessageDescriptor;
         }
 
+        private readonly ILogger _logger;
+
         private readonly IReadOnlyList<MessageHandlerData> _messageHandlers;
 
-        public MessagesReceiveHandler(IReadOnlyList<MessageDescriptor> messageDescriptors)
+        private readonly bool _traceMessageLogging;
+
+        /// <summary>
+        /// Creates a new messages receive handler
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="messageDescriptors"></param>
+        /// <param name="traceMessageLogging">Whether to enable message reception trace logging</param>
+        public MessagesReceiveHandler(ILogger logger, IReadOnlyList<MessageDescriptor> messageDescriptors, bool traceMessageLogging)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
             if (messageDescriptors == null)
             {
                 throw new ArgumentNullException(nameof(messageDescriptors));
             }
 
             _messageHandlers = messageDescriptors.Select(messageDescriptor => new MessageHandlerData { MessageDescriptor = messageDescriptor }).ToList();
+
+            _traceMessageLogging = traceMessageLogging;
         }
 
         private MessageHandlerData FindMessageData(Type type)
@@ -122,9 +137,16 @@ namespace SharpLife.Networking.Shared.Communication
         /// <summary>
         /// Reads messages from the stream and dispatches them to their registered handlers in the order that they are encountered
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="message"></param>
-        public void ReadMessages(NetIncomingMessage message)
+        public void ReadMessages(NetConnection sender, NetIncomingMessage message)
         {
+            //Sender is passed separately into this method because remote hails don't have a sender
+            if (sender == null)
+            {
+                throw new ArgumentNullException(nameof(sender));
+            }
+
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
@@ -140,7 +162,12 @@ namespace SharpLife.Networking.Shared.Communication
 
                     var protobufMessage = ReadDelimitedMessage(stream, data.MessageDescriptor);
 
-                    data.Handler(message.SenderConnection, protobufMessage);
+                    if (_traceMessageLogging)
+                    {
+                        _logger.Verbose($"Received message {protobufMessage.GetType().FullName} from {sender.RemoteEndPoint}");
+                    }
+
+                    data.Handler(sender, protobufMessage);
                 }
             }
         }

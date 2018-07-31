@@ -35,7 +35,7 @@ namespace SharpLife.Engine.Client.Host
         private void CreateMessageHandlers()
         {
             _netSendMappings = new SendMappings(NetMessages.ClientToServerMessages);
-            _netReceiveHandler = new MessagesReceiveHandler(NetMessages.ServerToClientMessages);
+            _netReceiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ServerToClientMessages, true);
         }
 
         private void RegisterMessageHandlers()

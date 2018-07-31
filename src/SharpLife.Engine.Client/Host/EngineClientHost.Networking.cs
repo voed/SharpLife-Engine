@@ -116,7 +116,7 @@ namespace SharpLife.Engine.Client.Host
 
         private void HandleData(NetIncomingMessage message)
         {
-            _netReceiveHandler.ReadMessages(message);
+            _netReceiveHandler.ReadMessages(message.SenderConnection, message);
         }
 
         /// <summary>
