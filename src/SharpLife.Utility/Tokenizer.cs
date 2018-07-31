@@ -26,6 +26,8 @@ namespace SharpLife.Utility
     {
         private readonly string _data;
 
+        private readonly IReadOnlyList<char> _singleCharacters;
+
         public string Token { get; private set; } = string.Empty;
 
         public int Index { get; private set; }
@@ -61,8 +63,8 @@ namespace SharpLife.Utility
         /// <summary>
         /// Characters to treat as their own tokens
         /// </summary>
-        private static readonly char[] SingleCharacters =
-        {
+        public static readonly IReadOnlyList<char> SingleCharacters =
+        new[]{
             '{',
             '}',
             '(',
@@ -71,9 +73,25 @@ namespace SharpLife.Utility
             ','
         };
 
+        /// <summary>
+        /// Creates a tokenizer that uses the default single characters list
+        /// </summary>
+        /// <param name="data"></param>
         public Tokenizer(string data)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
+            _singleCharacters = SingleCharacters;
+        }
+
+        /// <summary>
+        /// Creates a tokenizer that uses the given list of single characters
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="singleCharacters"></param>
+        public Tokenizer(string data, IReadOnlyList<char> singleCharacters)
+        {
+            _data = data ?? throw new ArgumentNullException(nameof(data));
+            _singleCharacters = singleCharacters ?? throw new ArgumentNullException(nameof(singleCharacters));
         }
 
         private void SkipWhitespace()
@@ -173,7 +191,7 @@ namespace SharpLife.Utility
             {
                 var c = _data[Index];
 
-                if (SingleCharacters.Contains(c))
+                if (_singleCharacters.Contains(c))
                 {
                     Token = new string(_data[Index++], 1);
 
@@ -201,7 +219,7 @@ namespace SharpLife.Utility
 
                     c = _data[Index];
                 }
-                while (!char.IsWhiteSpace(c) && !SingleCharacters.Contains(c));
+                while (!char.IsWhiteSpace(c) && !_singleCharacters.Contains(c));
 
                 //Either we're out of data, or we hit whitespace or a single character
                 Token = _data.Substring(startIndex, (endIndex - startIndex) + 1);
@@ -220,6 +238,25 @@ namespace SharpLife.Utility
             var list = new List<string>();
 
             for (var tokenizer = new Tokenizer(text); tokenizer.Next();)
+            {
+                list.Add(tokenizer.Token);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Gets all of the tokens from the given text
+        /// Uses the given list of single characters
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="singleCharacters"></param>
+        /// <returns></returns>
+        public static IList<string> GetTokens(string text, IReadOnlyList<char> singleCharacters)
+        {
+            var list = new List<string>();
+
+            for (var tokenizer = new Tokenizer(text, singleCharacters); tokenizer.Next();)
             {
                 list.Add(tokenizer.Token);
             }
