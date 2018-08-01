@@ -18,7 +18,7 @@ using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
-using SharpLife.Networking.Shared.MessageMapping;
+using SharpLife.Networking.Shared.Communication.MessageMapping;
 using System;
 
 namespace SharpLife.Engine.Client.Host

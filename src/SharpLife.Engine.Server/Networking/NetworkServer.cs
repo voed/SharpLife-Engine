@@ -19,7 +19,7 @@ using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
-using SharpLife.Networking.Shared.MessageMapping;
+using SharpLife.Networking.Shared.Communication.MessageMapping;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
 using System;

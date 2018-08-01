@@ -22,7 +22,7 @@ using SharpLife.Engine.Client.Servers;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
-using SharpLife.Networking.Shared.MessageMapping;
+using SharpLife.Networking.Shared.Communication.MessageMapping;
 using SharpLife.Networking.Shared.Messages.Client;
 using System;
 using System.Net;
