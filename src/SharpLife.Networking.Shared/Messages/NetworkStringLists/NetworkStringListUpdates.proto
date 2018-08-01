@@ -1,0 +1,34 @@
+﻿syntax = "proto3";
+
+package SharpLife.Networking.Shared.Messages.NetworkStringLists;
+
+//String index is local count + index in update
+message ListStringData
+{
+	string value = 1;
+}
+
+message ListStringDataUpdate
+{
+	uint32 index = 1;
+}
+
+//Updates a specific network string list
+message NetworkStringListFullUpdate
+{
+	uint32 list_id = 1;
+
+	//Lets the client patch up the correct index for a table
+	string name = 2;
+
+	repeated ListStringData strings = 3;
+}
+
+message NetworkStringListUpdate
+{
+	uint32 list_id = 1;
+
+	repeated ListStringData strings = 2;
+
+	repeated ListStringDataUpdate updates = 3;
+}

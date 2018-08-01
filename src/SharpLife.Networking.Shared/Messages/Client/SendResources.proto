@@ -1,0 +1,7 @@
+syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.Client;
+
+//Tells the server to start sending resources
+message SendResources
+{
+}

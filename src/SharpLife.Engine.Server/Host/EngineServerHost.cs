@@ -26,6 +26,7 @@ using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility.Events;
 using System;
+using System.Linq;
 
 namespace SharpLife.Engine.Server.Host
 {
@@ -191,7 +192,19 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapCRCComputed);
 
-            //TODO: add world to precache, precache bsp models
+            CreateNetworkStringLists();
+
+            //TODO: add binary data
+            _modelPrecache.Add(mapFileName);
+
+            foreach (var i in Enumerable.Range(0, _engine.MapManager.BSPFile.Models.Count))
+            {
+                _modelPrecache.Add($"*{i + 1}");
+            }
+
+            //TODO: create models for BSP models
+
+            //TODO: initialize sky
 
             return true;
         }
@@ -229,6 +242,8 @@ namespace SharpLife.Engine.Server.Host
                 {
                     DropClient(client, NetMessages.ServerShutdownMessage);
                 }
+
+                _netServer.StringListTransmitter.Clear();
             }
         }
 
@@ -241,6 +256,8 @@ namespace SharpLife.Engine.Server.Host
             {
                 return;
             }
+
+            _netServer.SendStringListUpdates();
 
             if (_netServer != null)
             {

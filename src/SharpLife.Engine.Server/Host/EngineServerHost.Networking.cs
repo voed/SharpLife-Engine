@@ -17,12 +17,15 @@ using SharpLife.Engine.Server.Networking;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 
 namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost
     {
         private NetworkServer _netServer;
+
+        private INetworkStringList _modelPrecache;
 
         private void CreateNetworkServer()
         {
@@ -57,6 +60,13 @@ namespace SharpLife.Engine.Server.Host
 
                 _netServer.Start();
             }
+        }
+
+        private void CreateNetworkStringLists()
+        {
+            _modelPrecache = _netServer.StringListTransmitter.CreateList("ModelPrecache");
+
+            //TODO: let game do the same
         }
     }
 }

@@ -23,11 +23,14 @@ using SharpLife.Networking.Shared.Messages.Server;
 
 namespace SharpLife.Engine.Server.Host
 {
-    public partial class EngineServerHost : IMessageReceiveHandler<NewConnection>
+    public partial class EngineServerHost :
+        IMessageReceiveHandler<NewConnection>,
+        IMessageReceiveHandler<SendResources>
     {
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
             receiveHandler.RegisterHandler<NewConnection>(this);
+            receiveHandler.RegisterHandler<SendResources>(this);
         }
 
         public void ReceiveMessage(NetConnection connection, NewConnection message)
@@ -36,6 +39,8 @@ namespace SharpLife.Engine.Server.Host
 
             if (!client.Spawned || client.Active)
             {
+                client.SetupStage = ServerClientSetupStage.AwaitingResourceTransmissionStart;
+
                 client.ConnectionStarted = _engine.EngineTime.ElapsedTime;
 
                 //TODO: send custom user messages
@@ -68,6 +73,39 @@ namespace SharpLife.Engine.Server.Host
             //TODO: tell game to send its own info now
 
             //TODO: send game networking data
+        }
+
+        /// <summary>
+        /// Client requests for resources during setup will send data in sequence
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="message"></param>
+        public void ReceiveMessage(NetConnection connection, SendResources message)
+        {
+            var client = ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
+
+            switch (client.SetupStage)
+            {
+                case ServerClientSetupStage.AwaitingResourceTransmissionStart:
+                    {
+                        client.SetupStage = ServerClientSetupStage.SendingStringLists;
+
+                        client.NextStringListToSend = 0;
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingStringLists:
+                    {
+                        client.NextStringListToSend = client.LastStringListFullUpdate + 1;
+                        break;
+                    }
+
+                default:
+                    {
+                        _logger.Error($"Client requested sending of resources while in invalid state {client.SetupStage}");
+                        break;
+                    }
+            }
         }
     }
 }

@@ -23,7 +23,9 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using System;
 using System.Net;
 
@@ -32,7 +34,9 @@ namespace SharpLife.Engine.Client.Networking
     /// <summary>
     /// Lidgren client networking handler
     /// </summary>
-    internal class NetworkClient : NetworkPeer
+    internal class NetworkClient : NetworkPeer,
+        IMessageReceiveHandler<NetworkStringListFullUpdate>,
+        IMessageReceiveHandler<NetworkStringListUpdate>
     {
         /// <summary>
         /// The current connection status, based on last processed status change message
@@ -50,7 +54,6 @@ namespace SharpLife.Engine.Client.Networking
         private readonly SendMappings _sendMappings;
 
         private readonly MessagesReceiveHandler _receiveHandler;
-
         private readonly IVariable _cl_name;
 
         private readonly NetClient _client;
@@ -58,6 +61,8 @@ namespace SharpLife.Engine.Client.Networking
         protected override NetPeer Peer => _client;
 
         public ClientServer Server { get; private set; }
+
+        public NetworkStringListReceptionManager StringListReceiver { get; } = new NetworkStringListReceptionManager();
 
         /// <summary>
         /// Invoked when the client has fully disconnected from a server
@@ -292,6 +297,8 @@ namespace SharpLife.Engine.Client.Networking
                             }
                         }
 
+                        StringListReceiver.Clear();
+
                         Server = null;
 
                         IsDisconnecting = false;
@@ -331,6 +338,16 @@ namespace SharpLife.Engine.Client.Networking
 
                 SendPacket(reliable, server.Connection, NetDeliveryMethod.ReliableOrdered);
             }
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
+        {
+            StringListReceiver.ProcessFullUpdate(message);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
+        {
+            StringListReceiver.ProcessUpdate(message);
         }
     }
 }

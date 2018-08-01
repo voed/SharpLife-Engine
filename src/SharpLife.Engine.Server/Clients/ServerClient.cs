@@ -52,6 +52,8 @@ namespace SharpLife.Engine.Server.Clients
 
         public double ConnectionStarted { get; set; }
 
+        public ServerClientSetupStage SetupStage { get; set; }
+
         /// <summary>
         /// Whether the client has spawned in the world
         /// </summary>
@@ -63,6 +65,16 @@ namespace SharpLife.Engine.Server.Clients
         public bool Active { get; set; }
 
         public string Name { get; set; }
+
+        /// <summary>
+        /// Id of the last string list that did a full update
+        /// </summary>
+        public int LastStringListFullUpdate { get; set; } = -1;
+
+        /// <summary>
+        /// Next string list to do a full update for
+        /// </summary>
+        public int NextStringListToSend { get; set; } = -1;
 
         private readonly PendingMessages _reliableMessages;
 

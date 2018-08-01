@@ -15,6 +15,7 @@
 
 using Google.Protobuf.Reflection;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 using System.Collections.Generic;
 
@@ -51,6 +52,7 @@ namespace SharpLife.Networking.Shared
         {
             //ClientUserInfo message is not included in this since it's the first message that gets sent
             NewConnection.Descriptor,
+            SendResources.Descriptor,
         };
 
         /// <summary>
@@ -63,6 +65,8 @@ namespace SharpLife.Networking.Shared
             ConnectAcknowledgement.Descriptor,
             ServerInfo.Descriptor,
             Print.Descriptor,
+            NetworkStringListFullUpdate.Descriptor,
+            NetworkStringListUpdate.Descriptor,
         };
     }
 }

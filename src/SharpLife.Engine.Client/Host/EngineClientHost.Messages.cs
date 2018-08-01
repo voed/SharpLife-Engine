@@ -18,21 +18,28 @@ using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
+using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
+using System;
 using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
     public partial class EngineClientHost : IMessageReceiveHandler<ConnectAcknowledgement>,
         IMessageReceiveHandler<ServerInfo>,
-        IMessageReceiveHandler<Print>
+        IMessageReceiveHandler<Print>,
+        IMessageReceiveHandler<NetworkStringListFullUpdate>,
+        IMessageReceiveHandler<NetworkStringListUpdate>
     {
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
             receiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
             receiveHandler.RegisterHandler<ServerInfo>(this);
             receiveHandler.RegisterHandler<Print>(this);
+            receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
+            receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
         }
 
         public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
@@ -82,11 +89,48 @@ namespace SharpLife.Engine.Client.Host
             }
 
             _renderer.LoadBSP(_engine.MapManager.BSPFile);
+
+            CreateNetworkStringLists();
+
+            _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
+
+            RequestResources();
+        }
+
+        private void _modelPrecache_OnStringAdded(IReadOnlyNetworkStringList list, int index)
+        {
+            _logger.Information($"Received {list.Name} string {list[index]}");
+        }
+
+        private void RequestResources()
+        {
+            _netClient.Server.AddMessage(new SendResources());
         }
 
         public void ReceiveMessage(NetConnection connection, Print message)
         {
             _logger.Information(message.MessageContents);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
+        {
+            try
+            {
+                _netClient.ReceiveMessage(connection, message);
+            }
+            catch (InvalidOperationException e)
+            {
+                _logger.Error(e, "An error occurred while processing a string list full update");
+                Disconnect(true);
+                return;
+            }
+
+            RequestResources();
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
+        {
+            _netClient.ReceiveMessage(connection, message);
         }
     }
 }

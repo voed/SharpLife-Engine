@@ -20,6 +20,7 @@ using SharpLife.Engine.Server.Host;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
 using System;
@@ -36,7 +37,6 @@ namespace SharpLife.Engine.Server.Networking
         private readonly SendMappings _sendMappings;
 
         private readonly MessagesReceiveHandler _receiveHandler;
-
         private readonly NetServer _server;
 
         private int _nextUserId = 1;
@@ -44,6 +44,8 @@ namespace SharpLife.Engine.Server.Networking
         protected override NetPeer Peer => _server;
 
         public bool IsRunning => _server.Status == NetPeerStatus.Running;
+
+        public NetworkStringListTransmissionManager StringListTransmitter { get; } = new NetworkStringListTransmissionManager();
 
         /// <summary>
         /// Creates a new server network handler
@@ -172,6 +174,8 @@ namespace SharpLife.Engine.Server.Networking
                 {
                     case NetConnectionStatus.Connected:
                         {
+                            client.SetupStage = ServerClientSetupStage.AwaitingSetupStart;
+
                             client.Connected = true;
 
                             var connectAcknowledgement = new ConnectAcknowledgement
@@ -261,6 +265,8 @@ namespace SharpLife.Engine.Server.Networking
                 _serverHost.ClientList.AddClientToSlot(client);
 
                 message.SenderConnection.Approve();
+
+                client.SetupStage = ServerClientSetupStage.Connecting;
             }
 
             _logger.Verbose("Client approved");
@@ -304,6 +310,67 @@ namespace SharpLife.Engine.Server.Networking
                 client.WriteMessages(unreliable, false);
 
                 SendPacket(unreliable, client.Connection, NetDeliveryMethod.UnreliableSequenced);
+            }
+        }
+
+        private void SendStringListFullUpdate(ServerClient client)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            if (client.NextStringListToSend < StringListTransmitter.Count)
+            {
+                var update = StringListTransmitter.CreateFullUpdate(client.NextStringListToSend);
+
+                client.AddMessage(update, true);
+
+                client.LastStringListFullUpdate = client.NextStringListToSend;
+
+                //Await client confirmation before sending next list
+            }
+            else
+            {
+                //TODO: change to next step
+                client.SetupStage = ServerClientSetupStage.Connected;
+            }
+
+            client.NextStringListToSend = -1;
+        }
+
+        /// <summary>
+        /// Send string list updates to all connected clients
+        /// </summary>
+        public void SendStringListUpdates()
+        {
+            //Only go through these steps if there are lists to send
+            var updates = StringListTransmitter.CreateUpdates();
+
+            foreach (var client in _serverHost.ClientList)
+            {
+                //Only if we've reached the point where we're sending string lists
+                if (client.Connected && client.SetupStage >= ServerClientSetupStage.SendingStringLists)
+                {
+                    var lastIdWeCanUpdate = client.LastStringListFullUpdate;
+
+                    if (client.SetupStage == ServerClientSetupStage.SendingStringLists
+                        && client.NextStringListToSend != -1)
+                    {
+                        SendStringListFullUpdate(client);
+                    }
+
+                    foreach (var update in updates)
+                    {
+                        //If we're sending full updates, we only want the client to receive these updates if they already received the initial full update
+                        //Since the last sent full update occurs just before these updates,
+                        //we don't send the data since anything this update sends is already part of the full update
+                        if ((int)update.ListId <= lastIdWeCanUpdate)
+                        {
+                            client.AddMessage(update, true);
+                        }
+                    }
+                }
             }
         }
     }
