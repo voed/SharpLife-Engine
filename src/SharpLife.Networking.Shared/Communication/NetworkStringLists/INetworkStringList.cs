@@ -31,13 +31,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         /// <summary>
         /// Sets binary data for the given string
+        /// Changing the binary data object will not automatically network changes; call this again to send changes
         /// </summary>
         /// <param name="value"></param>
         /// <param name="binaryData">Binary data to set. Pass null to clear</param>
         void SetBinaryData(string value, IMessage binaryData);
 
         /// <summary>
-        /// Sets binary data for the given string
+        /// <see cref="SetBinaryData(string, IMessage)"/>
         /// </summary>
         /// <param name="index"></param>
         /// <param name="binaryData">Binary data to set. Pass null to clear</param>

@@ -65,5 +65,35 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         IMessage GetBinaryData(string value);
 
         IMessage GetBinaryData(int index);
+
+        /// <summary>
+        /// Gets the user data object associated with this string
+        /// User data is not networked
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        object GetUserData(string value);
+
+        /// <summary>
+        /// <see cref="GetUserData(string)"/>
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        object GetUserData(int index);
+
+        /// <summary>
+        /// Sets the user data object associated with this string
+        /// User data is not networked
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="userData"></param>
+        void SetUserData(string value, object userData);
+
+        /// <summary>
+        /// <see cref="SetUserData(string, object)"/>
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="userData"></param>
+        void SetUserData(int index, object userData);
     }
 }

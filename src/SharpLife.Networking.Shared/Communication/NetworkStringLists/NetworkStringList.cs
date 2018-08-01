@@ -26,6 +26,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         {
             public string value;
             public IMessage binaryData;
+            public object userData;
         }
 
         private readonly List<StringData> _list = new List<StringData>();
@@ -90,6 +91,40 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             var data = _list[index];
 
             return data.binaryData;
+        }
+
+        public object GetUserData(string value)
+        {
+            var index = IndexOf(value);
+
+            if (index == -1)
+            {
+                return null;
+            }
+
+            return GetUserData(index);
+        }
+
+        public object GetUserData(int index)
+        {
+            return _list[index].userData;
+        }
+
+        public void SetUserData(string value, object userData)
+        {
+            var index = IndexOf(value);
+
+            if (index == -1)
+            {
+                throw new ArgumentException($"String \"{value}\" is not in list {Name}");
+            }
+
+            SetUserData(index, userData);
+        }
+
+        public void SetUserData(int index, object userData)
+        {
+            _list[index].userData = userData;
         }
 
         private void CheckBinaryDataType(IMessage binaryData)
