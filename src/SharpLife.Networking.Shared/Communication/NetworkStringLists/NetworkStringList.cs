@@ -30,6 +30,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         private readonly List<StringData> _list = new List<StringData>();
 
+        private readonly IBinaryDataDescriptorSet _binaryDataDescriptorSet;
+
         public string Name { get; }
 
         internal int Index { get; }
@@ -42,8 +44,10 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         public event Action<IReadOnlyNetworkStringList, int> OnBinaryDataChanged;
 
-        public NetworkStringList(string name, int index)
+        public NetworkStringList(IBinaryDataDescriptorSet binaryDataDescriptorSet, string name, int index)
         {
+            _binaryDataDescriptorSet = binaryDataDescriptorSet ?? throw new ArgumentNullException(nameof(binaryDataDescriptorSet));
+
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
@@ -88,8 +92,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             return data.binaryData;
         }
 
+        private void CheckBinaryDataType(IMessage binaryData)
+        {
+            if (binaryData != null && !_binaryDataDescriptorSet.Contains(binaryData.Descriptor))
+            {
+                throw new InvalidOperationException($"Binary data type {binaryData.GetType().FullName} has not been registered as a binary data type");
+            }
+        }
+
         public int Add(string value, IMessage binaryData = null)
         {
+            CheckBinaryDataType(binaryData);
+
             var index = IndexOf(value);
 
             if (index == -1)
@@ -122,6 +136,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         public void SetBinaryData(int index, IMessage binaryData)
         {
+            CheckBinaryDataType(binaryData);
+
             _list[index].binaryData = binaryData;
 
             OnBinaryDataChanged?.Invoke(this, index);

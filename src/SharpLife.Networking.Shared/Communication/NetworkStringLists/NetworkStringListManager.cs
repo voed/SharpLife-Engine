@@ -20,6 +20,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
     public sealed class NetworkStringListManager
     {
+        private readonly IBinaryDataDescriptorSet _binaryDataDescriptorSet;
+
         private readonly List<NetworkStringList> _stringLists = new List<NetworkStringList>();
 
         public int Count => _stringLists.Count;
@@ -27,6 +29,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         internal NetworkStringList this[int index]
         {
             get => _stringLists[index];
+        }
+
+        public NetworkStringListManager(IBinaryDataDescriptorSet binaryDataDescriptorSet)
+        {
+            _binaryDataDescriptorSet = binaryDataDescriptorSet ?? throw new ArgumentNullException(nameof(binaryDataDescriptorSet));
         }
 
         internal NetworkStringList FindByName(string name)
@@ -56,7 +63,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 throw new ArgumentException($"Cannot create string list with duplicate name {name}", nameof(name));
             }
 
-            var list = new NetworkStringList(name, _stringLists.Count);
+            var list = new NetworkStringList(_binaryDataDescriptorSet, name, _stringLists.Count);
 
             _stringLists.Add(list);
 

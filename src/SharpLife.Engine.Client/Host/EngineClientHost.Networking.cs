@@ -61,7 +61,7 @@ namespace SharpLife.Engine.Client.Host
         {
             var receiver = _netClient.StringListReceiver;
 
-            receiver.RegisterBinaryType(ModelPrecacheData.Descriptor);
+            receiver.BinaryDataDescriptorSet.Add(ModelPrecacheData.Descriptor);
 
             _modelPrecache = receiver.CreateList("ModelPrecache");
 

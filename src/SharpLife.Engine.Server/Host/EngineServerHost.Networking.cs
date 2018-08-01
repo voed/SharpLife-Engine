@@ -67,7 +67,7 @@ namespace SharpLife.Engine.Server.Host
         {
             var transmitter = _netServer.StringListTransmitter;
 
-            transmitter.RegisterBinaryType(ModelPrecacheData.Descriptor);
+            transmitter.BinaryDataDescriptorSet.Add(ModelPrecacheData.Descriptor);
 
             _modelPrecache = transmitter.CreateList("ModelPrecache");
 

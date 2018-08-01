@@ -22,9 +22,9 @@ using System.Collections.Generic;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
-    public sealed class NetworkStringListReceptionManager
+    public sealed class NetworkStringListReceptionManager : IBinaryDataDescriptorSet
     {
-        private readonly NetworkStringListManager _listManager = new NetworkStringListManager();
+        private readonly NetworkStringListManager _listManager;
 
         private readonly Dictionary<uint, NetworkStringList> _idToListMap = new Dictionary<uint, NetworkStringList>();
 
@@ -33,6 +33,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         private readonly Dictionary<uint, MessageDescriptor> _binaryIndexToDescriptor = new Dictionary<uint, MessageDescriptor>();
 
         public int Count => _listManager.Count;
+
+        public IBinaryDataDescriptorSet BinaryDataDescriptorSet => this;
+
+        public NetworkStringListReceptionManager()
+        {
+            _listManager = new NetworkStringListManager(this);
+        }
 
         public IReadOnlyNetworkStringList CreateList(string name)
         {
@@ -47,11 +54,17 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             _listManager.Clear();
         }
 
-        /// <summary>
-        /// Registers a binary type for use with a string's binary data
-        /// </summary>
-        /// <param name="descriptor"></param>
-        public void RegisterBinaryType(MessageDescriptor descriptor)
+        bool IBinaryDataDescriptorSet.Contains(MessageDescriptor descriptor)
+        {
+            if (descriptor == null)
+            {
+                throw new ArgumentNullException(nameof(descriptor));
+            }
+
+            return _binaryDescriptors.Contains(descriptor);
+        }
+
+        void IBinaryDataDescriptorSet.Add(MessageDescriptor descriptor)
         {
             if (descriptor == null)
             {
