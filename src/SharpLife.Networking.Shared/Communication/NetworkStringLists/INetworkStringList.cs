@@ -13,6 +13,8 @@
 *
 ****/
 
+using Google.Protobuf;
+
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
     public interface INetworkStringList : IReadOnlyNetworkStringList
@@ -22,8 +24,23 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         /// If the string already exists, the index for it is returned
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="binaryData">Optional binary data</param>
         /// <returns>Index of the string</returns>
         /// <exception cref="System.ArgumentNullException">If the given string is null</exception>
-        int Add(string value);
+        int Add(string value, IMessage binaryData = null);
+
+        /// <summary>
+        /// Sets binary data for the given string
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="binaryData">Binary data to set. Pass null to clear</param>
+        void SetBinaryData(string value, IMessage binaryData);
+
+        /// <summary>
+        /// Sets binary data for the given string
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="binaryData">Binary data to set. Pass null to clear</param>
+        void SetBinaryData(int index, IMessage binaryData);
     }
 }

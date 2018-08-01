@@ -30,6 +30,7 @@ namespace SharpLife.Engine.Client.Host
     public partial class EngineClientHost : IMessageReceiveHandler<ConnectAcknowledgement>,
         IMessageReceiveHandler<ServerInfo>,
         IMessageReceiveHandler<Print>,
+        IMessageReceiveHandler<NetworkStringListBinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>
     {
@@ -38,6 +39,7 @@ namespace SharpLife.Engine.Client.Host
             receiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
             receiveHandler.RegisterHandler<ServerInfo>(this);
             receiveHandler.RegisterHandler<Print>(this);
+            receiveHandler.RegisterHandler<NetworkStringListBinaryMetaData>(this);
             receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
             receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
         }
@@ -110,6 +112,13 @@ namespace SharpLife.Engine.Client.Host
         public void ReceiveMessage(NetConnection connection, Print message)
         {
             _logger.Information(message.MessageContents);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListBinaryMetaData message)
+        {
+            _netClient.ReceiveMessage(connection, message);
+
+            RequestResources();
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)

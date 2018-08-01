@@ -88,6 +88,14 @@ namespace SharpLife.Engine.Server.Host
             {
                 case ServerClientSetupStage.AwaitingResourceTransmissionStart:
                     {
+                        client.SetupStage = ServerClientSetupStage.SendingStringListsBinaryMetaData;
+
+                        client.AddMessages(_netServer.StringListTransmitter.CreateBinaryTypesMessages(), true);
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingStringListsBinaryMetaData:
+                    {
                         client.SetupStage = ServerClientSetupStage.SendingStringLists;
 
                         client.NextStringListToSend = 0;

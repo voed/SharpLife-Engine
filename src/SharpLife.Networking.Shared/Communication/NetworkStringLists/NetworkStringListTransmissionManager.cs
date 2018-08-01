@@ -13,9 +13,12 @@
 *
 ****/
 
+using Google.Protobuf;
+using Google.Protobuf.Reflection;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
@@ -25,17 +28,22 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         {
             public List<int> addedStrings = new List<int>();
 
-            public bool HasChanges => addedStrings.Count > 0;
+            public List<int> changedStrings = new List<int>();
+
+            public bool HasChanges => addedStrings.Count > 0 || changedStrings.Count > 0;
 
             public void Clear()
             {
                 addedStrings.Clear();
+                changedStrings.Clear();
             }
         }
 
         private readonly NetworkStringListManager _listManager = new NetworkStringListManager();
 
         private readonly Dictionary<int, ListData> _listData = new Dictionary<int, ListData>();
+
+        private readonly Dictionary<MessageDescriptor, uint> _binaryDescriptorToIndex = new Dictionary<MessageDescriptor, uint>();
 
         public int Count => _listManager.Count;
 
@@ -48,13 +56,32 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             _listData.Add(internalList.Index, new ListData());
 
             list.OnStringAdded += OnStringAdded;
+            list.OnBinaryDataChanged += OnBinaryDataChanged;
 
             return list;
         }
 
         public void Clear()
         {
+            _binaryDescriptorToIndex.Clear();
             _listManager.Clear();
+        }
+
+        /// <summary>
+        /// Registers a binary type for use with a string's binary data
+        /// </summary>
+        /// <param name="descriptor"></param>
+        public void RegisterBinaryType(MessageDescriptor descriptor)
+        {
+            if (descriptor == null)
+            {
+                throw new ArgumentNullException(nameof(descriptor));
+            }
+
+            if (!_binaryDescriptorToIndex.ContainsKey(descriptor))
+            {
+                _binaryDescriptorToIndex.Add(descriptor, (uint)_binaryDescriptorToIndex.Count);
+            }
         }
 
         private void OnStringAdded(IReadOnlyNetworkStringList stringList, int index)
@@ -64,6 +91,60 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             var data = _listData[internalList.Index];
 
             data.addedStrings.Add(index);
+        }
+
+        private void OnBinaryDataChanged(IReadOnlyNetworkStringList stringList, int index)
+        {
+            var internalList = stringList as NetworkStringList;
+
+            var data = _listData[internalList.Index];
+
+            data.changedStrings.Add(index);
+        }
+
+        public List<NetworkStringListBinaryMetaData> CreateBinaryTypesMessages()
+        {
+            var list = new List<NetworkStringListBinaryMetaData>(_binaryDescriptorToIndex.Count);
+
+            foreach (var descriptor in _binaryDescriptorToIndex)
+            {
+                list.Add(new NetworkStringListBinaryMetaData
+                {
+                    Index = descriptor.Value,
+                    TypeName = descriptor.Key.ClrType.FullName
+                });
+            }
+
+            return list;
+        }
+
+        private ListBinaryData CreateBinaryDataFor(Stream stream, NetworkStringList list, int index)
+        {
+            var binaryData = list.GetBinaryData(index);
+
+            var message = new ListBinaryData();
+
+            if (binaryData != null)
+            {
+                binaryData.WriteTo(stream);
+
+                stream.Position = 0;
+                message.BinaryData = ByteString.FromStream(stream);
+                stream.SetLength(0);
+
+                message.DataType = _binaryDescriptorToIndex[binaryData.Descriptor];
+            }
+
+            return message;
+        }
+
+        private ListStringData CreateStringDataFor(Stream stream, NetworkStringList list, int index)
+        {
+            return new ListStringData
+            {
+                Value = list[index],
+                BinaryData = CreateBinaryDataFor(stream, list, index)
+            };
         }
 
         /// <summary>
@@ -87,12 +168,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 Name = list.Name
             };
 
+            var binaryDataBuffer = new MemoryStream();
+
             for (var i = 0; i < list.Count; ++i)
             {
-                update.Strings.Add(new ListStringData
-                {
-                    Value = list[i]
-                });
+                update.Strings.Add(CreateStringDataFor(binaryDataBuffer, list, i));
             }
 
             return update;
@@ -104,6 +184,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         public List<NetworkStringListUpdate> CreateUpdates()
         {
             var updates = new List<NetworkStringListUpdate>();
+
+            var binaryDataBuffer = new MemoryStream();
 
             for (var i = 0; i < _listManager.Count; ++i)
             {
@@ -120,9 +202,15 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
                     foreach (var added in listData.addedStrings)
                     {
-                        update.Strings.Add(new ListStringData
+                        update.Strings.Add(CreateStringDataFor(binaryDataBuffer, list, added));
+                    }
+
+                    foreach (var changed in listData.changedStrings)
+                    {
+                        update.Updates.Add(new ListStringDataUpdate
                         {
-                            Value = list[added]
+                            Index = (uint)changed,
+                            BinaryData = CreateBinaryDataFor(binaryDataBuffer, list, changed)
                         });
                     }
 

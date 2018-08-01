@@ -13,6 +13,7 @@
 *
 ****/
 
+using Google.Protobuf;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +22,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
     internal sealed class NetworkStringList : INetworkStringList
     {
-        private readonly List<string> _list = new List<string>();
+        private sealed class StringData
+        {
+            public string value;
+            public IMessage binaryData;
+        }
+
+        private readonly List<StringData> _list = new List<StringData>();
 
         public string Name { get; }
 
@@ -29,9 +36,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         public int Count => _list.Count;
 
-        public string this[int index] => _list[index];
+        public string this[int index] => _list[index].value;
 
         public event Action<IReadOnlyNetworkStringList, int> OnStringAdded;
+
+        public event Action<IReadOnlyNetworkStringList, int> OnBinaryDataChanged;
 
         public NetworkStringList(string name, int index)
         {
@@ -57,21 +66,39 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return _list.IndexOf(value);
+            return _list.FindIndex(data => data.value == value);
         }
 
-        public int Add(string value)
+        public IMessage GetBinaryData(string value)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            var index = _list.IndexOf(value);
+            var index = IndexOf(value);
 
             if (index == -1)
             {
-                _list.Add(value);
+                return null;
+            }
+
+            return GetBinaryData(index);
+        }
+
+        public IMessage GetBinaryData(int index)
+        {
+            var data = _list[index];
+
+            return data.binaryData;
+        }
+
+        public int Add(string value, IMessage binaryData = null)
+        {
+            var index = IndexOf(value);
+
+            if (index == -1)
+            {
+                _list.Add(new StringData
+                {
+                    value = value,
+                    binaryData = binaryData
+                });
 
                 index = _list.Count - 1;
 
@@ -81,9 +108,31 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             return index;
         }
 
+        public void SetBinaryData(string value, IMessage binaryData)
+        {
+            var index = IndexOf(value);
+
+            if (index == -1)
+            {
+                throw new ArgumentOutOfRangeException($"String {value} is not present in string list {Name}");
+            }
+
+            SetBinaryData(index, binaryData);
+        }
+
+        public void SetBinaryData(int index, IMessage binaryData)
+        {
+            _list[index].binaryData = binaryData;
+
+            OnBinaryDataChanged?.Invoke(this, index);
+        }
+
         public IEnumerator<string> GetEnumerator()
         {
-            return _list.GetEnumerator();
+            foreach (var data in _list)
+            {
+                yield return data.value;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()

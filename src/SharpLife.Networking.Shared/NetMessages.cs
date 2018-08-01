@@ -65,6 +65,7 @@ namespace SharpLife.Networking.Shared
             ConnectAcknowledgement.Descriptor,
             ServerInfo.Descriptor,
             Print.Descriptor,
+            NetworkStringListBinaryMetaData.Descriptor,
             NetworkStringListFullUpdate.Descriptor,
             NetworkStringListUpdate.Descriptor,
         };

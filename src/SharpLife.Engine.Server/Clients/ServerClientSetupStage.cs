@@ -39,6 +39,11 @@ namespace SharpLife.Engine.Server.Clients
         AwaitingResourceTransmissionStart,
 
         /// <summary>
+        /// Sending binary metadata for string lists
+        /// </summary>
+        SendingStringListsBinaryMetaData,
+
+        /// <summary>
         /// Sending string lists to the client
         /// </summary>
         SendingStringLists,

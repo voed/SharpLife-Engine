@@ -2,15 +2,27 @@
 
 package SharpLife.Networking.Shared.Messages.NetworkStringLists;
 
+message ListBinaryData
+{
+	//0 if null data (empty byte string)
+	uint32 data_type = 1;
+
+	bytes binary_data = 2;
+}
+
 //String index is local count + index in update
 message ListStringData
 {
 	string value = 1;
+
+	ListBinaryData binary_data = 2;
 }
 
 message ListStringDataUpdate
 {
 	uint32 index = 1;
+
+	ListBinaryData binary_data = 2;
 }
 
 //Updates a specific network string list

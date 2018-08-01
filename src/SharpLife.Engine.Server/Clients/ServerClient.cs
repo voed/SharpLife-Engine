@@ -18,6 +18,7 @@ using Lidgren.Network;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
 using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace SharpLife.Engine.Server.Clients
@@ -159,6 +160,21 @@ namespace SharpLife.Engine.Server.Clients
             }
 
             GetMessages(reliable).Add(message);
+        }
+
+        public void AddMessages(IEnumerable<IMessage> messages, bool reliable)
+        {
+            if (IsFakeClient)
+            {
+                return;
+            }
+
+            if (messages == null)
+            {
+                throw new ArgumentNullException(nameof(messages));
+            }
+
+            GetMessages(reliable).AddRange(messages);
         }
 
         /// <summary>

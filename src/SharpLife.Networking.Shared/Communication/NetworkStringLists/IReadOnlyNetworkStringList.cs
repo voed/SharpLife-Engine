@@ -13,6 +13,7 @@
 *
 ****/
 
+using Google.Protobuf;
 using System;
 using System.Collections.Generic;
 
@@ -49,10 +50,20 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         event Action<IReadOnlyNetworkStringList, int> OnStringAdded;
 
         /// <summary>
+        /// Invoked when the binary data for a string changes
+        /// Not invoked when the string is initially added
+        /// </summary>
+        event Action<IReadOnlyNetworkStringList, int> OnBinaryDataChanged;
+
+        /// <summary>
         /// Gets the index of the given string, or -1 if the string is not in the list
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         int IndexOf(string value);
+
+        IMessage GetBinaryData(string value);
+
+        IMessage GetBinaryData(int index);
     }
 }

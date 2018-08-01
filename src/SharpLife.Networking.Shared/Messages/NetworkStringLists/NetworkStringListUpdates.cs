@@ -26,22 +26,28 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
           string.Concat(
             "Ch5OZXR3b3JrU3RyaW5nTGlzdFVwZGF0ZXMucHJvdG8SN1NoYXJwTGlmZS5O",
             "ZXR3b3JraW5nLlNoYXJlZC5NZXNzYWdlcy5OZXR3b3JrU3RyaW5nTGlzdHMi",
-            "HwoOTGlzdFN0cmluZ0RhdGESDQoFdmFsdWUYASABKAkiJQoUTGlzdFN0cmlu",
-            "Z0RhdGFVcGRhdGUSDQoFaW5kZXgYASABKA0ilgEKG05ldHdvcmtTdHJpbmdM",
-            "aXN0RnVsbFVwZGF0ZRIPCgdsaXN0X2lkGAEgASgNEgwKBG5hbWUYAiABKAkS",
-            "WAoHc3RyaW5ncxgDIAMoCzJHLlNoYXJwTGlmZS5OZXR3b3JraW5nLlNoYXJl",
-            "ZC5NZXNzYWdlcy5OZXR3b3JrU3RyaW5nTGlzdHMuTGlzdFN0cmluZ0RhdGEi",
-            "5AEKF05ldHdvcmtTdHJpbmdMaXN0VXBkYXRlEg8KB2xpc3RfaWQYASABKA0S",
-            "WAoHc3RyaW5ncxgCIAMoCzJHLlNoYXJwTGlmZS5OZXR3b3JraW5nLlNoYXJl",
-            "ZC5NZXNzYWdlcy5OZXR3b3JrU3RyaW5nTGlzdHMuTGlzdFN0cmluZ0RhdGES",
-            "XgoHdXBkYXRlcxgDIAMoCzJNLlNoYXJwTGlmZS5OZXR3b3JraW5nLlNoYXJl",
-            "ZC5NZXNzYWdlcy5OZXR3b3JrU3RyaW5nTGlzdHMuTGlzdFN0cmluZ0RhdGFV",
-            "cGRhdGViBnByb3RvMw=="));
+            "OAoOTGlzdEJpbmFyeURhdGESEQoJZGF0YV90eXBlGAEgASgNEhMKC2JpbmFy",
+            "eV9kYXRhGAIgASgMIn0KDkxpc3RTdHJpbmdEYXRhEg0KBXZhbHVlGAEgASgJ",
+            "ElwKC2JpbmFyeV9kYXRhGAIgASgLMkcuU2hhcnBMaWZlLk5ldHdvcmtpbmcu",
+            "U2hhcmVkLk1lc3NhZ2VzLk5ldHdvcmtTdHJpbmdMaXN0cy5MaXN0QmluYXJ5",
+            "RGF0YSKDAQoUTGlzdFN0cmluZ0RhdGFVcGRhdGUSDQoFaW5kZXgYASABKA0S",
+            "XAoLYmluYXJ5X2RhdGEYAiABKAsyRy5TaGFycExpZmUuTmV0d29ya2luZy5T",
+            "aGFyZWQuTWVzc2FnZXMuTmV0d29ya1N0cmluZ0xpc3RzLkxpc3RCaW5hcnlE",
+            "YXRhIpYBChtOZXR3b3JrU3RyaW5nTGlzdEZ1bGxVcGRhdGUSDwoHbGlzdF9p",
+            "ZBgBIAEoDRIMCgRuYW1lGAIgASgJElgKB3N0cmluZ3MYAyADKAsyRy5TaGFy",
+            "cExpZmUuTmV0d29ya2luZy5TaGFyZWQuTWVzc2FnZXMuTmV0d29ya1N0cmlu",
+            "Z0xpc3RzLkxpc3RTdHJpbmdEYXRhIuQBChdOZXR3b3JrU3RyaW5nTGlzdFVw",
+            "ZGF0ZRIPCgdsaXN0X2lkGAEgASgNElgKB3N0cmluZ3MYAiADKAsyRy5TaGFy",
+            "cExpZmUuTmV0d29ya2luZy5TaGFyZWQuTWVzc2FnZXMuTmV0d29ya1N0cmlu",
+            "Z0xpc3RzLkxpc3RTdHJpbmdEYXRhEl4KB3VwZGF0ZXMYAyADKAsyTS5TaGFy",
+            "cExpZmUuTmV0d29ya2luZy5TaGFyZWQuTWVzc2FnZXMuTmV0d29ya1N0cmlu",
+            "Z0xpc3RzLkxpc3RTdHJpbmdEYXRhVXBkYXRlYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringData), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringData.Parser, new[]{ "Value" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringDataUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringDataUpdate.Parser, new[]{ "Index" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData.Parser, new[]{ "DataType", "BinaryData" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringData), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringData.Parser, new[]{ "Value", "BinaryData" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringDataUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringDataUpdate.Parser, new[]{ "Index", "BinaryData" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListFullUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListFullUpdate.Parser, new[]{ "ListId", "Name", "Strings" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdate.Parser, new[]{ "ListId", "Strings", "Updates" }, null, null, null)
           }));
@@ -50,6 +56,166 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
 
   }
   #region Messages
+  public sealed partial class ListBinaryData : pb::IMessage<ListBinaryData> {
+    private static readonly pb::MessageParser<ListBinaryData> _parser = new pb::MessageParser<ListBinaryData>(() => new ListBinaryData());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<ListBinaryData> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[0]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ListBinaryData() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ListBinaryData(ListBinaryData other) : this() {
+      dataType_ = other.dataType_;
+      binaryData_ = other.binaryData_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ListBinaryData Clone() {
+      return new ListBinaryData(this);
+    }
+
+    /// <summary>Field number for the "data_type" field.</summary>
+    public const int DataTypeFieldNumber = 1;
+    private uint dataType_;
+    /// <summary>
+    ///0 if null data (empty byte string)
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint DataType {
+      get { return dataType_; }
+      set {
+        dataType_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "binary_data" field.</summary>
+    public const int BinaryDataFieldNumber = 2;
+    private pb::ByteString binaryData_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString BinaryData {
+      get { return binaryData_; }
+      set {
+        binaryData_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as ListBinaryData);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(ListBinaryData other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (DataType != other.DataType) return false;
+      if (BinaryData != other.BinaryData) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (DataType != 0) hash ^= DataType.GetHashCode();
+      if (BinaryData.Length != 0) hash ^= BinaryData.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (DataType != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(DataType);
+      }
+      if (BinaryData.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteBytes(BinaryData);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (DataType != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(DataType);
+      }
+      if (BinaryData.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(BinaryData);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(ListBinaryData other) {
+      if (other == null) {
+        return;
+      }
+      if (other.DataType != 0) {
+        DataType = other.DataType;
+      }
+      if (other.BinaryData.Length != 0) {
+        BinaryData = other.BinaryData;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            DataType = input.ReadUInt32();
+            break;
+          }
+          case 18: {
+            BinaryData = input.ReadBytes();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   /// <summary>
   ///String index is local count + index in update
   /// </summary>
@@ -61,7 +227,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[0]; }
+      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -79,6 +245,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ListStringData(ListStringData other) : this() {
       value_ = other.value_;
+      BinaryData = other.binaryData_ != null ? other.BinaryData.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -98,6 +265,17 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
       }
     }
 
+    /// <summary>Field number for the "binary_data" field.</summary>
+    public const int BinaryDataFieldNumber = 2;
+    private global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData binaryData_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData BinaryData {
+      get { return binaryData_; }
+      set {
+        binaryData_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ListStringData);
@@ -112,6 +290,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
         return true;
       }
       if (Value != other.Value) return false;
+      if (!object.Equals(BinaryData, other.BinaryData)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -119,6 +298,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
     public override int GetHashCode() {
       int hash = 1;
       if (Value.Length != 0) hash ^= Value.GetHashCode();
+      if (binaryData_ != null) hash ^= BinaryData.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -136,6 +316,10 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
         output.WriteRawTag(10);
         output.WriteString(Value);
       }
+      if (binaryData_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(BinaryData);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -146,6 +330,9 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
       int size = 0;
       if (Value.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Value);
+      }
+      if (binaryData_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BinaryData);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -160,6 +347,12 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
       }
       if (other.Value.Length != 0) {
         Value = other.Value;
+      }
+      if (other.binaryData_ != null) {
+        if (binaryData_ == null) {
+          binaryData_ = new global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData();
+        }
+        BinaryData.MergeFrom(other.BinaryData);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -176,6 +369,13 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
             Value = input.ReadString();
             break;
           }
+          case 18: {
+            if (binaryData_ == null) {
+              binaryData_ = new global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData();
+            }
+            input.ReadMessage(binaryData_);
+            break;
+          }
         }
       }
     }
@@ -190,7 +390,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[1]; }
+      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -208,6 +408,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ListStringDataUpdate(ListStringDataUpdate other) : this() {
       index_ = other.index_;
+      BinaryData = other.binaryData_ != null ? other.BinaryData.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -227,6 +428,17 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
       }
     }
 
+    /// <summary>Field number for the "binary_data" field.</summary>
+    public const int BinaryDataFieldNumber = 2;
+    private global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData binaryData_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData BinaryData {
+      get { return binaryData_; }
+      set {
+        binaryData_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ListStringDataUpdate);
@@ -241,6 +453,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
         return true;
       }
       if (Index != other.Index) return false;
+      if (!object.Equals(BinaryData, other.BinaryData)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -248,6 +461,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
     public override int GetHashCode() {
       int hash = 1;
       if (Index != 0) hash ^= Index.GetHashCode();
+      if (binaryData_ != null) hash ^= BinaryData.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -265,6 +479,10 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
         output.WriteRawTag(8);
         output.WriteUInt32(Index);
       }
+      if (binaryData_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(BinaryData);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -275,6 +493,9 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
       int size = 0;
       if (Index != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Index);
+      }
+      if (binaryData_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BinaryData);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -290,6 +511,12 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
       if (other.Index != 0) {
         Index = other.Index;
       }
+      if (other.binaryData_ != null) {
+        if (binaryData_ == null) {
+          binaryData_ = new global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData();
+        }
+        BinaryData.MergeFrom(other.BinaryData);
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -303,6 +530,13 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
             break;
           case 8: {
             Index = input.ReadUInt32();
+            break;
+          }
+          case 18: {
+            if (binaryData_ == null) {
+              binaryData_ = new global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListBinaryData();
+            }
+            input.ReadMessage(binaryData_);
             break;
           }
         }
@@ -322,7 +556,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[2]; }
+      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -502,7 +736,7 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[3]; }
+      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

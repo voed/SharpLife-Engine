@@ -35,6 +35,7 @@ namespace SharpLife.Engine.Client.Networking
     /// Lidgren client networking handler
     /// </summary>
     internal class NetworkClient : NetworkPeer,
+        IMessageReceiveHandler<NetworkStringListBinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>
     {
@@ -338,6 +339,11 @@ namespace SharpLife.Engine.Client.Networking
 
                 SendPacket(reliable, server.Connection, NetDeliveryMethod.ReliableOrdered);
             }
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListBinaryMetaData message)
+        {
+            StringListReceiver.ProcessBinaryMetaData(message);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
