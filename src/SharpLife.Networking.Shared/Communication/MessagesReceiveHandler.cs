@@ -164,7 +164,7 @@ namespace SharpLife.Networking.Shared.Communication
 
                     if (_traceMessageLogging)
                     {
-                        _logger.Verbose($"Received message {protobufMessage.GetType().FullName} from {sender.RemoteEndPoint}");
+                        _logger.Verbose($"Received message {protobufMessage.GetType().Name} from {sender.RemoteEndPoint}");
                     }
 
                     data.Handler(sender, protobufMessage);
