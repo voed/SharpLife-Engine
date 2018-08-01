@@ -20,6 +20,7 @@ using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
+using SharpLife.Networking.Shared.Messages.Server;
 using System;
 
 namespace SharpLife.Engine.Client.Host
@@ -58,7 +59,11 @@ namespace SharpLife.Engine.Client.Host
 
         private void CreateNetworkStringLists()
         {
-            _modelPrecache = _netClient.StringListReceiver.CreateList("ModelPrecache");
+            var receiver = _netClient.StringListReceiver;
+
+            receiver.RegisterBinaryType(ModelPrecacheData.Descriptor);
+
+            _modelPrecache = receiver.CreateList("ModelPrecache");
 
             //TODO: let game do the same
         }

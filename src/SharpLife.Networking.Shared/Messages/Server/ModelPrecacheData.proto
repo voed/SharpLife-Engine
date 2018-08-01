@@ -1,0 +1,8 @@
+syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.Server;
+
+//Model data used by the client to precache content
+message ModelPrecacheData
+{
+	uint32 flags = 1;
+}

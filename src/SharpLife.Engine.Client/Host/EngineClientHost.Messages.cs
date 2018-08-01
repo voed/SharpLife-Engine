@@ -101,7 +101,9 @@ namespace SharpLife.Engine.Client.Host
 
         private void _modelPrecache_OnStringAdded(IReadOnlyNetworkStringList list, int index)
         {
-            _logger.Information($"Received {list.Name} string {list[index]}");
+            var data = list.GetBinaryData(index) as ModelPrecacheData;
+
+            //TODO: process model data
         }
 
         private void RequestResources()

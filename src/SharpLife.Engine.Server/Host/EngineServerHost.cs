@@ -24,6 +24,8 @@ using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.Messages.Server;
+using SharpLife.Networking.Shared.Precaching;
 using SharpLife.Utility.Events;
 using System;
 using System.Linq;
@@ -195,11 +197,17 @@ namespace SharpLife.Engine.Server.Host
             CreateNetworkStringLists();
 
             //TODO: add binary data
-            _modelPrecache.Add(mapFileName);
+            _modelPrecache.Add(mapFileName, new ModelPrecacheData
+            {
+                Flags = (uint)ModelPrecacheFlags.Required
+            });
 
             foreach (var i in Enumerable.Range(0, _engine.MapManager.BSPFile.Models.Count))
             {
-                _modelPrecache.Add($"*{i + 1}");
+                _modelPrecache.Add($"*{i + 1}", new ModelPrecacheData
+                {
+                    Flags = (uint)ModelPrecacheFlags.Required
+                });
             }
 
             //TODO: create models for BSP models
