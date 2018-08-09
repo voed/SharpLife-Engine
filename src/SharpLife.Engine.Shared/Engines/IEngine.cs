@@ -75,11 +75,6 @@ namespace SharpLife.Engine.Shared.Engines
         EngineConfiguration EngineConfiguration { get; }
 
         /// <summary>
-        /// The game configuration
-        /// </summary>
-        GameConfiguration GameConfiguration { get; }
-
-        /// <summary>
         /// Gets the date that the engine was built
         /// </summary>
         DateTimeOffset BuildDate { get; }

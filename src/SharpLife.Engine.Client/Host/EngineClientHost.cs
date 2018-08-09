@@ -25,10 +25,10 @@ using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Engines;
-using SharpLife.Engine.Shared.GameUtils;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.FileSystem;
+using SharpLife.Game.Client.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
@@ -62,7 +62,7 @@ namespace SharpLife.Engine.Client.Host
 
         private readonly Renderer.Renderer _renderer;
 
-        private GameData<IGameClient> _game;
+        private IGameClient _game;
 
         private IClientUI _clientUI;
 
@@ -86,9 +86,9 @@ namespace SharpLife.Engine.Client.Host
 
             var gameWindowName = _engine.EngineConfiguration.DefaultGameName;
 
-            if (!string.IsNullOrWhiteSpace(_engine.GameConfiguration.GameName))
+            if (!string.IsNullOrWhiteSpace(_engine.EngineConfiguration.GameName))
             {
-                gameWindowName = _engine.GameConfiguration.GameName;
+                gameWindowName = _engine.EngineConfiguration.GameName;
             }
 
             _window = _userInterface.CreateMainWindow(gameWindowName, _engine.CommandLine.Contains("-noborder") ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0);
@@ -132,15 +132,12 @@ namespace SharpLife.Engine.Client.Host
         {
             _window.Center();
 
-            LoadGameAssembly();
+            LoadGameClient();
         }
 
-        private void LoadGameAssembly()
+        private void LoadGameClient()
         {
-            _game = GameLoadUtils.LoadGame<IGameClient>(
-                _engine.GameDirectory,
-                _engine.GameConfiguration.GameClient.AssemblyName,
-                _engine.GameConfiguration.GameClient.EntrypointClass);
+            _game = new GameClient();
 
             //Set up services
             var serviceCollection = new ServiceCollection();
@@ -149,13 +146,13 @@ namespace SharpLife.Engine.Client.Host
             serviceCollection.AddSingleton<IClientEngine>(this);
             serviceCollection.AddSingleton<IViewState>(_renderer);
 
-            _game.Entrypoint.Initialize(serviceCollection);
+            _game.Initialize(serviceCollection);
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             _clientUI = serviceProvider.GetRequiredService<IClientUI>();
 
-            _game.Entrypoint.Startup(serviceProvider);
+            _game.Startup(serviceProvider);
         }
 
         public void Shutdown()

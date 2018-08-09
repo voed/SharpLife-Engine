@@ -22,7 +22,7 @@ using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
-using SharpLife.Engine.Shared.GameUtils;
+using SharpLife.Game.Server.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Messages.Server;
 using SharpLife.Networking.Shared.Precaching;
@@ -46,7 +46,7 @@ namespace SharpLife.Engine.Server.Host
 
         private readonly ILogger _logger;
 
-        private GameData<IGameServer> _game;
+        private IGameServer _game;
 
         private readonly IVariable _ipname;
         private readonly IVariable _hostport;
@@ -109,21 +109,18 @@ namespace SharpLife.Engine.Server.Host
 
             ClientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
 
-            LoadGameAssembly();
+            LoadGameServer();
         }
 
-        private void LoadGameAssembly()
+        private void LoadGameServer()
         {
-            _game = GameLoadUtils.LoadGame<IGameServer>(
-                _engine.GameDirectory,
-                _engine.GameConfiguration.GameServer.AssemblyName,
-                _engine.GameConfiguration.GameServer.EntrypointClass);
+            _game = new GameServer();
 
             var collection = new ServiceCollection();
 
             var serviceProvider = collection.BuildServiceProvider();
 
-            _game.Entrypoint.Initialize(serviceProvider);
+            _game.Initialize(serviceProvider);
         }
 
         public void Shutdown()
@@ -133,7 +130,7 @@ namespace SharpLife.Engine.Server.Host
             //Always shut down the networking system, even if we weren't active
             _netServer?.Shutdown(NetMessages.ServerShutdownMessage);
 
-            _game?.Entrypoint.Shutdown();
+            _game.Shutdown();
 
             _engine.CommandSystem.DestroyContext(CommandContext);
         }

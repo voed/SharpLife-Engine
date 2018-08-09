@@ -78,8 +78,6 @@ namespace SharpLife.Engine.Engines
 
         public EngineConfiguration EngineConfiguration { get; private set; }
 
-        public GameConfiguration GameConfiguration { get; private set; }
-
         public DateTimeOffset BuildDate { get; private set; }
 
         public bool IsDedicatedServer => _hostType == HostType.DedicatedServer;
@@ -269,22 +267,6 @@ namespace SharpLife.Engine.Engines
             CommonCommands.AddExec(CommandSystem.SharedContext, Logger, FileSystem, ExecPathIDs);
             CommonCommands.AddEcho(CommandSystem.SharedContext, Logger);
             CommonCommands.AddAlias(CommandSystem.SharedContext, Logger);
-
-            try
-            {
-                using (var stream = FileSystem.OpenRead("cfg/SharpLife-Game.xml"))
-                {
-                    var serializer = new XmlSerializer(typeof(GameConfiguration));
-
-                    GameConfiguration = (GameConfiguration)serializer.Deserialize(stream);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"Couldn't load game configuration file\n{e}");
-
-                throw;
-            }
 
             //Get the build date from the generated resource file
             var assembly = typeof(ClientServerEngine).Assembly;
