@@ -122,6 +122,8 @@ namespace SharpLife.Engine.Server.Host
 
             var serviceProvider = collection.BuildServiceProvider();
 
+            _serverNetworking = serviceProvider.GetRequiredService<IServerNetworking>();
+
             _game.Startup(serviceProvider);
         }
 
@@ -265,6 +267,7 @@ namespace SharpLife.Engine.Server.Host
             }
 
             _netServer.SendStringListUpdates();
+            _netServer.SendObjectListUpdates();
 
             if (_netServer != null)
             {

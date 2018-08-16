@@ -84,6 +84,7 @@ namespace SharpLife.Engine.Server.Host
         {
             var client = ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
 
+            //TODO: need to refactor the logic for each stage so it's all in one place
             switch (client.SetupStage)
             {
                 case ServerClientSetupStage.AwaitingResourceTransmissionStart:
@@ -105,6 +106,21 @@ namespace SharpLife.Engine.Server.Host
                 case ServerClientSetupStage.SendingStringLists:
                     {
                         client.NextStringListToSend = client.LastStringListFullUpdate + 1;
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingObjectListTypeMetaData:
+                    {
+                        client.SetupStage = ServerClientSetupStage.SendingObjectListListMetaData;
+
+                        _netServer.SendObjectListListMetaData(client);
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingObjectListListMetaData:
+                    {
+                        //TODO: set next stage
+                        client.SetupStage = ServerClientSetupStage.Connected;
                         break;
                     }
 

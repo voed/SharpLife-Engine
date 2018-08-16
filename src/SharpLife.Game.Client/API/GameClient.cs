@@ -15,6 +15,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.API.Game.Client;
+using SharpLife.Game.Client.Networking;
 using SharpLife.Game.Client.UI;
 using System;
 
@@ -22,6 +23,8 @@ namespace SharpLife.Game.Client.API
 {
     public sealed class GameClient : IGameClient
     {
+        private ClientNetworking _networking;
+
         public void Initialize(IServiceCollection serviceCollection)
         {
             if (serviceCollection == null)
@@ -30,6 +33,10 @@ namespace SharpLife.Game.Client.API
             }
 
             serviceCollection.AddSingleton<IClientUI, ImGuiInterface>();
+
+            //Expose as both to get the implementation
+            serviceCollection.AddSingleton<ClientNetworking>();
+            serviceCollection.AddSingleton<IClientNetworking>(provider => provider.GetRequiredService<ClientNetworking>());
         }
 
         public void Startup(IServiceProvider serviceProvider)
@@ -38,6 +45,8 @@ namespace SharpLife.Game.Client.API
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
+
+            _networking = serviceProvider.GetRequiredService<ClientNetworking>();
         }
 
         public void Shutdown()

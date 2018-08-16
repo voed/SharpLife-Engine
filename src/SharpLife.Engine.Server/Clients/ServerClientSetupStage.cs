@@ -49,6 +49,16 @@ namespace SharpLife.Engine.Server.Clients
         SendingStringLists,
 
         /// <summary>
+        /// Sending object list type meta data to the client
+        /// </summary>
+        SendingObjectListTypeMetaData,
+
+        /// <summary>
+        /// Sending object list list meta data to the client
+        /// </summary>
+        SendingObjectListListMetaData,
+
+        /// <summary>
         /// Client is fully connected and set up
         /// </summary>
         Connected,

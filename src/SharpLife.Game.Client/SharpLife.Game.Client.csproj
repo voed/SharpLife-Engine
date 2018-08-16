@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.Engine.API\SharpLife.Engine.API.csproj" />
+    <ProjectReference Include="..\SharpLife.Game.Shared\SharpLife.Game.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>
 

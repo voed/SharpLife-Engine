@@ -151,6 +151,7 @@ namespace SharpLife.Engine.Client.Host
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             _clientUI = serviceProvider.GetRequiredService<IClientUI>();
+            _clientNetworking = serviceProvider.GetRequiredService<IClientNetworking>();
 
             _game.Startup(serviceProvider);
         }

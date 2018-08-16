@@ -17,9 +17,11 @@ using Lidgren.Network;
 using Serilog;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Server.Host;
+using SharpLife.Engine.Shared.Utility;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
@@ -32,11 +34,14 @@ namespace SharpLife.Engine.Server.Networking
     {
         private readonly ILogger _logger;
 
-        private readonly IEngineServerHost _serverHost;
+        private readonly EngineServerHost _serverHost;
 
         private readonly SendMappings _sendMappings;
 
         private readonly MessagesReceiveHandler _receiveHandler;
+
+        private readonly IEngineTime _engineTime;
+
         private readonly NetServer _server;
 
         private int _nextUserId = 1;
@@ -47,6 +52,8 @@ namespace SharpLife.Engine.Server.Networking
 
         public NetworkStringListTransmissionManager StringListTransmitter { get; } = new NetworkStringListTransmissionManager();
 
+        public NetworkObjectListTransmitter ObjectListTransmitter { get; private set; }
+
         /// <summary>
         /// Creates a new server network handler
         /// </summary>
@@ -54,14 +61,16 @@ namespace SharpLife.Engine.Server.Networking
         /// <param name="serverHost"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
+        /// <param name="engineTime"></param>
         /// <param name="appIdentifier"></param>
         /// <param name="ipAddress"></param>
         /// <param name="maxClients"></param>
         /// <param name="connectionTimeout"></param>
         public NetworkServer(ILogger logger,
-            IEngineServerHost serverHost,
+            EngineServerHost serverHost,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
+            IEngineTime engineTime,
             string appIdentifier,
             IPEndPoint ipAddress,
             int maxClients,
@@ -71,6 +80,7 @@ namespace SharpLife.Engine.Server.Networking
             _serverHost = serverHost ?? throw new ArgumentNullException(nameof(serverHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+            _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
 
             var config = new NetPeerConfiguration(appIdentifier)
             {
@@ -260,7 +270,7 @@ namespace SharpLife.Engine.Server.Networking
                     name = "unnamed";
                 }
 
-                var client = ServerClient.CreateClient(_sendMappings, message.SenderConnection, slot, _nextUserId++, name);
+                var client = ServerClient.CreateClient(_sendMappings, message.SenderConnection, _engineTime, ObjectListTransmitter, slot, _nextUserId++, name);
 
                 _serverHost.ClientList.AddClientToSlot(client);
 
@@ -332,8 +342,9 @@ namespace SharpLife.Engine.Server.Networking
             }
             else
             {
-                //TODO: change to next step
-                client.SetupStage = ServerClientSetupStage.Connected;
+                client.SetupStage = ServerClientSetupStage.SendingObjectListTypeMetaData;
+
+                client.AddMessage(ObjectListTransmitter.TypeRegistry.Serialize(), true);
             }
 
             client.NextStringListToSend = -1;
@@ -372,6 +383,35 @@ namespace SharpLife.Engine.Server.Networking
                     }
                 }
             }
+        }
+
+        public void SendObjectListUpdates()
+        {
+            ObjectListTransmitter.CreateFramesForTransmitters();
+
+            foreach (var client in _serverHost.ClientList)
+            {
+                if (client.CanTransmit)
+                {
+                    client.SendObjectListFrames();
+                }
+            }
+        }
+
+        public void CreateObjectListTransmitter()
+        {
+            //TODO: need to define number of frames for multiplayer
+            ObjectListTransmitter = new NetworkObjectListTransmitter(8);
+        }
+
+        public void SendObjectListListMetaData(ServerClient client)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            client.AddMessage(ObjectListTransmitter.SerializeListMetaData(), true);
         }
     }
 }
