@@ -1,0 +1,33 @@
+﻿syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.NetworkObjectLists;
+
+message ObjectMember
+{
+	uint32 type_id = 1;
+}
+
+message ObjectMetaData
+{
+	uint32 type_id = 1;
+
+	string type_name = 2;
+
+	repeated ObjectMember members = 3;
+}
+
+message NetworkObjectListObjectMetaDataList
+{
+	repeated ObjectMetaData meta_data = 1;
+}
+
+message ListMetaData
+{
+	uint32 list_id = 1;
+
+	string name = 2;
+}
+
+message NetworkObjectListListMetaDataList
+{
+	repeated ListMetaData meta_data = 1;
+}

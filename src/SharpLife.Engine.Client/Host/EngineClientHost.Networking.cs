@@ -14,6 +14,8 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
+using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
@@ -28,6 +30,10 @@ namespace SharpLife.Engine.Client.Host
     public partial class EngineClientHost
     {
         private NetworkClient _netClient;
+
+        private readonly ObjectListReceiverListener _objectListReceiverListener = new ObjectListReceiverListener();
+
+        private IClientNetworking _clientNetworking;
 
         private IReadOnlyNetworkStringList _modelPrecache;
 
@@ -47,6 +53,7 @@ namespace SharpLife.Engine.Client.Host
                     this,
                     new SendMappings(NetMessages.ClientToServerMessages),
                     receiveHandler,
+                    _objectListReceiverListener,
                     _cl_name,
                     NetConstants.AppIdentifier,
                     _clientport.Integer,
@@ -66,6 +73,11 @@ namespace SharpLife.Engine.Client.Host
             _modelPrecache = receiver.CreateList("ModelPrecache");
 
             //TODO: let game do the same
+        }
+
+        private void CreateNetworkObjectLists(IEngineNetworkObjectLists networkObjectLists)
+        {
+            _clientNetworking.CreateNetworkObjectLists(networkObjectLists);
         }
 
         /// <summary>

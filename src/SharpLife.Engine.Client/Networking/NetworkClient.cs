@@ -23,8 +23,10 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using System;
 using System.Net;
@@ -37,7 +39,9 @@ namespace SharpLife.Engine.Client.Networking
     internal class NetworkClient : NetworkPeer,
         IMessageReceiveHandler<NetworkStringListBinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
-        IMessageReceiveHandler<NetworkStringListUpdate>
+        IMessageReceiveHandler<NetworkStringListUpdate>,
+        IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
+        IMessageReceiveHandler<NetworkObjectListListMetaDataList>
     {
         /// <summary>
         /// The current connection status, based on last processed status change message
@@ -50,11 +54,14 @@ namespace SharpLife.Engine.Client.Networking
 
         private readonly ILogger _logger;
 
-        private readonly IEngineClientHost _clientHost;
+        private readonly EngineClientHost _clientHost;
 
         private readonly SendMappings _sendMappings;
 
         private readonly MessagesReceiveHandler _receiveHandler;
+
+        private readonly IFrameListReceiverListener _frameListReceiverListener;
+
         private readonly IVariable _cl_name;
 
         private readonly NetClient _client;
@@ -64,6 +71,8 @@ namespace SharpLife.Engine.Client.Networking
         public ClientServer Server { get; private set; }
 
         public NetworkStringListReceptionManager StringListReceiver { get; } = new NetworkStringListReceptionManager();
+
+        public NetworkObjectListReceiver ObjectListReceiver { get; private set; }
 
         /// <summary>
         /// Invoked when the client has fully disconnected from a server
@@ -79,15 +88,17 @@ namespace SharpLife.Engine.Client.Networking
         /// <param name="clientHost"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
+        /// <param name="frameListReceiverListener"></param>
         /// <param name="cl_name"></param>
         /// <param name="appIdentifier">App identifier to use for networking. Must match the identifier given to servers</param>
         /// <param name="port">Port to use</param>
         /// <param name="resendHandshakeInterval"></param>
         /// <param name="connectionTimeout"></param>
         public NetworkClient(ILogger logger,
-            IEngineClientHost clientHost,
+            EngineClientHost clientHost,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
+            IFrameListReceiverListener frameListReceiverListener,
             IVariable cl_name,
             string appIdentifier,
             int port,
@@ -98,6 +109,7 @@ namespace SharpLife.Engine.Client.Networking
             _clientHost = clientHost ?? throw new ArgumentNullException(nameof(clientHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+            _frameListReceiverListener = frameListReceiverListener ?? throw new ArgumentNullException(nameof(frameListReceiverListener));
             _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
 
             var config = new NetPeerConfiguration(appIdentifier)
@@ -341,6 +353,12 @@ namespace SharpLife.Engine.Client.Networking
             }
         }
 
+        public void CreateObjectListReceiver()
+        {
+            //TODO: need to define number of frames for multiplayer
+            ObjectListReceiver = new NetworkObjectListReceiver(8, _frameListReceiverListener);
+        }
+
         public void ReceiveMessage(NetConnection connection, NetworkStringListBinaryMetaData message)
         {
             StringListReceiver.ProcessBinaryMetaData(message);
@@ -354,6 +372,18 @@ namespace SharpLife.Engine.Client.Networking
         public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
         {
             StringListReceiver.ProcessUpdate(message);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkObjectListFrameListUpdate message)
+        {
+            ObjectListReceiver.DeserializeFrameList(message);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
+        {
+            ObjectListReceiver.DeserializeListMetaData(message);
+
+            _clientHost.RequestResources();
         }
     }
 }

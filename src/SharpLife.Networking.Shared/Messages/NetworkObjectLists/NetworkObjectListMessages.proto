@@ -1,0 +1,21 @@
+﻿syntax = "proto3";
+package SharpLife.Networking.Shared.Messages.NetworkObjectLists;
+
+message ObjectDestruction
+{
+	uint32 object_id = 1;
+}
+
+message FrameMessage
+{
+	uint32 list_id = 1;
+
+	repeated ObjectDestruction objects_destroyed = 2;
+
+	bytes object_updates = 3;
+}
+
+message NetworkObjectListFrameListUpdate
+{
+	repeated FrameMessage frames = 1;
+}

@@ -15,8 +15,11 @@
 
 using Google.Protobuf;
 using Lidgren.Network;
+using SharpLife.Engine.Shared.Utility;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -26,11 +29,13 @@ namespace SharpLife.Engine.Server.Clients
     /// <summary>
     /// Represents a single client on a server
     /// </summary>
-    public sealed class ServerClient
+    public sealed class ServerClient : IFrameListTransmitterListener
     {
         private readonly SendMappings _sendMappings;
 
         public NetConnection Connection { get; }
+
+        private readonly IEngineTime _engineTime;
 
         public IPEndPoint RemoteEndPoint => Connection?.RemoteEndPoint;
 
@@ -81,10 +86,36 @@ namespace SharpLife.Engine.Server.Clients
 
         private readonly PendingMessages _unreliableMessages;
 
-        private ServerClient(SendMappings sendMappings, NetConnection connection, int index, int userId, string name)
+        private readonly INetworkFrameListTransmitter _frameListTransmitter;
+
+        private readonly float _objectListMessageInterval = 0.1f;
+
+        public float NextObjectListMessageTime { get; private set; }
+
+        //Send frames when the client is fully connected and when updates should be sent
+        public bool CanTransmit => SetupStage == ServerClientSetupStage.Connected && NextObjectListMessageTime <= _engineTime.ElapsedTime;
+
+        private ServerClient(
+            SendMappings sendMappings,
+            NetConnection connection,
+            IEngineTime engineTime,
+            NetworkObjectListTransmitter objectListTransmitter,
+            int index,
+            int userId,
+            string name)
         {
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+
+            _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
+
+            if (objectListTransmitter == null)
+            {
+                throw new ArgumentNullException(nameof(objectListTransmitter));
+            }
+
+            _frameListTransmitter = objectListTransmitter.CreateTransmitter(this);
+
             Index = index;
             UserId = userId;
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -107,9 +138,16 @@ namespace SharpLife.Engine.Server.Clients
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        public static ServerClient CreateClient(SendMappings sendMappings, NetConnection connection, int index, int userId, string name)
+        public static ServerClient CreateClient(
+            SendMappings sendMappings,
+            NetConnection connection,
+            IEngineTime engineTime,
+            NetworkObjectListTransmitter objectListTransmitter,
+            int index,
+            int userId,
+            string name)
         {
-            return new ServerClient(sendMappings, connection, index, userId, name);
+            return new ServerClient(sendMappings, connection, engineTime, objectListTransmitter, index, userId, name);
         }
 
         /// <summary>
@@ -124,7 +162,7 @@ namespace SharpLife.Engine.Server.Clients
             return new ServerClient(index, userId, name);
         }
 
-        public void Disconnect(string reason)
+        public void Disconnect(string reason, NetworkObjectListTransmitter objectListTransmitter)
         {
             if (reason == null)
             {
@@ -134,6 +172,7 @@ namespace SharpLife.Engine.Server.Clients
             if (!IsFakeClient)
             {
                 Connection.Disconnect(reason);
+                objectListTransmitter.DestroyTransmitter(_frameListTransmitter);
             }
         }
 
@@ -190,6 +229,27 @@ namespace SharpLife.Engine.Server.Clients
             }
 
             GetMessages(reliable).Write(message);
+        }
+
+        public void SendObjectListFrames()
+        {
+            AddMessage(_frameListTransmitter.SerializeCurrentFrameList(), true);
+
+            //TODO: let user define message interval
+            NextObjectListMessageTime = (float)(_engineTime.ElapsedTime + _objectListMessageInterval);
+        }
+
+        public void OnBeginProcessList(INetworkObjectList networkObjectList)
+        {
+        }
+
+        public void OnEndProcessList(INetworkObjectList networkObjectList)
+        {
+        }
+
+        public bool FilterNetworkObject(INetworkObjectList networkObjectList, INetworkObject networkObject)
+        {
+            return true;
         }
     }
 }

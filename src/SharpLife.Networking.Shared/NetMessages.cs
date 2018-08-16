@@ -15,6 +15,7 @@
 
 using Google.Protobuf.Reflection;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 using System.Collections.Generic;
@@ -68,6 +69,9 @@ namespace SharpLife.Networking.Shared
             NetworkStringListBinaryMetaData.Descriptor,
             NetworkStringListFullUpdate.Descriptor,
             NetworkStringListUpdate.Descriptor,
+            NetworkObjectListFrameListUpdate.Descriptor,
+            NetworkObjectListObjectMetaDataList.Descriptor,
+            NetworkObjectListListMetaDataList.Descriptor,
         };
     }
 }

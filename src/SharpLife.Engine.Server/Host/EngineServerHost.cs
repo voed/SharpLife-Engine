@@ -118,19 +118,23 @@ namespace SharpLife.Engine.Server.Host
 
             var collection = new ServiceCollection();
 
+            _game.Initialize(collection);
+
             var serviceProvider = collection.BuildServiceProvider();
 
-            _game.Initialize(serviceProvider);
+            _serverNetworking = serviceProvider.GetRequiredService<IServerNetworking>();
+
+            _game.Startup(serviceProvider);
         }
 
         public void Shutdown()
         {
             Stop();
 
+            _game.Shutdown();
+
             //Always shut down the networking system, even if we weren't active
             _netServer?.Shutdown(NetMessages.ServerShutdownMessage);
-
-            _game.Shutdown();
 
             _engine.CommandSystem.DestroyContext(CommandContext);
         }
@@ -263,6 +267,7 @@ namespace SharpLife.Engine.Server.Host
             }
 
             _netServer.SendStringListUpdates();
+            _netServer.SendObjectListUpdates();
 
             if (_netServer != null)
             {

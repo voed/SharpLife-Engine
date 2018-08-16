@@ -20,6 +20,7 @@ using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 using System;
@@ -32,7 +33,10 @@ namespace SharpLife.Engine.Client.Host
         IMessageReceiveHandler<Print>,
         IMessageReceiveHandler<NetworkStringListBinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
-        IMessageReceiveHandler<NetworkStringListUpdate>
+        IMessageReceiveHandler<NetworkStringListUpdate>,
+        IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
+        IMessageReceiveHandler<NetworkObjectListObjectMetaDataList>,
+        IMessageReceiveHandler<NetworkObjectListListMetaDataList>
     {
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
@@ -42,6 +46,9 @@ namespace SharpLife.Engine.Client.Host
             receiveHandler.RegisterHandler<NetworkStringListBinaryMetaData>(this);
             receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
             receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
+            receiveHandler.RegisterHandler<NetworkObjectListFrameListUpdate>(this);
+            receiveHandler.RegisterHandler<NetworkObjectListObjectMetaDataList>(this);
+            receiveHandler.RegisterHandler<NetworkObjectListListMetaDataList>(this);
         }
 
         public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
@@ -106,7 +113,7 @@ namespace SharpLife.Engine.Client.Host
             //TODO: process model data
         }
 
-        private void RequestResources()
+        internal void RequestResources()
         {
             _netClient.Server.AddMessage(new SendResources());
         }
@@ -142,6 +149,33 @@ namespace SharpLife.Engine.Client.Host
         public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
         {
             _netClient.ReceiveMessage(connection, message);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkObjectListFrameListUpdate message)
+        {
+            _netClient.ReceiveMessage(connection, message);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkObjectListObjectMetaDataList message)
+        {
+            _netClient.CreateObjectListReceiver();
+
+            //TODO: maybe cache the type registry so we don't need to recreate
+            _clientNetworking.RegisterObjectListTypes(_netClient.ObjectListReceiver.TypeRegistry);
+
+            _netClient.ObjectListReceiver.TypeRegistry.Deserialize(message);
+
+            RequestResources();
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
+        {
+            _netClient.ReceiveMessage(connection, message);
+
+            using (var networkObjectLists = new EngineReceiverNetworkObjectLists(_netClient.ObjectListReceiver))
+            {
+                CreateNetworkObjectLists(networkObjectLists);
+            }
         }
     }
 }

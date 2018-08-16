@@ -58,7 +58,7 @@ namespace SharpLife.Engine.Server.Host
 
             _logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
 
-            client.Disconnect(reason);
+            client.Disconnect(reason, _netServer.ObjectListTransmitter);
         }
     }
 }

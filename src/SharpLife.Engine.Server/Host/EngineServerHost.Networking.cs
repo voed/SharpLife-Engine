@@ -13,6 +13,8 @@
 *
 ****/
 
+using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Networking;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication;
@@ -25,6 +27,8 @@ namespace SharpLife.Engine.Server.Host
     public partial class EngineServerHost
     {
         private NetworkServer _netServer;
+
+        private IServerNetworking _serverNetworking;
 
         private INetworkStringList _modelPrecache;
 
@@ -53,6 +57,7 @@ namespace SharpLife.Engine.Server.Host
                     this,
                     new SendMappings(NetMessages.ServerToClientMessages),
                     receiveHandler,
+                    _engine.EngineTime,
                     NetConstants.AppIdentifier,
                     ipAddress,
                     NetConstants.MaxClients,
@@ -60,6 +65,16 @@ namespace SharpLife.Engine.Server.Host
                     );
 
                 _netServer.Start();
+            }
+
+            _netServer.CreateObjectListTransmitter();
+
+            //TODO: maybe cache the type registry so we don't need to recreate
+            _serverNetworking.RegisterObjectListTypes(_netServer.ObjectListTransmitter.TypeRegistry);
+
+            using (var networkObjectLists = new EngineTransmitterNetworkObjectLists(_netServer.ObjectListTransmitter))
+            {
+                CreateNetworkObjectLists(networkObjectLists);
             }
         }
 
@@ -72,6 +87,11 @@ namespace SharpLife.Engine.Server.Host
             _modelPrecache = transmitter.CreateList("ModelPrecache");
 
             //TODO: let game do the same
+        }
+
+        private void CreateNetworkObjectLists(IEngineNetworkObjectLists networkObjectLists)
+        {
+            _serverNetworking.CreateNetworkObjectLists(networkObjectLists);
         }
     }
 }

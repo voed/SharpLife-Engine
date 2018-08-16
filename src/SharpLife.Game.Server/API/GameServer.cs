@@ -13,18 +13,31 @@
 *
 ****/
 
+using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.API.Game.Server;
+using SharpLife.Game.Server.Networking;
 using System;
 
 namespace SharpLife.Game.Server.API
 {
     public class GameServer : IGameServer
     {
+        private ServerNetworking _networking;
+
         private IServiceProvider _serviceProvider;
 
-        public void Initialize(IServiceProvider serviceProvider)
+        public void Initialize(IServiceCollection serviceCollection)
+        {
+            //Expose as both to get the implementation
+            serviceCollection.AddSingleton<ServerNetworking>();
+            serviceCollection.AddSingleton<IServerNetworking>(provider => provider.GetRequiredService<ServerNetworking>());
+        }
+
+        public void Startup(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
+            _networking = serviceProvider.GetRequiredService<ServerNetworking>();
         }
 
         public void Shutdown()
