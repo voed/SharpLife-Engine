@@ -13,13 +13,16 @@
 *
 ****/
 
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace SharpLife.Engine.API.Game.Server
 {
     public interface IGameServer
     {
-        void Initialize(IServiceProvider serviceProvider);
+        void Initialize(IServiceCollection serviceCollection);
+
+        void Startup(IServiceProvider serviceProvider);
 
         void Shutdown();
     }

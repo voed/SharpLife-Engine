@@ -161,6 +161,8 @@ namespace SharpLife.Engine.Client.Host
 
             Disconnect(false);
 
+            _game.Shutdown();
+
             if (_netClient != null)
             {
                 _netClient.Shutdown(NetMessages.ClientShutdownMessage);

@@ -13,6 +13,7 @@
 *
 ****/
 
+using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.API.Game.Server;
 using System;
 
@@ -22,7 +23,11 @@ namespace SharpLife.Game.Server.API
     {
         private IServiceProvider _serviceProvider;
 
-        public void Initialize(IServiceProvider serviceProvider)
+        public void Initialize(IServiceCollection serviceCollection)
+        {
+        }
+
+        public void Startup(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
