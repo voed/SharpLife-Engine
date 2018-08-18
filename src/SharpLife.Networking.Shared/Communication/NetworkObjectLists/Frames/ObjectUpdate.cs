@@ -15,6 +15,7 @@
 
 using Google.Protobuf;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion;
 using System;
 using System.IO;
 
@@ -84,6 +85,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 if (!member.ChangeNotificationIndex.HasValue || networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value])
                 {
                     changes = member.MetaData.Converter.EncodeAndWrite(Snapshot[i], previousSnapshot[i], stream) || changes;
+                }
+                else
+                {
+                    //Write unchanged values for each member
+                    for (var unchanged = 0; unchanged < member.MetaData.Converter.MemberCount; ++unchanged)
+                    {
+                        ConversionUtils.AddUnchangedValue(stream);
+                    }
                 }
             }
 
