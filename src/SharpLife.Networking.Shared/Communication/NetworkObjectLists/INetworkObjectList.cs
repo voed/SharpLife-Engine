@@ -21,12 +21,19 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
         int Id { get; }
 
-        INetworkObject FindNetworkObjectForObject(object networkableObject);
+        INetworkObject FindNetworkObjectForObject(INetworkable networkableObject);
 
         INetworkObject GetNetworkObjectById(int id);
 
-        INetworkObject CreateNetworkObject<TNetworkable>(TNetworkable networkableObject)
-            where TNetworkable : class;
+        /// <summary>
+        /// Creates a new network object for a networkable object
+        /// For transmitters, the object must have a handle set for it
+        /// For receivers, the handle will be set during deserialization
+        /// It is the responsibility of the list user to ensure that no duplicate ids are issued to object instances
+        /// </summary>
+        /// <param name="networkableObject"></param>
+        /// <returns></returns>
+        INetworkObject CreateNetworkObject(INetworkable networkableObject);
 
         void DestroyNetworkObject(INetworkObject networkObject);
     }

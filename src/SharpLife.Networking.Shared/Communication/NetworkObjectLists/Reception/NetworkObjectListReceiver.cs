@@ -47,11 +47,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
             _frameListLists.Add(list);
         }
 
-        private NetworkObject CreateNetworkObject(NetworkObjectList objectList, int objectId, TypeMetaData metaData)
+        private NetworkObject CreateNetworkObject(NetworkObjectList objectList, TypeMetaData metaData, in ObjectHandle objectHandle)
         {
-            var networkableObject = metaData.CreateInstance();
+            var networkableObject = metaData.CreateInstance(objectHandle);
 
-            var networkObject = objectList.InternalCreateNetworkObject(networkableObject, objectId);
+            var networkObject = objectList.InternalCreateNetworkObject(networkableObject);
 
             Listener.OnNetworkObjectCreated(objectList, networkObject, networkableObject);
 
@@ -96,7 +96,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
                 foreach (var update in frame.Updates)
                 {
                     //Create the object if it does not already exist
-                    var networkObject = objectList.InternalGetNetworkObjectById(update.ObjectId) ?? CreateNetworkObject(objectList, update.ObjectId, update.MetaData);
+                    var networkObject = objectList.InternalGetNetworkObjectById(update.ObjectHandle.Id) ?? CreateNetworkObject(objectList, update.MetaData, update.ObjectHandle);
 
                     Listener.OnBeginUpdateNetworkObject(objectList, networkObject);
                     networkObject.ApplySnapshot(update.Snapshot);

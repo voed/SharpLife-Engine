@@ -28,11 +28,17 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// Delegate for object factories
         /// </summary>
         /// <param name="metaData">Metadata of the object type to create</param>
+        /// <param name="handle">Handle that represents this object</param>
         /// <returns></returns>
-        public delegate object ObjectFactory(TypeMetaData metaData);
+        public delegate INetworkable ObjectFactory(TypeMetaData metaData, in ObjectHandle handle);
 
-        //Default to signalling to the user that this isn't implemented
-        public static readonly ObjectFactory DefaultFactory = metaData => throw new NotSupportedException($"The type {metaData.Type.FullName} does not support instantiation");
+        private static INetworkable InternalDefaultFactory(TypeMetaData metaData, in ObjectHandle handle)
+        {
+            throw new NotSupportedException($"The type {metaData.Type.FullName} does not support instantiation");
+        }
+
+        //Default to signal to the user that this isn't implemented
+        public static readonly ObjectFactory DefaultFactory = InternalDefaultFactory;
 
         public sealed class Member
         {
@@ -99,7 +105,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// Creates an instance of the type
         /// </summary>
         /// <returns></returns>
-        public object CreateInstance() => _factory(this);
+        public INetworkable CreateInstance(in ObjectHandle handle) => _factory(this, handle);
 
         public Member FindMemberByName(string name)
         {

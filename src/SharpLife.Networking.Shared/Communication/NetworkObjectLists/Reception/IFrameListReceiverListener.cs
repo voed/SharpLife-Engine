@@ -29,9 +29,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
         /// <param name="networkObjectList"></param>
         void OnEndProcessList(INetworkObjectList networkObjectList);
 
-        void OnNetworkObjectCreated(INetworkObjectList networkObjectList, INetworkObject networkObject, object networkableObject);
+        void OnNetworkObjectCreated(INetworkObjectList networkObjectList, INetworkObject networkObject, INetworkable networkableObject);
 
-        void OnNetworkObjectDestroyed(INetworkObjectList networkObjectList, INetworkObject networkObject, object networkableObject);
+        void OnNetworkObjectDestroyed(INetworkObjectList networkObjectList, INetworkObject networkObject, INetworkable networkableObject);
 
         void OnBeginUpdateNetworkObject(INetworkObjectList networkObjectList, INetworkObject networkObject);
 

@@ -53,7 +53,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
         {
             foreach (var update in _updates)
             {
-                if (update.ObjectId == id)
+                if (update.ObjectHandle.Id == id)
                 {
                     return update;
                 }
@@ -74,7 +74,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 throw new ArgumentNullException(nameof(networkObject));
             }
 
-            _updates.Add(new ObjectUpdate(networkObject.Id, networkObject.MetaData, networkObject.TakeSnapshot()));
+            _updates.Add(new ObjectUpdate(networkObject.Handle, networkObject.MetaData, networkObject.TakeSnapshot()));
         }
 
         private void DeserializeUpdate(ByteString data, TypeRegistry typeRegistry, Frame previousFrame)
@@ -82,13 +82,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             using (var codedStream = new CodedInputStream(data.ToByteArray()))
             {
                 var objectId = ObjectUpdate.DeserializeObjectId(codedStream);
+                var serialNumber = ObjectUpdate.DeserializeSerialNumber(codedStream);
                 var typeId = ObjectUpdate.DeserializeTypeId(codedStream);
 
                 var metaData = typeRegistry.FindMetaDataByTransmitterId(typeId);
 
                 var previousUpdate = previousFrame?.FindUpdateByObjectId(objectId);
 
-                var update = ObjectUpdate.DeserializeFromStream(codedStream, objectId, metaData, previousUpdate);
+                var update = ObjectUpdate.DeserializeFromStream(codedStream, new ObjectHandle(objectId, serialNumber), metaData, previousUpdate);
 
                 _updates.Add(update);
             }
@@ -100,7 +101,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
             foreach (var update in _updates)
             {
-                var data = update.Serialize(objectList.InternalGetNetworkObjectById(update.ObjectId), previousFrame?.FindUpdateByObjectId(update.ObjectId));
+                var data = update.Serialize(objectList.InternalGetNetworkObjectById(update.ObjectHandle.Id), previousFrame?.FindUpdateByObjectId(update.ObjectHandle.Id));
 
                 if (data.ContainsChanges)
                 {

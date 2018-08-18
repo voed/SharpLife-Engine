@@ -98,7 +98,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmiss
             {
                 if (networkObject.Destroyed)
                 {
-                    frame.CreateObjectDestruction(networkObject.Id);
+                    frame.CreateObjectDestruction(networkObject.Handle.Id);
 
                     //Don't remove a destroyed object's data from previous frames, we may need to reconstruct it for lag compensation
                 }

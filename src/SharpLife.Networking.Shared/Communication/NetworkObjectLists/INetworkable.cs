@@ -13,18 +13,16 @@
 *
 ****/
 
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 {
-    public interface INetworkObject
+    /// <summary>
+    /// Interface that root networkable objects must implement
+    /// </summary>
+    public interface INetworkable
     {
-        ObjectHandle Handle { get; }
-
-        TypeMetaData MetaData { get; }
-
-        INetworkable Instance { get; }
-
-        void OnChange(string name);
+        /// <summary>
+        /// The handle that represents this object
+        /// </summary>
+        ObjectHandle Handle { get; set; }
     }
 }
