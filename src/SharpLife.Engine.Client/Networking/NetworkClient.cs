@@ -377,6 +377,7 @@ namespace SharpLife.Engine.Client.Networking
         public void ReceiveMessage(NetConnection connection, NetworkObjectListFrameListUpdate message)
         {
             ObjectListReceiver.DeserializeFrameList(message);
+            ObjectListReceiver.ApplyCurrentFrame();
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
