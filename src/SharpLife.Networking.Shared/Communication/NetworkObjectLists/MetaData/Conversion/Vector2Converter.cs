@@ -23,7 +23,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
     {
         public static Vector2Converter Instance { get; } = new Vector2Converter();
 
-        public override int MemberCount => 2;
+        public override int MemberCount => 2 * FloatConverter.Instance.MemberCount;
 
         private Vector2Converter()
         {

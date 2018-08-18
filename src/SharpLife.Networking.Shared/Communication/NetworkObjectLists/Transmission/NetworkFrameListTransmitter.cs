@@ -15,6 +15,7 @@
 
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames;
 using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
+using SharpLife.Utility.Collections.Generic;
 using System;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission

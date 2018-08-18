@@ -27,11 +27,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             Destroyed = 1 << 0
         }
 
-        public int Id { get; }
+        public ObjectHandle Handle => Instance.Handle;
 
         public TypeMetaData MetaData { get; }
 
-        public object Instance { get; }
+        public INetworkable Instance { get; }
 
         internal bool[] ChangeNotifications { get; }
 
@@ -55,9 +55,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             }
         }
 
-        internal NetworkObject(int id, TypeMetaData metaData, object instance)
+        internal NetworkObject(TypeMetaData metaData, INetworkable instance)
         {
-            Id = id;
             MetaData = metaData ?? throw new ArgumentNullException(nameof(metaData));
             Instance = instance ?? throw new ArgumentNullException(nameof(instance));
 
@@ -110,7 +109,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
             if (snapshot.Length != MetaData.Members.Count)
             {
-                throw new InvalidOperationException($"Snapshot for object {Id} and type {MetaData.Type.FullName} has the wrong size (got {snapshot.Length}, expected {MetaData.Members.Count}");
+                throw new InvalidOperationException($"Snapshot for object {Handle} and type {MetaData.Type.FullName} has the wrong size (got {snapshot.Length}, expected {MetaData.Members.Count}");
             }
 
             for (var i = 0; i < MetaData.Members.Count; ++i)

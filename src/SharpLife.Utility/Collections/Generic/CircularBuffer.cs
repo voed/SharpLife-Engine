@@ -17,7 +17,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
+namespace SharpLife.Utility.Collections.Generic
 {
     /// <summary>
     /// A circular buffer that stores objects of type T

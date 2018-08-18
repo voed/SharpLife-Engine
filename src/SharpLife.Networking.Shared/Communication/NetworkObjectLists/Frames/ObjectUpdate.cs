@@ -15,6 +15,7 @@
 
 using Google.Protobuf;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion;
 using System;
 using System.IO;
 
@@ -22,15 +23,15 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 {
     internal sealed class ObjectUpdate
     {
-        public int ObjectId { get; }
+        public ObjectHandle ObjectHandle { get; }
 
         public TypeMetaData MetaData { get; }
 
         public object[] Snapshot { get; }
 
-        public ObjectUpdate(int objectId, TypeMetaData metaData, object[] snapshot)
+        public ObjectUpdate(in ObjectHandle objectHandle, TypeMetaData metaData, object[] snapshot)
         {
-            ObjectId = objectId;
+            ObjectHandle = objectHandle;
             MetaData = metaData ?? throw new ArgumentNullException(nameof(metaData));
             Snapshot = snapshot ?? throw new ArgumentNullException(nameof(snapshot));
         }
@@ -53,7 +54,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 IsDelta = previousSnapshot != null
             };
 
-            stream.WriteInt32(ObjectId);
+            stream.WriteInt32(ObjectHandle.Id);
+            stream.WriteInt32(ObjectHandle.SerialNumber);
             stream.WriteUInt32(MetaData.Id);
 
             stream.WriteBool(data.IsDelta);
@@ -85,6 +87,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 {
                     changes = member.MetaData.Converter.EncodeAndWrite(Snapshot[i], previousSnapshot[i], stream) || changes;
                 }
+                else
+                {
+                    //Write unchanged values for each member
+                    for (var unchanged = 0; unchanged < member.MetaData.Converter.MemberCount; ++unchanged)
+                    {
+                        ConversionUtils.AddUnchangedValue(stream);
+                    }
+                }
             }
 
             return changes;
@@ -107,12 +117,17 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             return stream.ReadInt32();
         }
 
+        internal static int DeserializeSerialNumber(CodedInputStream stream)
+        {
+            return stream.ReadInt32();
+        }
+
         internal static uint DeserializeTypeId(CodedInputStream stream)
         {
             return stream.ReadUInt32();
         }
 
-        internal static ObjectUpdate DeserializeFromStream(CodedInputStream stream, int objectId, TypeMetaData metaData, ObjectUpdate previousUpdate)
+        internal static ObjectUpdate DeserializeFromStream(CodedInputStream stream, in ObjectHandle objectHandle, TypeMetaData metaData, ObjectUpdate previousUpdate)
         {
             var snapshot = metaData.AllocateSnapshot();
 
@@ -121,7 +136,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             {
                 if (previousUpdate == null)
                 {
-                    throw new InvalidOperationException($"Object with id {objectId} ({metaData.Type.FullName}) received delta update, but no previous update to delta from");
+                    throw new InvalidOperationException($"Object with handle {objectHandle} ({metaData.Type.FullName}) received delta update, but no previous update to delta from");
                 }
 
                 var previousSnapshot = previousUpdate.Snapshot;
@@ -156,7 +171,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 }
             }
 
-            return new ObjectUpdate(objectId, metaData, snapshot);
+            return new ObjectUpdate(objectHandle, metaData, snapshot);
         }
     }
 }

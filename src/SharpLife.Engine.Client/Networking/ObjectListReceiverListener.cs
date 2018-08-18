@@ -13,11 +13,11 @@ namespace SharpLife.Engine.Client.Networking
         {
         }
 
-        public void OnNetworkObjectCreated(INetworkObjectList networkObjectList, INetworkObject networkObject, object networkableObject)
+        public void OnNetworkObjectCreated(INetworkObjectList networkObjectList, INetworkObject networkObject, INetworkable networkableObject)
         {
         }
 
-        public void OnNetworkObjectDestroyed(INetworkObjectList networkObjectList, INetworkObject networkObject, object networkableObject)
+        public void OnNetworkObjectDestroyed(INetworkObjectList networkObjectList, INetworkObject networkObject, INetworkable networkableObject)
         {
         }
 

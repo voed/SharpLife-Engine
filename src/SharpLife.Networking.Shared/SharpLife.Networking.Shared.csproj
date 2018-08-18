@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Lidgren.Network.MultiTarget">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Lidgren.Network.MultiTarget.dll</HintPath>
     </Reference>

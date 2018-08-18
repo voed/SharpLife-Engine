@@ -24,10 +24,6 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
         private readonly List<NetworkObject> _networkObjects = new List<NetworkObject>();
 
-        private int _nextId;
-
-        private readonly List<int> _freeIds = new List<int>();
-
         public string Name { get; }
 
         public int Id { get; }
@@ -41,7 +37,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             Id = id;
         }
 
-        public NetworkObject InternalFindNetworkObjectForObject(object networkableObject)
+        public NetworkObject InternalFindNetworkObjectForObject(INetworkable networkableObject)
         {
             if (networkableObject == null)
             {
@@ -59,14 +55,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             return null;
         }
 
-        public INetworkObject FindNetworkObjectForObject(object networkableObject)
+        public INetworkObject FindNetworkObjectForObject(INetworkable networkableObject)
         {
             return InternalFindNetworkObjectForObject(networkableObject);
         }
 
         public NetworkObject InternalGetNetworkObjectById(int id)
         {
-            return _networkObjects.Find(networkObject => networkObject.Id == id);
+            return _networkObjects.Find(networkObject => networkObject.Handle.Id == id);
         }
 
         public INetworkObject GetNetworkObjectById(int id)
@@ -74,32 +70,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             return InternalGetNetworkObjectById(id);
         }
 
-        private int GetFreeId()
-        {
-            int id;
-
-            if (_freeIds.Count > 0)
-            {
-                //TODO: could take the lowest id at all times to reduce varint size
-                //TODO: or have user hint at how often object updates to optimize id usage
-                id = _freeIds[_freeIds.Count - 1];
-                _freeIds.RemoveAt(_freeIds.Count - 1);
-            }
-            else
-            {
-                //If you absolutely need more, convert everything to uint64
-                if (_nextId == int.MaxValue)
-                {
-                    throw new InvalidOperationException($"Cannot create more network objects, ran out of IDs (max: {int.MaxValue})");
-                }
-
-                id = _nextId++;
-            }
-
-            return id;
-        }
-
-        internal NetworkObject InternalCreateNetworkObject(object networkableObject, int? objectId)
+        internal NetworkObject InternalCreateNetworkObject(INetworkable networkableObject)
         {
             if (networkableObject == null)
             {
@@ -120,24 +91,16 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
                 throw new InvalidOperationException($"Type {type.FullName} has not been registered to be networked");
             }
 
-            if (objectId.HasValue && GetNetworkObjectById(objectId.Value) != null)
-            {
-                throw new InvalidOperationException($"There is already an object with id {objectId.Value}");
-            }
-
-            var id = objectId ?? GetFreeId();
-
-            var networkObject = new NetworkObject(id, metaData, networkableObject);
+            var networkObject = new NetworkObject(metaData, networkableObject);
 
             _networkObjects.Add(networkObject);
 
             return networkObject;
         }
 
-        public INetworkObject CreateNetworkObject<TNetworkable>(TNetworkable networkableObject)
-            where TNetworkable : class
+        public INetworkObject CreateNetworkObject(INetworkable networkableObject)
         {
-            return InternalCreateNetworkObject(networkableObject, null);
+            return InternalCreateNetworkObject(networkableObject);
         }
 
         internal void InternalDestroyNetworkObject(NetworkObject networkObject)
@@ -166,7 +129,6 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             {
                 if (_networkObjects[i].Destroyed)
                 {
-                    _freeIds.Add(_networkObjects[i].Id);
                     _networkObjects.RemoveAt(i);
                 }
                 else
@@ -182,7 +144,6 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             {
                 if (_networkObjects[i].Destroyed)
                 {
-                    _freeIds.Add(_networkObjects[i].Id);
                     _networkObjects.RemoveAt(i);
                 }
                 else
