@@ -36,7 +36,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public override void Write(in bool value, CodedOutputStream stream)
         {
-            //Booleans can be stored in the same amount of space as the changed value, so just write it
+            ConversionUtils.AddChangedValue(stream);
             stream.WriteBool(value);
         }
 
@@ -47,9 +47,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public override bool Read(CodedInputStream stream, out bool result)
         {
-            result = stream.ReadBool();
+            var changed = stream.ReadBool();
 
-            return true;
+            if (changed)
+            {
+                result = stream.ReadBool();
+            }
+            else
+            {
+                result = default;
+            }
+
+            return changed;
         }
     }
 }
