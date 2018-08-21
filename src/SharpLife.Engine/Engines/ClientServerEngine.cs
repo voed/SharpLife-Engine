@@ -244,7 +244,7 @@ namespace SharpLife.Engine.Engines
                 retainedFileCountLimit: EngineConfiguration.LoggingConfiguration.RetainedFileCountLimit);
 
             //Use basic formatting for console output
-            var logFormatter = new MessageTemplateTextFormatter("{Message:lj}{NewLine}", null);
+            var logFormatter = new MessageTemplateTextFormatter("{Message:lj}{NewLine}{Exception}", null);
 
             config.WriteTo.TextWriter(logFormatter, LogTextWriter);
 
