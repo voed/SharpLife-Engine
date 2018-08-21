@@ -31,6 +31,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
 
         private readonly Dictionary<Type, TypeMetaData> _types = new Dictionary<Type, TypeMetaData>();
 
+        private readonly Dictionary<Type, TypeMetaData> _remappedTypes = new Dictionary<Type, TypeMetaData>();
+
         private uint _nextId;
 
         private GenericTypeMetaData _arrayConverter;
@@ -57,6 +59,29 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             }
 
             _types.TryGetValue(type, out var metaData);
+
+            return metaData;
+        }
+
+        /// <summary>
+        /// Looks up a root type's metadata
+        /// Also considers remapped types
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public TypeMetaData LookupRootType(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (_types.TryGetValue(type, out var metaData))
+            {
+                return metaData;
+            }
+
+            _remappedTypes.TryGetValue(type, out metaData);
 
             return metaData;
         }
@@ -192,6 +217,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 return InternalRegisterType(type, TypeMetaData.DefaultFactory, arrayConverter, Array.Empty<TypeMetaData.Member>(), null);
             }
 
+            if (type.IsEnum)
+            {
+                //Use the underlying type for networking
+                return LookupMemberType(type.GetEnumUnderlyingType());
+            }
+
             if (!type.IsGenericType)
             {
                 //Let caller handle failure (more information available)
@@ -232,6 +263,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 }
             }
 
+            if (_remappedTypes.ContainsKey(type))
+            {
+                throw new InvalidOperationException($"The type {type.FullName} has already been registered as a remapped type");
+            }
+
             var metaData = new TypeMetaData(_nextId++, type, factory, typeConverter, members, mapFromType);
 
             _types.Add(type, metaData);
@@ -268,6 +304,44 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         public TypeMetaDataBuilder NewBuilder(Type type)
         {
             return new TypeMetaDataBuilder(this, type);
+        }
+
+        /// <summary>
+        /// Registers a type that is mapped to another base type
+        /// This allows a type to be networked as a base type
+        /// </summary>
+        /// <param name="remappedType"></param>
+        /// <param name="inheritFrom"></param>
+        public void RegisterRemappedType(Type remappedType, Type inheritFrom)
+        {
+            if (remappedType == null)
+            {
+                throw new ArgumentNullException(nameof(remappedType));
+            }
+
+            if (inheritFrom == null)
+            {
+                throw new ArgumentNullException(nameof(inheritFrom));
+            }
+
+            if (!inheritFrom.IsAssignableFrom(remappedType))
+            {
+                throw new InvalidOperationException($"The type {remappedType.FullName} does not inherit from {inheritFrom.FullName}");
+            }
+
+            var metaData = FindMetaDataByType(inheritFrom);
+
+            if (metaData == null)
+            {
+                _remappedTypes.TryGetValue(inheritFrom, out metaData);
+            }
+
+            if (metaData == null)
+            {
+                throw new InvalidOperationException($"The type {inheritFrom.FullName} has not been registered");
+            }
+
+            _remappedTypes.Add(remappedType, metaData);
         }
 
         public NetworkObjectListObjectMetaDataList Serialize()

@@ -147,7 +147,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 throw new ArgumentNullException(nameof(info));
             }
 
-            if (info.DeclaringType != Type)
+            //Account for base classes
+            if (!info.DeclaringType.IsAssignableFrom(Type))
             {
                 throw new InvalidOperationException($"Member {info.Name} is not a member of type {Type.FullName}");
             }

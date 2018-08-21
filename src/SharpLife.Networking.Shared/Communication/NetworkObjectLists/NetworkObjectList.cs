@@ -84,7 +84,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
             var type = networkableObject.GetType();
 
-            var metaData = _listManager.TypeRegistry.FindMetaDataByType(type);
+            var metaData = _listManager.TypeRegistry.LookupRootType(type);
 
             if (metaData == null)
             {

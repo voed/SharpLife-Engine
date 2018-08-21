@@ -56,9 +56,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             }
         }
 
-        private readonly ObjectFactory _factory;
-
-        private readonly Member[] _members;
+        internal readonly Member[] _members;
 
         private readonly Dictionary<string, Member> _membersLookup = new Dictionary<string, Member>();
 
@@ -71,6 +69,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// If null, this type cannot be converted and cannot be used as a member in other types
         /// </summary>
         public ITypeConverter Converter { get; }
+
+        public ObjectFactory Factory { get; }
 
         public IReadOnlyList<Member> Members => _members;
 
@@ -89,7 +89,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         public TypeMetaData(uint id, Type type, ObjectFactory factory, ITypeConverter converter, Member[] members, string mapFromType)
         {
             Id = id;
-            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            Factory = factory ?? throw new ArgumentNullException(nameof(factory));
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Converter = converter;
             _members = members ?? throw new ArgumentNullException(nameof(members));
@@ -105,7 +105,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// Creates an instance of the type
         /// </summary>
         /// <returns></returns>
-        public INetworkable CreateInstance(in ObjectHandle handle) => _factory(this, handle);
+        public INetworkable CreateInstance(in ObjectHandle handle) => Factory(this, handle);
 
         public Member FindMemberByName(string name)
         {
