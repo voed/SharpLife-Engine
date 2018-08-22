@@ -13,15 +13,16 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Server.Entities
 {
-    public interface IServerNetworking
+    /// <summary>
+    /// Base class for entities that are not networked to clients
+    /// </summary>
+    public abstract class ServerOnlyEntity : BaseEntity
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
-
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        protected ServerOnlyEntity()
+            : base(false)
+        {
+        }
     }
 }

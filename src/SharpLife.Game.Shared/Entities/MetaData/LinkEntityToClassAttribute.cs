@@ -13,15 +13,23 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using System;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Shared.Entities.MetaData
 {
-    public interface IServerNetworking
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    public sealed class LinkEntityToClassAttribute : Attribute
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
+        public string Name { get; }
 
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        public LinkEntityToClassAttribute(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"Entity name must be valid", nameof(name));
+            }
+
+            Name = name;
+        }
     }
 }

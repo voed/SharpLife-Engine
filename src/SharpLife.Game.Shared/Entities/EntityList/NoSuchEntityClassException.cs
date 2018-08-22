@@ -13,15 +13,13 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Shared.Entities.EntityList
 {
-    public interface IServerNetworking
+    public sealed class NoSuchEntityClassException : EntityInstantiationException
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
-
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        public NoSuchEntityClassException(string className)
+            : base($"No entity class named \"{className}\" exists")
+        {
+        }
     }
 }

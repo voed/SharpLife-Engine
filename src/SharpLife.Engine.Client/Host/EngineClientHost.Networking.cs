@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
-using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
@@ -75,7 +75,7 @@ namespace SharpLife.Engine.Client.Host
             //TODO: let game do the same
         }
 
-        private void CreateNetworkObjectLists(IEngineNetworkObjectLists networkObjectLists)
+        private void CreateNetworkObjectLists(IClientNetworkObjectLists networkObjectLists)
         {
             _clientNetworking.CreateNetworkObjectLists(networkObjectLists);
         }

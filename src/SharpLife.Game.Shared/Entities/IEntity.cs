@@ -13,15 +13,12 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Shared.Entities
 {
-    public interface IServerNetworking
+    public interface IEntity : INetworkable
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
-
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        string ClassName { get; set; }
     }
 }

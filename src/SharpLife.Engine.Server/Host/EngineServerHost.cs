@@ -118,6 +118,8 @@ namespace SharpLife.Engine.Server.Host
 
             var collection = new ServiceCollection();
 
+            collection.AddSingleton(_logger);
+
             _game.Initialize(collection);
 
             var serviceProvider = collection.BuildServiceProvider();
@@ -195,8 +197,6 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapCRCComputed);
 
-            CreateNetworkStringLists();
-
             //TODO: add binary data
             _modelPrecache.Add(mapFileName, new ModelPrecacheData
             {
@@ -218,8 +218,17 @@ namespace SharpLife.Engine.Server.Host
             return true;
         }
 
+        public void InitializeMap(ServerStartFlags flags)
+        {
+            _game.MapLoadBegin(_engine.MapManager.MapName, _engine.MapManager.BSPFile.Entities, (flags & ServerStartFlags.LoadGame) != 0);
+
+            _game.MapLoadFinished();
+        }
+
         public void Activate()
         {
+            _game.Activate();
+
             //TODO: implement
             Active = true;
         }
@@ -233,7 +242,7 @@ namespace SharpLife.Engine.Server.Host
             {
                 if (Active)
                 {
-                    //TODO: deactivate game
+                    _game.Deactivate();
                 }
             }
         }

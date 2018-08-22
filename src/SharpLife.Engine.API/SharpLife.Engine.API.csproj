@@ -19,4 +19,8 @@
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Engine\Shared\" />
+  </ItemGroup>
+
 </Project>

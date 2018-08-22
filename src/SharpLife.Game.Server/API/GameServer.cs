@@ -15,22 +15,29 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.API.Game.Server;
+using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Server.Networking;
 using System;
+using System.Diagnostics;
 
 namespace SharpLife.Game.Server.API
 {
     public class GameServer : IGameServer
     {
+        private IServiceProvider _serviceProvider;
+
         private ServerNetworking _networking;
 
-        private IServiceProvider _serviceProvider;
+        private ServerEntities _entities;
+
+        private bool _active;
 
         public void Initialize(IServiceCollection serviceCollection)
         {
             //Expose as both to get the implementation
             serviceCollection.AddSingleton<ServerNetworking>();
             serviceCollection.AddSingleton<IServerNetworking>(provider => provider.GetRequiredService<ServerNetworking>());
+            serviceCollection.AddSingleton<ServerEntities>();
         }
 
         public void Startup(IServiceProvider serviceProvider)
@@ -38,10 +45,41 @@ namespace SharpLife.Game.Server.API
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
             _networking = serviceProvider.GetRequiredService<ServerNetworking>();
+
+            _entities = serviceProvider.GetRequiredService<ServerEntities>();
+
+            _entities.Startup();
         }
 
         public void Shutdown()
         {
+        }
+
+        public void MapLoadBegin(string mapName, string entityData, bool loadGame)
+        {
+            _entities.MapLoadBegin(mapName, entityData, loadGame);
+        }
+
+        public void MapLoadFinished()
+        {
+
+        }
+
+        public void Activate()
+        {
+            Debug.Assert(!_active);
+
+            _active = true;
+        }
+
+        public void Deactivate()
+        {
+            if (!_active)
+            {
+                return;
+            }
+
+            _active = false;
         }
     }
 }

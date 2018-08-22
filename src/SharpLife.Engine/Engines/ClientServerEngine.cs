@@ -396,16 +396,9 @@ namespace SharpLife.Engine.Engines
         /// <param name="flags"></param>
         private void FinishLoadMap(string startSpot = null, ServerStartFlags flags = ServerStartFlags.None)
         {
-            if ((flags & ServerStartFlags.LoadGame) != 0)
-            {
-                //TODO: load game
-            }
-            else
-            {
-                //TODO: initialize entities through game assembly
-            }
+            _server.InitializeMap(flags);
 
-            _server?.Activate();
+            _server.Activate();
         }
 
         public void EndGame(string reason)

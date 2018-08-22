@@ -99,6 +99,10 @@ namespace SharpLife.Engine.Client.Host
 
             _renderer.LoadBSP(_engine.MapManager.BSPFile);
 
+            _game.MapLoadBegin(_engine.MapManager.MapName, _engine.MapManager.BSPFile.Entities);
+
+            _game.MapLoadFinished();
+
             CreateNetworkStringLists();
 
             _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
@@ -172,7 +176,9 @@ namespace SharpLife.Engine.Client.Host
         {
             _netClient.ReceiveMessage(connection, message);
 
-            using (var networkObjectLists = new EngineReceiverNetworkObjectLists(_netClient.ObjectListReceiver))
+            _objectListReceiverListener.ClearListeners();
+
+            using (var networkObjectLists = new EngineReceiverNetworkObjectLists(_netClient.ObjectListReceiver, _objectListReceiverListener))
             {
                 CreateNetworkObjectLists(networkObjectLists);
             }

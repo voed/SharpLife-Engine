@@ -13,15 +13,24 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using System;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Shared.Entities.EntityList
 {
-    public interface IServerNetworking
+    public sealed class NoFreeEntityEntriesException : EntityInstantiationException
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
+        public NoFreeEntityEntriesException()
+        {
+        }
 
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        public NoFreeEntityEntriesException(string message)
+            : base(message)
+        {
+        }
+
+        public NoFreeEntityEntriesException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

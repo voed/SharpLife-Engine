@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Networking;
 using SharpLife.Networking.Shared;
@@ -67,6 +67,8 @@ namespace SharpLife.Engine.Server.Host
                 _netServer.Start();
             }
 
+            CreateNetworkStringLists();
+
             _netServer.CreateObjectListTransmitter();
 
             //TODO: maybe cache the type registry so we don't need to recreate
@@ -89,7 +91,7 @@ namespace SharpLife.Engine.Server.Host
             //TODO: let game do the same
         }
 
-        private void CreateNetworkObjectLists(IEngineNetworkObjectLists networkObjectLists)
+        private void CreateNetworkObjectLists(IServerNetworkObjectLists networkObjectLists)
         {
             _serverNetworking.CreateNetworkObjectLists(networkObjectLists);
         }

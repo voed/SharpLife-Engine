@@ -13,15 +13,14 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using System;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Shared.Entities
 {
-    public interface IServerNetworking
+    [Flags]
+    public enum EntityFlags
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
-
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        None = 0,
+        PendingDestruction = 1 << 0
     }
 }

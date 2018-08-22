@@ -25,5 +25,22 @@ namespace SharpLife.Engine.API.Game.Server
         void Startup(IServiceProvider serviceProvider);
 
         void Shutdown();
+
+        /// <summary>
+        /// Called when map loading begins
+        /// </summary>
+        /// <param name="mapName">Name of the map being loaded, without directory or extension</param>
+        /// <param name="entityData">The map's entity data string</param>
+        /// <param name="loadGame"></param>
+        void MapLoadBegin(string mapName, string entityData, bool loadGame);
+
+        /// <summary>
+        /// Called when map loading has finished
+        /// </summary>
+        void MapLoadFinished();
+
+        void Activate();
+
+        void Deactivate();
     }
 }

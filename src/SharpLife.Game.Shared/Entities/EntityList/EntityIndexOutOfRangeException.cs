@@ -13,12 +13,13 @@
 *
 ****/
 
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
-
-namespace SharpLife.Engine.API.Engine.Shared
+namespace SharpLife.Game.Shared.Entities.EntityList
 {
-    public interface IEngineNetworkObjectLists
+    public sealed class EntityIndexOutOfRangeException : EntityInstantiationException
     {
-        INetworkObjectList CreateList(string name);
+        public EntityIndexOutOfRangeException(int index, int maxValue)
+            : base($"Entity index {index} is out of range [0, {maxValue}]")
+        {
+        }
     }
 }

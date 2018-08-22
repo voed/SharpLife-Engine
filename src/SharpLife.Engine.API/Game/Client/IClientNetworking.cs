@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 
 namespace SharpLife.Engine.API.Game.Client
@@ -22,6 +22,6 @@ namespace SharpLife.Engine.API.Game.Client
     {
         void RegisterObjectListTypes(TypeRegistry typeRegistry);
 
-        void CreateNetworkObjectLists(IEngineNetworkObjectLists engineObjectLists);
+        void CreateNetworkObjectLists(IClientNetworkObjectLists engineObjectLists);
     }
 }

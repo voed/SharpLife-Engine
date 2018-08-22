@@ -55,6 +55,8 @@ namespace SharpLife.Engine.Server.Host
         /// <param name="flags"></param>
         bool Start(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None);
 
+        void InitializeMap(ServerStartFlags flags);
+
         void Activate();
 
         void Deactivate();

@@ -13,27 +13,34 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Engine.API.Game.Server;
-using SharpLife.Game.Shared;
+using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Shared.Networking;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using System;
 
 namespace SharpLife.Game.Server.Networking
 {
     internal sealed class ServerNetworking : IServerNetworking
     {
-        private INetworkObjectList _entitiesList;
+        private readonly ServerEntities _entities;
+
+        public ServerNetworking(ServerEntities entities)
+        {
+            _entities = entities ?? throw new ArgumentNullException(nameof(entities));
+        }
 
         public void RegisterObjectListTypes(TypeRegistry typeRegistry)
         {
             SharedObjectListTypes.RegisterSharedTypes(typeRegistry);
+
+            _entities.RegisterNetworkableEntities(typeRegistry);
         }
 
-        public void CreateNetworkObjectLists(IEngineNetworkObjectLists engineObjectLists)
+        public void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists)
         {
-            _entitiesList = engineObjectLists.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
+            _entities.CreateNetworkObjectLists(engineObjectLists);
         }
     }
 }

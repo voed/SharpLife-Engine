@@ -13,15 +13,20 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Game.Shared.Entities.MetaData;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Game.Server.Entities
 {
-    public interface IServerNetworking
+    /// <summary>
+    /// Base class for all networked types
+    /// Not marked abstract since subclasses can use this as a base type for networking
+    /// </summary>
+    [Networkable]
+    public class NetworkedEntity : BaseEntity
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
-
-        void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
+        public NetworkedEntity()
+            : base(true)
+        {
+        }
     }
 }
