@@ -34,7 +34,9 @@ namespace SharpLife.Game.Server.Entities.EntityList
         {
             if (entry.entity.Networked)
             {
-                _entitiesNetworkList.CreateNetworkObject(entry.entity);
+                var networkObject = _entitiesNetworkList.CreateNetworkObject(entry.entity);
+
+                entry.entity.NetworkObject = networkObject;
             }
         }
 
