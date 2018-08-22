@@ -17,8 +17,7 @@ using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Networking;
 using SharpLife.Networking.Shared;
-using SharpLife.Networking.Shared.Communication;
-using SharpLife.Networking.Shared.Communication.MessageMapping;
+using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 

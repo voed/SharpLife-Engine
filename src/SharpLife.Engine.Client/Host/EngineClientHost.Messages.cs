@@ -17,7 +17,7 @@ using Lidgren.Network;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
-using SharpLife.Networking.Shared.Communication;
+using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.NetworkObjectLists;

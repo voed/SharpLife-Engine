@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharpLife.Networking.Shared.Communication.MessageMapping
+namespace SharpLife.Networking.Shared.Communication.Messages
 {
     /// <summary>
     /// Provides a mapping of <see cref="MessageDescriptor"/> to unsigned integer ids

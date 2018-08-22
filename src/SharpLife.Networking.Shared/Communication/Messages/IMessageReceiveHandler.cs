@@ -16,7 +16,7 @@
 using Google.Protobuf;
 using Lidgren.Network;
 
-namespace SharpLife.Networking.Shared.Communication
+namespace SharpLife.Networking.Shared.Communication.Messages
 {
     /// <summary>
     /// Message handlers should implement this

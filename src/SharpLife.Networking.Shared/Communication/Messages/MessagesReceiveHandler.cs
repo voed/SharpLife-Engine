@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharpLife.Networking.Shared.Communication
+namespace SharpLife.Networking.Shared.Communication.Messages
 {
     /// <summary>
     /// Provides functionality to receive messages

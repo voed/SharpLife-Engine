@@ -17,7 +17,7 @@ using Google.Protobuf;
 using Lidgren.Network;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Networking.Shared;
-using SharpLife.Networking.Shared.Communication;
+using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.Server;
 

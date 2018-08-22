@@ -15,13 +15,12 @@
 
 using Google.Protobuf;
 using Lidgren.Network;
-using SharpLife.Networking.Shared.Communication.MessageMapping;
 using SharpLife.Networking.Shared.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SharpLife.Networking.Shared
+namespace SharpLife.Networking.Shared.Communication.Messages
 {
     /// <summary>
     /// Contains a list of messages that are pending transmission
