@@ -43,10 +43,8 @@ namespace SharpLife.FileFormats.BSP
         }
 
         public BSPLoader(Stream stream, bool leaveOpen)
+            : this(new BinaryReader(stream ?? throw new ArgumentNullException(nameof(stream)), Encoding.UTF8, leaveOpen))
         {
-            _reader = new BinaryReader(stream ?? throw new ArgumentNullException(nameof(stream)), Encoding.UTF8, leaveOpen);
-
-            _startPosition = stream.Position;
         }
 
         public BSPLoader(Stream stream)
@@ -113,7 +111,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var textureOffset in textureOffsets)
             {
-                textures.Add(WAD.Input.ReadMipTexture(_reader, lump.fileofs + textureOffset));
+                textures.Add(WADLoader.ReadMipTexture(_reader, lump.fileofs + textureOffset));
             }
 
             return textures;

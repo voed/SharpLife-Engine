@@ -25,13 +25,35 @@ using System.Text;
 
 namespace SharpLife.FileFormats.WAD
 {
-    public static class Input
+    public class WADLoader
     {
         private const int MipTexSize = 40;
 
-        private static Header ReadHeader(BinaryReader reader)
+        private readonly BinaryReader _reader;
+
+        public WADLoader(BinaryReader reader)
         {
-            var data = reader.ReadBytes(Marshal.SizeOf<Header>());
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+        }
+
+        public WADLoader(Stream stream, bool leaveOpen)
+            : this(new BinaryReader(stream ?? throw new ArgumentNullException(nameof(stream)), Encoding.UTF8, leaveOpen))
+        {
+        }
+
+        public WADLoader(Stream stream)
+            : this(stream, false)
+        {
+        }
+
+        public WADLoader(string fileName)
+            : this(File.OpenRead(fileName))
+        {
+        }
+
+        private Header ReadHeader()
+        {
+            var data = _reader.ReadBytes(Marshal.SizeOf<Header>());
 
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             var header = Marshal.PtrToStructure<Header>(handle.AddrOfPinnedObject());
@@ -48,15 +70,15 @@ namespace SharpLife.FileFormats.WAD
             return header;
         }
 
-        private static List<LumpInfo> ReadLumps(BinaryReader reader, ref Header header)
+        private List<LumpInfo> ReadLumps(ref Header header)
         {
-            reader.BaseStream.Position = header.infotableofs;
+            _reader.BaseStream.Position = header.infotableofs;
 
             var lumps = new List<LumpInfo>(header.numlumps);
 
             foreach (var i in Enumerable.Range(0, header.numlumps))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<LumpInfo>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<LumpInfo>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var lump = Marshal.PtrToStructure<LumpInfo>(handle.AddrOfPinnedObject());
@@ -71,6 +93,7 @@ namespace SharpLife.FileFormats.WAD
             return lumps;
         }
 
+        //Also used by BSPLoader
         public static MipTexture ReadMipTexture(BinaryReader reader, int fileOffset)
         {
             var startPos = reader.BaseStream.Position = fileOffset;
@@ -139,30 +162,30 @@ namespace SharpLife.FileFormats.WAD
             return texture;
         }
 
-        private static List<MipTexture> ReadMipTextures(BinaryReader reader, IReadOnlyList<LumpInfo> lumps)
+        private List<MipTexture> ReadMipTextures(IReadOnlyList<LumpInfo> lumps)
         {
             var textures = new List<MipTexture>(lumps.Count);
 
             foreach (var lump in lumps)
             {
-                textures.Add(ReadMipTexture(reader, lump.filepos));
+                textures.Add(ReadMipTexture(_reader, lump.filepos));
             }
 
             return textures;
         }
 
-        public static WADFile ReadWADFile(BinaryReader reader)
+        public WADFile ReadWADFile()
         {
-            if (reader == null)
+            if (_reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw new ArgumentNullException(nameof(_reader));
             }
 
-            var header = ReadHeader(reader);
+            var header = ReadHeader();
 
-            var lumps = ReadLumps(reader, ref header);
+            var lumps = ReadLumps(ref header);
 
-            var textures = ReadMipTextures(reader, lumps);
+            var textures = ReadMipTextures(lumps);
 
             var wadFile = new WADFile
             {
@@ -171,11 +194,6 @@ namespace SharpLife.FileFormats.WAD
             };
 
             return wadFile;
-        }
-
-        public static WADFile ReadWADFile(Stream stream)
-        {
-            return ReadWADFile(new BinaryReader(stream));
         }
     }
 }

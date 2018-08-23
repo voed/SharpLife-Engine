@@ -67,7 +67,7 @@ namespace SharpLife.FileFormats.WAD
                 throw new ArgumentException($"WAD file '{name}' is already loaded");
             }
 
-            var file = Input.ReadWADFile(_fileSystem.OpenRead(name));
+            var file = new WADLoader(_fileSystem.OpenRead(name)).ReadWADFile();
 
             file.Name = name;
 
