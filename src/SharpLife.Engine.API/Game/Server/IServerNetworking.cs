@@ -20,7 +20,7 @@ namespace SharpLife.Engine.API.Game.Server
 {
     public interface IServerNetworking
     {
-        void RegisterObjectListTypes(TypeRegistry typeRegistry);
+        void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder);
 
         void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists);
     }

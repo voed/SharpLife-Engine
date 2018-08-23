@@ -31,7 +31,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
 
         public IFrameListReceiverListener Listener { get; }
 
-        public NetworkObjectListReceiver(int maxFrameLists, IFrameListReceiverListener listener)
+        public NetworkObjectListReceiver(TypeRegistry typeRegistry, int maxFrameLists, IFrameListReceiverListener listener)
+            : base(typeRegistry)
         {
             _frameListLists = new CircularBuffer<FrameList>(maxFrameLists);
             Listener = listener ?? throw new ArgumentNullException(nameof(listener));

@@ -31,11 +31,11 @@ namespace SharpLife.Game.Client.Networking
             _entities = entities ?? throw new ArgumentNullException(nameof(entities));
         }
 
-        public void RegisterObjectListTypes(TypeRegistry typeRegistry)
+        public void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder)
         {
-            SharedObjectListTypes.RegisterSharedTypes(typeRegistry);
+            SharedObjectListTypes.RegisterSharedTypes(typeRegistryBuilder);
 
-            _entities.RegisterNetworkableEntities(typeRegistry);
+            _entities.RegisterNetworkableEntities(typeRegistryBuilder);
         }
 
         public void CreateNetworkObjectLists(IClientNetworkObjectLists engineObjectLists)

@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmiss
 
         private readonly int _maxFrameLists;
 
-        public NetworkObjectListTransmitter(int maxFrameLists)
+        public NetworkObjectListTransmitter(TypeRegistry typeRegistry, int maxFrameLists)
+            : base(typeRegistry)
         {
             if (maxFrameLists < 2)
             {

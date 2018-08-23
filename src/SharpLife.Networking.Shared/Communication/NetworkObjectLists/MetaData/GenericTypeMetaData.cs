@@ -38,14 +38,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// <summary>
         /// Creates a converter that can convert a generic type instance that has the given types
         /// </summary>
-        /// <param name="registry"></param>
+        /// <param name="registryBuilder"></param>
         /// <param name="types"></param>
         /// <returns></returns>
-        internal ITypeConverter CreateConverter(TypeRegistry registry, params Type[] types)
+        internal ITypeConverter CreateConverter(TypeRegistryBuilder registryBuilder, params Type[] types)
         {
-            if (registry == null)
+            if (registryBuilder == null)
             {
-                throw new ArgumentNullException(nameof(registry));
+                throw new ArgumentNullException(nameof(registryBuilder));
             }
 
             if (types == null)
@@ -69,7 +69,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             {
                 var type = uniqueTypes[i];
 
-                var metaData = registry.FindMetaDataByType(type);
+                var metaData = registryBuilder.FindMetaDataByType(type);
 
                 if (metaData == null)
                 {

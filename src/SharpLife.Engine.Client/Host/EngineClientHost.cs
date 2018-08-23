@@ -31,6 +31,7 @@ using SharpLife.FileSystem;
 using SharpLife.Game.Client.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
@@ -134,6 +135,12 @@ namespace SharpLife.Engine.Client.Host
             _window.Center();
 
             LoadGameClient();
+
+            var objectListTypeRegistryBuilder = new TypeRegistryBuilder();
+
+            _clientNetworking.RegisterObjectListTypes(objectListTypeRegistryBuilder);
+
+            _objectListTypeRegistry = objectListTypeRegistryBuilder.BuildRegistry();
 
             var dataSetBuilder = new BinaryDataSetBuilder();
 

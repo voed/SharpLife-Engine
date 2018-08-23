@@ -19,6 +19,7 @@ using SharpLife.Engine.Server.Networking;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 
 namespace SharpLife.Engine.Server.Host
@@ -26,6 +27,8 @@ namespace SharpLife.Engine.Server.Host
     public partial class EngineServerHost
     {
         private NetworkServer _netServer;
+
+        private readonly TypeRegistry _objectListTypeRegistry;
 
         private IServerNetworking _serverNetworking;
 
@@ -71,10 +74,7 @@ namespace SharpLife.Engine.Server.Host
 
             CreateNetworkStringLists();
 
-            _netServer.CreateObjectListTransmitter();
-
-            //TODO: maybe cache the type registry so we don't need to recreate
-            _serverNetworking.RegisterObjectListTypes(_netServer.ObjectListTransmitter.TypeRegistry);
+            _netServer.CreateObjectListTransmitter(_objectListTypeRegistry);
 
             using (var networkObjectLists = new EngineTransmitterNetworkObjectLists(_netServer.ObjectListTransmitter))
             {

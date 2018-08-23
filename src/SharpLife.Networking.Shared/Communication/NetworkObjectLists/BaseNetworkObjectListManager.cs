@@ -28,11 +28,16 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
     {
         private protected readonly List<NetworkObjectList> _objectLists = new List<NetworkObjectList>();
 
-        public TypeRegistry TypeRegistry { get; } = new TypeRegistry();
+        public TypeRegistry TypeRegistry { get; }
 
         public int ListCount => _objectLists.Count;
 
         public IEnumerable<INetworkObjectList> ObjectLists => _objectLists.AsEnumerable<INetworkObjectList>();
+
+        protected BaseNetworkObjectListManager(TypeRegistry typeRegistry)
+        {
+            TypeRegistry = typeRegistry ?? throw new ArgumentNullException(nameof(typeRegistry));
+        }
 
         public INetworkObjectList FindListByName(string name)
         {

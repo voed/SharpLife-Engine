@@ -163,10 +163,7 @@ namespace SharpLife.Engine.Client.Host
 
         public void ReceiveMessage(NetConnection connection, NetworkObjectListObjectMetaDataList message)
         {
-            _netClient.CreateObjectListReceiver();
-
-            //TODO: maybe cache the type registry so we don't need to recreate
-            _clientNetworking.RegisterObjectListTypes(_netClient.ObjectListReceiver.TypeRegistry);
+            _netClient.CreateObjectListReceiver(_objectListTypeRegistry);
 
             _netClient.ObjectListReceiver.TypeRegistry.Deserialize(message);
 

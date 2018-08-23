@@ -39,7 +39,7 @@ namespace SharpLife.Game.Client.Entities
             EntityDictionary.AddTypesFromAssembly<BaseEntity>(typeof(ClientEntities).Assembly);
         }
 
-        public void RegisterNetworkableEntities(TypeRegistry typeRegistry)
+        public void RegisterNetworkableEntities(TypeRegistryBuilder typeRegistryBuilder)
         {
             //Register all entity classes that have been marked networkable
             //This includes classes not marked with LinkEntityToClass since base types can be mapped to
@@ -56,7 +56,7 @@ namespace SharpLife.Game.Client.Entities
                 //Make sure not to replace words in names, just the namespace
                 var mapsFromType = networkableAttr.MapsFromType ?? type.FullName.Replace(".Client.", ".Server.");
 
-                typeRegistry
+                typeRegistryBuilder
                     .NewBuilder(type)
                     .AddNetworkedFields()
                     .AddNetworkedProperties()

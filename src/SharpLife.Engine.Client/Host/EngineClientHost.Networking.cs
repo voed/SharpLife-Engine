@@ -21,6 +21,7 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using System;
 
@@ -31,6 +32,8 @@ namespace SharpLife.Engine.Client.Host
         private NetworkClient _netClient;
 
         private readonly ObjectListReceiverListener _objectListReceiverListener = new ObjectListReceiverListener();
+
+        private TypeRegistry _objectListTypeRegistry;
 
         private IClientNetworking _clientNetworking;
 

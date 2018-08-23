@@ -26,7 +26,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
     /// </summary>
     public sealed class TypeMetaDataBuilder
     {
-        private readonly TypeRegistry _registry;
+        private readonly TypeRegistryBuilder _registryBuilder;
 
         private bool _built;
 
@@ -42,9 +42,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
 
         private string _mapFromType;
 
-        internal TypeMetaDataBuilder(TypeRegistry registry, Type type)
+        internal TypeMetaDataBuilder(TypeRegistryBuilder registryBuilder, Type type)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _registryBuilder = registryBuilder ?? throw new ArgumentNullException(nameof(registryBuilder));
             Type = type ?? throw new ArgumentNullException(nameof(type));
 
             if (type.IsGenericType && !type.IsConstructedGenericType)
@@ -52,7 +52,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 throw new ArgumentException($"Type {type.FullName} is a generic type");
             }
 
-            if (_registry.FindMetaDataByType(type) != null)
+            if (_registryBuilder.FindMetaDataByType(type) != null)
             {
                 throw new ArgumentException($"Type {type.FullName} has already been registered");
             }
@@ -92,7 +92,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
 
         private void InternalAddMember(MemberInfo memberInfo, Type type, bool usesChangeNotification)
         {
-            var typeMetaData = _registry.LookupMemberType(type);
+            var typeMetaData = _registryBuilder.LookupMemberType(type);
 
             if (typeMetaData == null)
             {
@@ -277,7 +277,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             _built = true;
 
             //Avoid unnecessary memory allocations
-            return _registry.InternalRegisterType(Type, _factory, _typeConverter, _members.Count > 0 ? _members.ToArray() : Array.Empty<TypeMetaData.Member>(), _mapFromType);
+            return _registryBuilder.InternalRegisterType(Type, _factory, _typeConverter, _members.Count > 0 ? _members.ToArray() : Array.Empty<TypeMetaData.Member>(), _mapFromType);
         }
     }
 }

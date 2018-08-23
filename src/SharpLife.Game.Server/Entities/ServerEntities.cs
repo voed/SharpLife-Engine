@@ -48,7 +48,7 @@ namespace SharpLife.Game.Server.Entities
             EntityDictionary.AddTypesFromAssembly<BaseEntity>(typeof(ServerEntities).Assembly);
         }
 
-        public void RegisterNetworkableEntities(TypeRegistry typeRegistry)
+        public void RegisterNetworkableEntities(TypeRegistryBuilder typeRegistryBuilder)
         {
             var registeredTypes = new HashSet<Type>();
 
@@ -56,7 +56,7 @@ namespace SharpLife.Game.Server.Entities
             {
                 //MapsFromType is not required on the server side
 
-                typeRegistry
+                typeRegistryBuilder
                     .NewBuilder(type)
                     .AddNetworkedFields()
                     .AddNetworkedProperties()
@@ -94,7 +94,7 @@ namespace SharpLife.Game.Server.Entities
                             throw new NotSupportedException($"The type {type.FullName} is declared as using a base class for networking, but no base class is configured for networking");
                         }
 
-                        typeRegistry.RegisterRemappedType(type, type.BaseType);
+                        typeRegistryBuilder.RegisterRemappedType(type, type.BaseType);
 
                         //Register the type as networked so any subclasses will know
                         registeredTypes.Add(type);

@@ -23,6 +23,7 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
@@ -362,10 +363,10 @@ namespace SharpLife.Engine.Client.Networking
             }
         }
 
-        public void CreateObjectListReceiver()
+        public void CreateObjectListReceiver(TypeRegistry typeRegistry)
         {
             //TODO: need to define number of frames for multiplayer
-            ObjectListReceiver = new NetworkObjectListReceiver(8, _frameListReceiverListener);
+            ObjectListReceiver = new NetworkObjectListReceiver(typeRegistry, 8, _frameListReceiverListener);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)

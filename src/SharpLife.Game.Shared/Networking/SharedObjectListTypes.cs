@@ -23,34 +23,34 @@ namespace SharpLife.Game.Shared.Networking
 {
     public static class SharedObjectListTypes
     {
-        public static void RegisterSharedTypes(TypeRegistry typeRegistry)
+        public static void RegisterSharedTypes(TypeRegistryBuilder typeRegistryBuilder)
         {
-            if (typeRegistry == null)
+            if (typeRegistryBuilder == null)
             {
-                throw new ArgumentNullException(nameof(typeRegistry));
+                throw new ArgumentNullException(nameof(typeRegistryBuilder));
             }
 
-            typeRegistry.RegisterArrayConverter(typeof(ListConverter<>));
+            typeRegistryBuilder.RegisterArrayConverter(typeof(ListConverter<>));
 
-            typeRegistry.RegisterType(typeof(bool), BooleanConverter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(bool), BooleanConverter.Instance);
 
-            typeRegistry.RegisterType(typeof(sbyte), Int8Converter.Instance);
-            typeRegistry.RegisterType(typeof(short), Int16Converter.Instance);
-            typeRegistry.RegisterType(typeof(int), Int32Converter.Instance);
-            typeRegistry.RegisterType(typeof(long), Int64Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(sbyte), Int8Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(short), Int16Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(int), Int32Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(long), Int64Converter.Instance);
 
-            typeRegistry.RegisterType(typeof(byte), UInt8Converter.Instance);
-            typeRegistry.RegisterType(typeof(ushort), UInt16Converter.Instance);
-            typeRegistry.RegisterType(typeof(uint), UInt32Converter.Instance);
-            typeRegistry.RegisterType(typeof(ulong), UInt64Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(byte), UInt8Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(ushort), UInt16Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(uint), UInt32Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(ulong), UInt64Converter.Instance);
 
-            typeRegistry.RegisterType(typeof(float), FloatConverter.Instance);
-            typeRegistry.RegisterType(typeof(double), DoubleConverter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(float), FloatConverter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(double), DoubleConverter.Instance);
 
-            typeRegistry.RegisterType(typeof(string), StringConverter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(string), StringConverter.Instance);
 
-            typeRegistry.RegisterType(typeof(Vector2), Vector2Converter.Instance);
-            typeRegistry.RegisterType(typeof(Vector3), Vector3Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(Vector2), Vector2Converter.Instance);
+            typeRegistryBuilder.RegisterType(typeof(Vector3), Vector3Converter.Instance);
         }
     }
 }

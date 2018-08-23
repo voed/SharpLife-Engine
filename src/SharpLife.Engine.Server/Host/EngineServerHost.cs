@@ -25,6 +25,7 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Game.Server.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Messages.Server;
 using SharpLife.Networking.Shared.Precaching;
 using SharpLife.Utility.Events;
@@ -111,6 +112,12 @@ namespace SharpLife.Engine.Server.Host
             ClientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
 
             LoadGameServer();
+
+            var objectListTypeRegistryBuilder = new TypeRegistryBuilder();
+
+            _serverNetworking.RegisterObjectListTypes(objectListTypeRegistryBuilder);
+
+            _objectListTypeRegistry = objectListTypeRegistryBuilder.BuildRegistry();
 
             var dataSetBuilder = new BinaryDataSetBuilder();
 
