@@ -16,53 +16,32 @@
 using Lidgren.Network;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
-using SharpLife.Networking.Shared.Messages.BinaryData;
-using SharpLife.Networking.Shared.Messages.Client;
-using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
-using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
-using System;
 
 namespace SharpLife.Engine.Client.Host
 {
-    public partial class EngineClientHost : IMessageReceiveHandler<ConnectAcknowledgement>,
+    public partial class EngineClientHost :
         IMessageReceiveHandler<ServerInfo>,
-        IMessageReceiveHandler<Print>,
-        IMessageReceiveHandler<BinaryMetaData>,
-        IMessageReceiveHandler<NetworkStringListFullUpdate>,
-        IMessageReceiveHandler<NetworkStringListUpdate>,
-        IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
-        IMessageReceiveHandler<NetworkObjectListObjectMetaDataList>,
-        IMessageReceiveHandler<NetworkObjectListListMetaDataList>
+        IMessageReceiveHandler<Print>
     {
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
-            receiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
             receiveHandler.RegisterHandler<ServerInfo>(this);
             receiveHandler.RegisterHandler<Print>(this);
-            receiveHandler.RegisterHandler<BinaryMetaData>(this);
-            receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
-            receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
-            receiveHandler.RegisterHandler<NetworkObjectListFrameListUpdate>(this);
-            receiveHandler.RegisterHandler<NetworkObjectListObjectMetaDataList>(this);
-            receiveHandler.RegisterHandler<NetworkObjectListListMetaDataList>(this);
-        }
-
-        public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
-        {
-            _netClient.ReceiveMessage(connection, message);
         }
 
         public void ReceiveMessage(NetConnection connection, ServerInfo message)
         {
-            //TODO
-            //TODO: this is temporary
+            //TODO: implement
+            //TODO: when finished, move this into NetworkClient if possible
+            //TODO: this is temporary. map loading occurs later on, so most of this will disappear
             if (!_engine.IsDedicatedServer)
             {
                 //Load the BSP file
                 if (!_engine.MapManager.LoadMap(message.MapFileName))
                 {
                     _logger.Error($"Couldn't load \"{message.MapFileName}\"");
+                    Disconnect(true);
                     return;
                 }
             }
@@ -75,7 +54,7 @@ namespace SharpLife.Engine.Client.Host
 
             _game.MapLoadFinished();
 
-            RequestResources();
+            _netClient.RequestResources();
         }
 
         private void _modelPrecache_OnStringAdded(IReadOnlyNetworkStringList list, int index)
@@ -85,59 +64,9 @@ namespace SharpLife.Engine.Client.Host
             //TODO: process model data
         }
 
-        internal void RequestResources()
-        {
-            _netClient.Server.AddMessage(new SendResources());
-        }
-
         public void ReceiveMessage(NetConnection connection, Print message)
         {
             _logger.Information(message.MessageContents);
-        }
-
-        public void ReceiveMessage(NetConnection connection, BinaryMetaData message)
-        {
-            _binaryDataDescriptorSet.ProcessBinaryMetaData(message);
-
-            RequestResources();
-        }
-
-        public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
-        {
-            try
-            {
-                _netClient.ReceiveMessage(connection, message);
-            }
-            catch (InvalidOperationException e)
-            {
-                _logger.Error(e, "An error occurred while processing a string list full update");
-                Disconnect(true);
-                return;
-            }
-
-            RequestResources();
-        }
-
-        public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
-        {
-            _netClient.ReceiveMessage(connection, message);
-        }
-
-        public void ReceiveMessage(NetConnection connection, NetworkObjectListFrameListUpdate message)
-        {
-            _netClient.ReceiveMessage(connection, message);
-        }
-
-        public void ReceiveMessage(NetConnection connection, NetworkObjectListObjectMetaDataList message)
-        {
-            _objectListTypeRegistry.Deserialize(message);
-
-            RequestResources();
-        }
-
-        public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
-        {
-            _netClient.ReceiveMessage(connection, message);
         }
     }
 }

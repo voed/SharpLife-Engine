@@ -26,6 +26,7 @@ using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
+using SharpLife.Networking.Shared.Messages.BinaryData;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
@@ -40,9 +41,11 @@ namespace SharpLife.Engine.Client.Networking
     /// </summary>
     internal class NetworkClient : NetworkPeer,
         IMessageReceiveHandler<ConnectAcknowledgement>,
+        IMessageReceiveHandler<BinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>,
         IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
+        IMessageReceiveHandler<NetworkObjectListObjectMetaDataList>,
         IMessageReceiveHandler<NetworkObjectListListMetaDataList>
     {
         /// <summary>
@@ -136,6 +139,15 @@ namespace SharpLife.Engine.Client.Networking
             _objectListTypeRegistry = objectListTypeRegistry ?? throw new ArgumentNullException(nameof(objectListTypeRegistry));
 
             _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
+
+            //Register our handlers
+            _receiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
+            _receiveHandler.RegisterHandler<BinaryMetaData>(this);
+            _receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
+            _receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
+            _receiveHandler.RegisterHandler<NetworkObjectListFrameListUpdate>(this);
+            _receiveHandler.RegisterHandler<NetworkObjectListObjectMetaDataList>(this);
+            _receiveHandler.RegisterHandler<NetworkObjectListListMetaDataList>(this);
 
             var config = new NetPeerConfiguration(appIdentifier)
             {
@@ -395,6 +407,11 @@ namespace SharpLife.Engine.Client.Networking
             _objectListReceiver = new NetworkObjectListReceiver(_objectListTypeRegistry, 8, _objectListReceiverListener);
         }
 
+        internal void RequestResources()
+        {
+            Server.AddMessage(new SendResources());
+        }
+
         public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
         {
             _clientHost.EventSystem.DispatchEvent(EngineEvents.ClientReceivedAck);
@@ -427,9 +444,27 @@ namespace SharpLife.Engine.Client.Networking
             Server.AddMessage(newConnection);
         }
 
+        public void ReceiveMessage(NetConnection connection, BinaryMetaData message)
+        {
+            _binaryDataDescriptorSet.ProcessBinaryMetaData(message);
+
+            RequestResources();
+        }
+
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
         {
-            _stringListReceiver.ProcessFullUpdate(message);
+            try
+            {
+                _stringListReceiver.ProcessFullUpdate(message);
+            }
+            catch (InvalidOperationException e)
+            {
+                _logger.Error(e, "An error occurred while processing a string list full update");
+                _clientHost.Disconnect(true);
+                return;
+            }
+
+            RequestResources();
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
@@ -443,6 +478,13 @@ namespace SharpLife.Engine.Client.Networking
             _objectListReceiver.ApplyCurrentFrame();
         }
 
+        public void ReceiveMessage(NetConnection connection, NetworkObjectListObjectMetaDataList message)
+        {
+            _objectListTypeRegistry.Deserialize(message);
+
+            RequestResources();
+        }
+
         public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
         {
             _objectListReceiver.DeserializeListMetaData(message);
@@ -452,7 +494,7 @@ namespace SharpLife.Engine.Client.Networking
                 _listener.CreateNetworkObjectLists(networkObjectLists);
             }
 
-            _clientHost.RequestResources();
+            RequestResources();
         }
     }
 }
