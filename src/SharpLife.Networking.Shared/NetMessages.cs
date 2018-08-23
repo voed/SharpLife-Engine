@@ -14,10 +14,13 @@
 ****/
 
 using Google.Protobuf.Reflection;
+using SharpLife.Networking.Shared.Communication.BinaryData;
+using SharpLife.Networking.Shared.Messages.BinaryData;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
+using System;
 using System.Collections.Generic;
 
 namespace SharpLife.Networking.Shared
@@ -66,12 +69,26 @@ namespace SharpLife.Networking.Shared
             ConnectAcknowledgement.Descriptor,
             ServerInfo.Descriptor,
             Print.Descriptor,
-            NetworkStringListBinaryMetaData.Descriptor,
+            BinaryMetaData.Descriptor,
             NetworkStringListFullUpdate.Descriptor,
             NetworkStringListUpdate.Descriptor,
             NetworkObjectListFrameListUpdate.Descriptor,
             NetworkObjectListObjectMetaDataList.Descriptor,
             NetworkObjectListListMetaDataList.Descriptor,
         };
+
+        /// <summary>
+        /// Registers Protobuf messages used by the engine for use as binary data in networking subsystems
+        /// </summary>
+        /// <param name="dataSetBuilder"></param>
+        public static void RegisterEngineBinaryDataTypes(IBinaryDataSetBuilder dataSetBuilder)
+        {
+            if (dataSetBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(dataSetBuilder));
+            }
+
+            dataSetBuilder.Add(ModelPrecacheData.Descriptor);
+        }
     }
 }

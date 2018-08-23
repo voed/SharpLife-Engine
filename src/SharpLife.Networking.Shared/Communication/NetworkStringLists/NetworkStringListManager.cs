@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using System;
 using System.Collections.Generic;
 

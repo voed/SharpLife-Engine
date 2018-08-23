@@ -30,6 +30,7 @@ using SharpLife.Engine.Shared.UI;
 using SharpLife.FileSystem;
 using SharpLife.Game.Client.API;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
@@ -133,6 +134,12 @@ namespace SharpLife.Engine.Client.Host
             _window.Center();
 
             LoadGameClient();
+
+            var dataSetBuilder = new BinaryDataSetBuilder();
+
+            RegisterNetworkBinaryData(dataSetBuilder);
+
+            _binaryDataDescriptorSet = dataSetBuilder.BuildReceptionSet();
         }
 
         private void LoadGameClient()

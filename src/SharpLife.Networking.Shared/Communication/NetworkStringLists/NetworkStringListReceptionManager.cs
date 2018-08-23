@@ -15,30 +15,27 @@
 
 using Google.Protobuf;
 using Google.Protobuf.Collections;
-using Google.Protobuf.Reflection;
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using System;
 using System.Collections.Generic;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
-    public sealed class NetworkStringListReceptionManager : IBinaryDataDescriptorSet
+    public sealed class NetworkStringListReceptionManager
     {
+        private readonly BinaryDataReceptionDescriptorSet _descriptorSet;
+
         private readonly NetworkStringListManager _listManager;
 
         private readonly Dictionary<uint, NetworkStringList> _idToListMap = new Dictionary<uint, NetworkStringList>();
 
-        private readonly List<MessageDescriptor> _binaryDescriptors = new List<MessageDescriptor>();
-
-        private readonly Dictionary<uint, MessageDescriptor> _binaryIndexToDescriptor = new Dictionary<uint, MessageDescriptor>();
-
         public int Count => _listManager.Count;
 
-        public IBinaryDataDescriptorSet BinaryDataDescriptorSet => this;
-
-        public NetworkStringListReceptionManager()
+        public NetworkStringListReceptionManager(BinaryDataReceptionDescriptorSet descriptorSet)
         {
-            _listManager = new NetworkStringListManager(this);
+            _descriptorSet = descriptorSet ?? throw new ArgumentNullException(nameof(descriptorSet));
+            _listManager = new NetworkStringListManager(_descriptorSet);
         }
 
         public IReadOnlyNetworkStringList CreateList(string name)
@@ -48,52 +45,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         public void Clear()
         {
-            _binaryDescriptors.Clear();
-            _binaryIndexToDescriptor.Clear();
             _idToListMap.Clear();
             _listManager.Clear();
-        }
-
-        bool IBinaryDataDescriptorSet.Contains(MessageDescriptor descriptor)
-        {
-            if (descriptor == null)
-            {
-                throw new ArgumentNullException(nameof(descriptor));
-            }
-
-            return _binaryDescriptors.Contains(descriptor);
-        }
-
-        void IBinaryDataDescriptorSet.Add(MessageDescriptor descriptor)
-        {
-            if (descriptor == null)
-            {
-                throw new ArgumentNullException(nameof(descriptor));
-            }
-
-            if (_binaryDescriptors.Contains(descriptor))
-            {
-                return;
-            }
-
-            _binaryDescriptors.Add(descriptor);
-        }
-
-        public void ProcessBinaryMetaData(NetworkStringListBinaryMetaData metaData)
-        {
-            if (metaData == null)
-            {
-                throw new ArgumentNullException(nameof(metaData));
-            }
-
-            var descriptor = _binaryDescriptors.Find(desc => desc.ClrType.FullName == metaData.TypeName);
-
-            if (descriptor == null)
-            {
-                throw new InvalidOperationException($"String list binary data descriptor for type {metaData.TypeName} has not been registered");
-            }
-
-            _binaryIndexToDescriptor.Add(metaData.Index, descriptor);
         }
 
         private IMessage ParseBinaryData(ListBinaryData binaryData)
@@ -103,7 +56,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 return null;
             }
 
-            var descriptor = _binaryIndexToDescriptor[binaryData.DataType];
+            var descriptor = _descriptorSet.GetDescriptorByIndex(binaryData.DataType);
 
             var message = descriptor.Parser.ParseFrom(binaryData.BinaryData);
 

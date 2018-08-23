@@ -15,19 +15,10 @@
 
 using Google.Protobuf.Reflection;
 
-namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
+namespace SharpLife.Networking.Shared.Communication.BinaryData
 {
-    /// <summary>
-    /// A set of message descriptors used for binary data transmission
-    /// </summary>
     public interface IBinaryDataDescriptorSet
     {
         bool Contains(MessageDescriptor descriptor);
-
-        /// <summary>
-        /// Registers a binary type for use with a string's binary data
-        /// </summary>
-        /// <param name="descriptor"></param>
-        void Add(MessageDescriptor descriptor);
     }
 }

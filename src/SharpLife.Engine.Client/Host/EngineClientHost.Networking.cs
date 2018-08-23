@@ -19,9 +19,9 @@ using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
-using SharpLife.Networking.Shared.Messages.Server;
 using System;
 
 namespace SharpLife.Engine.Client.Host
@@ -33,6 +33,8 @@ namespace SharpLife.Engine.Client.Host
         private readonly ObjectListReceiverListener _objectListReceiverListener = new ObjectListReceiverListener();
 
         private IClientNetworking _clientNetworking;
+
+        private BinaryDataReceptionDescriptorSet _binaryDataDescriptorSet;
 
         private IReadOnlyNetworkStringList _modelPrecache;
 
@@ -52,6 +54,7 @@ namespace SharpLife.Engine.Client.Host
                     this,
                     new SendMappings(NetMessages.ClientToServerMessages),
                     receiveHandler,
+                    _binaryDataDescriptorSet,
                     _objectListReceiverListener,
                     _cl_name,
                     NetConstants.AppIdentifier,
@@ -63,11 +66,16 @@ namespace SharpLife.Engine.Client.Host
             }
         }
 
+        private void RegisterNetworkBinaryData(IBinaryDataSetBuilder dataSetBuilder)
+        {
+            NetMessages.RegisterEngineBinaryDataTypes(dataSetBuilder);
+
+            //TODO: let game do the same
+        }
+
         private void CreateNetworkStringLists()
         {
             var receiver = _netClient.StringListReceiver;
-
-            receiver.BinaryDataDescriptorSet.Add(ModelPrecacheData.Descriptor);
 
             _modelPrecache = receiver.CreateList("ModelPrecache");
 

@@ -14,6 +14,7 @@
 ****/
 
 using Google.Protobuf;
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using System;
 using System.Collections;
 using System.Collections.Generic;

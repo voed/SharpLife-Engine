@@ -19,6 +19,7 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
+using SharpLife.Networking.Shared.Messages.BinaryData;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
@@ -31,7 +32,7 @@ namespace SharpLife.Engine.Client.Host
     public partial class EngineClientHost : IMessageReceiveHandler<ConnectAcknowledgement>,
         IMessageReceiveHandler<ServerInfo>,
         IMessageReceiveHandler<Print>,
-        IMessageReceiveHandler<NetworkStringListBinaryMetaData>,
+        IMessageReceiveHandler<BinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>,
         IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
@@ -43,7 +44,7 @@ namespace SharpLife.Engine.Client.Host
             receiveHandler.RegisterHandler<ConnectAcknowledgement>(this);
             receiveHandler.RegisterHandler<ServerInfo>(this);
             receiveHandler.RegisterHandler<Print>(this);
-            receiveHandler.RegisterHandler<NetworkStringListBinaryMetaData>(this);
+            receiveHandler.RegisterHandler<BinaryMetaData>(this);
             receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
             receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
             receiveHandler.RegisterHandler<NetworkObjectListFrameListUpdate>(this);
@@ -127,9 +128,9 @@ namespace SharpLife.Engine.Client.Host
             _logger.Information(message.MessageContents);
         }
 
-        public void ReceiveMessage(NetConnection connection, NetworkStringListBinaryMetaData message)
+        public void ReceiveMessage(NetConnection connection, BinaryMetaData message)
         {
-            _netClient.ReceiveMessage(connection, message);
+            _binaryDataDescriptorSet.ProcessBinaryMetaData(message);
 
             RequestResources();
         }

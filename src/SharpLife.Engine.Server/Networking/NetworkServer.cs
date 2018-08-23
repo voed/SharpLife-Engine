@@ -19,6 +19,7 @@ using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
@@ -49,7 +50,7 @@ namespace SharpLife.Engine.Server.Networking
 
         public bool IsRunning => _server.Status == NetPeerStatus.Running;
 
-        public NetworkStringListTransmissionManager StringListTransmitter { get; } = new NetworkStringListTransmissionManager();
+        public NetworkStringListTransmissionManager StringListTransmitter { get; }
 
         public NetworkObjectListTransmitter ObjectListTransmitter { get; private set; }
 
@@ -60,6 +61,7 @@ namespace SharpLife.Engine.Server.Networking
         /// <param name="serverHost"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
+        /// <param name="binaryDescriptorSet"></param>
         /// <param name="engineTime"></param>
         /// <param name="appIdentifier"></param>
         /// <param name="ipAddress"></param>
@@ -69,6 +71,7 @@ namespace SharpLife.Engine.Server.Networking
             EngineServerHost serverHost,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
+            BinaryDataTransmissionDescriptorSet binaryDescriptorSet,
             IEngineTime engineTime,
             string appIdentifier,
             IPEndPoint ipAddress,
@@ -79,6 +82,14 @@ namespace SharpLife.Engine.Server.Networking
             _serverHost = serverHost ?? throw new ArgumentNullException(nameof(serverHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+
+            if (binaryDescriptorSet == null)
+            {
+                throw new ArgumentNullException(nameof(binaryDescriptorSet));
+            }
+
+            StringListTransmitter = new NetworkStringListTransmissionManager(binaryDescriptorSet);
+
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
 
             var config = new NetPeerConfiguration(appIdentifier)

@@ -91,7 +91,7 @@ namespace SharpLife.Engine.Server.Host
                     {
                         client.SetupStage = ServerClientSetupStage.SendingStringListsBinaryMetaData;
 
-                        client.AddMessages(_netServer.StringListTransmitter.CreateBinaryTypesMessages(), true);
+                        client.AddMessages(_binaryDataDescriptorSet.CreateBinaryTypesMessages(), true);
                         break;
                     }
 

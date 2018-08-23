@@ -1,10 +1,10 @@
 ﻿syntax = "proto3";
 
-package SharpLife.Networking.Shared.Messages.NetworkStringLists;
+package SharpLife.Networking.Shared.Messages.BinaryData;
 
 //Describes a single Protobuf message type to be sent as binary data for a string
 //A type is mapped to an index so the receiver can parse the type properly
-message NetworkStringListBinaryMetaData
+message BinaryMetaData
 {
 	uint32 index = 1;
 	string type_name = 2;

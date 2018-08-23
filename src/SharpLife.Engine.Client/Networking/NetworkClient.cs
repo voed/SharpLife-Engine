@@ -21,6 +21,7 @@ using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Client.Servers;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Networking.Shared;
+using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
@@ -36,7 +37,6 @@ namespace SharpLife.Engine.Client.Networking
     /// Lidgren client networking handler
     /// </summary>
     internal class NetworkClient : NetworkPeer,
-        IMessageReceiveHandler<NetworkStringListBinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>,
         IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
@@ -69,7 +69,7 @@ namespace SharpLife.Engine.Client.Networking
 
         public ClientServer Server { get; private set; }
 
-        public NetworkStringListReceptionManager StringListReceiver { get; } = new NetworkStringListReceptionManager();
+        public NetworkStringListReceptionManager StringListReceiver { get; }
 
         public NetworkObjectListReceiver ObjectListReceiver { get; private set; }
 
@@ -87,6 +87,7 @@ namespace SharpLife.Engine.Client.Networking
         /// <param name="clientHost"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
+        /// <param name="binaryDescriptorSet"></param>
         /// <param name="frameListReceiverListener"></param>
         /// <param name="cl_name"></param>
         /// <param name="appIdentifier">App identifier to use for networking. Must match the identifier given to servers</param>
@@ -97,6 +98,7 @@ namespace SharpLife.Engine.Client.Networking
             EngineClientHost clientHost,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
+            BinaryDataReceptionDescriptorSet binaryDescriptorSet,
             IFrameListReceiverListener frameListReceiverListener,
             IVariable cl_name,
             string appIdentifier,
@@ -108,6 +110,14 @@ namespace SharpLife.Engine.Client.Networking
             _clientHost = clientHost ?? throw new ArgumentNullException(nameof(clientHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+
+            if (binaryDescriptorSet == null)
+            {
+                throw new ArgumentNullException(nameof(binaryDescriptorSet));
+            }
+
+            StringListReceiver = new NetworkStringListReceptionManager(binaryDescriptorSet);
+
             _frameListReceiverListener = frameListReceiverListener ?? throw new ArgumentNullException(nameof(frameListReceiverListener));
             _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
 
@@ -356,11 +366,6 @@ namespace SharpLife.Engine.Client.Networking
         {
             //TODO: need to define number of frames for multiplayer
             ObjectListReceiver = new NetworkObjectListReceiver(8, _frameListReceiverListener);
-        }
-
-        public void ReceiveMessage(NetConnection connection, NetworkStringListBinaryMetaData message)
-        {
-            StringListReceiver.ProcessBinaryMetaData(message);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
