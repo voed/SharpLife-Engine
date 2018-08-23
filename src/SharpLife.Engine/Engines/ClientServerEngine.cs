@@ -143,8 +143,6 @@ namespace SharpLife.Engine.Engines
 
             Initialize(GameDirectory, hostType);
 
-            _client?.PostInitialize();
-
             long previousFrameTicks = 0;
 
             while (!_exiting)
@@ -279,6 +277,14 @@ namespace SharpLife.Engine.Engines
                 Logger.Information($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
+            MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
+
+            //TODO: initialize subsystems
+
+            CommandSystem.SharedContext.RegisterCommand(new CommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
+
+            //We should be fully initialized before creating the client and/or server, in case it tries to access one of our members
+
             if (hostType == HostType.Client)
             {
                 _client = new EngineClientHost(this, Logger);
@@ -288,12 +294,6 @@ namespace SharpLife.Engine.Engines
             {
                 CreateServer();
             }
-
-            MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
-
-            CommandSystem.SharedContext.RegisterCommand(new CommandInfo("map", StartNewMap).WithHelpInfo("Loads the specified map"));
-
-            //TODO: initialize subsystems
 
             //Only one of these will exist right now
             _client?.CommandContext.QueueCommands($"exec {EngineConfiguration.DefaultGame}.rc");

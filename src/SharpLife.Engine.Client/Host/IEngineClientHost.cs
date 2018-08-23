@@ -33,8 +33,6 @@ namespace SharpLife.Engine.Client.Host
         /// </summary>
         IEventSystem EventSystem { get; }
 
-        void PostInitialize();
-
         void Shutdown();
 
         void Update(float deltaSeconds);

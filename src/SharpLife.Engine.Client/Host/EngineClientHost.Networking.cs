@@ -32,9 +32,9 @@ namespace SharpLife.Engine.Client.Host
     {
         private NetworkClient _netClient;
 
-        private BinaryDataReceptionDescriptorSet _binaryDataDescriptorSet;
+        private readonly BinaryDataReceptionDescriptorSet _binaryDataDescriptorSet;
 
-        private TypeRegistry _objectListTypeRegistry;
+        private readonly TypeRegistry _objectListTypeRegistry;
 
         private IClientNetworking _clientNetworking;
 

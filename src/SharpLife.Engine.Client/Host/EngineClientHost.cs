@@ -122,10 +122,7 @@ namespace SharpLife.Engine.Client.Host
             //TODO: add change handler to send update to server if connected
             _cl_name = CommandContext.RegisterVariable(new VariableInfo("name")
                 .WithHelpInfo("Your name as seen by other players"));
-        }
 
-        public void PostInitialize()
-        {
             _window.Center();
 
             LoadGameClient();

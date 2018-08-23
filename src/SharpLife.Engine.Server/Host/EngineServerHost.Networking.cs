@@ -28,7 +28,7 @@ namespace SharpLife.Engine.Server.Host
     {
         private NetworkServer _netServer;
 
-        private BinaryDataTransmissionDescriptorSet _binaryDataDescriptorSet;
+        private readonly BinaryDataTransmissionDescriptorSet _binaryDataDescriptorSet;
 
         private readonly TypeRegistry _objectListTypeRegistry;
 
