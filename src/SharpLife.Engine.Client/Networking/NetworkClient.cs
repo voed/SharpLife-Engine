@@ -395,6 +395,10 @@ namespace SharpLife.Engine.Client.Networking
         /// </summary>
         public void OnNewMapStarted()
         {
+            //Mappings will be resent by server
+            //TODO: maybe only reset on disconnect and not resend since they'll guaranteed to be the same?
+            _binaryDataDescriptorSet.ResetIndexMappings();
+
             var networkStringListBuilder = new NetworkStringListReceiverBuilder(_binaryDataDescriptorSet);
 
             _listener.CreateNetworkStringLists(networkStringListBuilder);

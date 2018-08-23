@@ -44,7 +44,12 @@ namespace SharpLife.Networking.Shared.Communication.BinaryData
 
         public MessageDescriptor GetDescriptorByIndex(uint index)
         {
-            return _descriptors[(int)index];
+            return _binaryIndexToDescriptor[index];
+        }
+
+        public void ResetIndexMappings()
+        {
+            _binaryIndexToDescriptor.Clear();
         }
 
         public void ProcessBinaryMetaData(BinaryMetaData metaData)
