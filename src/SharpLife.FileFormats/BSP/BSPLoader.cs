@@ -57,13 +57,43 @@ namespace SharpLife.FileFormats.BSP
         {
         }
 
+        private static int ReadVersion(BinaryReader reader)
+        {
+            return EndianConverter.Little(reader.ReadInt32());
+        }
+
+        /// <summary>
+        /// Returns whether the given reader represents a BSP file
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static bool IsBSPFile(BinaryReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            var originalPosition = reader.BaseStream.Position;
+
+            try
+            {
+                //Best that can be done to recognize BSP files, since there's no identifier
+                return Enum.IsDefined(typeof(BSPVersion), ReadVersion(reader));
+            }
+            finally
+            {
+                reader.BaseStream.Position = originalPosition;
+            }
+        }
+
         /// <summary>
         /// Reads the header of a BSP file
         /// </summary>
         /// <returns></returns>
         private Header ReadHeader()
         {
-            var version = EndianConverter.Little(_reader.ReadInt32());
+            var version = ReadVersion(_reader);
 
             //Verify that we can load this BSP file
             if (!Enum.IsDefined(typeof(BSPVersion), version))
