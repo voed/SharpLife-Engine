@@ -51,6 +51,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
         }
     }
 
+    //The list is copied to prevent code that holds onto the builder from modifying the lists after the fact
     public sealed class NetworkStringListTransmitterBuilder : BaseNetworkStringListsBuilder<BinaryDataTransmissionDescriptorSet>
     {
         public NetworkStringListTransmitterBuilder(BinaryDataTransmissionDescriptorSet descriptorSet)
@@ -60,7 +61,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         public NetworkStringListTransmitter Build()
         {
-            return new NetworkStringListTransmitter(_descriptorSet, _lists);
+            return new NetworkStringListTransmitter(_descriptorSet, _lists.ToArray());
         }
     }
 
@@ -73,7 +74,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
         public NetworkStringListReceiver Build()
         {
-            return new NetworkStringListReceiver(_descriptorSet, _lists);
+            return new NetworkStringListReceiver(_descriptorSet, _lists.ToArray());
         }
     }
 }

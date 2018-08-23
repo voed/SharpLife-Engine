@@ -42,12 +42,13 @@ namespace SharpLife.Networking.Shared.Communication.BinaryData
         public BinaryDataTransmissionDescriptorSet BuildTransmissionSet()
         {
             uint index = 0;
-            return new BinaryDataTransmissionDescriptorSet(_descriptors.ToDictionary(key => key, value => index++));
+            return new BinaryDataTransmissionDescriptorSet(_descriptors.ToDictionary(key => key, _ => index++));
         }
 
         public BinaryDataReceptionDescriptorSet BuildReceptionSet()
         {
-            return new BinaryDataReceptionDescriptorSet(_descriptors);
+            //The list is copied to prevent code that holds onto the builder from modifying the lists after the fact
+            return new BinaryDataReceptionDescriptorSet(_descriptors.ToArray());
         }
     }
 }
