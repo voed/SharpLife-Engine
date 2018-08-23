@@ -15,6 +15,7 @@
 
 using Lidgren.Network;
 using Serilog;
+using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared.Utility;
@@ -31,7 +32,8 @@ using System.Net;
 
 namespace SharpLife.Engine.Server.Networking
 {
-    internal sealed class NetworkServer : NetworkPeer
+    internal sealed class NetworkServer : NetworkPeer,
+        IMessageReceiveHandler<SendResources>
     {
         private readonly ILogger _logger;
 
@@ -57,6 +59,8 @@ namespace SharpLife.Engine.Server.Networking
 
         public bool IsRunning => _server.Status == NetPeerStatus.Running;
 
+        public ServerClientList ClientList { get; }
+
         //Map specific instances
         private NetworkStringListTransmitter _stringListTransmitter;
 
@@ -73,6 +77,7 @@ namespace SharpLife.Engine.Server.Networking
         /// <param name="binaryDataDescriptorSet"></param>
         /// <param name="objectListTypeRegistry"></param>
         /// <param name="engineTime"></param>
+        /// <param name="maxPlayers"></param>
         /// <param name="appIdentifier"></param>
         /// <param name="ipAddress"></param>
         /// <param name="maxClients"></param>
@@ -85,6 +90,7 @@ namespace SharpLife.Engine.Server.Networking
             BinaryDataTransmissionDescriptorSet binaryDataDescriptorSet,
             TypeRegistry objectListTypeRegistry,
             IEngineTime engineTime,
+            IVariable maxPlayers,
             string appIdentifier,
             IPEndPoint ipAddress,
             int maxClients,
@@ -99,6 +105,16 @@ namespace SharpLife.Engine.Server.Networking
             _objectListTypeRegistry = objectListTypeRegistry ?? throw new ArgumentNullException(nameof(objectListTypeRegistry));
 
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
+
+            if (maxPlayers == null)
+            {
+                throw new ArgumentNullException(nameof(maxPlayers));
+            }
+
+            ClientList = new ServerClientList(NetConstants.MaxClients, maxPlayers);
+
+            //Register our handlers
+            _receiveHandler.RegisterHandler<SendResources>(this);
 
             var config = new NetPeerConfiguration(appIdentifier)
             {
@@ -194,7 +210,7 @@ namespace SharpLife.Engine.Server.Networking
 
             string reason = message.ReadString();
 
-            var client = _serverHost.FindClient(message.SenderEndPoint);
+            var client = FindClient(message.SenderEndPoint);
 
             if (client != null)
             {
@@ -230,7 +246,7 @@ namespace SharpLife.Engine.Server.Networking
                         break;
 
                     case NetConnectionStatus.Disconnected:
-                        _serverHost.ClientList.RemoveClient(client);
+                        ClientList.RemoveClient(client);
                         break;
                 }
             }
@@ -251,7 +267,7 @@ namespace SharpLife.Engine.Server.Networking
             //Query IP ban list, other things
 
             //Check if there is a slot to put the client in
-            var slot = _serverHost.ClientList.FindEmptySlot();
+            var slot = ClientList.FindEmptySlot();
 
             if (slot == -1)
             {
@@ -290,7 +306,7 @@ namespace SharpLife.Engine.Server.Networking
 
                 var client = ServerClient.CreateClient(_sendMappings, message.SenderConnection, _engineTime, _objectListTransmitter, slot, _nextUserId++, name);
 
-                _serverHost.ClientList.AddClientToSlot(client);
+                ClientList.AddClientToSlot(client);
 
                 message.SenderConnection.Approve();
 
@@ -309,6 +325,25 @@ namespace SharpLife.Engine.Server.Networking
             }
 
             _receiveHandler.ReadMessages(message.SenderConnection, message);
+        }
+
+        public ServerClient FindClient(IPEndPoint endPoint)
+        {
+            if (endPoint == null)
+            {
+                throw new ArgumentNullException(nameof(endPoint));
+            }
+
+            var client = ClientList.FindClientByEndPoint(endPoint, false);
+
+            if (client != null)
+            {
+                return client;
+            }
+
+            _logger.Warning($"Client with IP {endPoint} has no associated client instance");
+
+            return null;
         }
 
         public void OnNewMapStarted()
@@ -332,7 +367,7 @@ namespace SharpLife.Engine.Server.Networking
         /// Sends all pending messages for the given client
         /// </summary>
         /// <param name="client"></param>
-        public void SendClientMessages(ServerClient client)
+        private void SendClientMessages(ServerClient client)
         {
             if (client == null)
             {
@@ -397,12 +432,11 @@ namespace SharpLife.Engine.Server.Networking
                 client.LastStringListFullUpdate = client.NextStringListToSend;
 
                 //Await client confirmation before sending next list
+                //Don't call ContinueSetup here, it will set up the next list before the client has confirmed receipt
             }
             else
             {
-                client.SetupStage = ServerClientSetupStage.SendingObjectListTypeMetaData;
-
-                client.AddMessage(_objectListTransmitter.TypeRegistry.Serialize(), true);
+                ContinueSetup(client);
             }
 
             client.NextStringListToSend = -1;
@@ -411,12 +445,12 @@ namespace SharpLife.Engine.Server.Networking
         /// <summary>
         /// Send string list updates to all connected clients
         /// </summary>
-        public void SendStringListUpdates()
+        private void SendStringListUpdates()
         {
             //Only go through these steps if there are lists to send
             var updates = _stringListTransmitter.CreateUpdates();
 
-            foreach (var client in _serverHost.ClientList)
+            foreach (var client in ClientList)
             {
                 //Only if we've reached the point where we're sending string lists
                 if (client.Connected && client.SetupStage >= ServerClientSetupStage.SendingStringLists)
@@ -443,11 +477,11 @@ namespace SharpLife.Engine.Server.Networking
             }
         }
 
-        public void SendObjectListUpdates()
+        private void SendObjectListUpdates()
         {
             _objectListTransmitter.CreateFramesForTransmitters();
 
-            foreach (var client in _serverHost.ClientList)
+            foreach (var client in ClientList)
             {
                 if (client.CanTransmit)
                 {
@@ -456,7 +490,7 @@ namespace SharpLife.Engine.Server.Networking
             }
         }
 
-        public void SendObjectListListMetaData(ServerClient client)
+        private void SendObjectListListMetaData(ServerClient client)
         {
             if (client == null)
             {
@@ -464,6 +498,93 @@ namespace SharpLife.Engine.Server.Networking
             }
 
             client.AddMessage(_objectListTransmitter.SerializeListMetaData(), true);
+        }
+
+        public void RunFrame()
+        {
+            SendStringListUpdates();
+            SendObjectListUpdates();
+
+            foreach (var client in ClientList)
+            {
+                SendClientMessages(client);
+            }
+        }
+
+        /// <summary>
+        /// Client requests for resources during setup will send data in sequence
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="message"></param>
+        public void ReceiveMessage(NetConnection connection, SendResources message)
+        {
+            var client = ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
+
+            ContinueSetup(client);
+        }
+
+        /// <summary>
+        /// Continue setting up the client
+        /// </summary>
+        /// <param name="client"></param>
+        private void ContinueSetup(ServerClient client)
+        {
+            switch (client.SetupStage)
+            {
+                case ServerClientSetupStage.AwaitingResourceTransmissionStart:
+                    {
+                        client.SetupStage = ServerClientSetupStage.SendingStringListsBinaryMetaData;
+
+                        client.AddMessages(_binaryDataDescriptorSet.CreateBinaryTypesMessages(), true);
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingStringListsBinaryMetaData:
+                    {
+                        client.SetupStage = ServerClientSetupStage.SendingStringLists;
+
+                        client.NextStringListToSend = 0;
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingStringLists:
+                    {
+                        //This is a list by list update so this needs to account for where we are
+                        if (client.NextStringListToSend < _stringListTransmitter.Count)
+                        {
+                            client.NextStringListToSend = client.LastStringListFullUpdate + 1;
+                        }
+                        else
+                        {
+                            client.SetupStage = ServerClientSetupStage.SendingObjectListTypeMetaData;
+
+                            client.AddMessage(_objectListTransmitter.TypeRegistry.Serialize(), true);
+                        }
+
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingObjectListTypeMetaData:
+                    {
+                        client.SetupStage = ServerClientSetupStage.SendingObjectListListMetaData;
+
+                        SendObjectListListMetaData(client);
+                        break;
+                    }
+
+                case ServerClientSetupStage.SendingObjectListListMetaData:
+                    {
+                        //TODO: set next stage
+                        client.SetupStage = ServerClientSetupStage.Connected;
+                        break;
+                    }
+
+                default:
+                    {
+                        _logger.Error($"Client requested sending of resources while in invalid state {client.SetupStage}");
+                        break;
+                    }
+            }
         }
     }
 }

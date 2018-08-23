@@ -65,6 +65,7 @@ namespace SharpLife.Engine.Server.Host
                     _binaryDataDescriptorSet,
                     _objectListTypeRegistry,
                     _engine.EngineTime,
+                    _maxPlayers,
                     NetConstants.AppIdentifier,
                     ipAddress,
                     NetConstants.MaxClients,

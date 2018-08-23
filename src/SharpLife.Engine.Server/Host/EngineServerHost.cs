@@ -19,7 +19,6 @@ using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.API.Game.Server;
-using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Game.Server.API;
@@ -108,8 +107,6 @@ namespace SharpLife.Engine.Server.Host
             {
                 _maxPlayers.String = maxPlayersValue;
             }
-
-            ClientList = new ServerClientList(NetConstants.MaxClients, _maxPlayers);
 
             LoadGameServer();
 
@@ -270,7 +267,7 @@ namespace SharpLife.Engine.Server.Host
 
                 Active = false;
 
-                foreach (var client in ClientList)
+                foreach (var client in _netServer.ClientList)
                 {
                     _netServer.DropClient(client, NetMessages.ServerShutdownMessage);
                 }
@@ -287,16 +284,7 @@ namespace SharpLife.Engine.Server.Host
                 return;
             }
 
-            _netServer.SendStringListUpdates();
-            _netServer.SendObjectListUpdates();
-
-            if (_netServer != null)
-            {
-                foreach (var client in ClientList)
-                {
-                    _netServer.SendClientMessages(client);
-                }
-            }
+            _netServer.RunFrame();
         }
     }
 }

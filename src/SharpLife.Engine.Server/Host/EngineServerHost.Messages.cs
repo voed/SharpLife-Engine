@@ -24,18 +24,16 @@ using SharpLife.Networking.Shared.Messages.Server;
 namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost :
-        IMessageReceiveHandler<NewConnection>,
-        IMessageReceiveHandler<SendResources>
+        IMessageReceiveHandler<NewConnection>
     {
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
             receiveHandler.RegisterHandler<NewConnection>(this);
-            receiveHandler.RegisterHandler<SendResources>(this);
         }
 
         public void ReceiveMessage(NetConnection connection, NewConnection message)
         {
-            var client = ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
+            var client = _netServer.ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
 
             if (!client.Spawned || client.Active)
             {
@@ -73,63 +71,6 @@ namespace SharpLife.Engine.Server.Host
             //TODO: tell game to send its own info now
 
             //TODO: send game networking data
-        }
-
-        /// <summary>
-        /// Client requests for resources during setup will send data in sequence
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="message"></param>
-        public void ReceiveMessage(NetConnection connection, SendResources message)
-        {
-            var client = ClientList.FindClientByEndPoint(connection.RemoteEndPoint);
-
-            //TODO: need to refactor the logic for each stage so it's all in one place
-            switch (client.SetupStage)
-            {
-                case ServerClientSetupStage.AwaitingResourceTransmissionStart:
-                    {
-                        client.SetupStage = ServerClientSetupStage.SendingStringListsBinaryMetaData;
-
-                        client.AddMessages(_binaryDataDescriptorSet.CreateBinaryTypesMessages(), true);
-                        break;
-                    }
-
-                case ServerClientSetupStage.SendingStringListsBinaryMetaData:
-                    {
-                        client.SetupStage = ServerClientSetupStage.SendingStringLists;
-
-                        client.NextStringListToSend = 0;
-                        break;
-                    }
-
-                case ServerClientSetupStage.SendingStringLists:
-                    {
-                        client.NextStringListToSend = client.LastStringListFullUpdate + 1;
-                        break;
-                    }
-
-                case ServerClientSetupStage.SendingObjectListTypeMetaData:
-                    {
-                        client.SetupStage = ServerClientSetupStage.SendingObjectListListMetaData;
-
-                        _netServer.SendObjectListListMetaData(client);
-                        break;
-                    }
-
-                case ServerClientSetupStage.SendingObjectListListMetaData:
-                    {
-                        //TODO: set next stage
-                        client.SetupStage = ServerClientSetupStage.Connected;
-                        break;
-                    }
-
-                default:
-                    {
-                        _logger.Error($"Client requested sending of resources while in invalid state {client.SetupStage}");
-                        break;
-                    }
-            }
         }
     }
 }
