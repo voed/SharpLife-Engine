@@ -137,8 +137,6 @@ namespace SharpLife.Engine.Client.Host
 
             _netClient?.Disconnect(NetMessages.ClientDisconnectMessage);
 
-            ConnectionSetupStatus = ClientConnectionSetupStatus.NotConnected;
-
             EventSystem.DispatchEvent(EngineEvents.ClientEndDisconnect);
 
             if (shutdownServer)

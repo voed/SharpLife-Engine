@@ -14,7 +14,6 @@
 ****/
 
 using SharpLife.CommandSystem;
-using SharpLife.Engine.Client.Networking;
 using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Client.Host
@@ -33,11 +32,6 @@ namespace SharpLife.Engine.Client.Host
         /// The event system used by the client
         /// </summary>
         IEventSystem EventSystem { get; }
-
-        /// <summary>
-        /// Which connection setup stage the client is in right now
-        /// </summary>
-        ClientConnectionSetupStatus ConnectionSetupStatus { get; set; }
 
         void PostInitialize();
 

@@ -21,7 +21,6 @@ using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.API.Game.Client;
-using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Engines;
@@ -45,8 +44,6 @@ namespace SharpLife.Engine.Client.Host
         public ICommandContext CommandContext { get; }
 
         public IEventSystem EventSystem => _engine.EventSystem;
-
-        public ClientConnectionSetupStatus ConnectionSetupStatus { get; set; }
 
         public ILogListener LogListener
         {
@@ -73,9 +70,6 @@ namespace SharpLife.Engine.Client.Host
         private readonly IVariable _cl_timeout;
 
         private readonly IVariable _cl_name;
-
-        private int _userId;
-        private int _buildNumber;
 
         public EngineClientHost(IEngine engine, ILogger logger)
         {

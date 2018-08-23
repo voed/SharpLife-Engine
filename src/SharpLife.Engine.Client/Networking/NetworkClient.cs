@@ -29,6 +29,7 @@ using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
+using SharpLife.Networking.Shared.Messages.Server;
 using System;
 using System.Net;
 
@@ -38,6 +39,7 @@ namespace SharpLife.Engine.Client.Networking
     /// Lidgren client networking handler
     /// </summary>
     internal class NetworkClient : NetworkPeer,
+        IMessageReceiveHandler<ConnectAcknowledgement>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>,
         IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
@@ -47,6 +49,11 @@ namespace SharpLife.Engine.Client.Networking
         /// The current connection status, based on last processed status change message
         /// </summary>
         public NetConnectionStatus ConnectionStatus { get; private set; }
+
+        /// <summary>
+        /// Which connection setup stage the client is in right now
+        /// </summary>
+        public ClientConnectionSetupStatus ConnectionSetupStatus { get; private set; }
 
         public bool IsConnected => ConnectionStatus != NetConnectionStatus.None && ConnectionStatus != NetConnectionStatus.Disconnected;
 
@@ -73,6 +80,10 @@ namespace SharpLife.Engine.Client.Networking
         protected override NetPeer Peer => _client;
 
         public ClientServer Server { get; private set; }
+
+        //Server specific
+        private int _userId;
+        private int _buildNumber;
 
         //Map specific instances
         private ObjectListReceiverListener _objectListReceiverListener;
@@ -168,7 +179,7 @@ namespace SharpLife.Engine.Client.Networking
                 throw new ArgumentNullException(nameof(address));
             }
 
-            if (_clientHost.ConnectionSetupStatus == ClientConnectionSetupStatus.Connecting)
+            if (ConnectionSetupStatus == ClientConnectionSetupStatus.Connecting)
             {
                 _logger.Information($"Already connecting to a server; connect command to {address} ignored");
                 return;
@@ -239,7 +250,7 @@ namespace SharpLife.Engine.Client.Networking
                 return;
             }
 
-            _clientHost.ConnectionSetupStatus = ClientConnectionSetupStatus.Connecting;
+            ConnectionSetupStatus = ClientConnectionSetupStatus.Connecting;
 
             Server = new ClientServer(_sendMappings, address, connection);
         }
@@ -261,6 +272,8 @@ namespace SharpLife.Engine.Client.Networking
 
                 _clientHost.EventSystem.DispatchEvent(EngineEvents.ClientDisconnectSent);
             }
+
+            ConnectionSetupStatus = ClientConnectionSetupStatus.NotConnected;
         }
 
         protected override void HandlePacket(NetIncomingMessage message)
@@ -312,9 +325,9 @@ namespace SharpLife.Engine.Client.Networking
                 //Clear our server data only once we're fully disconnected so we can process the packets
                 case NetConnectionStatus.Disconnected:
                     {
-                        if (_clientHost.ConnectionSetupStatus != ClientConnectionSetupStatus.NotConnected)
+                        if (ConnectionSetupStatus != ClientConnectionSetupStatus.NotConnected)
                         {
-                            _clientHost.ConnectionSetupStatus = ClientConnectionSetupStatus.NotConnected;
+                            ConnectionSetupStatus = ClientConnectionSetupStatus.NotConnected;
 
                             //Don't process disconnect initiated by us
                             if (reason != NetMessages.ClientDisconnectMessage)
@@ -336,7 +349,7 @@ namespace SharpLife.Engine.Client.Networking
 
         private void HandleData(NetIncomingMessage message)
         {
-            if (_clientHost.ConnectionSetupStatus == ClientConnectionSetupStatus.NotConnected)
+            if (ConnectionSetupStatus == ClientConnectionSetupStatus.NotConnected)
             {
                 return;
             }
@@ -380,6 +393,38 @@ namespace SharpLife.Engine.Client.Networking
 
             //TODO: need to define number of frames for multiplayer
             _objectListReceiver = new NetworkObjectListReceiver(_objectListTypeRegistry, 8, _objectListReceiverListener);
+        }
+
+        public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
+        {
+            _clientHost.EventSystem.DispatchEvent(EngineEvents.ClientReceivedAck);
+
+            if (ConnectionSetupStatus == ClientConnectionSetupStatus.Connected)
+            {
+                _logger.Debug("Duplicate connect ack. received.  Ignored.");
+                return;
+            }
+
+            ConnectionSetupStatus = ClientConnectionSetupStatus.Connected;
+
+            _userId = message.UserId;
+            Server.TrueAddress = NetUtilities.StringToIPAddress(message.TrueAddress, NetConstants.DefaultServerPort);
+            _buildNumber = message.BuildNumber;
+
+            if (Server.Connection.RemoteEndPoint.Address != IPAddress.Loopback)
+            {
+                _logger.Information($"Connection accepted by {Server.Name}");
+            }
+            else
+            {
+                _logger.Debug("Connection accepted.");
+            }
+
+            //TODO: set state variables
+
+            var newConnection = new NewConnection();
+
+            Server.AddMessage(newConnection);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)

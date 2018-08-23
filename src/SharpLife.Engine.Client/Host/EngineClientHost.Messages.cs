@@ -14,9 +14,6 @@
 ****/
 
 using Lidgren.Network;
-using SharpLife.Engine.Client.Networking;
-using SharpLife.Engine.Shared.Events;
-using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.BinaryData;
@@ -25,7 +22,6 @@ using SharpLife.Networking.Shared.Messages.NetworkObjectLists;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 using System;
-using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
@@ -54,34 +50,7 @@ namespace SharpLife.Engine.Client.Host
 
         public void ReceiveMessage(NetConnection connection, ConnectAcknowledgement message)
         {
-            EventSystem.DispatchEvent(EngineEvents.ClientReceivedAck);
-
-            if (ConnectionSetupStatus == ClientConnectionSetupStatus.Connected)
-            {
-                _logger.Debug("Duplicate connect ack. received.  Ignored.");
-                return;
-            }
-
-            ConnectionSetupStatus = ClientConnectionSetupStatus.Connected;
-
-            _userId = message.UserId;
-            _netClient.Server.TrueAddress = NetUtilities.StringToIPAddress(message.TrueAddress, NetConstants.DefaultServerPort);
-            _buildNumber = message.BuildNumber;
-
-            if (_netClient.Server.Connection.RemoteEndPoint.Address != IPAddress.Loopback)
-            {
-                _logger.Information($"Connection accepted by {_netClient.Server.Name}");
-            }
-            else
-            {
-                _logger.Debug("Connection accepted.");
-            }
-
-            //TODO: set state variables
-
-            var newConnection = new NewConnection();
-
-            _netClient.Server.AddMessage(newConnection);
+            _netClient.ReceiveMessage(connection, message);
         }
 
         public void ReceiveMessage(NetConnection connection, ServerInfo message)
