@@ -93,7 +93,7 @@ namespace SharpLife.Engine.Shared.Maps
         {
             try
             {
-                BSPFile = FileFormats.BSP.Input.ReadBSPFile(_fileSystem.OpenRead(mapFileName));
+                BSPFile = new BSPLoader(_fileSystem.OpenRead(mapFileName)).ReadBSPFile();
 
                 BSPFile.Name = mapFileName;
             }
@@ -128,7 +128,7 @@ namespace SharpLife.Engine.Shared.Maps
 
             try
             {
-                crc = FileFormats.BSP.Input.ComputeCRC(_fileSystem.OpenRead(fileName));
+                crc = new BSPLoader(_fileSystem.OpenRead(fileName)).ComputeCRC();
             }
             catch (Exception e)
             {

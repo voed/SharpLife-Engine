@@ -27,18 +27,45 @@ using System.Text;
 
 namespace SharpLife.FileFormats.BSP
 {
-    public static class Input
+    public class BSPLoader
     {
         private const int FaceSize = 20;
+
+        private readonly BinaryReader _reader;
+
+        private readonly long _startPosition;
+
+        public BSPLoader(BinaryReader reader)
+        {
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+
+            _startPosition = _reader.BaseStream.Position;
+        }
+
+        public BSPLoader(Stream stream, bool leaveOpen)
+        {
+            _reader = new BinaryReader(stream ?? throw new ArgumentNullException(nameof(stream)), Encoding.UTF8, leaveOpen);
+
+            _startPosition = stream.Position;
+        }
+
+        public BSPLoader(Stream stream)
+            : this(stream, false)
+        {
+        }
+
+        public BSPLoader(string fileName)
+            : this(File.OpenRead(fileName))
+        {
+        }
 
         /// <summary>
         /// Reads the header of a BSP file
         /// </summary>
-        /// <param name="reader"></param>
         /// <returns></returns>
-        private static Header ReadHeader(BinaryReader reader)
+        private Header ReadHeader()
         {
-            var version = EndianConverter.Little(reader.ReadInt32());
+            var version = EndianConverter.Little(_reader.ReadInt32());
 
             //Verify that we can load this BSP file
             if (!Enum.IsDefined(typeof(BSPVersion), version))
@@ -55,7 +82,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range((int)LumpId.FirstLump, (int)LumpId.LastLump + 1))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Lump>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Lump>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 lumps[i] = Marshal.PtrToStructure<Lump>(handle.AddrOfPinnedObject());
@@ -69,32 +96,32 @@ namespace SharpLife.FileFormats.BSP
             return header;
         }
 
-        private static List<MipTexture> ReadMipTextures(BinaryReader reader, ref Lump lump)
+        private List<MipTexture> ReadMipTextures(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
-            var count = EndianConverter.Little(reader.ReadInt32());
+            var count = EndianConverter.Little(_reader.ReadInt32());
 
             var textureOffsets = new int[count];
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                textureOffsets[i] = EndianConverter.Little(reader.ReadInt32());
+                textureOffsets[i] = EndianConverter.Little(_reader.ReadInt32());
             }
 
             var textures = new List<MipTexture>(count);
 
             foreach (var textureOffset in textureOffsets)
             {
-                textures.Add(WAD.Input.ReadMipTexture(reader, lump.fileofs + textureOffset));
+                textures.Add(WAD.Input.ReadMipTexture(_reader, lump.fileofs + textureOffset));
             }
 
             return textures;
         }
 
-        private static List<Plane> ReadPlanes(BinaryReader reader, ref Lump lump)
+        private List<Plane> ReadPlanes(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.Plane>();
 
@@ -102,7 +129,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Disk.Plane>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Disk.Plane>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var plane = Marshal.PtrToStructure<Disk.Plane>(handle.AddrOfPinnedObject());
@@ -118,16 +145,16 @@ namespace SharpLife.FileFormats.BSP
             return planes;
         }
 
-        private static unsafe void ReadBaseNode(IReadOnlyList<Plane> planes, ref Disk.BaseNode input, BaseNode output)
+        private unsafe void ReadBaseNode(IReadOnlyList<Plane> planes, ref Disk.BaseNode input, BaseNode output)
         {
             output.Plane = planes[EndianConverter.Little(input.planenum)];
             output.Children[0] = EndianConverter.Little(input.children[0]);
             output.Children[1] = EndianConverter.Little(input.children[1]);
         }
 
-        private static unsafe List<Node> ReadNodes(BinaryReader reader, ref Lump lump, IReadOnlyList<Plane> planes, IReadOnlyList<Face> faces)
+        private unsafe List<Node> ReadNodes(ref Lump lump, IReadOnlyList<Plane> planes, IReadOnlyList<Face> faces)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.Node>();
 
@@ -135,7 +162,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Disk.Node>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Disk.Node>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var node = Marshal.PtrToStructure<Disk.Node>(handle.AddrOfPinnedObject());
@@ -171,9 +198,9 @@ namespace SharpLife.FileFormats.BSP
             return nodes;
         }
 
-        private static List<ClipNode> ReadClipNodes(BinaryReader reader, ref Lump lump, IReadOnlyList<Plane> planes)
+        private List<ClipNode> ReadClipNodes(ref Lump lump, IReadOnlyList<Plane> planes)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.ClipNode>();
 
@@ -181,7 +208,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Disk.ClipNode>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Disk.ClipNode>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var node = Marshal.PtrToStructure<Disk.ClipNode>(handle.AddrOfPinnedObject());
@@ -197,9 +224,9 @@ namespace SharpLife.FileFormats.BSP
             return nodes;
         }
 
-        private static unsafe List<TextureInfo> ReadTextureInfos(BinaryReader reader, ref Lump lump, List<MipTexture> mipTextures)
+        private unsafe List<TextureInfo> ReadTextureInfos(ref Lump lump, List<MipTexture> mipTextures)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.TextureInfo>();
 
@@ -207,7 +234,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Disk.TextureInfo>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Disk.TextureInfo>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var info = Marshal.PtrToStructure<Disk.TextureInfo>(handle.AddrOfPinnedObject());
@@ -226,9 +253,9 @@ namespace SharpLife.FileFormats.BSP
             return textureInfos;
         }
 
-        private static List<Vector3> ReadVertexes(BinaryReader reader, ref Lump lump)
+        private List<Vector3> ReadVertexes(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Vector3>();
 
@@ -236,7 +263,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Vector3>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Vector3>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var vertex = Marshal.PtrToStructure<Vector3>(handle.AddrOfPinnedObject());
@@ -248,9 +275,9 @@ namespace SharpLife.FileFormats.BSP
             return vertexes;
         }
 
-        private static List<Edge> ReadEdges(BinaryReader reader, ref Lump lump)
+        private List<Edge> ReadEdges(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Edge>();
 
@@ -258,7 +285,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Edge>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Edge>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var edge = Marshal.PtrToStructure<Edge>(handle.AddrOfPinnedObject());
@@ -273,9 +300,9 @@ namespace SharpLife.FileFormats.BSP
             return edges;
         }
 
-        private static List<int> ReadSurfEdges(BinaryReader reader, ref Lump lump)
+        private List<int> ReadSurfEdges(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<int>();
 
@@ -283,20 +310,20 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                surfEdges.Add(EndianConverter.Little(reader.ReadInt32()));
+                surfEdges.Add(EndianConverter.Little(_reader.ReadInt32()));
             }
 
             return surfEdges;
         }
 
-        private static List<Face> ReadFaces(BinaryReader reader, ref Lump lump,
+        private List<Face> ReadFaces(ref Lump lump,
             IReadOnlyList<Plane> planes,
             IReadOnlyList<Vector3> vertexes,
             IReadOnlyList<Edge> edges,
             IReadOnlyList<int> surfEdges,
             IReadOnlyList<TextureInfo> textureInfos)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / FaceSize;
 
@@ -306,13 +333,13 @@ namespace SharpLife.FileFormats.BSP
             {
                 var face = new Face();
 
-                var planeNumber = reader.ReadInt16();
+                var planeNumber = _reader.ReadInt16();
 
                 face.Plane = planes[EndianConverter.Little(planeNumber)];
-                face.Side = EndianConverter.Little(reader.ReadInt16()) != 0;
+                face.Side = EndianConverter.Little(_reader.ReadInt16()) != 0;
 
-                var firstEdge = EndianConverter.Little(reader.ReadInt32());
-                var numEdges = EndianConverter.Little(reader.ReadInt16());
+                var firstEdge = EndianConverter.Little(_reader.ReadInt32());
+                var numEdges = EndianConverter.Little(_reader.ReadInt16());
 
                 face.Points = new List<Vector3>(numEdges);
 
@@ -326,7 +353,7 @@ namespace SharpLife.FileFormats.BSP
                     face.Points.Add(vertexes[edgeIndex > 0 ? edgeData.start : edgeData.end]);
                 }
 
-                var texInfo = EndianConverter.Little(reader.ReadInt16());
+                var texInfo = EndianConverter.Little(_reader.ReadInt16());
 
                 face.TextureInfo = textureInfos[texInfo];
 
@@ -334,10 +361,10 @@ namespace SharpLife.FileFormats.BSP
 
                 foreach (var style in Enumerable.Range(0, Constants.MaxLightmaps))
                 {
-                    face.Styles[style] = reader.ReadByte();
+                    face.Styles[style] = _reader.ReadByte();
                 }
 
-                face.LightOffset = EndianConverter.Little(reader.ReadInt32());
+                face.LightOffset = EndianConverter.Little(_reader.ReadInt32());
 
                 faces.Add(face);
             }
@@ -345,9 +372,9 @@ namespace SharpLife.FileFormats.BSP
             return faces;
         }
 
-        private static List<int> ReadMarkSurfaces(BinaryReader reader, ref Lump lump)
+        private List<int> ReadMarkSurfaces(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<ushort>();
 
@@ -355,15 +382,15 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                markSurfaces.Add(EndianConverter.Little(reader.ReadUInt16()));
+                markSurfaces.Add(EndianConverter.Little(_reader.ReadUInt16()));
             }
 
             return markSurfaces;
         }
 
-        private static unsafe List<Leaf> ReadLeafs(BinaryReader reader, ref Lump lump, IReadOnlyList<int> markSurfaces, IReadOnlyList<Face> faces)
+        private unsafe List<Leaf> ReadLeafs(ref Lump lump, IReadOnlyList<int> markSurfaces, IReadOnlyList<Face> faces)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.Leaf>();
 
@@ -371,7 +398,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Disk.Leaf>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Disk.Leaf>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var leaf = Marshal.PtrToStructure<Disk.Leaf>(handle.AddrOfPinnedObject());
@@ -413,9 +440,9 @@ namespace SharpLife.FileFormats.BSP
             return leaves;
         }
 
-        private static unsafe List<Model> ReadModels(BinaryReader reader, ref Lump lump, IReadOnlyList<Face> faces)
+        private unsafe List<Model> ReadModels(ref Lump lump, IReadOnlyList<Face> faces)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.Model>();
 
@@ -423,7 +450,7 @@ namespace SharpLife.FileFormats.BSP
 
             foreach (var i in Enumerable.Range(0, count))
             {
-                var data = reader.ReadBytes(Marshal.SizeOf<Disk.Model>());
+                var data = _reader.ReadBytes(Marshal.SizeOf<Disk.Model>());
 
                 GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 var model = Marshal.PtrToStructure<Disk.Model>(handle.AddrOfPinnedObject());
@@ -455,11 +482,11 @@ namespace SharpLife.FileFormats.BSP
             return models;
         }
 
-        private static string ReadEntities(BinaryReader reader, ref Lump lump)
+        private string ReadEntities(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
-            var rawBytes = reader.ReadBytes(lump.filelen);
+            var rawBytes = _reader.ReadBytes(lump.filelen);
 
             var entityData = Encoding.UTF8.GetString(rawBytes);
 
@@ -472,28 +499,29 @@ namespace SharpLife.FileFormats.BSP
             return entityData;
         }
 
-        private static byte[] ReadVisibility(BinaryReader reader, ref Lump lump)
+        private byte[] ReadVisibility(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
-            return reader.ReadBytes(lump.filelen);
+            return _reader.ReadBytes(lump.filelen);
         }
 
-        private static byte[] ReadLighting(BinaryReader reader, ref Lump lump)
+        private byte[] ReadLighting(ref Lump lump)
         {
-            reader.BaseStream.Position = lump.fileofs;
+            _reader.BaseStream.Position = lump.fileofs;
 
-            return reader.ReadBytes(lump.filelen);
+            return _reader.ReadBytes(lump.filelen);
         }
 
-        public static BSPFile ReadBSPFile(BinaryReader reader)
+        /// <summary>
+        /// Reads the BSP file
+        /// </summary>
+        /// <returns></returns>
+        public BSPFile ReadBSPFile()
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException(nameof(reader));
-            }
+            _reader.BaseStream.Position = _startPosition;
 
-            var header = ReadHeader(reader);
+            var header = ReadHeader();
 
             //Determine if this is a Blue Shift BSP file
             //This works by checking if the planes lump actually contains planes
@@ -505,30 +533,30 @@ namespace SharpLife.FileFormats.BSP
             var entitiesLumpId = isBlueShiftBSP ? LumpId.Planes : LumpId.Entities;
             var planesLumpId = isBlueShiftBSP ? LumpId.Entities : LumpId.Planes;
 
-            var mipTextures = ReadMipTextures(reader, ref header.Lumps[(int)LumpId.Textures]);
-            var planes = ReadPlanes(reader, ref header.Lumps[(int)planesLumpId]);
+            var mipTextures = ReadMipTextures(ref header.Lumps[(int)LumpId.Textures]);
+            var planes = ReadPlanes(ref header.Lumps[(int)planesLumpId]);
 
-            var textureInfos = ReadTextureInfos(reader, ref header.Lumps[(int)LumpId.TexInfo], mipTextures);
+            var textureInfos = ReadTextureInfos(ref header.Lumps[(int)LumpId.TexInfo], mipTextures);
 
-            var vertexes = ReadVertexes(reader, ref header.Lumps[(int)LumpId.Vertexes]);
-            var edges = ReadEdges(reader, ref header.Lumps[(int)LumpId.Edges]);
-            var surfEdges = ReadSurfEdges(reader, ref header.Lumps[(int)LumpId.SurfEdges]);
-            var faces = ReadFaces(reader, ref header.Lumps[(int)LumpId.Faces], planes, vertexes, edges, surfEdges, textureInfos);
+            var vertexes = ReadVertexes(ref header.Lumps[(int)LumpId.Vertexes]);
+            var edges = ReadEdges(ref header.Lumps[(int)LumpId.Edges]);
+            var surfEdges = ReadSurfEdges(ref header.Lumps[(int)LumpId.SurfEdges]);
+            var faces = ReadFaces(ref header.Lumps[(int)LumpId.Faces], planes, vertexes, edges, surfEdges, textureInfos);
 
-            var nodes = ReadNodes(reader, ref header.Lumps[(int)LumpId.Nodes], planes, faces);
-            var clipNodes = ReadClipNodes(reader, ref header.Lumps[(int)LumpId.ClipNodes], planes);
+            var nodes = ReadNodes(ref header.Lumps[(int)LumpId.Nodes], planes, faces);
+            var clipNodes = ReadClipNodes(ref header.Lumps[(int)LumpId.ClipNodes], planes);
 
-            var markSurfaces = ReadMarkSurfaces(reader, ref header.Lumps[(int)LumpId.MarkSurfaces]);
+            var markSurfaces = ReadMarkSurfaces(ref header.Lumps[(int)LumpId.MarkSurfaces]);
 
-            var leaves = ReadLeafs(reader, ref header.Lumps[(int)LumpId.Leafs], markSurfaces, faces);
+            var leaves = ReadLeafs(ref header.Lumps[(int)LumpId.Leafs], markSurfaces, faces);
 
-            var models = ReadModels(reader, ref header.Lumps[(int)LumpId.Models], faces);
+            var models = ReadModels(ref header.Lumps[(int)LumpId.Models], faces);
 
-            var entities = ReadEntities(reader, ref header.Lumps[(int)entitiesLumpId]);
+            var entities = ReadEntities(ref header.Lumps[(int)entitiesLumpId]);
 
-            var visibility = ReadVisibility(reader, ref header.Lumps[(int)LumpId.Visibility]);
+            var visibility = ReadVisibility(ref header.Lumps[(int)LumpId.Visibility]);
 
-            var lighting = ReadLighting(reader, ref header.Lumps[(int)LumpId.Lighting]);
+            var lighting = ReadLighting(ref header.Lumps[(int)LumpId.Lighting]);
 
             var bspFile = new BSPFile
             {
@@ -549,14 +577,6 @@ namespace SharpLife.FileFormats.BSP
             return bspFile;
         }
 
-        public static BSPFile ReadBSPFile(Stream stream)
-        {
-            using (var reader = new BinaryReader(stream))
-            {
-                return ReadBSPFile(reader);
-            }
-        }
-
         private static bool IsBlueShiftBSP(Header header)
         {
             //Determine if this is a Blue Shift BSP file
@@ -569,49 +589,19 @@ namespace SharpLife.FileFormats.BSP
         }
 
         /// <summary>
-        /// Identifies whether the given reader contains a Blue Shift BSP file
+        /// Computes the CRC32 for this BSP file
+        /// The stream position is left unmodified
         /// </summary>
-        /// <param name="reader"></param>
-        public static bool IsBlueShiftBSP(BinaryReader reader)
+        /// <returns></returns>
+        public uint ComputeCRC()
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException(nameof(reader));
-            }
+            var currentPosition = _reader.BaseStream.Position;
 
-            var position = reader.BaseStream.Position;
+            _reader.BaseStream.Position = _startPosition;
 
             try
             {
-                var header = ReadHeader(reader);
-
-                return IsBlueShiftBSP(header);
-            }
-            finally
-            {
-                //Restore original position since this is a query operation
-                reader.BaseStream.Position = position;
-            }
-        }
-
-        /// <summary>
-        /// <see cref="IsBlueShiftBSP(BinaryReader)"/>
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <returns></returns>
-        public static bool IsBlueShiftBSP(Stream stream)
-        {
-            using (var reader = new BinaryReader(stream))
-            {
-                return IsBlueShiftBSP(new BinaryReader(stream));
-            }
-        }
-
-        public static uint ComputeCRC(Stream stream)
-        {
-            using (var reader = new BinaryReader(stream))
-            {
-                var header = ReadHeader(reader);
+                var header = ReadHeader();
 
                 var isBlueShiftBSP = IsBlueShiftBSP(header);
 
@@ -630,7 +620,7 @@ namespace SharpLife.FileFormats.BSP
                         continue;
                     }
 
-                    reader.BaseStream.Position = header.Lumps[i].fileofs;
+                    _reader.BaseStream.Position = header.Lumps[i].fileofs;
 
                     var bytesLeft = header.Lumps[i].filelen;
 
@@ -638,7 +628,7 @@ namespace SharpLife.FileFormats.BSP
                     {
                         var bytesToRead = bytesLeft < buffer.Length ? bytesLeft : buffer.Length;
 
-                        var bytesRead = reader.Read(buffer, 0, bytesToRead);
+                        var bytesRead = _reader.Read(buffer, 0, bytesToRead);
 
                         if (bytesRead != bytesToRead)
                         {
@@ -653,6 +643,10 @@ namespace SharpLife.FileFormats.BSP
                 }
 
                 return crc;
+            }
+            finally
+            {
+                _reader.BaseStream.Position = currentPosition;
             }
         }
     }
