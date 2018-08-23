@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
-using SharpLife.Engine.Shared.Logging;
+using SharpLife.Engine.API.Shared.Logging;
 
 namespace SharpLife.Engine.API.Engine.Client
 {

@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Logging
+namespace SharpLife.Engine.API.Shared.Logging
 {
     public interface ILogListener
     {

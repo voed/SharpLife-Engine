@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Engine.API.Shared.Logging;
 using System;
 using System.Diagnostics.Contracts;
 using System.IO;

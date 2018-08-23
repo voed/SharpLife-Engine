@@ -17,7 +17,7 @@ using ImGuiNET;
 using Serilog;
 using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.API.Game.Client;
-using SharpLife.Engine.Shared.Logging;
+using SharpLife.Engine.API.Shared.Logging;
 using SharpLife.Utility;
 using System;
 using System.Numerics;
