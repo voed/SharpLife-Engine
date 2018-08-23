@@ -274,8 +274,6 @@ namespace SharpLife.Engine.Server.Host
                 {
                     DropClient(client, NetMessages.ServerShutdownMessage);
                 }
-
-                _netServer.StringListTransmitter.Clear();
             }
         }
 

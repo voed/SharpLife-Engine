@@ -57,7 +57,6 @@ namespace SharpLife.Engine.Client.Host
                     this,
                     new SendMappings(NetMessages.ClientToServerMessages),
                     receiveHandler,
-                    _binaryDataDescriptorSet,
                     _objectListReceiverListener,
                     _cl_name,
                     NetConstants.AppIdentifier,
@@ -76,11 +75,9 @@ namespace SharpLife.Engine.Client.Host
             //TODO: let game do the same
         }
 
-        private void CreateNetworkStringLists()
+        private void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
         {
-            var receiver = _netClient.StringListReceiver;
-
-            _modelPrecache = receiver.CreateList("ModelPrecache");
+            _modelPrecache = networkStringListBuilder.CreateList("ModelPrecache");
 
             //TODO: let game do the same
         }

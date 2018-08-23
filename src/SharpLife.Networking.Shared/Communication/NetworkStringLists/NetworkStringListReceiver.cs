@@ -26,20 +26,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
     {
         private readonly Dictionary<uint, NetworkStringList> _idToListMap = new Dictionary<uint, NetworkStringList>();
 
-        public NetworkStringListReceiver(BinaryDataReceptionDescriptorSet descriptorSet)
-            : base(descriptorSet)
+        public NetworkStringListReceiver(BinaryDataReceptionDescriptorSet descriptorSet, IReadOnlyList<NetworkStringList> lists)
+            : base(descriptorSet, lists)
         {
-        }
-
-        internal override void OnListCreated(NetworkStringList list)
-        {
-            //Nothing
-        }
-
-        public override void Clear()
-        {
-            _idToListMap.Clear();
-            base.Clear();
         }
 
         private IMessage ParseBinaryData(ListBinaryData binaryData)

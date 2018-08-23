@@ -70,7 +70,7 @@ namespace SharpLife.Engine.Client.Networking
 
         public ClientServer Server { get; private set; }
 
-        public NetworkStringListReceiver StringListReceiver { get; }
+        public NetworkStringListReceiver StringListReceiver { get; private set; }
 
         public NetworkObjectListReceiver ObjectListReceiver { get; private set; }
 
@@ -88,7 +88,6 @@ namespace SharpLife.Engine.Client.Networking
         /// <param name="clientHost"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
-        /// <param name="binaryDescriptorSet"></param>
         /// <param name="frameListReceiverListener"></param>
         /// <param name="cl_name"></param>
         /// <param name="appIdentifier">App identifier to use for networking. Must match the identifier given to servers</param>
@@ -99,7 +98,6 @@ namespace SharpLife.Engine.Client.Networking
             EngineClientHost clientHost,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
-            BinaryDataReceptionDescriptorSet binaryDescriptorSet,
             IFrameListReceiverListener frameListReceiverListener,
             IVariable cl_name,
             string appIdentifier,
@@ -111,13 +109,6 @@ namespace SharpLife.Engine.Client.Networking
             _clientHost = clientHost ?? throw new ArgumentNullException(nameof(clientHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
-
-            if (binaryDescriptorSet == null)
-            {
-                throw new ArgumentNullException(nameof(binaryDescriptorSet));
-            }
-
-            StringListReceiver = new NetworkStringListReceiver(binaryDescriptorSet);
 
             _frameListReceiverListener = frameListReceiverListener ?? throw new ArgumentNullException(nameof(frameListReceiverListener));
             _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
@@ -320,8 +311,6 @@ namespace SharpLife.Engine.Client.Networking
                             }
                         }
 
-                        StringListReceiver.Clear();
-
                         Server = null;
 
                         IsDisconnecting = false;
@@ -390,6 +379,20 @@ namespace SharpLife.Engine.Client.Networking
             ObjectListReceiver.DeserializeListMetaData(message);
 
             _clientHost.RequestResources();
+        }
+
+        public void OnNewMapStarted(BinaryDataReceptionDescriptorSet binaryDescriptorSet, Action<INetworkStringListsBuilder> listBuildCallback)
+        {
+            if (binaryDescriptorSet == null)
+            {
+                throw new ArgumentNullException(nameof(binaryDescriptorSet));
+            }
+
+            var networkStringListBuilder = new NetworkStringListReceiverBuilder(binaryDescriptorSet);
+
+            listBuildCallback(networkStringListBuilder);
+
+            StringListReceiver = networkStringListBuilder.Build();
         }
     }
 }

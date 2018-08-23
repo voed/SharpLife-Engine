@@ -51,7 +51,7 @@ namespace SharpLife.Engine.Server.Networking
 
         public bool IsRunning => _server.Status == NetPeerStatus.Running;
 
-        public NetworkStringListTransmitter StringListTransmitter { get; }
+        public NetworkStringListTransmitter StringListTransmitter { get; private set; }
 
         public NetworkObjectListTransmitter ObjectListTransmitter { get; private set; }
 
@@ -62,7 +62,6 @@ namespace SharpLife.Engine.Server.Networking
         /// <param name="serverHost"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
-        /// <param name="binaryDescriptorSet"></param>
         /// <param name="engineTime"></param>
         /// <param name="appIdentifier"></param>
         /// <param name="ipAddress"></param>
@@ -72,7 +71,6 @@ namespace SharpLife.Engine.Server.Networking
             EngineServerHost serverHost,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
-            BinaryDataTransmissionDescriptorSet binaryDescriptorSet,
             IEngineTime engineTime,
             string appIdentifier,
             IPEndPoint ipAddress,
@@ -83,13 +81,6 @@ namespace SharpLife.Engine.Server.Networking
             _serverHost = serverHost ?? throw new ArgumentNullException(nameof(serverHost));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
-
-            if (binaryDescriptorSet == null)
-            {
-                throw new ArgumentNullException(nameof(binaryDescriptorSet));
-            }
-
-            StringListTransmitter = new NetworkStringListTransmitter(binaryDescriptorSet);
 
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
 
@@ -423,6 +414,20 @@ namespace SharpLife.Engine.Server.Networking
             }
 
             client.AddMessage(ObjectListTransmitter.SerializeListMetaData(), true);
+        }
+
+        public void OnNewMapStarted(BinaryDataTransmissionDescriptorSet binaryDescriptorSet, Action<INetworkStringListsBuilder> listBuildCallback)
+        {
+            if (binaryDescriptorSet == null)
+            {
+                throw new ArgumentNullException(nameof(binaryDescriptorSet));
+            }
+
+            var networkStringListBuilder = new NetworkStringListTransmitterBuilder(binaryDescriptorSet);
+
+            listBuildCallback(networkStringListBuilder);
+
+            StringListTransmitter = networkStringListBuilder.Build();
         }
     }
 }

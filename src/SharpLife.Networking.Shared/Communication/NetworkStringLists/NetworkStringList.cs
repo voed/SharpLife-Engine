@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
-    internal sealed class NetworkStringList : INetworkStringList
+    public sealed class NetworkStringList : INetworkStringList
     {
         private sealed class StringData
         {

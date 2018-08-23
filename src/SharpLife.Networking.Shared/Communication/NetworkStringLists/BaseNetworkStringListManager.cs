@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Networking.Shared.Communication.BinaryData;
+using SharpLife.Utility.Collections.Generic;
 using System;
 using System.Collections.Generic;
 
@@ -24,21 +25,22 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
     {
         protected readonly TBinaryDescriptorSet _binaryDataDescriptorSet;
 
-        private readonly List<NetworkStringList> _stringLists = new List<NetworkStringList>();
+        private readonly IReadOnlyList<NetworkStringList> _stringLists;
 
         public int Count => _stringLists.Count;
 
-        internal NetworkStringList this[int index]
+        protected NetworkStringList this[int index]
         {
             get => _stringLists[index];
         }
 
-        protected BaseNetworkStringListManager(TBinaryDescriptorSet binaryDataDescriptorSet)
+        protected BaseNetworkStringListManager(TBinaryDescriptorSet binaryDataDescriptorSet, IReadOnlyList<NetworkStringList> lists)
         {
             _binaryDataDescriptorSet = binaryDataDescriptorSet ?? throw new ArgumentNullException(nameof(binaryDataDescriptorSet));
+            _stringLists = lists ?? throw new ArgumentNullException(nameof(lists));
         }
 
-        internal NetworkStringList FindByName(string name)
+        protected NetworkStringList FindByName(string name)
         {
             if (name == null)
             {
@@ -46,45 +48,6 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             }
 
             return _stringLists.Find(list => list.Name == name);
-        }
-
-        public bool Contains(string name)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            return _stringLists.FindIndex(list => list.Name == name) != -1;
-        }
-
-        internal abstract void OnListCreated(NetworkStringList list);
-
-        public INetworkStringList CreateList(string name)
-        {
-            if (Contains(name))
-            {
-                throw new ArgumentException($"Cannot create string list with duplicate name {name}", nameof(name));
-            }
-
-            var list = new NetworkStringList(_binaryDataDescriptorSet, name, _stringLists.Count);
-
-            _stringLists.Add(list);
-
-            OnListCreated(list);
-
-            return list;
-        }
-
-        public virtual void Clear()
-        {
-            //Clear internal data so the memory can be reclaimed
-            foreach (var list in _stringLists)
-            {
-                list.Clear();
-            }
-
-            _stringLists.Clear();
         }
     }
 }

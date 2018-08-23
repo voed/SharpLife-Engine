@@ -18,7 +18,6 @@ using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
@@ -40,22 +39,24 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             }
         }
 
-        private readonly List<ListData> _listData = new List<ListData>();
+        private readonly IReadOnlyList<ListData> _listData;
 
-        public NetworkStringListTransmitter(BinaryDataTransmissionDescriptorSet descriptorSet)
-            : base(descriptorSet)
+        public NetworkStringListTransmitter(BinaryDataTransmissionDescriptorSet descriptorSet, IReadOnlyList<NetworkStringList> lists)
+            : base(descriptorSet, lists)
         {
-        }
+            var listData = new List<ListData>(Count);
 
-        internal override void OnListCreated(NetworkStringList list)
-        {
-            //At this point the base class list has one more element than this list, it should always match
-            Debug.Assert(_listData.Count == Count - 1);
+            for (var i = 0; i < Count; ++i)
+            {
+                listData.Add(new ListData());
 
-            _listData.Add(new ListData());
+                var list = this[i];
 
-            list.OnStringAdded += OnStringAdded;
-            list.OnBinaryDataChanged += OnBinaryDataChanged;
+                list.OnStringAdded += OnStringAdded;
+                list.OnBinaryDataChanged += OnBinaryDataChanged;
+            }
+
+            _listData = listData;
         }
 
         private void OnStringAdded(IReadOnlyNetworkStringList stringList, int index)

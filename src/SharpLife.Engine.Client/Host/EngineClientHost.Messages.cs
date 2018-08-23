@@ -104,7 +104,7 @@ namespace SharpLife.Engine.Client.Host
 
             _game.MapLoadFinished();
 
-            CreateNetworkStringLists();
+            _netClient.OnNewMapStarted(_binaryDataDescriptorSet, CreateNetworkStringLists);
 
             _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
 
