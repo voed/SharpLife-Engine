@@ -23,6 +23,7 @@ using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
+using SharpLife.Networking.Shared.Messages.Server;
 using System;
 
 namespace SharpLife.Engine.Client.Host
@@ -82,6 +83,13 @@ namespace SharpLife.Engine.Client.Host
             _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
 
             //TODO: let game do the same
+        }
+
+        private void _modelPrecache_OnStringAdded(IReadOnlyNetworkStringList list, int index)
+        {
+            var data = list.GetBinaryData(index) as ModelPrecacheData;
+
+            //TODO: process model data
         }
 
         public void CreateNetworkObjectLists(IClientNetworkObjectLists networkObjectLists)

@@ -15,7 +15,6 @@
 
 using Lidgren.Network;
 using SharpLife.Networking.Shared.Communication.Messages;
-using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 
 namespace SharpLife.Engine.Client.Host
@@ -55,13 +54,6 @@ namespace SharpLife.Engine.Client.Host
             _game.MapLoadFinished();
 
             _netClient.RequestResources();
-        }
-
-        private void _modelPrecache_OnStringAdded(IReadOnlyNetworkStringList list, int index)
-        {
-            var data = list.GetBinaryData(index) as ModelPrecacheData;
-
-            //TODO: process model data
         }
 
         public void ReceiveMessage(NetConnection connection, Print message)
