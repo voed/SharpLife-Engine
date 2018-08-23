@@ -22,45 +22,37 @@ using System.Collections.Generic;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
-    public sealed class NetworkStringListReceptionManager
+    public sealed class NetworkStringListReceiver : BaseNetworkStringListManager<BinaryDataReceptionDescriptorSet>
     {
-        private readonly BinaryDataReceptionDescriptorSet _descriptorSet;
-
-        private readonly NetworkStringListManager _listManager;
-
         private readonly Dictionary<uint, NetworkStringList> _idToListMap = new Dictionary<uint, NetworkStringList>();
 
-        public int Count => _listManager.Count;
-
-        public NetworkStringListReceptionManager(BinaryDataReceptionDescriptorSet descriptorSet)
+        public NetworkStringListReceiver(BinaryDataReceptionDescriptorSet descriptorSet)
+            : base(descriptorSet)
         {
-            _descriptorSet = descriptorSet ?? throw new ArgumentNullException(nameof(descriptorSet));
-            _listManager = new NetworkStringListManager(_descriptorSet);
         }
 
-        public IReadOnlyNetworkStringList CreateList(string name)
+        internal override void OnListCreated(NetworkStringList list)
         {
-            return _listManager.CreateList(name);
+            //Nothing
         }
 
-        public void Clear()
+        public override void Clear()
         {
             _idToListMap.Clear();
-            _listManager.Clear();
+            base.Clear();
         }
 
         private IMessage ParseBinaryData(ListBinaryData binaryData)
         {
+            //TODO: maybe always parse even if empty?
             if (binaryData.BinaryData.IsEmpty)
             {
                 return null;
             }
 
-            var descriptor = _descriptorSet.GetDescriptorByIndex(binaryData.DataType);
+            var descriptor = _binaryDataDescriptorSet.GetDescriptorByIndex(binaryData.DataType);
 
-            var message = descriptor.Parser.ParseFrom(binaryData.BinaryData);
-
-            return message;
+            return descriptor.Parser.ParseFrom(binaryData.BinaryData);
         }
 
         private void ProcessStringData(RepeatedField<ListStringData> strings, NetworkStringList list)
@@ -78,7 +70,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 throw new ArgumentNullException(nameof(update));
             }
 
-            var list = _listManager.FindByName(update.Name);
+            var list = FindByName(update.Name);
 
             _idToListMap[update.ListId] = list ?? throw new InvalidOperationException($"Full update received for non-existent table \"{update.Name}\"");
 

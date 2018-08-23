@@ -22,7 +22,7 @@ using System.IO;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
-    public sealed class NetworkStringListTransmissionManager
+    public sealed class NetworkStringListTransmitter : BaseNetworkStringListManager<BinaryDataTransmissionDescriptorSet>
     {
         private class ListData
         {
@@ -39,37 +39,19 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             }
         }
 
-        private readonly BinaryDataTransmissionDescriptorSet _descriptorSet;
-
-        private readonly NetworkStringListManager _listManager;
-
         private readonly Dictionary<int, ListData> _listData = new Dictionary<int, ListData>();
 
-        public int Count => _listManager.Count;
-
-        public NetworkStringListTransmissionManager(BinaryDataTransmissionDescriptorSet descriptorSet)
+        public NetworkStringListTransmitter(BinaryDataTransmissionDescriptorSet descriptorSet)
+            : base(descriptorSet)
         {
-            _descriptorSet = descriptorSet ?? throw new ArgumentNullException(nameof(descriptorSet));
-            _listManager = new NetworkStringListManager(_descriptorSet);
         }
 
-        public INetworkStringList CreateList(string name)
+        internal override void OnListCreated(NetworkStringList list)
         {
-            var list = _listManager.CreateList(name);
-
-            var internalList = list as NetworkStringList;
-
-            _listData.Add(internalList.Index, new ListData());
+            _listData.Add(list.Index, new ListData());
 
             list.OnStringAdded += OnStringAdded;
             list.OnBinaryDataChanged += OnBinaryDataChanged;
-
-            return list;
-        }
-
-        public void Clear()
-        {
-            _listManager.Clear();
         }
 
         private void OnStringAdded(IReadOnlyNetworkStringList stringList, int index)
@@ -104,7 +86,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 message.BinaryData = ByteString.FromStream(stream);
                 stream.SetLength(0);
 
-                message.DataType = _descriptorSet.GetDescriptorIndex(binaryData.Descriptor);
+                message.DataType = _binaryDataDescriptorSet.GetDescriptorIndex(binaryData.Descriptor);
             }
 
             return message;
@@ -132,7 +114,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            var list = _listManager[index];
+            var list = this[index];
 
             var update = new NetworkStringListFullUpdate
             {
@@ -159,13 +141,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
             var binaryDataBuffer = new MemoryStream();
 
-            for (var i = 0; i < _listManager.Count; ++i)
+            for (var i = 0; i < Count; ++i)
             {
                 var listData = _listData[i];
 
                 if (listData.HasChanges)
                 {
-                    var list = _listManager[i];
+                    var list = this[i];
 
                     var update = new NetworkStringListUpdate
                     {

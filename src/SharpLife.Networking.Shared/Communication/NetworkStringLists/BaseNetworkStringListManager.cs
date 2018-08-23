@@ -19,9 +19,10 @@ using System.Collections.Generic;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 {
-    public sealed class NetworkStringListManager
+    public abstract class BaseNetworkStringListManager<TBinaryDescriptorSet>
+        where TBinaryDescriptorSet : class, IBinaryDataDescriptorSet
     {
-        private readonly IBinaryDataDescriptorSet _binaryDataDescriptorSet;
+        protected readonly TBinaryDescriptorSet _binaryDataDescriptorSet;
 
         private readonly List<NetworkStringList> _stringLists = new List<NetworkStringList>();
 
@@ -32,7 +33,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             get => _stringLists[index];
         }
 
-        public NetworkStringListManager(IBinaryDataDescriptorSet binaryDataDescriptorSet)
+        protected BaseNetworkStringListManager(TBinaryDescriptorSet binaryDataDescriptorSet)
         {
             _binaryDataDescriptorSet = binaryDataDescriptorSet ?? throw new ArgumentNullException(nameof(binaryDataDescriptorSet));
         }
@@ -57,6 +58,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
             return _stringLists.FindIndex(list => list.Name == name) != -1;
         }
 
+        internal abstract void OnListCreated(NetworkStringList list);
+
         public INetworkStringList CreateList(string name)
         {
             if (Contains(name))
@@ -68,10 +71,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkStringLists
 
             _stringLists.Add(list);
 
+            OnListCreated(list);
+
             return list;
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             //Clear internal data so the memory can be reclaimed
             foreach (var list in _stringLists)

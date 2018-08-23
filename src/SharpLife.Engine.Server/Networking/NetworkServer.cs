@@ -51,7 +51,7 @@ namespace SharpLife.Engine.Server.Networking
 
         public bool IsRunning => _server.Status == NetPeerStatus.Running;
 
-        public NetworkStringListTransmissionManager StringListTransmitter { get; }
+        public NetworkStringListTransmitter StringListTransmitter { get; }
 
         public NetworkObjectListTransmitter ObjectListTransmitter { get; private set; }
 
@@ -89,7 +89,7 @@ namespace SharpLife.Engine.Server.Networking
                 throw new ArgumentNullException(nameof(binaryDescriptorSet));
             }
 
-            StringListTransmitter = new NetworkStringListTransmissionManager(binaryDescriptorSet);
+            StringListTransmitter = new NetworkStringListTransmitter(binaryDescriptorSet);
 
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
 

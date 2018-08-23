@@ -70,7 +70,7 @@ namespace SharpLife.Engine.Client.Networking
 
         public ClientServer Server { get; private set; }
 
-        public NetworkStringListReceptionManager StringListReceiver { get; }
+        public NetworkStringListReceiver StringListReceiver { get; }
 
         public NetworkObjectListReceiver ObjectListReceiver { get; private set; }
 
@@ -117,7 +117,7 @@ namespace SharpLife.Engine.Client.Networking
                 throw new ArgumentNullException(nameof(binaryDescriptorSet));
             }
 
-            StringListReceiver = new NetworkStringListReceptionManager(binaryDescriptorSet);
+            StringListReceiver = new NetworkStringListReceiver(binaryDescriptorSet);
 
             _frameListReceiverListener = frameListReceiverListener ?? throw new ArgumentNullException(nameof(frameListReceiverListener));
             _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
