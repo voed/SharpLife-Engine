@@ -85,7 +85,7 @@ namespace SharpLife.Engine.Server.Clients
 
         private readonly PendingMessages _unreliableMessages;
 
-        private readonly INetworkFrameListTransmitter _frameListTransmitter;
+        public INetworkFrameListTransmitter FrameListTransmitter { get; }
 
         private readonly float _objectListMessageInterval = 0.1f;
 
@@ -113,7 +113,7 @@ namespace SharpLife.Engine.Server.Clients
                 throw new ArgumentNullException(nameof(objectListTransmitter));
             }
 
-            _frameListTransmitter = objectListTransmitter.CreateTransmitter(this);
+            FrameListTransmitter = objectListTransmitter.CreateTransmitter(this);
 
             Index = index;
             UserId = userId;
@@ -159,20 +159,6 @@ namespace SharpLife.Engine.Server.Clients
         public static ServerClient CreateFakeClient(int index, int userId, string name)
         {
             return new ServerClient(index, userId, name);
-        }
-
-        public void Disconnect(string reason, NetworkObjectListTransmitter objectListTransmitter)
-        {
-            if (reason == null)
-            {
-                throw new ArgumentNullException(nameof(reason));
-            }
-
-            if (!IsFakeClient)
-            {
-                Connection.Disconnect(reason);
-                objectListTransmitter.DestroyTransmitter(_frameListTransmitter);
-            }
         }
 
         private PendingMessages GetMessages(bool reliable)
@@ -232,7 +218,7 @@ namespace SharpLife.Engine.Server.Clients
 
         public void SendObjectListFrames()
         {
-            AddMessage(_frameListTransmitter.SerializeCurrentFrameList(), true);
+            AddMessage(FrameListTransmitter.SerializeCurrentFrameList(), true);
 
             //TODO: let user define message interval
             NextObjectListMessageTime = (float)(_engineTime.ElapsedTime + _objectListMessageInterval);

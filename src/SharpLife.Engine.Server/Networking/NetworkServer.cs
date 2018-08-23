@@ -37,9 +37,15 @@ namespace SharpLife.Engine.Server.Networking
 
         private readonly EngineServerHost _serverHost;
 
+        private readonly IServerNetworkListener _listener;
+
         private readonly SendMappings _sendMappings;
 
         private readonly MessagesReceiveHandler _receiveHandler;
+
+        private readonly BinaryDataTransmissionDescriptorSet _binaryDataDescriptorSet;
+
+        private readonly TypeRegistry _objectListTypeRegistry;
 
         private readonly IEngineTime _engineTime;
 
@@ -51,17 +57,21 @@ namespace SharpLife.Engine.Server.Networking
 
         public bool IsRunning => _server.Status == NetPeerStatus.Running;
 
-        public NetworkStringListTransmitter StringListTransmitter { get; private set; }
+        //Map specific instances
+        private NetworkStringListTransmitter _stringListTransmitter;
 
-        public NetworkObjectListTransmitter ObjectListTransmitter { get; private set; }
+        private NetworkObjectListTransmitter _objectListTransmitter;
 
         /// <summary>
         /// Creates a new server network handler
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="serverHost"></param>
+        /// <param name="listener"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
+        /// <param name="binaryDataDescriptorSet"></param>
+        /// <param name="objectListTypeRegistry"></param>
         /// <param name="engineTime"></param>
         /// <param name="appIdentifier"></param>
         /// <param name="ipAddress"></param>
@@ -69,8 +79,11 @@ namespace SharpLife.Engine.Server.Networking
         /// <param name="connectionTimeout"></param>
         public NetworkServer(ILogger logger,
             EngineServerHost serverHost,
+            IServerNetworkListener listener,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
+            BinaryDataTransmissionDescriptorSet binaryDataDescriptorSet,
+            TypeRegistry objectListTypeRegistry,
             IEngineTime engineTime,
             string appIdentifier,
             IPEndPoint ipAddress,
@@ -79,8 +92,11 @@ namespace SharpLife.Engine.Server.Networking
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serverHost = serverHost ?? throw new ArgumentNullException(nameof(serverHost));
+            _listener = listener ?? throw new ArgumentNullException(nameof(listener));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+            _binaryDataDescriptorSet = binaryDataDescriptorSet ?? throw new ArgumentNullException(nameof(binaryDataDescriptorSet));
+            _objectListTypeRegistry = objectListTypeRegistry ?? throw new ArgumentNullException(nameof(objectListTypeRegistry));
 
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
 
@@ -272,7 +288,7 @@ namespace SharpLife.Engine.Server.Networking
                     name = "unnamed";
                 }
 
-                var client = ServerClient.CreateClient(_sendMappings, message.SenderConnection, _engineTime, ObjectListTransmitter, slot, _nextUserId++, name);
+                var client = ServerClient.CreateClient(_sendMappings, message.SenderConnection, _engineTime, _objectListTransmitter, slot, _nextUserId++, name);
 
                 _serverHost.ClientList.AddClientToSlot(client);
 
@@ -293,6 +309,23 @@ namespace SharpLife.Engine.Server.Networking
             }
 
             _receiveHandler.ReadMessages(message.SenderConnection, message);
+        }
+
+        public void OnNewMapStarted()
+        {
+            var networkStringListBuilder = new NetworkStringListTransmitterBuilder(_binaryDataDescriptorSet);
+
+            _listener.CreateNetworkStringLists(networkStringListBuilder);
+
+            _stringListTransmitter = networkStringListBuilder.Build();
+
+            //TODO: need to define number of frames for multiplayer
+            _objectListTransmitter = new NetworkObjectListTransmitter(_objectListTypeRegistry, 8);
+
+            using (var networkObjectLists = new EngineTransmitterNetworkObjectLists(_objectListTransmitter))
+            {
+                _listener.CreateNetworkObjectLists(networkObjectLists);
+            }
         }
 
         /// <summary>
@@ -325,6 +358,29 @@ namespace SharpLife.Engine.Server.Networking
             }
         }
 
+        public void DropClient(ServerClient client, string reason)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            if (reason == null)
+            {
+                throw new ArgumentNullException(nameof(reason));
+            }
+
+            //TODO: notify game
+
+            _logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
+
+            if (!client.IsFakeClient)
+            {
+                client.Connection.Disconnect(reason);
+                _objectListTransmitter.DestroyTransmitter(client.FrameListTransmitter);
+            }
+        }
+
         private void SendStringListFullUpdate(ServerClient client)
         {
             if (client == null)
@@ -332,9 +388,9 @@ namespace SharpLife.Engine.Server.Networking
                 throw new ArgumentNullException(nameof(client));
             }
 
-            if (client.NextStringListToSend < StringListTransmitter.Count)
+            if (client.NextStringListToSend < _stringListTransmitter.Count)
             {
-                var update = StringListTransmitter.CreateFullUpdate(client.NextStringListToSend);
+                var update = _stringListTransmitter.CreateFullUpdate(client.NextStringListToSend);
 
                 client.AddMessage(update, true);
 
@@ -346,7 +402,7 @@ namespace SharpLife.Engine.Server.Networking
             {
                 client.SetupStage = ServerClientSetupStage.SendingObjectListTypeMetaData;
 
-                client.AddMessage(ObjectListTransmitter.TypeRegistry.Serialize(), true);
+                client.AddMessage(_objectListTransmitter.TypeRegistry.Serialize(), true);
             }
 
             client.NextStringListToSend = -1;
@@ -358,7 +414,7 @@ namespace SharpLife.Engine.Server.Networking
         public void SendStringListUpdates()
         {
             //Only go through these steps if there are lists to send
-            var updates = StringListTransmitter.CreateUpdates();
+            var updates = _stringListTransmitter.CreateUpdates();
 
             foreach (var client in _serverHost.ClientList)
             {
@@ -389,7 +445,7 @@ namespace SharpLife.Engine.Server.Networking
 
         public void SendObjectListUpdates()
         {
-            ObjectListTransmitter.CreateFramesForTransmitters();
+            _objectListTransmitter.CreateFramesForTransmitters();
 
             foreach (var client in _serverHost.ClientList)
             {
@@ -400,12 +456,6 @@ namespace SharpLife.Engine.Server.Networking
             }
         }
 
-        public void CreateObjectListTransmitter(TypeRegistry typeRegistry)
-        {
-            //TODO: need to define number of frames for multiplayer
-            ObjectListTransmitter = new NetworkObjectListTransmitter(typeRegistry, 8);
-        }
-
         public void SendObjectListListMetaData(ServerClient client)
         {
             if (client == null)
@@ -413,21 +463,7 @@ namespace SharpLife.Engine.Server.Networking
                 throw new ArgumentNullException(nameof(client));
             }
 
-            client.AddMessage(ObjectListTransmitter.SerializeListMetaData(), true);
-        }
-
-        public void OnNewMapStarted(BinaryDataTransmissionDescriptorSet binaryDescriptorSet, Action<INetworkStringListsBuilder> listBuildCallback)
-        {
-            if (binaryDescriptorSet == null)
-            {
-                throw new ArgumentNullException(nameof(binaryDescriptorSet));
-            }
-
-            var networkStringListBuilder = new NetworkStringListTransmitterBuilder(binaryDescriptorSet);
-
-            listBuildCallback(networkStringListBuilder);
-
-            StringListTransmitter = networkStringListBuilder.Build();
+            client.AddMessage(_objectListTransmitter.SerializeListMetaData(), true);
         }
     }
 }

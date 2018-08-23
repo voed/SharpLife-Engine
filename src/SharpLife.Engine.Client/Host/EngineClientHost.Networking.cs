@@ -27,17 +27,15 @@ using System;
 
 namespace SharpLife.Engine.Client.Host
 {
-    public partial class EngineClientHost
+    public partial class EngineClientHost : IClientNetworkListener
     {
         private NetworkClient _netClient;
 
-        private readonly ObjectListReceiverListener _objectListReceiverListener = new ObjectListReceiverListener();
+        private BinaryDataReceptionDescriptorSet _binaryDataDescriptorSet;
 
         private TypeRegistry _objectListTypeRegistry;
 
         private IClientNetworking _clientNetworking;
-
-        private BinaryDataReceptionDescriptorSet _binaryDataDescriptorSet;
 
         private IReadOnlyNetworkStringList _modelPrecache;
 
@@ -55,9 +53,11 @@ namespace SharpLife.Engine.Client.Host
                 _netClient = new NetworkClient(
                     _logger,
                     this,
+                    this,
                     new SendMappings(NetMessages.ClientToServerMessages),
                     receiveHandler,
-                    _objectListReceiverListener,
+                    _binaryDataDescriptorSet,
+                    _objectListTypeRegistry,
                     _cl_name,
                     NetConstants.AppIdentifier,
                     _clientport.Integer,
@@ -75,14 +75,16 @@ namespace SharpLife.Engine.Client.Host
             //TODO: let game do the same
         }
 
-        private void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
+        public void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
         {
             _modelPrecache = networkStringListBuilder.CreateList("ModelPrecache");
+
+            _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
 
             //TODO: let game do the same
         }
 
-        private void CreateNetworkObjectLists(IClientNetworkObjectLists networkObjectLists)
+        public void CreateNetworkObjectLists(IClientNetworkObjectLists networkObjectLists)
         {
             _clientNetworking.CreateNetworkObjectLists(networkObjectLists);
         }

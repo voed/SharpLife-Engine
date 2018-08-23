@@ -272,7 +272,7 @@ namespace SharpLife.Engine.Server.Host
 
                 foreach (var client in ClientList)
                 {
-                    DropClient(client, NetMessages.ServerShutdownMessage);
+                    _netServer.DropClient(client, NetMessages.ServerShutdownMessage);
                 }
             }
         }

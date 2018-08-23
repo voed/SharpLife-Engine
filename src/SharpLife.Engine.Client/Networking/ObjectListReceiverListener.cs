@@ -19,12 +19,6 @@ namespace SharpLife.Engine.Client.Networking
             _listeners.Add(id, listener);
         }
 
-        //TODO: could refactor so the server object maintains this instance as well
-        public void ClearListeners()
-        {
-            _listeners.Clear();
-        }
-
         public void OnBeginProcessList(INetworkObjectList networkObjectList)
         {
             if (_listeners.TryGetValue(networkObjectList.Id, out var listener))

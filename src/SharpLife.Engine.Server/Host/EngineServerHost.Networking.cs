@@ -24,15 +24,15 @@ using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 
 namespace SharpLife.Engine.Server.Host
 {
-    public partial class EngineServerHost
+    public partial class EngineServerHost : IServerNetworkListener
     {
         private NetworkServer _netServer;
+
+        private BinaryDataTransmissionDescriptorSet _binaryDataDescriptorSet;
 
         private readonly TypeRegistry _objectListTypeRegistry;
 
         private IServerNetworking _serverNetworking;
-
-        private BinaryDataTransmissionDescriptorSet _binaryDataDescriptorSet;
 
         private INetworkStringList _modelPrecache;
 
@@ -59,8 +59,11 @@ namespace SharpLife.Engine.Server.Host
                 _netServer = new NetworkServer(
                     _logger,
                     this,
+                    this,
                     new SendMappings(NetMessages.ServerToClientMessages),
                     receiveHandler,
+                    _binaryDataDescriptorSet,
+                    _objectListTypeRegistry,
                     _engine.EngineTime,
                     NetConstants.AppIdentifier,
                     ipAddress,
@@ -71,14 +74,7 @@ namespace SharpLife.Engine.Server.Host
                 _netServer.Start();
             }
 
-            _netServer.OnNewMapStarted(_binaryDataDescriptorSet, CreateNetworkStringLists);
-
-            _netServer.CreateObjectListTransmitter(_objectListTypeRegistry);
-
-            using (var networkObjectLists = new EngineTransmitterNetworkObjectLists(_netServer.ObjectListTransmitter))
-            {
-                CreateNetworkObjectLists(networkObjectLists);
-            }
+            _netServer.OnNewMapStarted();
         }
 
         private void RegisterNetworkBinaryData(IBinaryDataSetBuilder dataSetBuilder)
@@ -88,14 +84,14 @@ namespace SharpLife.Engine.Server.Host
             //TODO: let game do the same
         }
 
-        private void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
+        public void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
         {
             _modelPrecache = networkStringListBuilder.CreateList("ModelPrecache");
 
             //TODO: let game do the same
         }
 
-        private void CreateNetworkObjectLists(IServerNetworkObjectLists networkObjectLists)
+        public void CreateNetworkObjectLists(IServerNetworkObjectLists networkObjectLists)
         {
             _serverNetworking.CreateNetworkObjectLists(networkObjectLists);
         }

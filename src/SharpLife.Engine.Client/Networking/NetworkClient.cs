@@ -56,11 +56,15 @@ namespace SharpLife.Engine.Client.Networking
 
         private readonly EngineClientHost _clientHost;
 
+        private readonly IClientNetworkListener _listener;
+
         private readonly SendMappings _sendMappings;
 
         private readonly MessagesReceiveHandler _receiveHandler;
 
-        private readonly IFrameListReceiverListener _frameListReceiverListener;
+        private readonly BinaryDataReceptionDescriptorSet _binaryDataDescriptorSet;
+
+        private readonly TypeRegistry _objectListTypeRegistry;
 
         private readonly IVariable _cl_name;
 
@@ -70,9 +74,12 @@ namespace SharpLife.Engine.Client.Networking
 
         public ClientServer Server { get; private set; }
 
-        public NetworkStringListReceiver StringListReceiver { get; private set; }
+        //Map specific instances
+        private ObjectListReceiverListener _objectListReceiverListener;
 
-        public NetworkObjectListReceiver ObjectListReceiver { get; private set; }
+        private NetworkStringListReceiver _stringListReceiver;
+
+        private NetworkObjectListReceiver _objectListReceiver;
 
         /// <summary>
         /// Invoked when the client has fully disconnected from a server
@@ -86,9 +93,11 @@ namespace SharpLife.Engine.Client.Networking
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="clientHost"></param>
+        /// <param name="listener"></param>
         /// <param name="sendMappings"></param>
         /// <param name="receiveHandler"></param>
-        /// <param name="frameListReceiverListener"></param>
+        /// <param name="binaryDataDescriptorSet"></param>
+        /// <param name="objectListTypeRegistry"></param>
         /// <param name="cl_name"></param>
         /// <param name="appIdentifier">App identifier to use for networking. Must match the identifier given to servers</param>
         /// <param name="port">Port to use</param>
@@ -96,9 +105,11 @@ namespace SharpLife.Engine.Client.Networking
         /// <param name="connectionTimeout"></param>
         public NetworkClient(ILogger logger,
             EngineClientHost clientHost,
+            IClientNetworkListener listener,
             SendMappings sendMappings,
             MessagesReceiveHandler receiveHandler,
-            IFrameListReceiverListener frameListReceiverListener,
+            BinaryDataReceptionDescriptorSet binaryDataDescriptorSet,
+            TypeRegistry objectListTypeRegistry,
             IVariable cl_name,
             string appIdentifier,
             int port,
@@ -107,10 +118,12 @@ namespace SharpLife.Engine.Client.Networking
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _clientHost = clientHost ?? throw new ArgumentNullException(nameof(clientHost));
+            _listener = listener ?? throw new ArgumentNullException(nameof(listener));
             _sendMappings = sendMappings ?? throw new ArgumentNullException(nameof(sendMappings));
             _receiveHandler = receiveHandler ?? throw new ArgumentNullException(nameof(receiveHandler));
+            _binaryDataDescriptorSet = binaryDataDescriptorSet ?? throw new ArgumentNullException(nameof(binaryDataDescriptorSet));
+            _objectListTypeRegistry = objectListTypeRegistry ?? throw new ArgumentNullException(nameof(objectListTypeRegistry));
 
-            _frameListReceiverListener = frameListReceiverListener ?? throw new ArgumentNullException(nameof(frameListReceiverListener));
             _cl_name = cl_name ?? throw new ArgumentNullException(nameof(cl_name));
 
             var config = new NetPeerConfiguration(appIdentifier)
@@ -352,47 +365,49 @@ namespace SharpLife.Engine.Client.Networking
             }
         }
 
-        public void CreateObjectListReceiver(TypeRegistry typeRegistry)
+        /// <summary>
+        /// Prepares the client's networking systems for a new map
+        /// </summary>
+        public void OnNewMapStarted()
         {
+            var networkStringListBuilder = new NetworkStringListReceiverBuilder(_binaryDataDescriptorSet);
+
+            _listener.CreateNetworkStringLists(networkStringListBuilder);
+
+            _stringListReceiver = networkStringListBuilder.Build();
+
+            _objectListReceiverListener = new ObjectListReceiverListener();
+
             //TODO: need to define number of frames for multiplayer
-            ObjectListReceiver = new NetworkObjectListReceiver(typeRegistry, 8, _frameListReceiverListener);
+            _objectListReceiver = new NetworkObjectListReceiver(_objectListTypeRegistry, 8, _objectListReceiverListener);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdate message)
         {
-            StringListReceiver.ProcessFullUpdate(message);
+            _stringListReceiver.ProcessFullUpdate(message);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
         {
-            StringListReceiver.ProcessUpdate(message);
+            _stringListReceiver.ProcessUpdate(message);
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkObjectListFrameListUpdate message)
         {
-            ObjectListReceiver.DeserializeFrameList(message);
-            ObjectListReceiver.ApplyCurrentFrame();
+            _objectListReceiver.DeserializeFrameList(message);
+            _objectListReceiver.ApplyCurrentFrame();
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
         {
-            ObjectListReceiver.DeserializeListMetaData(message);
+            _objectListReceiver.DeserializeListMetaData(message);
 
-            _clientHost.RequestResources();
-        }
-
-        public void OnNewMapStarted(BinaryDataReceptionDescriptorSet binaryDescriptorSet, Action<INetworkStringListsBuilder> listBuildCallback)
-        {
-            if (binaryDescriptorSet == null)
+            using (var networkObjectLists = new EngineReceiverNetworkObjectLists(_objectListReceiver, _objectListReceiverListener))
             {
-                throw new ArgumentNullException(nameof(binaryDescriptorSet));
+                _listener.CreateNetworkObjectLists(networkObjectLists);
             }
 
-            var networkStringListBuilder = new NetworkStringListReceiverBuilder(binaryDescriptorSet);
-
-            listBuildCallback(networkStringListBuilder);
-
-            StringListReceiver = networkStringListBuilder.Build();
+            _clientHost.RequestResources();
         }
     }
 }

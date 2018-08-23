@@ -41,24 +41,5 @@ namespace SharpLife.Engine.Server.Host
 
             return null;
         }
-
-        private void DropClient(ServerClient client, string reason)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            if (reason == null)
-            {
-                throw new ArgumentNullException(nameof(reason));
-            }
-
-            //TODO: notify game
-
-            _logger.Information($"Dropped {client.Name} from server\nReason:  {reason}");
-
-            client.Disconnect(reason, _netServer.ObjectListTransmitter);
-        }
     }
 }

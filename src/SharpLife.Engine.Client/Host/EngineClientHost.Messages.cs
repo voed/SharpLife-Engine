@@ -98,15 +98,13 @@ namespace SharpLife.Engine.Client.Host
                 }
             }
 
+            _netClient.OnNewMapStarted();
+
             _renderer.LoadBSP(_engine.MapManager.BSPFile);
 
             _game.MapLoadBegin(_engine.MapManager.MapName, _engine.MapManager.BSPFile.Entities);
 
             _game.MapLoadFinished();
-
-            _netClient.OnNewMapStarted(_binaryDataDescriptorSet, CreateNetworkStringLists);
-
-            _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
 
             RequestResources();
         }
@@ -163,9 +161,7 @@ namespace SharpLife.Engine.Client.Host
 
         public void ReceiveMessage(NetConnection connection, NetworkObjectListObjectMetaDataList message)
         {
-            _netClient.CreateObjectListReceiver(_objectListTypeRegistry);
-
-            _netClient.ObjectListReceiver.TypeRegistry.Deserialize(message);
+            _objectListTypeRegistry.Deserialize(message);
 
             RequestResources();
         }
@@ -173,13 +169,6 @@ namespace SharpLife.Engine.Client.Host
         public void ReceiveMessage(NetConnection connection, NetworkObjectListListMetaDataList message)
         {
             _netClient.ReceiveMessage(connection, message);
-
-            _objectListReceiverListener.ClearListeners();
-
-            using (var networkObjectLists = new EngineReceiverNetworkObjectLists(_netClient.ObjectListReceiver, _objectListReceiverListener))
-            {
-                CreateNetworkObjectLists(networkObjectLists);
-            }
         }
     }
 }
