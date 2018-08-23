@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Engine\Server\" />
     <Folder Include="Engine\Shared\" />
   </ItemGroup>
 

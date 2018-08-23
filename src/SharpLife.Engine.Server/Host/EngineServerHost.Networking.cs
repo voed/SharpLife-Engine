@@ -13,13 +13,13 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Networking;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 
 namespace SharpLife.Engine.Server.Host
@@ -92,9 +92,9 @@ namespace SharpLife.Engine.Server.Host
             //TODO: let game do the same
         }
 
-        public void CreateNetworkObjectLists(IServerNetworkObjectLists networkObjectLists)
+        public void CreateNetworkObjectLists(INetworkObjectListTransmitterBuilder networkObjectListBuilder)
         {
-            _serverNetworking.CreateNetworkObjectLists(networkObjectLists);
+            _serverNetworking.CreateNetworkObjectLists(networkObjectListBuilder);
         }
     }
 }

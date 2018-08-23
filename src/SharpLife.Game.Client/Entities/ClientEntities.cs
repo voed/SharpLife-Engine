@@ -66,7 +66,7 @@ namespace SharpLife.Game.Client.Entities
             }
         }
 
-        public void CreateNetworkObjectLists(IClientNetworkObjectLists engineObjectLists)
+        public void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder engineObjectLists)
         {
             _entitiesNetworkList = engineObjectLists.CreateList(GameConstants.NetworkObjectLists.EntitiesListName, this);
         }

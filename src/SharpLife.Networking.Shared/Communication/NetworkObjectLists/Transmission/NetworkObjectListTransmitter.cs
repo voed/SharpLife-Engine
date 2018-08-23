@@ -50,6 +50,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmiss
                 throw new ArgumentException("Network object list name should contain at least one valid character", nameof(name));
             }
 
+            if (FindListByName(name) != null)
+            {
+                throw new ArgumentException($"A list with name \"{name}\" already exists", nameof(name));
+            }
+
             var objectList = new NetworkObjectList(this, name, _objectLists.Count);
 
             _objectLists.Add(objectList);

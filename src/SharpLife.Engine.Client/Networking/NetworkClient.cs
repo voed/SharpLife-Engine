@@ -493,9 +493,11 @@ namespace SharpLife.Engine.Client.Networking
         {
             _objectListReceiver.DeserializeListMetaData(message);
 
-            using (var networkObjectLists = new EngineReceiverNetworkObjectLists(_objectListReceiver, _objectListReceiverListener))
+            using (var networkObjectListBuilder = new NetworkObjectListReceiverBuilder(
+                _objectListReceiver,
+                (list, listener) => _objectListReceiverListener.RegisterListener(list.Id, listener)))
             {
-                _listener.CreateNetworkObjectLists(networkObjectLists);
+                _listener.CreateNetworkObjectLists(networkObjectListBuilder);
             }
 
             RequestResources();

@@ -13,11 +13,11 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Engine.API.Game.Server;
 using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Shared.Networking;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using System;
 
 namespace SharpLife.Game.Server.Networking
@@ -38,9 +38,9 @@ namespace SharpLife.Game.Server.Networking
             _entities.RegisterNetworkableEntities(typeRegistryBuilder);
         }
 
-        public void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists)
+        public void CreateNetworkObjectLists(INetworkObjectListTransmitterBuilder networkObjectListTransmitterBuilder)
         {
-            _entities.CreateNetworkObjectLists(engineObjectLists);
+            _entities.CreateNetworkObjectLists(networkObjectListTransmitterBuilder);
         }
     }
 }

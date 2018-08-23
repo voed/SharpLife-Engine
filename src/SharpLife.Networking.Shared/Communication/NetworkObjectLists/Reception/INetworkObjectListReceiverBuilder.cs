@@ -16,9 +16,9 @@
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
 {
-    public interface IClientNetworkObjectLists
+    public interface INetworkObjectListReceiverBuilder
     {
         /// <summary>
         /// Creates a receiver list for a specific object list

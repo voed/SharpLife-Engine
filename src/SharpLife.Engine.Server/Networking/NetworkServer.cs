@@ -357,9 +357,9 @@ namespace SharpLife.Engine.Server.Networking
             //TODO: need to define number of frames for multiplayer
             _objectListTransmitter = new NetworkObjectListTransmitter(_objectListTypeRegistry, 8);
 
-            using (var networkObjectLists = new EngineTransmitterNetworkObjectLists(_objectListTransmitter))
+            using (var networkObjectListBuilder = new NetworkObjectListTransmitterBuilder(_objectListTransmitter))
             {
-                _listener.CreateNetworkObjectLists(networkObjectLists);
+                _listener.CreateNetworkObjectLists(networkObjectListBuilder);
             }
         }
 

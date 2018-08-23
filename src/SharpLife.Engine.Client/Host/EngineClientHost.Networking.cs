@@ -14,7 +14,6 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
-using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
@@ -22,6 +21,7 @@ using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 using System;
@@ -92,9 +92,9 @@ namespace SharpLife.Engine.Client.Host
             //TODO: process model data
         }
 
-        public void CreateNetworkObjectLists(IClientNetworkObjectLists networkObjectLists)
+        public void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder networkObjectListBuilder)
         {
-            _clientNetworking.CreateNetworkObjectLists(networkObjectLists);
+            _clientNetworking.CreateNetworkObjectLists(networkObjectListBuilder);
         }
 
         /// <summary>

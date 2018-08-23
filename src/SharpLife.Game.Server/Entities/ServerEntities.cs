@@ -14,7 +14,6 @@
 ****/
 
 using Serilog;
-using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityData;
@@ -22,6 +21,7 @@ using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -113,9 +113,9 @@ namespace SharpLife.Game.Server.Entities
             }
         }
 
-        public void CreateNetworkObjectLists(IServerNetworkObjectLists engineObjectLists)
+        public void CreateNetworkObjectLists(INetworkObjectListTransmitterBuilder networkObjectListBuilder)
         {
-            _entitiesNetworkList = engineObjectLists.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
+            _entitiesNetworkList = networkObjectListBuilder.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
         }
 
         public void MapLoadBegin(string mapName, string entityData, bool loadGame)

@@ -13,11 +13,9 @@
 *
 ****/
 
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
-
-namespace SharpLife.Engine.API.Engine.Server
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission
 {
-    public interface IServerNetworkObjectLists
+    public interface INetworkObjectListTransmitterBuilder
     {
         INetworkObjectList CreateList(string name);
     }

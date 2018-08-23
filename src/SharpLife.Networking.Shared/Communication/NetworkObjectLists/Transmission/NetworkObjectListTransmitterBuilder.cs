@@ -13,20 +13,18 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Server;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using System;
 
-namespace SharpLife.Engine.Server.Networking
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission
 {
-    internal sealed class EngineTransmitterNetworkObjectLists : IServerNetworkObjectLists, IDisposable
+    //Not quite a builder, but the user will treat it as such
+    public sealed class NetworkObjectListTransmitterBuilder : INetworkObjectListTransmitterBuilder, IDisposable
     {
         private readonly NetworkObjectListTransmitter _objectListManager;
 
         private bool _disposed;
 
-        internal EngineTransmitterNetworkObjectLists(NetworkObjectListTransmitter objectListManager)
+        public NetworkObjectListTransmitterBuilder(NetworkObjectListTransmitter objectListManager)
         {
             _objectListManager = objectListManager ?? throw new ArgumentNullException(nameof(objectListManager));
         }
@@ -35,7 +33,7 @@ namespace SharpLife.Engine.Server.Networking
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(EngineTransmitterNetworkObjectLists));
+                throw new ObjectDisposedException(nameof(NetworkObjectListTransmitterBuilder));
             }
 
             return _objectListManager.CreateList(name);

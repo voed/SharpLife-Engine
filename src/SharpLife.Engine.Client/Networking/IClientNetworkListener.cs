@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Client;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 
 namespace SharpLife.Engine.Client.Networking
@@ -22,6 +22,6 @@ namespace SharpLife.Engine.Client.Networking
     {
         void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder);
 
-        void CreateNetworkObjectLists(IClientNetworkObjectLists networkObjectLists);
+        void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder networkObjectListBuilder);
     }
 }

@@ -13,32 +13,35 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Client;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using System;
 
-namespace SharpLife.Engine.Client.Networking
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
 {
-    internal sealed class EngineReceiverNetworkObjectLists : IClientNetworkObjectLists, IDisposable
+    //Not quite a builder, but the user will treat it as such
+    public sealed class NetworkObjectListReceiverBuilder : INetworkObjectListReceiverBuilder, IDisposable
     {
         private readonly BaseNetworkObjectListManager _objectListManager;
 
-        private readonly ObjectListReceiverListener _mainListener;
+        private readonly Action<INetworkObjectList, IFrameListReceiverListener> _callback;
 
         private bool _disposed;
 
-        internal EngineReceiverNetworkObjectLists(BaseNetworkObjectListManager objectListManager, ObjectListReceiverListener mainListener)
+        /// <summary>
+        /// Creates a new builder
+        /// </summary>
+        /// <param name="objectListManager"></param>
+        /// <param name="callback">Callback to invoke for each list that is created</param>
+        public NetworkObjectListReceiverBuilder(BaseNetworkObjectListManager objectListManager, Action<INetworkObjectList, IFrameListReceiverListener> callback)
         {
             _objectListManager = objectListManager ?? throw new ArgumentNullException(nameof(objectListManager));
-            _mainListener = mainListener ?? throw new ArgumentNullException(nameof(mainListener));
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
         public INetworkObjectList CreateList(string name, IFrameListReceiverListener listener)
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(EngineReceiverNetworkObjectLists));
+                throw new ObjectDisposedException(nameof(NetworkObjectListReceiverBuilder));
             }
 
             if (name == null)
@@ -59,7 +62,7 @@ namespace SharpLife.Engine.Client.Networking
                 throw new InvalidOperationException($"Object list {name} does not exist");
             }
 
-            _mainListener.RegisterListener(objectList.Id, listener);
+            _callback(objectList, listener);
 
             return objectList;
         }
