@@ -146,7 +146,7 @@ namespace SharpLife.FileFormats.WAD
 
                 if (paletteSize != Constants.NumPaletteColors)
                 {
-                    throw new ArgumentException("Invalid miptex");
+                    throw new FileLoadFailureException("Invalid miptex");
                 }
 
                 foreach (var i in Enumerable.Range(0, Constants.NumPaletteColors))
@@ -176,11 +176,6 @@ namespace SharpLife.FileFormats.WAD
 
         public WADFile ReadWADFile()
         {
-            if (_reader == null)
-            {
-                throw new ArgumentNullException(nameof(_reader));
-            }
-
             var header = ReadHeader();
 
             var lumps = ReadLumps(ref header);

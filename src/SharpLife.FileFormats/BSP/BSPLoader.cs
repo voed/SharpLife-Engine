@@ -661,7 +661,7 @@ namespace SharpLife.FileFormats.BSP
                         if (bytesRead != bytesToRead)
                         {
                             var totalRead = header.Lumps[i].filelen - bytesLeft - (bytesToRead - bytesRead);
-                            throw new InvalidOperationException($"BSP lump {i} has invalid file length data, expected {header.Lumps[i].filelen}, got {totalRead}");
+                            throw new FileLoadFailureException($"BSP lump {i} has invalid file length data, expected {header.Lumps[i].filelen}, got {totalRead}");
                         }
 
                         crc = Crc32Algorithm.Append(crc, buffer, 0, bytesToRead);

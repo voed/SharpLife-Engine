@@ -14,33 +14,32 @@
 ****/
 
 using System;
+using System.Runtime.Serialization;
 
-namespace SharpLife.FileFormats.BSP
+namespace SharpLife.FileFormats
 {
-#pragma warning disable RCS1194 // Implement exception constructors.
     /// <summary>
-    /// thrown when a BSP file has an invalid version set for it
+    /// Base class for all exceptions thrown when a file fails to load
     /// </summary>
-    public sealed class InvalidBSPVersionException : FileLoadFailureException
-#pragma warning restore RCS1194 // Implement exception constructors.
+    public class FileLoadFailureException : Exception
     {
-        public int Version { get; }
-
-        public InvalidBSPVersionException(int version)
+        public FileLoadFailureException()
         {
-            Version = version;
         }
 
-        public InvalidBSPVersionException(int version, string message)
+        protected FileLoadFailureException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        public FileLoadFailureException(string message)
             : base(message)
         {
-            Version = version;
         }
 
-        public InvalidBSPVersionException(int version, string message, Exception innerException)
+        public FileLoadFailureException(string message, Exception innerException)
             : base(message, innerException)
         {
-            Version = version;
         }
     }
 }
