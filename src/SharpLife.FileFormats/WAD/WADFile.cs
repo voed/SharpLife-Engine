@@ -19,8 +19,6 @@ namespace SharpLife.FileFormats.WAD
 {
     public class WADFile
     {
-        public string Name { get; set; }
-
         public WADVersion Version { get; set; }
 
         public List<MipTexture> MipTextures { get; set; }

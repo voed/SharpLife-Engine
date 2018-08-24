@@ -16,7 +16,7 @@
 using SDL2;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.API.Engine.Client;
-using SharpLife.FileFormats.BSP;
+using SharpLife.Engine.Shared.Models;
 using SharpLife.FileSystem;
 using SharpLife.Input;
 using SharpLife.Renderer;
@@ -153,16 +153,16 @@ namespace SharpLife.Engine.Client.Renderer
             _gd.SwapBuffers();
         }
 
-        public void LoadBSP(BSPFile bspFile)
+        public void LoadBSP(BSPModel bspModel)
         {
-            if (bspFile == null)
+            if (bspModel == null)
             {
-                throw new ArgumentNullException(nameof(bspFile));
+                throw new ArgumentNullException(nameof(bspModel));
             }
 
             ClearBSP();
 
-            _bspWorldRenderable = new BSPWorldRenderable(_fileSystem, bspFile, Framework.Extension.WAD);
+            _bspWorldRenderable = new BSPWorldRenderable(_fileSystem, bspModel, Framework.Extension.WAD);
 
             _scene.AddRenderable(_bspWorldRenderable);
 

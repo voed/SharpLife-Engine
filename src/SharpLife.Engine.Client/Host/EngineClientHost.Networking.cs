@@ -104,7 +104,7 @@ namespace SharpLife.Engine.Client.Host
 
             var bspModel = MapInfo.Model;
 
-            _renderer.LoadBSP(bspModel.BSPFile);
+            _renderer.LoadBSP(bspModel);
 
             _game.MapLoadBegin(bspModel.BSPFile.Entities);
 

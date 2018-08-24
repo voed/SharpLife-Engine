@@ -20,8 +20,6 @@ namespace SharpLife.FileFormats.BSP
 {
     public class BSPFile
     {
-        public string Name { get; set; }
-
         public BSPVersion Version { get; set; }
 
         public List<MipTexture> MipTextures { get; set; }

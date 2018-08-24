@@ -13,9 +13,11 @@
 *
 ****/
 
+using SharpLife.Engine.Shared.Models;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
+using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -56,7 +58,7 @@ namespace SharpLife.Renderer.BSP
         }
 
         private readonly IFileSystem _fileSystem;
-        private readonly BSPFile _bspFile;
+        private readonly BSPModel _bspModel;
         private readonly string _wadExtension;
 
         private List<FaceBufferData> _faces;
@@ -71,10 +73,10 @@ namespace SharpLife.Renderer.BSP
 
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
-        public BSPWorldRenderable(IFileSystem fileSystem, BSPFile bspFile, string wadExtension)
+        public BSPWorldRenderable(IFileSystem fileSystem, BSPModel bspModel, string wadExtension)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _bspFile = bspFile ?? throw new ArgumentNullException(nameof(bspFile));
+            _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
             _wadExtension = wadExtension ?? throw new ArgumentNullException(nameof(wadExtension));
         }
 
@@ -110,11 +112,11 @@ namespace SharpLife.Renderer.BSP
             //Load all WADs
             var wadList = new WADList(_fileSystem, _wadExtension);
 
-            var embeddedTexturesWAD = BSPUtilities.CreateWADFromBSP(_bspFile, _wadExtension);
+            var embeddedTexturesWAD = BSPUtilities.CreateWADFromBSP(_bspModel.BSPFile);
 
-            wadList.Add(embeddedTexturesWAD);
+            wadList.Add(_bspModel.Name + FileExtensionUtils.AsExtension(_wadExtension), embeddedTexturesWAD);
 
-            var wadPath = BSPUtilities.ExtractWADPathKeyValue(_bspFile.Entities);
+            var wadPath = BSPUtilities.ExtractWADPathKeyValue(_bspModel.BSPFile.Entities);
 
             foreach (var wadName in wadPath.Split(';', StringSplitOptions.RemoveEmptyEntries))
             {
@@ -131,14 +133,14 @@ namespace SharpLife.Renderer.BSP
             }
 
             //Upload all used textures
-            var usedTextures = BSPUtilities.GetUsedTextures(_bspFile, wadList);
+            var usedTextures = BSPUtilities.GetUsedTextures(_bspModel.BSPFile, wadList);
 
             WADUtilities.UploadTextures(gd, gd.ResourceFactory, sc.ResourceCache, usedTextures);
 
             //Build a list of buffers, each buffer containing all of the faces that have the same texture
             //This reduces the number of buffers we have to create from a set for each face to a set for each texture and all of the faces referencing it
             //TODO: further split by visleaf when vis data is available
-            var sortedFaces = _bspFile.Faces.GroupBy(face => face.TextureInfo.MipTexture.Name);
+            var sortedFaces = _bspModel.BSPFile.Faces.GroupBy(face => face.TextureInfo.MipTexture.Name);
 
             _faces = new List<FaceBufferData>();
 

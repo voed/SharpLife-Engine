@@ -26,11 +26,17 @@ namespace SharpLife.FileFormats.WAD
     /// </summary>
     public class WADList
     {
+        private sealed class WADData
+        {
+            public string Name;
+            public WADFile File;
+        }
+
         private readonly IFileSystem _fileSystem;
 
         private readonly string _extension;
 
-        private readonly List<WADFile> _wadFiles = new List<WADFile>();
+        private readonly List<WADData> _wadFiles = new List<WADData>();
 
         /// <summary>
         /// Creates a new WAD list
@@ -50,7 +56,7 @@ namespace SharpLife.FileFormats.WAD
 
         public WADFile Get(string name)
         {
-            return _wadFiles.Find(w => w.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return _wadFiles.Find(w => w.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.File;
         }
 
         public void Load(string name)
@@ -69,26 +75,29 @@ namespace SharpLife.FileFormats.WAD
 
             var file = new WADLoader(_fileSystem.OpenRead(name)).ReadWADFile();
 
-            file.Name = name;
-
-            _wadFiles.Add(file);
+            _wadFiles.Add(new WADData { Name = name, File = file });
         }
 
-        public void Add(WADFile wadFile)
+        public void Add(string name, WADFile wadFile)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Name must be valid", nameof(wadFile));
+            }
+
             if (wadFile == null)
             {
                 throw new ArgumentNullException(nameof(wadFile));
             }
 
-            wadFile.Name = FileExtensionUtils.EnsureExtension(wadFile.Name, _extension);
+            name = FileExtensionUtils.EnsureExtension(name, _extension);
 
-            if (IsLoaded(wadFile.Name))
+            if (IsLoaded(name))
             {
-                throw new ArgumentException($"WAD file '{wadFile.Name}' is already loaded");
+                throw new ArgumentException($"WAD file '{name}' is already loaded");
             }
 
-            _wadFiles.Add(wadFile);
+            _wadFiles.Add(new WADData { Name = name, File = wadFile });
         }
 
         public void Clear()
@@ -110,7 +119,7 @@ namespace SharpLife.FileFormats.WAD
 
             foreach (var wadFile in _wadFiles)
             {
-                foreach (var texture in wadFile.MipTextures)
+                foreach (var texture in wadFile.File.MipTextures)
                 {
                     if (texture.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                     {
@@ -136,11 +145,11 @@ namespace SharpLife.FileFormats.WAD
 
             foreach (var wadFile in _wadFiles)
             {
-                foreach (var texture in wadFile.MipTextures)
+                foreach (var texture in wadFile.File.MipTextures)
                 {
                     if (texture.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                     {
-                        return wadFile;
+                        return wadFile.File;
                     }
                 }
             }

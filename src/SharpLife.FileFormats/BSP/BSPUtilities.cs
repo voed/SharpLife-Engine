@@ -28,9 +28,8 @@ namespace SharpLife.FileFormats.BSP
         /// The WAD file will be backed by the BSP file's textures, and changes will be reflected
         /// </summary>
         /// <param name="bspFile"></param>
-        /// <param name="wadExtension"></param>
         /// <returns></returns>
-        public static WADFile CreateWADFromBSP(BSPFile bspFile, string wadExtension)
+        public static WADFile CreateWADFromBSP(BSPFile bspFile)
         {
             if (bspFile == null)
             {
@@ -39,7 +38,6 @@ namespace SharpLife.FileFormats.BSP
 
             return new WADFile
             {
-                Name = bspFile.Name + FileExtensionUtils.AsExtension(wadExtension),
                 Version = WADVersion.WAD3,
                 MipTextures = bspFile.MipTextures.Where(t => t.Data[0] != null).ToList()
             };
