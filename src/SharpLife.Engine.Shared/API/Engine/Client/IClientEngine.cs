@@ -13,12 +13,23 @@
 *
 ****/
 
-namespace SharpLife.Engine.API.Shared.Logging
-{
-    public interface ILogListener
-    {
-        void Write(char value);
+using SharpLife.CommandSystem;
+using SharpLife.Engine.Shared.Logging;
+using SharpLife.Engine.Shared.Maps;
 
-        void Write(char[] buffer, int index, int count);
+namespace SharpLife.Engine.Shared.API.Engine.Client
+{
+    public interface IClientEngine
+    {
+        ICommandContext CommandContext { get; }
+
+        ILogListener LogListener { get; set; }
+
+        /// <summary>
+        /// Gets the current map info instance
+        /// Don't cache this, it gets recreated every map
+        /// Null if not running any map
+        /// </summary>
+        IMapInfo MapInfo { get; }
     }
 }

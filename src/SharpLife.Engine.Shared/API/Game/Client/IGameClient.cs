@@ -16,30 +16,30 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Engine.Shared.API.Game.Client
 {
-    public interface IGameServer
+    public interface IGameClient
     {
+        /// <summary>
+        /// Allows the client to add services to the shared engine/client service collection
+        /// </summary>
+        /// <param name="serviceCollection"></param>
         void Initialize(IServiceCollection serviceCollection);
 
+        /// <summary>
+        /// Allows the client to query for services exposed by the engine and itself
+        /// </summary>
+        /// <param name="serviceProvider"></param>
         void Startup(IServiceProvider serviceProvider);
 
         void Shutdown();
 
         /// <summary>
-        /// Called when map loading begins
+        /// Called when the map has started loading
         /// </summary>
-        /// <param name="entityData">The map's entity data string</param>
-        /// <param name="loadGame"></param>
-        void MapLoadBegin(string entityData, bool loadGame);
+        /// <param name="entityData">The map's entity data string. The client shouldn't instantiate any entities on its own</param>
+        void MapLoadBegin(string entityData);
 
-        /// <summary>
-        /// Called when map loading has finished
-        /// </summary>
         void MapLoadFinished();
-
-        void Activate();
-
-        void Deactivate();
     }
 }

@@ -14,14 +14,14 @@
 ****/
 
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Engine.Shared.API.Game.Client
 {
-    public interface IServerNetworking
+    public interface IClientNetworking
     {
         void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder);
 
-        void CreateNetworkObjectLists(INetworkObjectListTransmitterBuilder networkObjectListBuilder);
+        void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder networkObjectListBuilder);
     }
 }

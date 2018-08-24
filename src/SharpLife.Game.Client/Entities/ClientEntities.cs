@@ -13,7 +13,6 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Game.Client.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.MetaData;

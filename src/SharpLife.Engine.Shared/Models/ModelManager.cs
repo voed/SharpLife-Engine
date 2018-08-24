@@ -13,7 +13,6 @@
 *
 ****/
 
-using SharpLife.Engine.API.Shared.Models;
 using SharpLife.FileSystem;
 using System;
 using System.Collections.Generic;

@@ -14,8 +14,8 @@
 ****/
 
 using SDL2;
-using SharpLife.Engine.API.Engine.Client;
 using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileSystem;
 using SharpLife.Input;

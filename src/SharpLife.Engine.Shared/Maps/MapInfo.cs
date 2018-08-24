@@ -13,8 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Shared.Maps;
-using SharpLife.Engine.API.Shared.Models;
+using SharpLife.Engine.Shared.Models;
 using System;
 
 namespace SharpLife.Engine.Shared.Maps

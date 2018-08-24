@@ -13,8 +13,8 @@
 *
 ****/
 
-using SharpLife.Engine.API.Game.Server;
 using SharpLife.Engine.Server.Networking;
+using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;

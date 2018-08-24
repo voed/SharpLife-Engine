@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Engine.API.Engine.Shared
+namespace SharpLife.Engine.Shared.Models
 {
     /// <summary>
     /// Represents a strongly typed model index

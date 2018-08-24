@@ -13,9 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Client;
-using SharpLife.Engine.API.Engine.Shared;
-using SharpLife.Engine.API.Shared.Models;
+using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.Models;
 using SharpLife.Engine.Shared.Networking;
 using SharpLife.Networking.Shared;

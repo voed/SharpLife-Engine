@@ -13,15 +13,12 @@
 *
 ****/
 
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
-
-namespace SharpLife.Engine.API.Game.Client
+namespace SharpLife.Engine.Shared.Logging
 {
-    public interface IClientNetworking
+    public interface ILogListener
     {
-        void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder);
+        void Write(char value);
 
-        void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder networkObjectListBuilder);
+        void Write(char[] buffer, int index, int count);
     }
 }

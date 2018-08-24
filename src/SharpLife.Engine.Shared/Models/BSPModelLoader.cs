@@ -13,7 +13,6 @@
 *
 ****/
 
-using SharpLife.Engine.API.Shared.Models;
 using SharpLife.FileFormats.BSP;
 using System;
 using System.IO;

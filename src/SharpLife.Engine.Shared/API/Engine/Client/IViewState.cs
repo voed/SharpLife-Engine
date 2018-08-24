@@ -15,7 +15,7 @@
 
 using System.Numerics;
 
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Engine.Shared.API.Engine.Client
 {
     /// <summary>
     /// Provides read-only access to the client view state

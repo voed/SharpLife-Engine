@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.API.Game.Client
+namespace SharpLife.Engine.Shared.API.Game.Client
 {
     /// <summary>
     /// The client UI, used to inform the client of engine level changes and to allow drawing

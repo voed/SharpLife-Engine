@@ -13,29 +13,26 @@
 *
 ****/
 
-using SharpLife.Engine.API.Shared.Models;
+using SharpLife.CommandSystem;
+using SharpLife.Engine.Shared.Maps;
 
-namespace SharpLife.Engine.API.Engine.Shared.Maps
+namespace SharpLife.Engine.Shared.API.Engine.Server
 {
-    /// <summary>
-    /// Provides access to map info
-    /// </summary>
-    public interface IMapInfo
+    public interface IServerEngine
     {
-        /// <summary>
-        /// The name of the map, excluding directory and extension
-        /// </summary>
-        string Name { get; }
+        ICommandContext CommandContext { get; }
 
         /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
+        /// Gets the current map info instance
+        /// Don't cache this, it gets recreated every map
         /// </summary>
-        string PreviousMapName { get; }
+        IMapInfo MapInfo { get; }
 
         /// <summary>
-        /// The map model
-        /// TODO: this should be a BSPModel, need to merge API into Shared first
+        /// Returns whether the given map name is valid
         /// </summary>
-        IModel Model { get; }
+        /// <param name="mapName">The map name without directory or extension</param>
+        /// <returns></returns>
+        bool IsMapValid(string mapName);
     }
 }

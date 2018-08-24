@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.API.Game.Client;
+using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Shared.Networking;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;

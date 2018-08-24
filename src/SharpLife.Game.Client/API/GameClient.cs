@@ -14,7 +14,7 @@
 ****/
 
 using Microsoft.Extensions.DependencyInjection;
-using SharpLife.Engine.API.Game.Client;
+using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Client.Networking;
 using SharpLife.Game.Client.UI;

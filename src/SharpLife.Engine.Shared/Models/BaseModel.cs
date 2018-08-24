@@ -13,7 +13,6 @@
 *
 ****/
 
-using SharpLife.Engine.API.Shared.Models;
 using System;
 
 namespace SharpLife.Engine.Shared.Models

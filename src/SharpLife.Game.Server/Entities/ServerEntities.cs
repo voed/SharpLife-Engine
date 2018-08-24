@@ -14,7 +14,7 @@
 ****/
 
 using Serilog;
-using SharpLife.Engine.API.Engine.Server;
+using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityData;

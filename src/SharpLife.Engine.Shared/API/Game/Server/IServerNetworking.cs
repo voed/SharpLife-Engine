@@ -13,23 +13,15 @@
 *
 ****/
 
-using SharpLife.CommandSystem;
-using SharpLife.Engine.API.Engine.Shared.Maps;
-using SharpLife.Engine.API.Shared.Logging;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Engine.Shared.API.Game.Server
 {
-    public interface IClientEngine
+    public interface IServerNetworking
     {
-        ICommandContext CommandContext { get; }
+        void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder);
 
-        ILogListener LogListener { get; set; }
-
-        /// <summary>
-        /// Gets the current map info instance
-        /// Don't cache this, it gets recreated every map
-        /// Null if not running any map
-        /// </summary>
-        IMapInfo MapInfo { get; }
+        void CreateNetworkObjectLists(INetworkObjectListTransmitterBuilder networkObjectListBuilder);
     }
 }

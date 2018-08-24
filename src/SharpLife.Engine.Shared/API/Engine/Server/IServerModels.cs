@@ -13,12 +13,14 @@
 *
 ****/
 
-using SharpLife.Engine.API.Engine.Shared;
-using SharpLife.Engine.API.Shared.Models;
+using SharpLife.Engine.Shared.Models;
 
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Engine.Shared.API.Engine.Server
 {
-    public interface IClientModels
+    /// <summary>
+    /// Provides access to the server's model data
+    /// </summary>
+    public interface IServerModels
     {
         /// <summary>
         /// Loads a model
@@ -33,6 +35,13 @@ namespace SharpLife.Engine.API.Engine.Client
         /// <param name="index"></param>
         /// <returns></returns>
         IModel GetModel(in ModelIndex index);
+
+        /// <summary>
+        /// Gets the index of a model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ModelIndex IndexOf(IModel model);
 
         /// <summary>
         /// Compares two model indices and returns whether they refer to the same model, or if they are both the invalid index

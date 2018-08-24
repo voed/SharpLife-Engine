@@ -14,8 +14,8 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
-using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
+using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Maps;
 using SharpLife.Engine.Shared.Models;

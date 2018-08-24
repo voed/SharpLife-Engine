@@ -13,8 +13,6 @@
 *
 ****/
 
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception
 {
