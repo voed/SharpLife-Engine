@@ -264,7 +264,7 @@ namespace SharpLife.Engine.Server.Host
 
         public void InitializeMap(ServerStartFlags flags)
         {
-            _game.MapLoadBegin(((BSPModel)MapInfo.Model).BSPFile.Entities, (flags & ServerStartFlags.LoadGame) != 0);
+            _game.MapLoadBegin(MapInfo.Model.BSPFile.Entities, (flags & ServerStartFlags.LoadGame) != 0);
 
             _game.MapLoadFinished();
         }

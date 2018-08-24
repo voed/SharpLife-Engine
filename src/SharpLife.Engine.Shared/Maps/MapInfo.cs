@@ -27,9 +27,9 @@ namespace SharpLife.Engine.Shared.Maps
 
         public string PreviousMapName { get; }
 
-        public IModel Model { get; }
+        public BSPModel Model { get; }
 
-        public MapInfo(string name, string previousMapName, IModel model)
+        public MapInfo(string name, string previousMapName, BSPModel model)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             PreviousMapName = previousMapName;

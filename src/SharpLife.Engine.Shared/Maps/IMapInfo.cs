@@ -34,8 +34,7 @@ namespace SharpLife.Engine.Shared.Maps
 
         /// <summary>
         /// The map model
-        /// TODO: this should be a BSPModel, need to merge API into Shared first
         /// </summary>
-        IModel Model { get; }
+        BSPModel Model { get; }
     }
 }

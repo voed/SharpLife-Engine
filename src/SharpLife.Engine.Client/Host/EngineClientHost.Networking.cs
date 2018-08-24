@@ -92,13 +92,17 @@ namespace SharpLife.Engine.Client.Host
             //All resources are loaded, let's start
             //TODO: implement
 
-            //TODO: clear map info on disconnect
             var worldModelIndex = _clientModels.LoadModel(_cachedMapName);
-            var worldModel = _clientModels.GetModel(worldModelIndex);
+
+            //This should never happen since the map file is compared by CRC before being loaded
+            if (!(_clientModels.GetModel(worldModelIndex) is BSPModel worldModel))
+            {
+                throw new InvalidOperationException($"Model {_cachedMapName} is not a map");
+            }
 
             MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(_cachedMapName), MapInfo?.Name, worldModel);
 
-            var bspModel = (BSPModel)MapInfo.Model;
+            var bspModel = MapInfo.Model;
 
             _renderer.LoadBSP(bspModel.BSPFile);
 
