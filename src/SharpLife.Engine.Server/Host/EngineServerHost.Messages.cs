@@ -64,7 +64,7 @@ namespace SharpLife.Engine.Server.Host
                 GameName = _engine.GameDirectory,
                 HostName = "", //TODO: define cvar
                 //In case the file format/directory ever changes, use the full file name
-                MapFileName = _engine.MapManager.FormatMapFileName(_engine.MapManager.MapName),
+                MapFileName = NetUtilities.ConvertToNetworkPath(MapInfo.Model.Name),
                 AllowCheats = false, //TODO: define cvar
             }, true);
 

@@ -26,6 +26,7 @@ using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
+using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
 using System;
 using System.Net;
@@ -556,6 +557,8 @@ namespace SharpLife.Engine.Server.Networking
                         }
                         else
                         {
+                            client.AddMessage(new NetworkStringListFullUpdatesComplete(), true);
+
                             client.SetupStage = ServerClientSetupStage.SendingObjectListTypeMetaData;
 
                             client.AddMessage(_objectListTransmitter.TypeRegistry.Serialize(), true);

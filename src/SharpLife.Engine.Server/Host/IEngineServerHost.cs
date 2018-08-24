@@ -60,5 +60,12 @@ namespace SharpLife.Engine.Server.Host
         void Stop();
 
         void RunFrame(float deltaSeconds);
+
+        /// <summary>
+        /// Returns whether the given map name is valid
+        /// </summary>
+        /// <param name="mapName">The map name without directory or extension</param>
+        /// <returns></returns>
+        bool IsMapValid(string mapName);
     }
 }

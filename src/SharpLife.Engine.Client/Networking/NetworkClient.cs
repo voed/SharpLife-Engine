@@ -44,6 +44,7 @@ namespace SharpLife.Engine.Client.Networking
         IMessageReceiveHandler<BinaryMetaData>,
         IMessageReceiveHandler<NetworkStringListFullUpdate>,
         IMessageReceiveHandler<NetworkStringListUpdate>,
+        IMessageReceiveHandler<NetworkStringListFullUpdatesComplete>,
         IMessageReceiveHandler<NetworkObjectListFrameListUpdate>,
         IMessageReceiveHandler<NetworkObjectListObjectMetaDataList>,
         IMessageReceiveHandler<NetworkObjectListListMetaDataList>
@@ -145,6 +146,7 @@ namespace SharpLife.Engine.Client.Networking
             _receiveHandler.RegisterHandler<BinaryMetaData>(this);
             _receiveHandler.RegisterHandler<NetworkStringListFullUpdate>(this);
             _receiveHandler.RegisterHandler<NetworkStringListUpdate>(this);
+            _receiveHandler.RegisterHandler<NetworkStringListFullUpdatesComplete>(this);
             _receiveHandler.RegisterHandler<NetworkObjectListFrameListUpdate>(this);
             _receiveHandler.RegisterHandler<NetworkObjectListObjectMetaDataList>(this);
             _receiveHandler.RegisterHandler<NetworkObjectListListMetaDataList>(this);
@@ -474,6 +476,11 @@ namespace SharpLife.Engine.Client.Networking
         public void ReceiveMessage(NetConnection connection, NetworkStringListUpdate message)
         {
             _stringListReceiver.ProcessUpdate(message);
+        }
+
+        public void ReceiveMessage(NetConnection connection, NetworkStringListFullUpdatesComplete message)
+        {
+            _listener.OnStringListsReceived();
         }
 
         public void ReceiveMessage(NetConnection connection, NetworkObjectListFrameListUpdate message)

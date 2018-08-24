@@ -28,7 +28,7 @@ using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.Loop;
-using SharpLife.Engine.Shared.Maps;
+using SharpLife.Engine.Shared.Models;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
@@ -72,7 +72,7 @@ namespace SharpLife.Engine.Engines
 
         IEngineTime IEngine.EngineTime => EngineTime;
 
-        public IMapManager MapManager { get; private set; }
+        public IModelManager ModelManager { get; private set; }
 
         public IEventSystem EventSystem { get; } = new EventSystem();
 
@@ -277,7 +277,7 @@ namespace SharpLife.Engine.Engines
                 Logger.Information($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
-            MapManager = new MapManager(Logger, FileSystem, Framework.Path.Maps, Framework.Extension.BSP);
+            ModelManager = new ModelManager(FileSystem);
 
             //TODO: initialize subsystems
 
@@ -351,6 +351,8 @@ namespace SharpLife.Engine.Engines
 
             _client?.Disconnect(false);
 
+            ClearMemory();
+
             var mapName = command[0];
 
             //Remove BSP extension
@@ -363,7 +365,7 @@ namespace SharpLife.Engine.Engines
 
             EventSystem.DispatchEvent(EngineEvents.EngineNewMapRequest);
 
-            if (!MapManager.IsMapValid(mapName))
+            if (!_server.IsMapValid(mapName))
             {
                 Logger.Error($"map change failed: '{mapName}' not found on server.");
                 return;
@@ -414,6 +416,8 @@ namespace SharpLife.Engine.Engines
 
             //Disconnected by server
             _client?.Disconnect(false);
+
+            ClearMemory();
         }
 
         public void StopServer()
@@ -422,6 +426,15 @@ namespace SharpLife.Engine.Engines
             {
                 _server.Stop();
             }
+        }
+
+        /// <summary>
+        /// Clear map specific memory
+        /// </summary>
+        private void ClearMemory()
+        {
+            //Done here so server and client don't wipe eachother's data while loading
+            ModelManager.Clear();
         }
     }
 }

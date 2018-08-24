@@ -23,6 +23,8 @@ namespace SharpLife.Engine.Client.Host
         IMessageReceiveHandler<ServerInfo>,
         IMessageReceiveHandler<Print>
     {
+        private string _cachedMapName;
+
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
             receiveHandler.RegisterHandler<ServerInfo>(this);
@@ -33,25 +35,11 @@ namespace SharpLife.Engine.Client.Host
         {
             //TODO: implement
             //TODO: when finished, move this into NetworkClient if possible
-            //TODO: this is temporary. map loading occurs later on, so most of this will disappear
-            if (!_engine.IsDedicatedServer)
-            {
-                //Load the BSP file
-                if (!_engine.MapManager.LoadMap(message.MapFileName))
-                {
-                    _logger.Error($"Couldn't load \"{message.MapFileName}\"");
-                    Disconnect(true);
-                    return;
-                }
-            }
+
+            //Cache off the name so we can look it up later
+            _cachedMapName = message.MapFileName;
 
             _netClient.OnNewMapStarted();
-
-            _renderer.LoadBSP(_engine.MapManager.BSPFile);
-
-            _game.MapLoadBegin(_engine.MapManager.MapName, _engine.MapManager.BSPFile.Entities);
-
-            _game.MapLoadFinished();
 
             _netClient.RequestResources();
         }

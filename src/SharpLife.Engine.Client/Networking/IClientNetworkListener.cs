@@ -23,5 +23,10 @@ namespace SharpLife.Engine.Client.Networking
         void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder);
 
         void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder networkObjectListBuilder);
+
+        /// <summary>
+        /// Invoked when all full string list updates have been received
+        /// </summary>
+        void OnStringListsReceived();
     }
 }

@@ -13,33 +13,26 @@
 *
 ****/
 
-using Microsoft.Extensions.DependencyInjection;
-using System;
+using SharpLife.CommandSystem;
+using SharpLife.Engine.API.Engine.Shared.Maps;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Engine.API.Engine.Server
 {
-    public interface IGameServer
+    public interface IServerEngine
     {
-        void Initialize(IServiceCollection serviceCollection);
-
-        void Startup(IServiceProvider serviceProvider);
-
-        void Shutdown();
+        ICommandContext CommandContext { get; }
 
         /// <summary>
-        /// Called when map loading begins
+        /// Gets the current map info instance
+        /// Don't cache this, it gets recreated every map
         /// </summary>
-        /// <param name="entityData">The map's entity data string</param>
-        /// <param name="loadGame"></param>
-        void MapLoadBegin(string entityData, bool loadGame);
+        IMapInfo MapInfo { get; }
 
         /// <summary>
-        /// Called when map loading has finished
+        /// Returns whether the given map name is valid
         /// </summary>
-        void MapLoadFinished();
-
-        void Activate();
-
-        void Deactivate();
+        /// <param name="mapName">The map name without directory or extension</param>
+        /// <returns></returns>
+        bool IsMapValid(string mapName);
     }
 }

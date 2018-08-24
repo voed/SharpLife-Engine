@@ -61,7 +61,7 @@ namespace SharpLife.Game.Client.API
         {
         }
 
-        public void MapLoadBegin(string mapName, string entityData)
+        public void MapLoadBegin(string entityData)
         {
             _entities.MapLoadBegin();
         }

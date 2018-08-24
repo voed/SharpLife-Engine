@@ -72,6 +72,7 @@ namespace SharpLife.Networking.Shared
             BinaryMetaData.Descriptor,
             NetworkStringListFullUpdate.Descriptor,
             NetworkStringListUpdate.Descriptor,
+            NetworkStringListFullUpdatesComplete.Descriptor,
             NetworkObjectListFrameListUpdate.Descriptor,
             NetworkObjectListObjectMetaDataList.Descriptor,
             NetworkObjectListListMetaDataList.Descriptor,

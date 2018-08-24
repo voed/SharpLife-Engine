@@ -13,6 +13,8 @@
 *
 ****/
 
+using SharpLife.Utility;
+
 namespace SharpLife.Engine.Shared
 {
     /// <summary>
@@ -25,12 +27,20 @@ namespace SharpLife.Engine.Shared
         /// </summary>
         public const string DefaultLanguage = "english";
 
+        /// <summary>
+        /// Name of the model that will be used as a fallback when a model fails to load
+        /// </summary>
+        public static readonly string FallbackModelName = System.IO.Path.Combine(Directory.Models, "error" + FileExtensionUtils.AsExtension(Extension.MDL));
+
+        public const string BSPModelNamePrefix = "*";
+
         public static class Directory
         {
             public const string Graphics = "gfx";
             public const string EnvironmentMaps = "env";
             public const string Shaders = "shaders";
             public const string Maps = "maps";
+            public const string Models = "models";
         }
 
         public static class Path
@@ -59,6 +69,7 @@ namespace SharpLife.Engine.Shared
         {
             public const string WAD = "wad";
             public const string BSP = "bsp";
+            public const string MDL = "mdl";
             public const string CFG = "cfg";
         }
     }

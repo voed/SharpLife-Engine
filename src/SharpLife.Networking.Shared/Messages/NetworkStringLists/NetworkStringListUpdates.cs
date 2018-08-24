@@ -41,7 +41,8 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
             "cExpZmUuTmV0d29ya2luZy5TaGFyZWQuTWVzc2FnZXMuTmV0d29ya1N0cmlu",
             "Z0xpc3RzLkxpc3RTdHJpbmdEYXRhEl4KB3VwZGF0ZXMYAyADKAsyTS5TaGFy",
             "cExpZmUuTmV0d29ya2luZy5TaGFyZWQuTWVzc2FnZXMuTmV0d29ya1N0cmlu",
-            "Z0xpc3RzLkxpc3RTdHJpbmdEYXRhVXBkYXRlYgZwcm90bzM="));
+            "Z0xpc3RzLkxpc3RTdHJpbmdEYXRhVXBkYXRlIiYKJE5ldHdvcmtTdHJpbmdM",
+            "aXN0RnVsbFVwZGF0ZXNDb21wbGV0ZWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -49,7 +50,8 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
             new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringData), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringData.Parser, new[]{ "Value", "BinaryData" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringDataUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.ListStringDataUpdate.Parser, new[]{ "Index", "BinaryData" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListFullUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListFullUpdate.Parser, new[]{ "ListId", "Name", "Strings" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdate.Parser, new[]{ "ListId", "Strings", "Updates" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdate), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdate.Parser, new[]{ "ListId", "Strings", "Updates" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListFullUpdatesComplete), global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListFullUpdatesComplete.Parser, null, null, null, null)
           }));
     }
     #endregion
@@ -891,6 +893,110 @@ namespace SharpLife.Networking.Shared.Messages.NetworkStringLists {
             updates_.AddEntriesFrom(input, _repeated_updates_codec);
             break;
           }
+        }
+      }
+    }
+
+  }
+
+  /// <summary>
+  ///Notifies the receiver that they've received all full updates
+  /// </summary>
+  public sealed partial class NetworkStringListFullUpdatesComplete : pb::IMessage<NetworkStringListFullUpdatesComplete> {
+    private static readonly pb::MessageParser<NetworkStringListFullUpdatesComplete> _parser = new pb::MessageParser<NetworkStringListFullUpdatesComplete>(() => new NetworkStringListFullUpdatesComplete());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<NetworkStringListFullUpdatesComplete> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::SharpLife.Networking.Shared.Messages.NetworkStringLists.NetworkStringListUpdatesReflection.Descriptor.MessageTypes[5]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public NetworkStringListFullUpdatesComplete() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public NetworkStringListFullUpdatesComplete(NetworkStringListFullUpdatesComplete other) : this() {
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public NetworkStringListFullUpdatesComplete Clone() {
+      return new NetworkStringListFullUpdatesComplete(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as NetworkStringListFullUpdatesComplete);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(NetworkStringListFullUpdatesComplete other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(NetworkStringListFullUpdatesComplete other) {
+      if (other == null) {
+        return;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
         }
       }
     }

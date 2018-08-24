@@ -20,8 +20,10 @@ using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.API.Engine.Client;
+using SharpLife.Engine.API.Engine.Shared.Maps;
 using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.API.Shared.Logging;
+using SharpLife.Engine.Client.Resources;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Engines;
@@ -51,6 +53,8 @@ namespace SharpLife.Engine.Client.Host
             set => _engine.LogTextWriter.Listener = value;
         }
 
+        public IMapInfo MapInfo { get; private set; }
+
         private readonly IEngine _engine;
 
         private readonly ILogger _logger;
@@ -61,6 +65,10 @@ namespace SharpLife.Engine.Client.Host
 
         private readonly Renderer.Renderer _renderer;
 
+        //Engine API
+        private readonly ClientModels _clientModels;
+
+        //Game API
         private IGameClient _game;
 
         private IClientUI _clientUI;
@@ -125,6 +133,8 @@ namespace SharpLife.Engine.Client.Host
 
             _window.Center();
 
+            _clientModels = new ClientModels(_engine.ModelManager);
+
             LoadGameClient();
 
             var objectListTypeRegistryBuilder = new TypeRegistryBuilder();
@@ -150,6 +160,7 @@ namespace SharpLife.Engine.Client.Host
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IClientEngine>(this);
             serviceCollection.AddSingleton<IViewState>(_renderer);
+            serviceCollection.AddSingleton<IClientModels>(_clientModels);
 
             _game.Initialize(serviceCollection);
 

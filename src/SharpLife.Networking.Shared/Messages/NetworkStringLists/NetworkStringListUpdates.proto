@@ -44,3 +44,8 @@ message NetworkStringListUpdate
 
 	repeated ListStringDataUpdate updates = 3;
 }
+
+//Notifies the receiver that they've received all full updates
+message NetworkStringListFullUpdatesComplete
+{
+}

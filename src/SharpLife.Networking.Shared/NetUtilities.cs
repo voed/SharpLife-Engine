@@ -14,12 +14,17 @@
 ****/
 
 using System;
+using System.IO;
 using System.Net;
 
 namespace SharpLife.Networking.Shared
 {
     public static class NetUtilities
     {
+        private const char NetworkPathSeparator = '/';
+
+        private const char AlternateNetworkPathSeparator = '\\';
+
         /// <summary>
         /// Converts a string to an IP address
         /// </summary>
@@ -101,6 +106,36 @@ namespace SharpLife.Networking.Shared
             }
 
             return new IPEndPoint(ip, port);
+        }
+
+        /// <summary>
+        /// Converts a string that contains a path to the network representation, consistent across platforms
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string ConvertToNetworkPath(string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            return path.Replace(AlternateNetworkPathSeparator, NetworkPathSeparator);
+        }
+
+        /// <summary>
+        /// Converts a string that contains a path in network representation to a platform specific path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string ConvertToPlatformPath(string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            return path.Replace(NetworkPathSeparator, Path.DirectorySeparatorChar);
         }
     }
 }

@@ -13,23 +13,19 @@
 *
 ****/
 
-using SharpLife.CommandSystem;
-using SharpLife.Engine.API.Engine.Shared.Maps;
-using SharpLife.Engine.API.Shared.Logging;
+using SharpLife.FileFormats.BSP;
+using System;
 
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Engine.Shared.Models
 {
-    public interface IClientEngine
+    public sealed class BSPModel : BaseModel
     {
-        ICommandContext CommandContext { get; }
+        public BSPFile BSPFile { get; }
 
-        ILogListener LogListener { get; set; }
-
-        /// <summary>
-        /// Gets the current map info instance
-        /// Don't cache this, it gets recreated every map
-        /// Null if not running any map
-        /// </summary>
-        IMapInfo MapInfo { get; }
+        public BSPModel(string name, uint crc, BSPFile bspFile)
+            : base(name, crc)
+        {
+            BSPFile = bspFile ?? throw new ArgumentNullException(nameof(bspFile));
+        }
     }
 }

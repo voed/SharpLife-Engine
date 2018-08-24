@@ -13,23 +13,10 @@
 *
 ****/
 
-using SharpLife.CommandSystem;
-using SharpLife.Engine.API.Engine.Shared.Maps;
-using SharpLife.Engine.API.Shared.Logging;
-
-namespace SharpLife.Engine.API.Engine.Client
+namespace SharpLife.Engine.Shared.Networking
 {
-    public interface IClientEngine
+    public static class EngineStringLists
     {
-        ICommandContext CommandContext { get; }
-
-        ILogListener LogListener { get; set; }
-
-        /// <summary>
-        /// Gets the current map info instance
-        /// Don't cache this, it gets recreated every map
-        /// Null if not running any map
-        /// </summary>
-        IMapInfo MapInfo { get; }
+        public const string Models = nameof(Models);
     }
 }

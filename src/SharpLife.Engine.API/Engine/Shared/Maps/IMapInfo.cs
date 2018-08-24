@@ -13,33 +13,29 @@
 *
 ****/
 
-using Microsoft.Extensions.DependencyInjection;
-using System;
+using SharpLife.Engine.API.Shared.Models;
 
-namespace SharpLife.Engine.API.Game.Server
+namespace SharpLife.Engine.API.Engine.Shared.Maps
 {
-    public interface IGameServer
+    /// <summary>
+    /// Provides access to map info
+    /// </summary>
+    public interface IMapInfo
     {
-        void Initialize(IServiceCollection serviceCollection);
-
-        void Startup(IServiceProvider serviceProvider);
-
-        void Shutdown();
+        /// <summary>
+        /// The name of the map, excluding directory and extension
+        /// </summary>
+        string Name { get; }
 
         /// <summary>
-        /// Called when map loading begins
+        /// Name of the previous map that was loaded, or null if no previous map was loaded
         /// </summary>
-        /// <param name="entityData">The map's entity data string</param>
-        /// <param name="loadGame"></param>
-        void MapLoadBegin(string entityData, bool loadGame);
+        string PreviousMapName { get; }
 
         /// <summary>
-        /// Called when map loading has finished
+        /// The map model
+        /// TODO: this should be a BSPModel, need to merge API into Shared first
         /// </summary>
-        void MapLoadFinished();
-
-        void Activate();
-
-        void Deactivate();
+        IModel Model { get; }
     }
 }

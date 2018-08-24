@@ -17,13 +17,14 @@ using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.API.Game.Client;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.Events;
+using SharpLife.Engine.Shared.Maps;
+using SharpLife.Engine.Shared.Models;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
-using SharpLife.Networking.Shared.Messages.Server;
 using System;
 
 namespace SharpLife.Engine.Client.Host
@@ -37,8 +38,6 @@ namespace SharpLife.Engine.Client.Host
         private readonly TypeRegistry _objectListTypeRegistry;
 
         private IClientNetworking _clientNetworking;
-
-        private IReadOnlyNetworkStringList _modelPrecache;
 
         /// <summary>
         /// Creates the network client, using current client configuration values
@@ -78,23 +77,34 @@ namespace SharpLife.Engine.Client.Host
 
         public void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
         {
-            _modelPrecache = networkStringListBuilder.CreateList("ModelPrecache");
-
-            _modelPrecache.OnStringAdded += _modelPrecache_OnStringAdded;
+            _clientModels.CreateNetworkStringLists(networkStringListBuilder);
 
             //TODO: let game do the same
-        }
-
-        private void _modelPrecache_OnStringAdded(IReadOnlyNetworkStringList list, int index)
-        {
-            var data = list.GetBinaryData(index) as ModelPrecacheData;
-
-            //TODO: process model data
         }
 
         public void CreateNetworkObjectLists(INetworkObjectListReceiverBuilder networkObjectListBuilder)
         {
             _clientNetworking.CreateNetworkObjectLists(networkObjectListBuilder);
+        }
+
+        public void OnStringListsReceived()
+        {
+            //All resources are loaded, let's start
+            //TODO: implement
+
+            //TODO: clear map info on disconnect
+            var worldModelIndex = _clientModels.LoadModel(_cachedMapName);
+            var worldModel = _clientModels.GetModel(worldModelIndex);
+
+            MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(_cachedMapName), MapInfo?.Name, worldModel);
+
+            var bspModel = (BSPModel)MapInfo.Model;
+
+            _renderer.LoadBSP(bspModel.BSPFile);
+
+            _game.MapLoadBegin(bspModel.BSPFile.Entities);
+
+            _game.MapLoadFinished();
         }
 
         /// <summary>
@@ -153,6 +163,8 @@ namespace SharpLife.Engine.Client.Host
             }
 
             _renderer.ClearBSP();
+
+            MapInfo = null;
 
             //TODO: reset client state
         }

@@ -55,9 +55,9 @@ namespace SharpLife.Game.Server.API
         {
         }
 
-        public void MapLoadBegin(string mapName, string entityData, bool loadGame)
+        public void MapLoadBegin(string entityData, bool loadGame)
         {
-            _entities.MapLoadBegin(mapName, entityData, loadGame);
+            _entities.MapLoadBegin(entityData, loadGame);
         }
 
         public void MapLoadFinished()

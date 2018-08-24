@@ -14,6 +14,7 @@
 ****/
 
 using Serilog;
+using SharpLife.Engine.API.Engine.Server;
 using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityData;
@@ -32,15 +33,21 @@ namespace SharpLife.Game.Server.Entities
     {
         private readonly ILogger _logger;
 
+        private readonly IServerEngine _serverEngine;
+
+        private readonly IServerModels _serverModels;
+
         private ServerEntityList _entityList;
 
         private INetworkObjectList _entitiesNetworkList;
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
 
-        public ServerEntities(ILogger logger)
+        public ServerEntities(ILogger logger, IServerEngine serverEngine, IServerModels serverModels)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _serverEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
+            _serverModels = serverModels ?? throw new ArgumentNullException(nameof(serverModels));
         }
 
         public void Startup()
@@ -118,7 +125,7 @@ namespace SharpLife.Game.Server.Entities
             _entitiesNetworkList = networkObjectListBuilder.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
         }
 
-        public void MapLoadBegin(string mapName, string entityData, bool loadGame)
+        public void MapLoadBegin(string entityData, bool loadGame)
         {
             _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList);
 

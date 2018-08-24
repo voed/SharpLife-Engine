@@ -18,22 +18,29 @@ using Serilog;
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
+using SharpLife.Engine.API.Engine.Server;
+using SharpLife.Engine.API.Engine.Shared;
+using SharpLife.Engine.API.Engine.Shared.Maps;
 using SharpLife.Engine.API.Game.Server;
+using SharpLife.Engine.Server.Resources;
+using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
+using SharpLife.Engine.Shared.Maps;
+using SharpLife.Engine.Shared.Models;
+using SharpLife.FileFormats.BSP;
 using SharpLife.Game.Server.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-using SharpLife.Networking.Shared.Messages.Server;
-using SharpLife.Networking.Shared.Precaching;
 using SharpLife.Utility.Events;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace SharpLife.Engine.Server.Host
 {
-    public partial class EngineServerHost : IEngineServerHost
+    public partial class EngineServerHost : IEngineServerHost, IServerEngine
     {
         public ICommandContext CommandContext { get; }
 
@@ -43,10 +50,16 @@ namespace SharpLife.Engine.Server.Host
 
         public bool Active { get; private set; }
 
+        public IMapInfo MapInfo { get; private set; }
+
         private readonly IEngine _engine;
 
         private readonly ILogger _logger;
 
+        //Engine API
+        private readonly ServerModels _serverModels;
+
+        //Game API
         private IGameServer _game;
 
         private readonly IVariable _ipname;
@@ -108,6 +121,8 @@ namespace SharpLife.Engine.Server.Host
                 _maxPlayers.String = maxPlayersValue;
             }
 
+            _serverModels = new ServerModels(_engine.ModelManager, Framework.FallbackModelName);
+
             LoadGameServer();
 
             var objectListTypeRegistryBuilder = new TypeRegistryBuilder();
@@ -127,13 +142,15 @@ namespace SharpLife.Engine.Server.Host
         {
             _game = new GameServer();
 
-            var collection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection();
 
-            collection.AddSingleton(_logger);
+            serviceCollection.AddSingleton(_logger);
+            serviceCollection.AddSingleton<IServerEngine>(this);
+            serviceCollection.AddSingleton<IServerModels>(_serverModels);
 
-            _game.Initialize(collection);
+            _game.Initialize(serviceCollection);
 
-            var serviceProvider = collection.BuildServiceProvider();
+            var serviceProvider = serviceCollection.BuildServiceProvider();
 
             _serverNetworking = serviceProvider.GetRequiredService<IServerNetworking>();
 
@@ -156,7 +173,7 @@ namespace SharpLife.Engine.Server.Host
         {
             EventSystem.DispatchEvent(new MapStartedLoading(
                 mapName,
-                _engine.MapManager.MapName,
+                MapInfo?.Name,
                 (flags & ServerStartFlags.ChangeLevel) != 0,
                 (flags & ServerStartFlags.LoadGame) != 0));
 
@@ -187,40 +204,58 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapDataStartLoad);
 
-            var mapFileName = _engine.MapManager.FormatMapFileName(mapName);
+            var mapFileName = ModelUtils.FormatMapFileName(mapName);
 
-            if (!_engine.MapManager.LoadMap(mapFileName))
+            ModelIndex worldModelIndex;
+
+            try
             {
-                _logger.Information($"Couldn't spawn server {mapFileName}\n");
+                worldModelIndex = _serverModels.LoadModel(mapFileName);
+            }
+            catch (Exception e)
+            {
+                //TODO: needs a rework
+                if (e is InvalidOperationException
+                    || e is InvalidBSPVersionException
+                    || e is IOException)
+                {
+                    worldModelIndex = new ModelIndex();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            if (!worldModelIndex.Valid)
+            {
+                _logger.Information($"Couldn't spawn server {mapFileName}");
                 Stop();
                 return false;
             }
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapDataFinishLoad);
 
-            if (!_engine.MapManager.ComputeCRC(mapName, out var crc))
+            if (!(_serverModels.GetModel(worldModelIndex) is BSPModel worldModel))
             {
+                _logger.Information($"Model {mapFileName} is not a map");
                 Stop();
                 return false;
             }
 
-            _mapCRC = crc;
+            _mapCRC = worldModel.CRC;
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapCRCComputed);
 
-            //TODO: add binary data
-            _modelPrecache.Add(mapFileName, new ModelPrecacheData
-            {
-                Flags = (uint)ModelPrecacheFlags.Required
-            });
+            MapInfo = new MapInfo(mapName, MapInfo?.Name, worldModel);
 
-            foreach (var i in Enumerable.Range(0, _engine.MapManager.BSPFile.Models.Count))
+            foreach (var i in Enumerable.Range(0, worldModel.BSPFile.Models.Count))
             {
-                _modelPrecache.Add($"*{i + 1}", new ModelPrecacheData
-                {
-                    Flags = (uint)ModelPrecacheFlags.Required
-                });
+                _serverModels.LoadModel($"{Framework.BSPModelNamePrefix}{i + 1}");
             }
+
+            //Load the fallback model now to ensure that BSP indices are matched up
+            _serverModels.LoadFallbackModel();
 
             //TODO: create models for BSP models
 
@@ -231,7 +266,7 @@ namespace SharpLife.Engine.Server.Host
 
         public void InitializeMap(ServerStartFlags flags)
         {
-            _game.MapLoadBegin(_engine.MapManager.MapName, _engine.MapManager.BSPFile.Entities, (flags & ServerStartFlags.LoadGame) != 0);
+            _game.MapLoadBegin(((BSPModel)MapInfo.Model).BSPFile.Entities, (flags & ServerStartFlags.LoadGame) != 0);
 
             _game.MapLoadFinished();
         }
@@ -285,6 +320,11 @@ namespace SharpLife.Engine.Server.Host
             }
 
             _netServer.RunFrame();
+        }
+
+        public bool IsMapValid(string mapName)
+        {
+            return _engine.FileSystem.Exists(ModelUtils.FormatMapFileName(mapName));
         }
     }
 }

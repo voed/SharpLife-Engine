@@ -34,8 +34,6 @@ namespace SharpLife.Engine.Server.Host
 
         private IServerNetworking _serverNetworking;
 
-        private INetworkStringList _modelPrecache;
-
         private void CreateNetworkServer()
         {
             if (_netServer == null)
@@ -87,7 +85,7 @@ namespace SharpLife.Engine.Server.Host
 
         public void CreateNetworkStringLists(INetworkStringListsBuilder networkStringListBuilder)
         {
-            _modelPrecache = networkStringListBuilder.CreateList("ModelPrecache");
+            _serverModels.CreateNetworkStringLists(networkStringListBuilder);
 
             //TODO: let game do the same
         }
