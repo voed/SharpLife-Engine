@@ -143,31 +143,24 @@ namespace SharpLife.Engine.Shared.CommandSystem
                     return;
                 }
 
-                try
+                var succeeded = false;
+
+                foreach (var pathID in gameConfigPathIDs)
                 {
-                    var succeeded = false;
-
-                    foreach (var pathID in gameConfigPathIDs)
+                    if (fileSystem.Exists(fileName, pathID))
                     {
-                        if (fileSystem.Exists(fileName, pathID))
-                        {
-                            var text = fileSystem.ReadAllText(fileName, pathID);
+                        var text = fileSystem.ReadAllText(fileName, pathID);
 
-                            logger.Debug($"execing {arguments[0]}");
+                        logger.Debug($"execing {arguments[0]}");
 
-                            commandContext.InsertCommands(text);
+                        commandContext.InsertCommands(text);
 
-                            succeeded = true;
-                            break;
-                        }
-                    }
-
-                    if (!succeeded)
-                    {
-                        throw new FileNotFoundException("Couldn't execute file", fileName);
+                        succeeded = true;
+                        break;
                     }
                 }
-                catch (Exception)
+
+                if (!succeeded)
                 {
                     logger.Error($"Couldn't exec {arguments[0]}");
                 }

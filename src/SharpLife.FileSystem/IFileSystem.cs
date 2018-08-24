@@ -48,10 +48,19 @@ namespace SharpLife.FileSystem
         /// </summary>
         /// <param name="relativePath"></param>
         /// <param name="pathID">If not null, specifies that only paths with this Id should be checked for the file's existence</param>
-        /// <param name="mustExist">If false, only the path to the file must exist, otherwise the file must also exist</param>
         /// <returns>The absolute path if it could be resolved</returns>
         /// <exception cref="FileNotFoundException">If the file could not be resolved</exception>
-        string GetAbsolutePath(string relativePath, string pathID = null, bool mustExist = true);
+        string GetAbsolutePath(string relativePath, string pathID = null);
+
+        /// <summary>
+        /// <see cref=" GetAbsolutePath(string, string)"/>
+        /// Returns a default value if the path couldn't not be resolved
+        /// </summary>
+        /// <param name="relativePath"></param>
+        /// <param name="pathID"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        string GetAbsolutePathOrDefault(string relativePath, string pathID = null, string defaultValue = null);
 
         /// <summary>
         /// Given an absolute path, attempts to resolve the path to a relative path

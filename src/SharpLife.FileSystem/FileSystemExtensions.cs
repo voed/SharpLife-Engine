@@ -25,27 +25,6 @@ namespace SharpLife.FileSystem
     public static class FileSystemExtensions
     {
         /// <summary>
-        /// Gets the absolute path, or a default value if it could not be resolved
-        /// <see cref="IFileSystem.GetAbsolutePath(string, string)"/>
-        /// </summary>
-        /// <param name="self"></param>
-        /// <param name="relativePath"></param>
-        /// <param name="pathID"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
-        public static string GetAbsolutePathOrDefault(this IFileSystem self, string relativePath, string pathID = null, string defaultValue = null)
-        {
-            try
-            {
-                return self.GetAbsolutePath(relativePath, pathID);
-            }
-            catch (FileNotFoundException)
-            {
-                return defaultValue;
-            }
-        }
-
-        /// <summary>
         /// Gets the relative path, or a default value if it could not be resolved
         /// <see cref="IFileSystem.GetRelativePath(string, string)(string, string)"/>
         /// </summary>
