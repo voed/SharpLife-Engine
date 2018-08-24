@@ -385,9 +385,9 @@ namespace SharpLife.FileFormats.BSP
 
                 face.TextureInfo = textureInfos[texInfo];
 
-                face.Styles = new byte[Constants.MaxLightmaps];
+                face.Styles = new byte[BSPConstants.MaxLightmaps];
 
-                foreach (var style in Enumerable.Range(0, Constants.MaxLightmaps))
+                foreach (var style in Enumerable.Range(0, BSPConstants.MaxLightmaps))
                 {
                     face.Styles[style] = _reader.ReadByte();
                 }
@@ -492,7 +492,7 @@ namespace SharpLife.FileFormats.BSP
                     NumVisLeaves = model.visleafs
                 };
 
-                foreach (var node in Enumerable.Range(0, Constants.MaxHulls))
+                foreach (var node in Enumerable.Range(0, BSPConstants.MaxHulls))
                 {
                     result.HeadNodes[node] = model.headnode[node];
                 }

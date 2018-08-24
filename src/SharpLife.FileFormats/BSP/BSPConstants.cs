@@ -15,7 +15,7 @@
 
 namespace SharpLife.FileFormats.BSP
 {
-    public static class Constants
+    public static class BSPConstants
     {
         //TODO: hulls max is a common constant
         public const int MaxHulls = 4;

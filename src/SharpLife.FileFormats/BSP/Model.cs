@@ -26,7 +26,7 @@ namespace SharpLife.FileFormats.BSP
 
         public Vector3 Origin { get; set; }
 
-        public int[] HeadNodes { get; } = new int[Constants.MaxHulls];
+        public int[] HeadNodes { get; } = new int[BSPConstants.MaxHulls];
 
         public int NumVisLeaves { get; set; }       // not including the solid leaf 0
 
