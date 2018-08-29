@@ -64,10 +64,6 @@ namespace SharpLife.Renderer
             _imguiRenderer.Render(gd, cl);
         }
 
-        public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
-        {
-        }
-
         public RenderPasses RenderPasses => RenderPasses.Overlay;
 
         public void Update(float deltaSeconds)

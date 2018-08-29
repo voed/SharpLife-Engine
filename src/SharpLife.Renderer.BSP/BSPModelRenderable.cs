@@ -74,13 +74,11 @@ namespace SharpLife.Renderer.BSP
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
         }
 
-        public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
             WorldAndInverse wai;
             wai.World = Transform.GetTransformMatrix();
             wai.InverseWorld = VdUtilities.CalculateInverseTranspose(ref wai.World);
             gd.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
-        }
 
         public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {

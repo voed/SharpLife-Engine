@@ -158,10 +158,6 @@ namespace SharpLife.Renderer.Objects
             _disposeCollector.Add(_vb, _ib, textureCube, textureView, _layout, _pipeline, _resourceSet, vs, fs);
         }
 
-        public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
-        {
-        }
-
         public static Skybox2D LoadDefaultSkybox(IFileSystem fileSystem, string envDirectory, string skyboxName)
         {
             return new Skybox2D(

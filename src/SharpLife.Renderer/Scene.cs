@@ -109,14 +109,6 @@ namespace SharpLife.Renderer
 
             cl.End();
 
-            _resourceUpdateCL.Begin();
-            foreach (ResourceContainer renderable in _allPerFrameRenderablesSet)
-            {
-                renderable.UpdatePerFrameResources(gd, _resourceUpdateCL, sc);
-            }
-            _resourceUpdateCL.End();
-
-            gd.SubmitCommands(_resourceUpdateCL);
             gd.SubmitCommands(cl);
         }
 
@@ -151,21 +143,8 @@ namespace SharpLife.Renderer
             {
                 renderable.Render(gd, rc, sc, pass);
             }
-
-            if (threaded)
-            {
-                lock (_allPerFrameRenderablesSet)
-                {
-                    foreach (ResourceContainer thing in renderableList) { _allPerFrameRenderablesSet.Add(thing); }
-                }
-            }
-            else
-            {
-                foreach (ResourceContainer thing in renderableList) { _allPerFrameRenderablesSet.Add(thing); }
-            }
         }
 
-        private readonly HashSet<ResourceContainer> _allPerFrameRenderablesSet = new HashSet<ResourceContainer>();
         private readonly RenderQueue[] _renderQueues = Enumerable.Range(0, 4).Select(_ => new RenderQueue()).ToArray();
         private readonly List<IRenderable>[] _renderableStage = Enumerable.Range(0, 4).Select(_ => new List<IRenderable>()).ToArray();
 
@@ -180,16 +159,12 @@ namespace SharpLife.Renderer
             }
         }
 
-        private CommandList _resourceUpdateCL;
-
         internal void DestroyAllDeviceObjects()
         {
             foreach (var r in _resourceContainers)
             {
                 r.DestroyDeviceObjects();
             }
-
-            _resourceUpdateCL.Dispose();
         }
 
         public void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
@@ -198,9 +173,6 @@ namespace SharpLife.Renderer
             {
                 r.CreateDeviceObjects(gd, cl, sc);
             }
-
-            _resourceUpdateCL = gd.ResourceFactory.CreateCommandList();
-            _resourceUpdateCL.Name = "Scene Resource Update Command List";
         }
 
         private class RenderPassesComparer : IEqualityComparer<RenderPasses>

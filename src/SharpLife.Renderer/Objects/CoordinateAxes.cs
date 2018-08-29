@@ -24,10 +24,6 @@ namespace SharpLife.Renderer.Objects
 
         public RenderPasses RenderPasses => RenderPasses.Standard;
 
-        public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
-        {
-        }
-
         public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {
             cl.SetVertexBuffer(0, _vb);

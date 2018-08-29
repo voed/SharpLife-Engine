@@ -20,7 +20,6 @@ namespace SharpLife.Renderer
 {
     public abstract class ResourceContainer : IDisposable
     {
-        public abstract void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc);
         public abstract void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc);
         public abstract void DestroyDeviceObjects();
 

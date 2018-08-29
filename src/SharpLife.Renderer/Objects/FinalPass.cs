@@ -91,10 +91,6 @@ namespace SharpLife.Renderer.Objects
 
         public RenderPasses RenderPasses => RenderPasses.SwapchainOutput;
 
-        public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
-        {
-        }
-
         private static readonly ushort[] s_quadIndices = new ushort[] { 0, 1, 2, 0, 2, 3 };
     }
 }
