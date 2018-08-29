@@ -41,7 +41,6 @@ using SharpLife.Utility.Events;
 using System;
 using System.IO;
 using System.Net;
-using System.Numerics;
 
 namespace SharpLife.Engine.Client.Host
 {
@@ -269,19 +268,6 @@ namespace SharpLife.Engine.Client.Host
         public void OnRenderModels(IModelRenderer modelRenderer)
         {
             _clientEntities.RenderEntities(modelRenderer);
-
-            //TODO: remove
-            //Render all models
-            if (MapInfo?.Model != null)
-            {
-                var data = new ModelRenderData { Scale = new Vector3(1, 1, 1) };
-
-                foreach (var model in _engine.ModelManager)
-                {
-                    data.Model = model;
-                    modelRenderer.Render(ref data);
-                }
-            }
         }
     }
 }

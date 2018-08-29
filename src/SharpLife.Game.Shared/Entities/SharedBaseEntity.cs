@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Models;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using System.Numerics;
@@ -47,6 +48,10 @@ namespace SharpLife.Game.Shared.Entities
 
         [Networked]
         public EntityFlags Flags { get; set; }
+
+        //TODO: will need handlers to update size
+        [Networked]
+        public IModel Model { get; set; }
 
         /// <summary>
         /// Convenience for checking and setting if an entity has been marked as needing destruction

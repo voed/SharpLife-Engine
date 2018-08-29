@@ -24,6 +24,8 @@ namespace SharpLife.Game.Server.Entities
     [Networkable]
     public abstract class BaseEntity : SharedBaseEntity
     {
+        public EntityContext Context { get; set; }
+
         /// <summary>
         /// Call this if you have a networked member with change notifications enabled
         /// </summary>
@@ -50,6 +52,12 @@ namespace SharpLife.Game.Server.Entities
         /// <returns></returns>
         public virtual bool KeyValue(string key, string value)
         {
+            if (key == "model")
+            {
+                Model = Context.EngineModels.LoadModel(value);
+                return true;
+            }
+
             return false;
         }
 

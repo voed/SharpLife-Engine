@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Shared.Networking;
@@ -24,16 +25,18 @@ namespace SharpLife.Game.Server.Networking
 {
     internal sealed class ServerNetworking : IServerNetworking
     {
+        private readonly IEngineModels _engineModels;
         private readonly ServerEntities _entities;
 
-        public ServerNetworking(ServerEntities entities)
+        public ServerNetworking(IEngineModels engineModels, ServerEntities entities)
         {
+            _engineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
             _entities = entities ?? throw new ArgumentNullException(nameof(entities));
         }
 
         public void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder)
         {
-            SharedObjectListTypes.RegisterSharedTypes(typeRegistryBuilder);
+            SharedObjectListTypes.RegisterSharedTypes(typeRegistryBuilder, _engineModels);
 
             _entities.RegisterNetworkableEntities(typeRegistryBuilder);
         }

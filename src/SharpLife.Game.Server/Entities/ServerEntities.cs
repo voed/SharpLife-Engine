@@ -128,7 +128,7 @@ namespace SharpLife.Game.Server.Entities
 
         public void MapLoadBegin(string entityData, bool loadGame)
         {
-            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList);
+            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _serverModels);
 
             if (loadGame)
             {

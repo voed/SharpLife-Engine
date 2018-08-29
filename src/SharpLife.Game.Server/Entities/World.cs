@@ -21,5 +21,16 @@ namespace SharpLife.Game.Server.Entities
     [Networkable]
     public sealed class World : NetworkedEntity
     {
+        public override void Precache()
+        {
+            base.Precache();
+
+            Model = Context.ServerEngine.MapInfo.Model;
+        }
+
+        protected override void Spawn()
+        {
+            Precache();
+        }
     }
 }

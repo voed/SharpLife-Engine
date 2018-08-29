@@ -13,6 +13,9 @@
 *
 ****/
 
+using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Game.Shared.Networking.Conversion;
+using SharpLife.Models;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives;
@@ -23,7 +26,7 @@ namespace SharpLife.Game.Shared.Networking
 {
     public static class SharedObjectListTypes
     {
-        public static void RegisterSharedTypes(TypeRegistryBuilder typeRegistryBuilder)
+        public static void RegisterSharedTypes(TypeRegistryBuilder typeRegistryBuilder, IEngineModels engineModels)
         {
             if (typeRegistryBuilder == null)
             {
@@ -51,6 +54,8 @@ namespace SharpLife.Game.Shared.Networking
 
             typeRegistryBuilder.RegisterType(typeof(Vector2), Vector2Converter.Instance);
             typeRegistryBuilder.RegisterType(typeof(Vector3), Vector3Converter.Instance);
+
+            typeRegistryBuilder.RegisterType(typeof(IModel), new ModelConverter(engineModels));
         }
     }
 }

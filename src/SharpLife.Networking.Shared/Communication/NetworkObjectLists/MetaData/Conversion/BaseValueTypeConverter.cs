@@ -69,12 +69,22 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public abstract void Decode(in T value, in T previousValue, out T result);
 
+        public bool ReadAndDecode(CodedInputStream stream, in T previousValue, out T result)
+        {
+            if (Read(stream, out result))
+            {
+                Decode(result, previousValue, out result);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public bool ReadAndDecode(CodedInputStream stream, object previousValue, out object result)
         {
-            if (Read(stream, out T resultValue))
+            if (ReadAndDecode(stream, (T)previousValue, out T resultValue))
             {
-                Decode(resultValue, (T)previousValue, out resultValue);
-
                 result = resultValue;
 
                 return true;

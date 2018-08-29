@@ -15,15 +15,27 @@
 
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Renderer.Models;
+using System.Numerics;
 
 namespace SharpLife.Game.Client.Entities
 {
     [Networkable]
-    public abstract class BaseEntity : SharedBaseEntity
+    public abstract class BaseEntity : SharedBaseEntity, IRenderableEntity
     {
         protected BaseEntity(bool networked)
             : base(networked)
         {
+        }
+
+        public virtual void Render(IModelRenderer modelRenderer)
+        {
+            if (Model != null)
+            {
+                var renderData = new ModelRenderData { Model = Model, Origin = Origin, Angles = Angles, Scale = new Vector3(1, 1, 1) };
+
+                modelRenderer.Render(ref renderData);
+            }
         }
     }
 }

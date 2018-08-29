@@ -13,6 +13,8 @@
 *
 ****/
 
+using SharpLife.Engine.Shared.API.Engine.Server;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
@@ -24,14 +26,19 @@ namespace SharpLife.Game.Server.Entities.EntityList
     {
         private readonly INetworkObjectList _entitiesNetworkList;
 
-        public ServerEntityList(EntityDictionary entityDictionary, INetworkObjectList entitiesNetworkList)
+        private readonly EntityContext _entityContext;
+
+        public ServerEntityList(EntityDictionary entityDictionary, INetworkObjectList entitiesNetworkList, IServerEngine serverEngine, IEngineModels engineModels)
             : base(entityDictionary)
         {
             _entitiesNetworkList = entitiesNetworkList ?? throw new ArgumentNullException(nameof(entitiesNetworkList));
+            _entityContext = new EntityContext(serverEngine, engineModels, this);
         }
 
         protected override void OnEntityCreated(EntityEntry entry)
         {
+            entry.entity.Context = _entityContext;
+
             if (entry.entity.Networked)
             {
                 var networkObject = _entitiesNetworkList.CreateNetworkObject(entry.entity);
