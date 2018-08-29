@@ -364,14 +364,21 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
             public bool MoveNext()
             {
-                _handle = _entityList.GetNextEntity(_handle);
+                if (!_handle.Valid)
+                {
+                    _handle = _entityList.GetFirstEntity();
+                }
+                else
+                {
+                    _handle = _entityList.GetNextEntity(_handle);
+                }
 
                 return _handle.Valid;
             }
 
             public void Reset()
             {
-                _handle = _entityList.GetFirstEntity();
+                _handle = new ObjectHandle();
             }
 
             object IEnumerator.Current => Current;
