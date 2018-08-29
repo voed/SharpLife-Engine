@@ -21,6 +21,7 @@ using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.Server.Resources;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.API.Engine.Server;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
@@ -145,7 +146,7 @@ namespace SharpLife.Engine.Server.Host
 
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IServerEngine>(this);
-            serviceCollection.AddSingleton<IServerModels>(_serverModels);
+            serviceCollection.AddSingleton<IEngineModels>(_serverModels);
 
             _game.Initialize(serviceCollection);
 

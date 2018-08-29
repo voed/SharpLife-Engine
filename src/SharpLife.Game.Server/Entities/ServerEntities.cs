@@ -15,6 +15,7 @@
 
 using Serilog;
 using SharpLife.Engine.Shared.API.Engine.Server;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityData;
@@ -35,7 +36,7 @@ namespace SharpLife.Game.Server.Entities
 
         private readonly IServerEngine _serverEngine;
 
-        private readonly IServerModels _serverModels;
+        private readonly IEngineModels _serverModels;
 
         private ServerEntityList _entityList;
 
@@ -43,7 +44,7 @@ namespace SharpLife.Game.Server.Entities
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
 
-        public ServerEntities(ILogger logger, IServerEngine serverEngine, IServerModels serverModels)
+        public ServerEntities(ILogger logger, IServerEngine serverEngine, IEngineModels serverModels)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serverEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));

@@ -15,12 +15,12 @@
 
 using SharpLife.Models;
 
-namespace SharpLife.Engine.Shared.API.Engine.Server
+namespace SharpLife.Engine.Shared.API.Engine.Shared
 {
     /// <summary>
-    /// Provides access to the server's model data
+    /// Provides access to the engine's model data
     /// </summary>
-    public interface IServerModels
+    public interface IEngineModels
     {
         /// <summary>
         /// Loads a model

@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.API.Engine.Server;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.Networking;
 using SharpLife.Models;
 using SharpLife.Networking.Shared;
@@ -24,7 +24,7 @@ using System;
 
 namespace SharpLife.Engine.Server.Resources
 {
-    internal sealed class ServerModels : IServerModels
+    internal sealed class ServerModels : IEngineModels
     {
         private readonly ModelUtils _modelUtils;
 

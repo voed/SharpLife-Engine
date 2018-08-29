@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.API.Engine.Client;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.Networking;
 using SharpLife.Models;
 using SharpLife.Networking.Shared;
@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace SharpLife.Engine.Client.Resources
 {
-    internal sealed class ClientModels : IClientModels
+    internal sealed class ClientModels : IEngineModels
     {
         private readonly ModelUtils _modelUtils;
         private readonly IModelManager _modelManager;
@@ -144,6 +144,21 @@ namespace SharpLife.Engine.Client.Resources
             }
 
             return null;
+        }
+
+        public ModelIndex IndexOf(IModel model)
+        {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            if (_nameToIndex.TryGetValue(NetUtilities.ConvertToNetworkPath(model.Name), out var index))
+            {
+                return _modelUtils.CreateModelIndex(index);
+            }
+
+            return new ModelIndex();
         }
 
         public bool IndicesEqual(in ModelIndex lhs, in ModelIndex rhs)
