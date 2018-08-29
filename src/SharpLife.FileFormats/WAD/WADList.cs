@@ -17,6 +17,7 @@ using SharpLife.FileSystem;
 using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace SharpLife.FileFormats.WAD
@@ -73,9 +74,17 @@ namespace SharpLife.FileFormats.WAD
                 throw new ArgumentException($"WAD file '{name}' is already loaded");
             }
 
-            var file = new WADLoader(_fileSystem.OpenRead(name)).ReadWADFile();
+            try
+            {
+                var file = new WADLoader(_fileSystem.OpenRead(name)).ReadWADFile();
 
-            _wadFiles.Add(new WADData { Name = name, File = file });
+                _wadFiles.Add(new WADData { Name = name, File = file });
+            }
+            catch (FileNotFoundException)
+            {
+                //Some maps reference non-existent wad files (e.g. c1a0 references sample.wad)
+                //It's safe to ignore these
+            }
         }
 
         public void Add(string name, WADFile wadFile)
