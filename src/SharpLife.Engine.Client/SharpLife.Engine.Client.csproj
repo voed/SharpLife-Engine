@@ -18,6 +18,7 @@
     <ProjectReference Include="..\SharpLife.Game.Client\SharpLife.Game.Client.csproj" />
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer.BSP\SharpLife.Renderer.BSP.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer.StudioModel\SharpLife.Renderer.StudioModel.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
   </ItemGroup>
 

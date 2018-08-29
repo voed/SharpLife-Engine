@@ -41,6 +41,7 @@ namespace SharpLife.Game.Client.API
             serviceCollection.AddSingleton<ClientNetworking>();
             serviceCollection.AddSingleton<IClientNetworking>(provider => provider.GetRequiredService<ClientNetworking>());
             serviceCollection.AddSingleton<ClientEntities>();
+            serviceCollection.AddSingleton<IClientEntities>(provider => provider.GetRequiredService<ClientEntities>());
         }
 
         public void Startup(IServiceProvider serviceProvider)
@@ -69,6 +70,11 @@ namespace SharpLife.Game.Client.API
         public void MapLoadFinished()
         {
 
+        }
+
+        public void MapShutdown()
+        {
+            _entities.MapShutdown();
         }
     }
 }

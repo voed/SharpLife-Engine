@@ -14,7 +14,9 @@
 ****/
 
 using SharpLife.FileFormats.BSP;
+using SharpLife.Models;
 using SharpLife.Models.BSP;
+using SharpLife.Renderer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +29,7 @@ namespace SharpLife.Renderer.BSP
     /// <summary>
     /// The BSP World model renderable
     /// </summary>
-    public class BSPModelRenderable : ResourceContainer, IRenderable
+    public class BSPModelRenderable : ModelResourceContainer
     {
         public struct WorldAndInverse
         {
@@ -63,25 +65,27 @@ namespace SharpLife.Renderer.BSP
 
         private DeviceBuffer _worldAndInverseBuffer;
 
-        public Transform Transform { get; } = new Transform();
-
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
-        public RenderPasses RenderPasses => RenderPasses.Standard;
+        public override IModel Model => _bspModel;
 
         public BSPModelRenderable(BSPModel bspModel)
         {
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
         }
 
+        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData)
         {
             WorldAndInverse wai;
-            wai.World = Transform.GetTransformMatrix();
+
+            //TODO: verify that the angles are correctly used here
+            wai.World = Matrix4x4.CreateScale(renderData.Scale)
+                * Matrix4x4.CreateFromYawPitchRoll(renderData.Angles.Y, renderData.Angles.X, renderData.Angles.Z)
+                * Matrix4x4.CreateTranslation(renderData.Origin);
+
             wai.InverseWorld = VdUtilities.CalculateInverseTranspose(ref wai.World);
             gd.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
 
-        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
-        {
             cl.SetPipeline(_pipeline);
 
             foreach (var faces in _faces)
@@ -158,11 +162,6 @@ namespace SharpLife.Renderer.BSP
         public override void DestroyDeviceObjects()
         {
             _disposeCollector.DisposeAll();
-        }
-
-        public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
-        {
-            return new RenderOrderKey();
         }
 
         private FaceBufferData BuildFacesBuffer(IReadOnlyList<Face> faces, ResourceCache resourceCache, GraphicsDevice gd, CommandList cl, SceneContext sc)

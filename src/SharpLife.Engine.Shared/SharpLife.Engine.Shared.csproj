@@ -20,6 +20,7 @@
     <ProjectReference Include="..\SharpLife.FileFormats\SharpLife.FileFormats.csproj" />
     <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>
 

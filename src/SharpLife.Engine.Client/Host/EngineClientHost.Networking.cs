@@ -164,6 +164,9 @@ namespace SharpLife.Engine.Client.Host
                 _engine.StopServer();
             }
 
+            //TODO: refactor into separate method
+            _game.MapShutdown();
+
             _renderer.ClearBSP();
 
             MapInfo = null;

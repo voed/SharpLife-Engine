@@ -40,10 +40,11 @@ using SharpLife.Utility.Events;
 using System;
 using System.IO;
 using System.Net;
+using System.Numerics;
 
 namespace SharpLife.Engine.Client.Host
 {
-    public partial class EngineClientHost : IEngineClientHost, IClientEngine
+    public partial class EngineClientHost : IEngineClientHost, IClientEngine, IRendererListener
     {
         public ICommandContext CommandContext { get; }
 
@@ -74,6 +75,8 @@ namespace SharpLife.Engine.Client.Host
         private IGameClient _game;
 
         private IClientUI _clientUI;
+
+        private IClientEntities _clientEntities;
 
         private readonly IVariable _clientport;
         private readonly IVariable _cl_resend;
@@ -106,6 +109,7 @@ namespace SharpLife.Engine.Client.Host
                 _window.GLContextHandle,
                 _engine.FileSystem,
                 _userInterface.WindowManager.InputSystem,
+                this,
                 Framework.Path.EnvironmentMaps,
                 Framework.Path.Shaders);
 
@@ -170,6 +174,7 @@ namespace SharpLife.Engine.Client.Host
 
             _clientUI = serviceProvider.GetRequiredService<IClientUI>();
             _clientNetworking = serviceProvider.GetRequiredService<IClientNetworking>();
+            _clientEntities = serviceProvider.GetRequiredService<IClientEntities>();
 
             _game.Startup(serviceProvider);
         }
@@ -258,6 +263,24 @@ namespace SharpLife.Engine.Client.Host
         public void EndGame(string reason)
         {
             _engine.EndGame(reason);
+        }
+
+        public void OnRenderModels(IModelRenderer modelRenderer)
+        {
+            _clientEntities.RenderEntities(modelRenderer);
+
+            //TODO: remove
+            //Render all models
+            if (MapInfo?.Model != null)
+            {
+                var data = new ModelRenderData { Scale = new Vector3(1, 1, 1) };
+
+                foreach (var model in _engine.ModelManager)
+                {
+                    data.Model = model;
+                    modelRenderer.Render(ref data);
+                }
+            }
         }
     }
 }

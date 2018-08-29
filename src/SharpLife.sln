@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.FileFormats", "Sh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.Models", "SharpLife.Models\SharpLife.Models.csproj", "{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.Renderer.StudioModel", "SharpLife.Renderer.StudioModel\SharpLife.Renderer.StudioModel.csproj", "{8129E5D5-F3BA-432B-AE4D-A73AA9D7DF33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,10 @@ Global
 		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8129E5D5-F3BA-432B-AE4D-A73AA9D7DF33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8129E5D5-F3BA-432B-AE4D-A73AA9D7DF33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8129E5D5-F3BA-432B-AE4D-A73AA9D7DF33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8129E5D5-F3BA-432B-AE4D-A73AA9D7DF33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +138,7 @@ Global
 		{26B38FFB-5E47-48A0-9E3F-F93308D4D80A} = {D3F00D15-8331-4732-954D-83400870F283}
 		{E71209D4-637B-4ACF-8033-0D858970F309} = {D3F00D15-8331-4732-954D-83400870F283}
 		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743} = {D3F00D15-8331-4732-954D-83400870F283}
+		{8129E5D5-F3BA-432B-AE4D-A73AA9D7DF33} = {D3F00D15-8331-4732-954D-83400870F283}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91F9ACDE-7440-4689-8F79-5D5A360133A5}

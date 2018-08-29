@@ -13,19 +13,21 @@
 *
 ****/
 
+using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Game.Client.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
+using SharpLife.Renderer.Models;
 using System;
 using System.Linq;
 using System.Reflection;
 
 namespace SharpLife.Game.Client.Entities
 {
-    public sealed class ClientEntities : IFrameListReceiverListener
+    public sealed class ClientEntities : IFrameListReceiverListener, IClientEntities
     {
         private ClientEntityList _entityList;
 
@@ -73,6 +75,11 @@ namespace SharpLife.Game.Client.Entities
         public void MapLoadBegin()
         {
             _entityList = new ClientEntityList(EntityDictionary);
+        }
+
+        public void MapShutdown()
+        {
+            _entityList = null;
         }
 
         //Factory function for networked entities
@@ -126,6 +133,21 @@ namespace SharpLife.Game.Client.Entities
 
         public void OnEndUpdateNetworkObject(INetworkObjectList networkObjectList, INetworkObject networkObject)
         {
+        }
+
+        public void RenderEntities(IModelRenderer modelRenderer)
+        {
+            //This can be called when no maps have been loaded
+            if (_entityList != null)
+            {
+                foreach (var entity in _entityList)
+                {
+                    if (entity is IRenderableEntity renderable)
+                    {
+                        renderable.Render(modelRenderer);
+                    }
+                }
+            }
         }
     }
 }

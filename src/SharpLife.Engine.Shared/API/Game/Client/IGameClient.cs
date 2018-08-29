@@ -41,5 +41,7 @@ namespace SharpLife.Engine.Shared.API.Game.Client
         void MapLoadBegin(string entityData);
 
         void MapLoadFinished();
+
+        void MapShutdown();
     }
 }
