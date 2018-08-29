@@ -249,10 +249,10 @@ namespace SharpLife.Engine.Server.Host
 
             MapInfo = new MapInfo(mapName, MapInfo?.Name, bspWorldModel);
 
-            //The last model is actually the world model data, which has no visible faces
-            foreach (var i in Enumerable.Range(0, bspWorldModel.BSPFile.Models.Count - 1))
+            //Load world sub models
+            foreach (var i in Enumerable.Range(1, bspWorldModel.BSPFile.Models.Count - 1))
             {
-                _serverModels.LoadModel($"{Framework.BSPModelNamePrefix}{i + 1}");
+                _serverModels.LoadModel($"{Framework.BSPModelNamePrefix}{i}");
             }
 
             //Load the fallback model now to ensure that BSP indices are matched up

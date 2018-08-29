@@ -47,8 +47,8 @@ namespace SharpLife.Models.BSP
                 crc = loader.ComputeCRC();
             }
 
-            //World is the last model
-            return new BSPModel(name, crc, bspFile, bspFile.Models[bspFile.Models.Count - 1]);
+            //World is the first submodel
+            return new BSPModel(name, crc, bspFile, bspFile.Models[0]);
         }
     }
 }

@@ -91,12 +91,13 @@ namespace SharpLife.Models
                 _models.Add(modelName, model);
 
                 //if it's a BSP model, also add all of its submodels
+                //TODO: should ideally be handled in the loader
                 if (model is BSPModel bspModel)
                 {
-                    //See BSPModelLoader.Load for where the last model goes
-                    for (var i = 0; i < bspModel.BSPFile.Models.Count - 1; ++i)
+                    //First submodel (0) is the world
+                    for (var i = 1; i < bspModel.BSPFile.Models.Count; ++i)
                     {
-                        var name = $"{_bspModelNamePrefix}{i + 1}";
+                        var name = $"{_bspModelNamePrefix}{i}";
                         _models.Add(name, new BSPModel(name, bspModel.CRC, bspModel.BSPFile, bspModel.BSPFile.Models[i]));
                     }
                 }
