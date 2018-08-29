@@ -16,6 +16,7 @@
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -25,7 +26,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
     /// Base class for lists of entities deriving from <typeparamref name="TBaseEntity"/>
     /// </summary>
     /// <typeparam name="TBaseEntity"></typeparam>
-    public abstract class BaseEntityList<TBaseEntity>
+    public abstract class BaseEntityList<TBaseEntity> : IEnumerable<TBaseEntity>
         where TBaseEntity : class, IEntity
     {
         public const ushort InvalidId = ushort.MaxValue;
@@ -344,6 +345,51 @@ namespace SharpLife.Game.Shared.Entities.EntityList
             }
 
             HighestIndex = NoHighestIndex;
+        }
+
+        private sealed class Enumerator : IEnumerator<TBaseEntity>
+        {
+            private readonly BaseEntityList<TBaseEntity> _entityList;
+
+            private ObjectHandle _handle;
+
+            public TBaseEntity Current => _entityList.GetEntity(_handle);
+
+            public Enumerator(BaseEntityList<TBaseEntity> entityList)
+            {
+                _entityList = entityList ?? throw new ArgumentNullException(nameof(entityList));
+
+                Reset();
+            }
+
+            public bool MoveNext()
+            {
+                _handle = _entityList.GetNextEntity(_handle);
+
+                return _handle.Valid;
+            }
+
+            public void Reset()
+            {
+                _handle = _entityList.GetFirstEntity();
+            }
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+                //Nothing
+            }
+        }
+
+        public IEnumerator<TBaseEntity> GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
