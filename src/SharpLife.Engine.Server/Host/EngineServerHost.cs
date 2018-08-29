@@ -205,11 +205,11 @@ namespace SharpLife.Engine.Server.Host
 
             var mapFileName = _engine.ModelUtils.FormatMapFileName(mapName);
 
-            ModelIndex worldModelIndex;
+            IModel worldModel;
 
             try
             {
-                worldModelIndex = _serverModels.LoadModel(mapFileName);
+                worldModel = _serverModels.LoadModel(mapFileName);
             }
             catch (Exception e)
             {
@@ -218,7 +218,7 @@ namespace SharpLife.Engine.Server.Host
                     || e is InvalidBSPVersionException
                     || e is IOException)
                 {
-                    worldModelIndex = new ModelIndex();
+                    worldModel = null;
                 }
                 else
                 {
@@ -226,7 +226,7 @@ namespace SharpLife.Engine.Server.Host
                 }
             }
 
-            if (!worldModelIndex.Valid)
+            if (worldModel == null)
             {
                 _logger.Information($"Couldn't spawn server {mapFileName}");
                 Stop();
@@ -235,7 +235,7 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapDataFinishLoad);
 
-            if (!(_serverModels.GetModel(worldModelIndex) is BSPModel worldModel))
+            if (!(worldModel is BSPModel bspWorldModel))
             {
                 _logger.Information($"Model {mapFileName} is not a map");
                 Stop();
@@ -246,10 +246,10 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapCRCComputed);
 
-            MapInfo = new MapInfo(mapName, MapInfo?.Name, worldModel);
+            MapInfo = new MapInfo(mapName, MapInfo?.Name, bspWorldModel);
 
             //The last model is actually the world model data, which has no visible faces
-            foreach (var i in Enumerable.Range(0, worldModel.BSPFile.Models.Count - 1))
+            foreach (var i in Enumerable.Range(0, bspWorldModel.BSPFile.Models.Count - 1))
             {
                 _serverModels.LoadModel($"{Framework.BSPModelNamePrefix}{i + 1}");
             }

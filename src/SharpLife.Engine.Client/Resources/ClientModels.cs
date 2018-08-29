@@ -103,7 +103,7 @@ namespace SharpLife.Engine.Client.Resources
             return index;
         }
 
-        public ModelIndex LoadModel(string modelName)
+        public IModel LoadModel(string modelName)
         {
             if (modelName == null)
             {
@@ -115,6 +115,7 @@ namespace SharpLife.Engine.Client.Resources
                 throw new InvalidOperationException($"Cannot load model \"{modelName}\"; network string list not created yet");
             }
 
+            var platformModelName = NetUtilities.ConvertToPlatformPath(modelName);
             var networkModelName = NetUtilities.ConvertToNetworkPath(modelName);
 
             if (!_nameToIndex.TryGetValue(networkModelName, out var index))
@@ -122,10 +123,10 @@ namespace SharpLife.Engine.Client.Resources
                 //See if it's a server loaded model
                 index = _models.IndexOf(networkModelName);
 
-                index = InternalLoadModel(networkModelName, modelName, index != -1 ? index : (int?)null);
+                index = InternalLoadModel(networkModelName, platformModelName, index != -1 ? index : (int?)null);
             }
 
-            return _modelUtils.CreateModelIndex(index);
+            return _modelManager[platformModelName];
         }
 
         public IModel GetModel(in ModelIndex index)

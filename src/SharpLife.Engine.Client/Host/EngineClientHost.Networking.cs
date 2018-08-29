@@ -92,15 +92,15 @@ namespace SharpLife.Engine.Client.Host
             //All resources are loaded, let's start
             //TODO: implement
 
-            var worldModelIndex = _clientModels.LoadModel(_cachedMapName);
+            var worldModel = _clientModels.LoadModel(_cachedMapName);
 
             //This should never happen since the map file is compared by CRC before being loaded
-            if (!(_clientModels.GetModel(worldModelIndex) is BSPModel worldModel))
+            if (!(worldModel is BSPModel bspWorldModel))
             {
                 throw new InvalidOperationException($"Model {_cachedMapName} is not a map");
             }
 
-            MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(_cachedMapName), MapInfo?.Name, worldModel);
+            MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(_cachedMapName), MapInfo?.Name, bspWorldModel);
 
             _renderer.LoadModels(MapInfo.Model, _engine.ModelManager);
 

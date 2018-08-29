@@ -24,7 +24,7 @@ namespace SharpLife.Engine.Shared.API.Engine.Client
         /// </summary>
         /// <param name="modelName"></param>
         /// <returns></returns>
-        ModelIndex LoadModel(string modelName);
+        IModel LoadModel(string modelName);
 
         /// <summary>
         /// Gets a model by index
