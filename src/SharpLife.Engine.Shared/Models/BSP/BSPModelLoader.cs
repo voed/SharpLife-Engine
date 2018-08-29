@@ -17,7 +17,7 @@ using SharpLife.FileFormats.BSP;
 using System;
 using System.IO;
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Engine.Shared.Models.BSP
 {
     public sealed class BSPModelLoader : IModelLoader
     {
@@ -47,7 +47,8 @@ namespace SharpLife.Engine.Shared.Models
                 crc = loader.ComputeCRC();
             }
 
-            return new BSPModel(name, crc, bspFile);
+            //World is the last model
+            return new BSPModel(name, crc, bspFile, bspFile.Models[bspFile.Models.Count - 1]);
         }
     }
 }

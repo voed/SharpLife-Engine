@@ -13,14 +13,10 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.Models;
+using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileFormats.BSP;
-using SharpLife.FileFormats.WAD;
-using SharpLife.FileSystem;
-using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using Veldrid;
@@ -31,7 +27,7 @@ namespace SharpLife.Renderer.BSP
     /// <summary>
     /// The BSP World model renderable
     /// </summary>
-    public class BSPWorldRenderable : Renderable
+    public class BSPModelRenderable : Renderable
     {
         public struct WorldAndInverse
         {
@@ -57,9 +53,7 @@ namespace SharpLife.Renderer.BSP
             }
         }
 
-        private readonly IFileSystem _fileSystem;
         private readonly BSPModel _bspModel;
-        private readonly string _wadExtension;
 
         private List<FaceBufferData> _faces;
         private Pipeline _pipeline;
@@ -73,11 +67,9 @@ namespace SharpLife.Renderer.BSP
 
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
-        public BSPWorldRenderable(IFileSystem fileSystem, BSPModel bspModel, string wadExtension)
+        public BSPModelRenderable(BSPModel bspModel)
         {
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
-            _wadExtension = wadExtension ?? throw new ArgumentNullException(nameof(wadExtension));
         }
 
         public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
@@ -109,38 +101,10 @@ namespace SharpLife.Renderer.BSP
 
             _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription(64 * 2, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            //Load all WADs
-            var wadList = new WADList(_fileSystem, _wadExtension);
-
-            var embeddedTexturesWAD = BSPUtilities.CreateWADFromBSP(_bspModel.BSPFile);
-
-            wadList.Add(_bspModel.Name + FileExtensionUtils.AsExtension(_wadExtension), embeddedTexturesWAD);
-
-            var wadPath = BSPUtilities.ExtractWADPathKeyValue(_bspModel.BSPFile.Entities);
-
-            foreach (var wadName in wadPath.Split(';', StringSplitOptions.RemoveEmptyEntries))
-            {
-                var baseName = Path.GetFileNameWithoutExtension(wadName);
-
-                //Never allow these to be loaded, they contain spray decals
-                //TODO: refactor into blacklist
-                if (baseName != "pldecal" && baseName != "tempdecal")
-                {
-                    //WAD loading only needs to consider the filename; the directory part is mapper specific
-                    var fileName = Path.GetFileName(wadName);
-                    wadList.Load(fileName);
-                }
-            }
-
-            //Upload all used textures
-            var usedTextures = BSPUtilities.GetUsedTextures(_bspModel.BSPFile, wadList);
-
-            WADUtilities.UploadTextures(gd, gd.ResourceFactory, sc.ResourceCache, usedTextures);
-
             //Build a list of buffers, each buffer containing all of the faces that have the same texture
             //This reduces the number of buffers we have to create from a set for each face to a set for each texture and all of the faces referencing it
             //TODO: further split by visleaf when vis data is available
-            var sortedFaces = _bspModel.BSPFile.Faces.GroupBy(face => face.TextureInfo.MipTexture.Name);
+            var sortedFaces = _bspModel.SubModel.Faces.GroupBy(face => face.TextureInfo.MipTexture.Name);
 
             _faces = new List<FaceBufferData>();
 

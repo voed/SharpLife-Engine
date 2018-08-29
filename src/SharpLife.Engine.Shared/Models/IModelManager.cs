@@ -14,13 +14,14 @@
 ****/
 
 using System;
+using System.Collections.Generic;
 
 namespace SharpLife.Engine.Shared.Models
 {
     /// <summary>
     /// Manages the models that have been loaded for a map
     /// </summary>
-    public interface IModelManager
+    public interface IModelManager : IEnumerable<IModel>
     {
         /// <summary>
         /// Gets a model by name

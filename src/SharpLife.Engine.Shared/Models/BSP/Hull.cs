@@ -13,19 +13,18 @@
 *
 ****/
 
-using SharpLife.FileFormats.BSP;
-using System;
-
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Engine.Shared.Models.BSP
 {
-    public sealed class BSPModel : BaseModel
+    public class Hull
     {
-        public BSPFile BSPFile { get; }
+        public int FirstClipNode { get; }
 
-        public BSPModel(string name, uint crc, BSPFile bspFile)
-            : base(name, crc)
+        public int LastClipNode { get; }
+
+        public Hull(int firstClipNode, int lastClipNode)
         {
-            BSPFile = bspFile ?? throw new ArgumentNullException(nameof(bspFile));
+            FirstClipNode = firstClipNode;
+            LastClipNode = lastClipNode;
         }
     }
 }

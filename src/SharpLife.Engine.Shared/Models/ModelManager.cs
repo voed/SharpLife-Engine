@@ -13,8 +13,10 @@
 *
 ****/
 
+using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileSystem;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -88,10 +90,11 @@ namespace SharpLife.Engine.Shared.Models
                 //if it's a BSP model, also add all of its submodels
                 if (model is BSPModel bspModel)
                 {
-                    //TODO: construct BSP sub model data
-                    for (var i = 0; i < bspModel.BSPFile.Models.Count; ++i)
+                    //See BSPModelLoader.Load for where the last model goes
+                    for (var i = 0; i < bspModel.BSPFile.Models.Count - 1; ++i)
                     {
-                        _models.Add($"{Framework.BSPModelNamePrefix}{i + 1}", model);
+                        var name = $"{Framework.BSPModelNamePrefix}{i + 1}";
+                        _models.Add(name, new BSPModel(name, bspModel.CRC, bspModel.BSPFile, bspModel.BSPFile.Models[i]));
                     }
                 }
 
@@ -142,6 +145,16 @@ namespace SharpLife.Engine.Shared.Models
             _models.Clear();
 
             FallbackModel = null;
+        }
+
+        public IEnumerator<IModel> GetEnumerator()
+        {
+            return _models.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

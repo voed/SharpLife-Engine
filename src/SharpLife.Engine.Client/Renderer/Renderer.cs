@@ -17,6 +17,9 @@ using SDL2;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.Models;
+using SharpLife.Engine.Shared.Models.BSP;
+using SharpLife.FileFormats.BSP;
+using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
 using SharpLife.Input;
 using SharpLife.Renderer;
@@ -24,6 +27,7 @@ using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Objects;
 using SharpLife.Utility;
 using System;
+using System.IO;
 using System.Numerics;
 using Veldrid;
 
@@ -47,8 +51,6 @@ namespace SharpLife.Engine.Client.Renderer
         private readonly SceneContext _sc;
 
         private readonly ImGuiRenderable _imGuiRenderable;
-
-        private BSPWorldRenderable _bspWorldRenderable;
 
         private Skybox2D _skyboxRenderable;
 
@@ -153,29 +155,94 @@ namespace SharpLife.Engine.Client.Renderer
             _gd.SwapBuffers();
         }
 
-        public void LoadBSP(BSPModel bspModel)
+        private void UploadWADTextures(BSPModel worldModel)
         {
-            if (bspModel == null)
+            //Load all WADs
+            var wadList = new WADList(_fileSystem, Framework.Extension.WAD);
+
+            var embeddedTexturesWAD = BSPUtilities.CreateWADFromBSP(worldModel.BSPFile);
+
+            wadList.Add(worldModel.Name + FileExtensionUtils.AsExtension(Framework.Extension.WAD), embeddedTexturesWAD);
+
+            var wadPath = BSPUtilities.ExtractWADPathKeyValue(worldModel.BSPFile.Entities);
+
+            foreach (var wadName in wadPath.Split(';', StringSplitOptions.RemoveEmptyEntries))
             {
-                throw new ArgumentNullException(nameof(bspModel));
+                var baseName = Path.GetFileNameWithoutExtension(wadName);
+
+                //Never allow these to be loaded, they contain spray decals
+                //TODO: refactor into blacklist
+                if (baseName != "pldecal" && baseName != "tempdecal")
+                {
+                    //WAD loading only needs to consider the filename; the directory part is mapper specific
+                    var fileName = Path.GetFileName(wadName);
+                    wadList.Load(fileName);
+                }
+            }
+
+            //Upload all used textures
+            var usedTextures = BSPUtilities.GetUsedTextures(worldModel.BSPFile, wadList);
+
+            WADUtilities.UploadTextures(_gd, _gd.ResourceFactory, _sc.ResourceCache, usedTextures);
+        }
+
+        /// <summary>
+        /// Loads all models in the model manager
+        /// This is when BSP models are loaded
+        /// </summary>
+        /// <param name="worldModel"></param>
+        /// <param name="modelManager"></param>
+        public void LoadModels(BSPModel worldModel, IModelManager modelManager)
+        {
+            if (worldModel == null)
+            {
+                throw new ArgumentNullException(nameof(worldModel));
+            }
+
+            if (modelManager == null)
+            {
+                throw new ArgumentNullException(nameof(modelManager));
             }
 
             ClearBSP();
 
-            _bspWorldRenderable = new BSPWorldRenderable(_fileSystem, bspModel, Framework.Extension.WAD);
+            UploadWADTextures(worldModel);
 
-            _scene.AddRenderable(_bspWorldRenderable);
+            foreach (var model in modelManager)
+            {
+                Renderable modelRenderable = null;
+
+                switch (model)
+                {
+                    case BSPModel bspModel:
+                        {
+                            modelRenderable = new BSPModelRenderable(bspModel);
+                            break;
+                        }
+
+                    case StudioModel studioModel:
+                        {
+                            //TODO: implement
+                            continue;
+                        }
+
+                    default: throw new InvalidOperationException($"Model type {model.GetType().FullName} is not supported");
+                }
+
+                _scene.AddMapRenderable(modelRenderable);
+            }
 
             //TODO: define default in config
             _skyboxRenderable = Skybox2D.LoadDefaultSkybox(_fileSystem, _envMapDirectory, "2desert");
-            _scene.AddRenderable(_skyboxRenderable);
+            _scene.AddMapRenderable(_skyboxRenderable);
 
             //Set up graphics data
             CommandList initCL = _gd.ResourceFactory.CreateCommandList();
             initCL.Name = "BSP Initialization Command List";
             initCL.Begin();
-            _bspWorldRenderable.CreateDeviceObjects(_gd, initCL, _sc);
-            _skyboxRenderable.CreateDeviceObjects(_gd, initCL, _sc);
+
+            _scene.CreateMapDeviceObjects(_gd, initCL, _sc);
+
             initCL.End();
             _gd.SubmitCommands(initCL);
             initCL.Dispose();
@@ -183,15 +250,10 @@ namespace SharpLife.Engine.Client.Renderer
 
         public void ClearBSP()
         {
-            if (_bspWorldRenderable != null)
-            {
-                _scene.RemoveRenderable(_bspWorldRenderable);
-                _bspWorldRenderable = null;
-            }
+            _scene.ClearMapRenderables();
 
             if (_skyboxRenderable != null)
             {
-                _scene.RemoveRenderable(_skyboxRenderable);
                 _skyboxRenderable = null;
             }
 

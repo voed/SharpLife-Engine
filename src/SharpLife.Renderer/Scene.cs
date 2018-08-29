@@ -33,6 +33,8 @@ namespace SharpLife.Renderer
         private readonly List<Renderable> _freeRenderables = new List<Renderable>();
         private readonly List<IUpdateable> _updateables = new List<IUpdateable>();
 
+        private readonly List<Renderable> _mapRenderables = new List<Renderable>();
+
         private readonly ConcurrentDictionary<RenderPasses, Func<CullRenderable, bool>> _filters
             = new ConcurrentDictionary<RenderPasses, Func<CullRenderable, bool>>(new RenderPassesComparer());
 
@@ -66,6 +68,16 @@ namespace SharpLife.Renderer
             {
                 _freeRenderables.Remove(r);
             }
+        }
+
+        public void AddMapRenderable(Renderable r)
+        {
+            _mapRenderables.Add(r);
+        }
+
+        public void ClearMapRenderables()
+        {
+            _mapRenderables.Clear();
         }
 
         public void AddUpdateable(IUpdateable updateable)
@@ -205,6 +217,14 @@ namespace SharpLife.Renderer
                     renderables.Add(r);
                 }
             }
+
+            foreach (Renderable r in _mapRenderables)
+            {
+                if ((r.RenderPasses & renderPass) != 0)
+                {
+                    renderables.Add(r);
+                }
+            }
         }
 
         private static readonly Func<RenderPasses, Func<CullRenderable, bool>> s_createFilterFunc = CreateFilter;
@@ -234,6 +254,10 @@ namespace SharpLife.Renderer
             {
                 r.DestroyDeviceObjects();
             }
+            foreach (Renderable r in _mapRenderables)
+            {
+                r.DestroyDeviceObjects();
+            }
 
             _resourceUpdateCL.Dispose();
         }
@@ -250,9 +274,18 @@ namespace SharpLife.Renderer
             {
                 r.CreateDeviceObjects(gd, cl, sc);
             }
+            CreateMapDeviceObjects(gd, cl, sc);
 
             _resourceUpdateCL = gd.ResourceFactory.CreateCommandList();
             _resourceUpdateCL.Name = "Scene Resource Update Command List";
+        }
+
+        public void CreateMapDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        {
+            foreach (Renderable r in _mapRenderables)
+            {
+                r.CreateDeviceObjects(gd, cl, sc);
+            }
         }
 
         private class RenderPassesComparer : IEqualityComparer<RenderPasses>

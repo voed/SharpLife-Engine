@@ -26,6 +26,7 @@ using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Maps;
 using SharpLife.Engine.Shared.Models;
+using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileFormats.BSP;
 using SharpLife.Game.Server.API;
 using SharpLife.Networking.Shared;
@@ -247,7 +248,8 @@ namespace SharpLife.Engine.Server.Host
 
             MapInfo = new MapInfo(mapName, MapInfo?.Name, worldModel);
 
-            foreach (var i in Enumerable.Range(0, worldModel.BSPFile.Models.Count))
+            //The last model is actually the world model data, which has no visible faces
+            foreach (var i in Enumerable.Range(0, worldModel.BSPFile.Models.Count - 1))
             {
                 _serverModels.LoadModel($"{Framework.BSPModelNamePrefix}{i + 1}");
             }

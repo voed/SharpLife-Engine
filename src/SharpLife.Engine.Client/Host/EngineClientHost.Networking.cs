@@ -18,7 +18,7 @@ using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Maps;
-using SharpLife.Engine.Shared.Models;
+using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
@@ -102,11 +102,9 @@ namespace SharpLife.Engine.Client.Host
 
             MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(_cachedMapName), MapInfo?.Name, worldModel);
 
-            var bspModel = MapInfo.Model;
+            _renderer.LoadModels(MapInfo.Model, _engine.ModelManager);
 
-            _renderer.LoadBSP(bspModel);
-
-            _game.MapLoadBegin(bspModel.BSPFile.Entities);
+            _game.MapLoadBegin(MapInfo.Model.BSPFile.Entities);
 
             _game.MapLoadFinished();
         }
