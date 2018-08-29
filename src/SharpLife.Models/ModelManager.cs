@@ -13,14 +13,14 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileSystem;
+using SharpLife.Models.BSP;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models
 {
     public sealed class ModelManager : IModelManager
     {
@@ -34,6 +34,8 @@ namespace SharpLife.Engine.Shared.Models
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly string _bspModelNamePrefix;
+
         private readonly Dictionary<string, IModel> _models;
 
         public IModel this[string modelName] => _models[modelName];
@@ -44,9 +46,10 @@ namespace SharpLife.Engine.Shared.Models
 
         public event Action<IModel> OnModelLoaded;
 
-        public ModelManager(IFileSystem fileSystem)
+        public ModelManager(IFileSystem fileSystem, string bspModelNamePrefix)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _bspModelNamePrefix = bspModelNamePrefix ?? throw new ArgumentNullException(nameof(bspModelNamePrefix));
 
             //Names are case insensitive to account for differences in the filesystem
             _models = new Dictionary<string, IModel>(StringComparer.OrdinalIgnoreCase);
@@ -93,7 +96,7 @@ namespace SharpLife.Engine.Shared.Models
                     //See BSPModelLoader.Load for where the last model goes
                     for (var i = 0; i < bspModel.BSPFile.Models.Count - 1; ++i)
                     {
-                        var name = $"{Framework.BSPModelNamePrefix}{i + 1}";
+                        var name = $"{_bspModelNamePrefix}{i + 1}";
                         _models.Add(name, new BSPModel(name, bspModel.CRC, bspModel.BSPFile, bspModel.BSPFile.Models[i]));
                     }
                 }

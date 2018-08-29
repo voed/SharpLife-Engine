@@ -13,8 +13,8 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileFormats.BSP;
+using SharpLife.Models.BSP;
 using System;
 using System.Collections.Generic;
 using System.Linq;

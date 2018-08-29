@@ -13,19 +13,18 @@
 *
 ****/
 
-using SharpLife.FileFormats.MDL;
-using System;
-
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models.BSP
 {
-    public sealed class StudioModel : BaseModel
+    public class Hull
     {
-        public StudioFile StudioFile { get; }
+        public int FirstClipNode { get; }
 
-        public StudioModel(string name, uint crc, StudioFile studioFile)
-            : base(name, crc)
+        public int LastClipNode { get; }
+
+        public Hull(int firstClipNode, int lastClipNode)
         {
-            StudioFile = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
+            FirstClipNode = firstClipNode;
+            LastClipNode = lastClipNode;
         }
     }
 }

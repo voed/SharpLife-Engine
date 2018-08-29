@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models
 {
     /// <summary>
     /// Manages the models that have been loaded for a map

@@ -25,10 +25,10 @@ using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Maps;
-using SharpLife.Engine.Shared.Models;
-using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileFormats.BSP;
 using SharpLife.Game.Server.API;
+using SharpLife.Models;
+using SharpLife.Models.BSP;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
@@ -120,7 +120,7 @@ namespace SharpLife.Engine.Server.Host
                 _maxPlayers.String = maxPlayersValue;
             }
 
-            _serverModels = new ServerModels(_engine.ModelManager, Framework.FallbackModelName);
+            _serverModels = new ServerModels(_engine.ModelUtils, _engine.ModelManager, Framework.FallbackModelName);
 
             LoadGameServer();
 
@@ -203,7 +203,7 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapDataStartLoad);
 
-            var mapFileName = ModelUtils.FormatMapFileName(mapName);
+            var mapFileName = _engine.ModelUtils.FormatMapFileName(mapName);
 
             ModelIndex worldModelIndex;
 
@@ -324,7 +324,7 @@ namespace SharpLife.Engine.Server.Host
 
         public bool IsMapValid(string mapName)
         {
-            return _engine.FileSystem.Exists(ModelUtils.FormatMapFileName(mapName));
+            return _engine.FileSystem.Exists(_engine.ModelUtils.FormatMapFileName(mapName));
         }
     }
 }

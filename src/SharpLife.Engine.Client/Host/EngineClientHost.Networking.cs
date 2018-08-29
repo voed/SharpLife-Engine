@@ -18,7 +18,7 @@ using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Maps;
-using SharpLife.Engine.Shared.Models.BSP;
+using SharpLife.Models.BSP;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;

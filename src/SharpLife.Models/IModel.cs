@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models
 {
     /// <summary>
     /// Interface to a model

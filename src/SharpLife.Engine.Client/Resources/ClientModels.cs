@@ -14,8 +14,8 @@
 ****/
 
 using SharpLife.Engine.Shared.API.Engine.Client;
-using SharpLife.Engine.Shared.Models;
 using SharpLife.Engine.Shared.Networking;
+using SharpLife.Models;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
@@ -26,6 +26,7 @@ namespace SharpLife.Engine.Client.Resources
 {
     internal sealed class ClientModels : IClientModels
     {
+        private readonly ModelUtils _modelUtils;
         private readonly IModelManager _modelManager;
 
         private INetworkStringList _models;
@@ -38,8 +39,9 @@ namespace SharpLife.Engine.Client.Resources
 
         private int _nextClientIndex;
 
-        public ClientModels(IModelManager modelManager)
+        public ClientModels(ModelUtils modelUtils, IModelManager modelManager)
         {
+            _modelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
             _modelManager = modelManager ?? throw new ArgumentNullException(nameof(modelManager));
         }
 
@@ -123,14 +125,14 @@ namespace SharpLife.Engine.Client.Resources
                 index = InternalLoadModel(networkModelName, modelName, index != -1 ? index : (int?)null);
             }
 
-            return ModelUtils.CreateModelIndex(index);
+            return _modelUtils.CreateModelIndex(index);
         }
 
         public IModel GetModel(in ModelIndex index)
         {
             if (index.Valid)
             {
-                var internalIndex = ModelUtils.GetInternalIndex(index);
+                var internalIndex = _modelUtils.GetInternalIndex(index);
 
                 if (_loadedModels.TryGetValue(internalIndex, out var model))
                 {

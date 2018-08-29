@@ -13,18 +13,21 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Models.BSP
+using System;
+
+namespace SharpLife.Models
 {
-    public class Hull
+    public abstract class BaseModel : IModel
     {
-        public int FirstClipNode { get; }
+        public string Name { get; }
 
-        public int LastClipNode { get; }
+        public uint CRC { get; }
 
-        public Hull(int firstClipNode, int lastClipNode)
+        protected BaseModel(string name, uint crc)
         {
-            FirstClipNode = firstClipNode;
-            LastClipNode = lastClipNode;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+
+            CRC = crc;
         }
     }
 }

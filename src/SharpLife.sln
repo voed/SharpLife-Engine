@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{D3F0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.FileFormats", "SharpLife.FileFormats\SharpLife.FileFormats.csproj", "{E71209D4-637B-4ACF-8033-0D858970F309}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.Models", "SharpLife.Models\SharpLife.Models.csproj", "{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,10 @@ Global
 		{E71209D4-637B-4ACF-8033-0D858970F309}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E71209D4-637B-4ACF-8033-0D858970F309}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E71209D4-637B-4ACF-8033-0D858970F309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -125,6 +131,7 @@ Global
 		{C00BD3A0-2E54-4E87-AD43-74CF2CF7EB13} = {B532F313-592A-468A-83EB-7D9E250AB199}
 		{26B38FFB-5E47-48A0-9E3F-F93308D4D80A} = {D3F00D15-8331-4732-954D-83400870F283}
 		{E71209D4-637B-4ACF-8033-0D858970F309} = {D3F00D15-8331-4732-954D-83400870F283}
+		{FC9DF50E-6FA8-4D85-8D80-513A61BC5743} = {D3F00D15-8331-4732-954D-83400870F283}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91F9ACDE-7440-4689-8F79-5D5A360133A5}

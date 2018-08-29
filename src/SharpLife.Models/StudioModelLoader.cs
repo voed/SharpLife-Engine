@@ -13,13 +13,13 @@
 *
 ****/
 
-using SharpLife.FileFormats.BSP;
+using SharpLife.FileFormats.MDL;
 using System;
 using System.IO;
 
-namespace SharpLife.Engine.Shared.Models.BSP
+namespace SharpLife.Models
 {
-    public sealed class BSPModelLoader : IModelLoader
+    public sealed class StudioModelLoader : IModelLoader
     {
         public IModel Load(string name, BinaryReader reader, bool computeCRC)
         {
@@ -29,16 +29,14 @@ namespace SharpLife.Engine.Shared.Models.BSP
             }
 
             //Check if we can actually load this
-            //TODO: because BSP files don't have a separate identifier, this will fail on invalid BSP versions
-            //Should remove this once the other formats can be loaded
-            if (!BSPLoader.IsBSPFile(reader))
+            if (!StudioLoader.IsStudioFile(reader))
             {
                 return null;
             }
 
-            var loader = new BSPLoader(reader);
+            var loader = new StudioLoader(reader);
 
-            var bspFile = loader.ReadBSPFile();
+            var studioFile = loader.ReadStudioFile();
 
             uint crc = 0;
 
@@ -47,8 +45,7 @@ namespace SharpLife.Engine.Shared.Models.BSP
                 crc = loader.ComputeCRC();
             }
 
-            //World is the last model
-            return new BSPModel(name, crc, bspFile, bspFile.Models[bspFile.Models.Count - 1]);
+            return new StudioModel(name, crc, studioFile);
         }
     }
 }

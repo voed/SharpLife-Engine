@@ -28,10 +28,10 @@ using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.Loop;
-using SharpLife.Engine.Shared.Models;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
+using SharpLife.Models;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
@@ -71,6 +71,8 @@ namespace SharpLife.Engine.Engines
         private EngineTime EngineTime { get; } = new EngineTime();
 
         IEngineTime IEngine.EngineTime => EngineTime;
+
+        public ModelUtils ModelUtils { get; private set; }
 
         public IModelManager ModelManager { get; private set; }
 
@@ -277,7 +279,9 @@ namespace SharpLife.Engine.Engines
                 Logger.Information($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
-            ModelManager = new ModelManager(FileSystem);
+            ModelUtils = new ModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP);
+
+            ModelManager = new ModelManager(FileSystem, Framework.BSPModelNamePrefix);
 
             //TODO: initialize subsystems
 

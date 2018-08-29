@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace SharpLife.Engine.Shared.Models.BSP
+namespace SharpLife.Models.BSP
 {
     public sealed class BSPModel : BaseModel
     {

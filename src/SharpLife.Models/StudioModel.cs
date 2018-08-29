@@ -13,21 +13,19 @@
 *
 ****/
 
+using SharpLife.FileFormats.MDL;
 using System;
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models
 {
-    public abstract class BaseModel : IModel
+    public sealed class StudioModel : BaseModel
     {
-        public string Name { get; }
+        public StudioFile StudioFile { get; }
 
-        public uint CRC { get; }
-
-        protected BaseModel(string name, uint crc)
+        public StudioModel(string name, uint crc, StudioFile studioFile)
+            : base(name, crc)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-
-            CRC = crc;
+            StudioFile = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
         }
     }
 }

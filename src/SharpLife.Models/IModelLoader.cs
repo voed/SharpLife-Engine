@@ -15,7 +15,7 @@
 
 using System.IO;
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models
 {
     /// <summary>
     /// Represents an object that can load a certain type of model

@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.Models.BSP;
+using SharpLife.Models.BSP;
 
 namespace SharpLife.Engine.Shared.Maps
 {

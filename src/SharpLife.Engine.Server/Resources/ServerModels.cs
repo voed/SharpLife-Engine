@@ -14,8 +14,8 @@
 ****/
 
 using SharpLife.Engine.Shared.API.Engine.Server;
-using SharpLife.Engine.Shared.Models;
 using SharpLife.Engine.Shared.Networking;
+using SharpLife.Models;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
@@ -26,14 +26,17 @@ namespace SharpLife.Engine.Server.Resources
 {
     internal sealed class ServerModels : IServerModels
     {
+        private readonly ModelUtils _modelUtils;
+
         private readonly IModelManager _modelManager;
 
         private readonly string _fallbackModelName;
 
         private INetworkStringList _models;
 
-        public ServerModels(IModelManager modelManager, string fallbackModelName)
+        public ServerModels(ModelUtils modelUtils, IModelManager modelManager, string fallbackModelName)
         {
+            _modelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
             _modelManager = modelManager ?? throw new ArgumentNullException(nameof(modelManager));
             _fallbackModelName = fallbackModelName ?? throw new ArgumentNullException(nameof(fallbackModelName));
         }
@@ -80,14 +83,14 @@ namespace SharpLife.Engine.Server.Resources
                 });
             }
 
-            return ModelUtils.CreateModelIndex(index);
+            return _modelUtils.CreateModelIndex(index);
         }
 
         public IModel GetModel(in ModelIndex index)
         {
             if (index.Valid)
             {
-                var internalIndex = ModelUtils.GetInternalIndex(index);
+                var internalIndex = _modelUtils.GetInternalIndex(index);
 
                 if (internalIndex < 0 || internalIndex >= _models.Count)
                 {
@@ -111,7 +114,7 @@ namespace SharpLife.Engine.Server.Resources
 
             if (index != -1)
             {
-                return ModelUtils.CreateModelIndex(index);
+                return _modelUtils.CreateModelIndex(index);
             }
 
             return new ModelIndex();

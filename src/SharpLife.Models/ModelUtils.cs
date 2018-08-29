@@ -18,33 +18,48 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace SharpLife.Engine.Shared.Models
+namespace SharpLife.Models
 {
-    public static class ModelUtils
+    public sealed class ModelUtils
     {
-        private static readonly string _mapFileNameBaseRegexString =
-            Framework.Directory.Maps
-            + $"[{Regex.Escape(Path.DirectorySeparatorChar.ToString() + Path.AltDirectorySeparatorChar.ToString())}](\\w+)"
-            + Regex.Escape(FileExtensionUtils.AsExtension(Framework.Extension.BSP));
+        private readonly string _bspModelNamePrefix;
 
-        public static ModelIndex CreateModelIndex(int index)
+        private readonly string _mapsDirectory;
+
+        private readonly string _bspExtension;
+
+        private readonly string _mapFileNameBaseRegexString;
+
+        public ModelUtils(string bspModelNamePrefix, string mapsDirectory, string bspExtension)
+        {
+            _bspModelNamePrefix = bspModelNamePrefix ?? throw new ArgumentNullException(nameof(bspModelNamePrefix));
+            _mapsDirectory = mapsDirectory ?? throw new ArgumentNullException(nameof(mapsDirectory));
+            _bspExtension = bspExtension ?? throw new ArgumentNullException(nameof(bspExtension));
+
+            _mapFileNameBaseRegexString =
+            mapsDirectory
+            + $"[{Regex.Escape(Path.DirectorySeparatorChar.ToString() + Path.AltDirectorySeparatorChar.ToString())}](\\w+)"
+            + Regex.Escape(FileExtensionUtils.AsExtension(bspExtension));
+        }
+
+        public ModelIndex CreateModelIndex(int index)
         {
             return new ModelIndex(index + 1);
         }
 
-        public static int GetInternalIndex(ModelIndex index)
+        public int GetInternalIndex(ModelIndex index)
         {
             return index.Index - 1;
         }
 
-        public static bool IsBSPModelName(string modelName)
+        public bool IsBSPModelName(string modelName)
         {
             if (modelName == null)
             {
                 throw new ArgumentNullException(nameof(modelName));
             }
 
-            return modelName.StartsWith(Framework.BSPModelNamePrefix);
+            return modelName.StartsWith(_bspModelNamePrefix);
         }
 
         /// <summary>
@@ -52,14 +67,14 @@ namespace SharpLife.Engine.Shared.Models
         /// </summary>
         /// <param name="mapName"></param>
         /// <returns></returns>
-        public static string FormatMapFileName(string mapName)
+        public string FormatMapFileName(string mapName)
         {
             if (mapName == null)
             {
                 throw new ArgumentNullException(nameof(mapName));
             }
 
-            return Path.Combine(Framework.Directory.Maps, mapName + FileExtensionUtils.AsExtension(Framework.Extension.BSP));
+            return Path.Combine(_mapsDirectory, mapName + FileExtensionUtils.AsExtension(_bspExtension));
         }
 
         /// <summary>
@@ -68,7 +83,7 @@ namespace SharpLife.Engine.Shared.Models
         /// <param name="mapFileName"></param>
         /// <returns></returns>
         /// <exception cref="FormatException">If the file name is not a map file name</exception>
-        public static string ExtractMapBaseName(string mapFileName)
+        public string ExtractMapBaseName(string mapFileName)
         {
             if (mapFileName == null)
             {

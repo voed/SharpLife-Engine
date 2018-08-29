@@ -16,12 +16,12 @@
 using SDL2;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.API.Engine.Client;
-using SharpLife.Engine.Shared.Models;
-using SharpLife.Engine.Shared.Models.BSP;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
 using SharpLife.Input;
+using SharpLife.Models;
+using SharpLife.Models.BSP;
 using SharpLife.Renderer;
 using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Objects;

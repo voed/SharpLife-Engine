@@ -33,6 +33,8 @@ using SharpLife.Game.Client.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Renderer;
+using SharpLife.Renderer.Models;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
@@ -133,7 +135,7 @@ namespace SharpLife.Engine.Client.Host
 
             _window.Center();
 
-            _clientModels = new ClientModels(_engine.ModelManager);
+            _clientModels = new ClientModels(_engine.ModelUtils, _engine.ModelManager);
 
             LoadGameClient();
 
