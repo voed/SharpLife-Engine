@@ -27,6 +27,7 @@ using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Objects;
 using SharpLife.Utility;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Veldrid;
@@ -66,6 +67,8 @@ namespace SharpLife.Engine.Client.Renderer
 
         public Vector3 Angles => VectorUtils.VectorToAngles(Vector3.Transform(Camera.DefaultLookDirection, _scene.Camera.RotationMatrix));
 
+        private readonly List<ResourceContainer> _mapResources = new List<ResourceContainer>();
+
         public Renderer(IntPtr window, IntPtr glContext, IFileSystem fileSystem, IInputSystem inputSystem, string envMapDirectory, string shadersDirectory)
         {
             _window = window;
@@ -99,13 +102,16 @@ namespace SharpLife.Engine.Client.Renderer
 
             _imGuiRenderable = new ImGuiRenderable(inputSystem, width, height);
             _resizeHandled += _imGuiRenderable.WindowResized;
+            _scene.AddContainer(_imGuiRenderable);
             _scene.AddRenderable(_imGuiRenderable);
             _scene.AddUpdateable(_imGuiRenderable);
 
             var coordinateAxes = new CoordinateAxes();
+            _scene.AddContainer(coordinateAxes);
             _scene.AddRenderable(coordinateAxes);
 
             FinalPass finalPass = new FinalPass();
+            _scene.AddContainer(finalPass);
             _scene.AddRenderable(finalPass);
 
             _frameCommands = _gd.ResourceFactory.CreateCommandList();
@@ -210,7 +216,7 @@ namespace SharpLife.Engine.Client.Renderer
 
             foreach (var model in modelManager)
             {
-                Renderable modelRenderable = null;
+                ResourceContainer modelRenderable = null;
 
                 switch (model)
                 {
@@ -229,19 +235,27 @@ namespace SharpLife.Engine.Client.Renderer
                     default: throw new InvalidOperationException($"Model type {model.GetType().FullName} is not supported");
                 }
 
-                _scene.AddMapRenderable(modelRenderable);
+                _scene.AddContainer(modelRenderable);
+                //TODO: need to separate this
+                _scene.AddRenderable((IRenderable)modelRenderable);
+                _mapResources.Add(modelRenderable);
             }
 
             //TODO: define default in config
             _skyboxRenderable = Skybox2D.LoadDefaultSkybox(_fileSystem, _envMapDirectory, "2desert");
-            _scene.AddMapRenderable(_skyboxRenderable);
+            _scene.AddContainer(_skyboxRenderable);
+            _scene.AddRenderable(_skyboxRenderable);
+            _mapResources.Add(_skyboxRenderable);
 
             //Set up graphics data
             CommandList initCL = _gd.ResourceFactory.CreateCommandList();
             initCL.Name = "BSP Initialization Command List";
             initCL.Begin();
 
-            _scene.CreateMapDeviceObjects(_gd, initCL, _sc);
+            foreach (var resource in _mapResources)
+            {
+                resource.CreateDeviceObjects(_gd, initCL, _sc);
+            }
 
             initCL.End();
             _gd.SubmitCommands(initCL);
@@ -250,7 +264,17 @@ namespace SharpLife.Engine.Client.Renderer
 
         public void ClearBSP()
         {
-            _scene.ClearMapRenderables();
+            foreach (var resource in _mapResources)
+            {
+                _scene.RemoveContainer(resource);
+
+                if (resource is IRenderable renderable)
+                {
+                    _scene.RemoveRenderable(renderable);
+                }
+            }
+
+            _mapResources.Clear();
 
             if (_skyboxRenderable != null)
             {

@@ -23,7 +23,7 @@ namespace SharpLife.Renderer.Objects
     /// Takes the rendered scene and draws it into the swap chain buffer
     /// The scene is flipped vertically in the shader to ensure it's right side up
     /// </summary>
-    public class FinalPass : Renderable
+    public class FinalPass : ResourceContainer, IRenderable
     {
         private DisposeCollector _disposeCollector;
         private Pipeline _pipeline;
@@ -75,12 +75,12 @@ namespace SharpLife.Renderer.Objects
             _disposeCollector.DisposeAll();
         }
 
-        public override RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
+        public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
         {
             return new RenderOrderKey();
         }
 
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {
             cl.SetPipeline(_pipeline);
             cl.SetGraphicsResourceSet(0, sc.MainSceneViewResourceSet);
@@ -89,7 +89,7 @@ namespace SharpLife.Renderer.Objects
             cl.DrawIndexed(6, 1, 0, 0, 0);
         }
 
-        public override RenderPasses RenderPasses => RenderPasses.SwapchainOutput;
+        public RenderPasses RenderPasses => RenderPasses.SwapchainOutput;
 
         public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {

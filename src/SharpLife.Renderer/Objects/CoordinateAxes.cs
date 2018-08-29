@@ -7,7 +7,7 @@ namespace SharpLife.Renderer.Objects
     /// <summary>
     /// Draws the coordinate axes
     /// </summary>
-    public class CoordinateAxes : Renderable
+    public class CoordinateAxes : ResourceContainer, IRenderable
     {
         private struct LineData
         {
@@ -22,11 +22,13 @@ namespace SharpLife.Renderer.Objects
         private ResourceLayout _layout;
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
+        public RenderPasses RenderPasses => RenderPasses.Standard;
+
         public override void UpdatePerFrameResources(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
         }
 
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {
             cl.SetVertexBuffer(0, _vb);
             cl.SetIndexBuffer(_ib, IndexFormat.UInt16);
@@ -82,7 +84,7 @@ namespace SharpLife.Renderer.Objects
             _disposeCollector.DisposeAll();
         }
 
-        public override RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
+        public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
         {
             return new RenderOrderKey();
         }

@@ -14,8 +14,6 @@
 ****/
 
 using SharpLife.Input;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -27,16 +25,9 @@ namespace SharpLife.Renderer
 {
     public class Scene
     {
-        private readonly Octree<CullRenderable> _octree
-            = new Octree<CullRenderable>(new BoundingBox(Vector3.One * -50, Vector3.One * 50), 2);
-
-        private readonly List<Renderable> _freeRenderables = new List<Renderable>();
+        private readonly List<ResourceContainer> _resourceContainers = new List<ResourceContainer>();
         private readonly List<IUpdateable> _updateables = new List<IUpdateable>();
-
-        private readonly List<Renderable> _mapRenderables = new List<Renderable>();
-
-        private readonly ConcurrentDictionary<RenderPasses, Func<CullRenderable, bool>> _filters
-            = new ConcurrentDictionary<RenderPasses, Func<CullRenderable, bool>>(new RenderPassesComparer());
+        private readonly List<IRenderable> _renderables = new List<IRenderable>();
 
         public Camera Camera { get; }
 
@@ -46,38 +37,24 @@ namespace SharpLife.Renderer
             _updateables.Add(Camera);
         }
 
-        public void AddRenderable(Renderable r)
+        public void AddContainer(ResourceContainer r)
         {
-            if (r is CullRenderable cr)
-            {
-                _octree.AddItem(cr.BoundingBox, cr);
-            }
-            else
-            {
-                _freeRenderables.Add(r);
-            }
+            _resourceContainers.Add(r);
         }
 
-        public void RemoveRenderable(Renderable r)
+        public void RemoveContainer(ResourceContainer r)
         {
-            if (r is CullRenderable cr)
-            {
-                _octree.RemoveItem(cr);
-            }
-            else
-            {
-                _freeRenderables.Remove(r);
-            }
+            _resourceContainers.Remove(r);
         }
 
-        public void AddMapRenderable(Renderable r)
+        public void AddRenderable(IRenderable r)
         {
-            _mapRenderables.Add(r);
+            _renderables.Add(r);
         }
 
-        public void ClearMapRenderables()
+        public void RemoveRenderable(IRenderable r)
         {
-            _mapRenderables.Clear();
+            _renderables.Remove(r);
         }
 
         public void AddUpdateable(IUpdateable updateable)
@@ -114,9 +91,9 @@ namespace SharpLife.Renderer
             cl.ClearDepthStencil(depthClear);
             sc.UpdateCameraBuffers(cl);
             var cameraFrustum = new BoundingFrustum(Camera.ViewMatrix * Camera.ProjectionMatrix);
-            Render(gd, cl, sc, RenderPasses.Standard, cameraFrustum, Camera.Position, _renderQueues[0], _cullableStage[0], _renderableStage[0], null, false);
-            Render(gd, cl, sc, RenderPasses.AlphaBlend, cameraFrustum, Camera.Position, _renderQueues[0], _cullableStage[0], _renderableStage[0], null, false);
-            Render(gd, cl, sc, RenderPasses.Overlay, cameraFrustum, Camera.Position, _renderQueues[0], _cullableStage[0], _renderableStage[0], null, false);
+            Render(gd, cl, sc, RenderPasses.Standard, cameraFrustum, Camera.Position, _renderQueues[0], _renderableStage[0], null, false);
+            Render(gd, cl, sc, RenderPasses.AlphaBlend, cameraFrustum, Camera.Position, _renderQueues[0], _renderableStage[0], null, false);
+            Render(gd, cl, sc, RenderPasses.Overlay, cameraFrustum, Camera.Position, _renderQueues[0], _renderableStage[0], null, false);
 
             if (sc.MainSceneColorTexture.SampleCount != TextureSampleCount.Count1)
             {
@@ -128,12 +105,12 @@ namespace SharpLife.Renderer
             fbWidth = gd.SwapchainFramebuffer.Width;
             fbHeight = gd.SwapchainFramebuffer.Height;
             cl.SetFullViewports();
-            Render(gd, cl, sc, RenderPasses.SwapchainOutput, new BoundingFrustum(), Camera.Position, _renderQueues[0], _cullableStage[0], _renderableStage[0], null, false);
+            Render(gd, cl, sc, RenderPasses.SwapchainOutput, new BoundingFrustum(), Camera.Position, _renderQueues[0], _renderableStage[0], null, false);
 
             cl.End();
 
             _resourceUpdateCL.Begin();
-            foreach (Renderable renderable in _allPerFrameRenderablesSet)
+            foreach (ResourceContainer renderable in _allPerFrameRenderablesSet)
             {
                 renderable.UpdatePerFrameResources(gd, _resourceUpdateCL, sc);
             }
@@ -151,16 +128,11 @@ namespace SharpLife.Renderer
             BoundingFrustum frustum,
             Vector3 viewPosition,
             RenderQueue renderQueue,
-            List<CullRenderable> cullRenderableList,
-            List<Renderable> renderableList,
+            List<IRenderable> renderableList,
             Comparer<RenderItemIndex> comparer,
             bool threaded)
         {
             renderQueue.Clear();
-
-            cullRenderableList.Clear();
-            CollectVisibleObjects(ref frustum, pass, cullRenderableList);
-            renderQueue.AddRange(cullRenderableList, viewPosition);
 
             renderableList.Clear();
             CollectFreeObjects(pass, renderableList);
@@ -175,7 +147,7 @@ namespace SharpLife.Renderer
                 renderQueue.Sort(comparer);
             }
 
-            foreach (Renderable renderable in renderQueue)
+            foreach (var renderable in renderQueue)
             {
                 renderable.Render(gd, rc, sc, pass);
             }
@@ -184,41 +156,22 @@ namespace SharpLife.Renderer
             {
                 lock (_allPerFrameRenderablesSet)
                 {
-                    foreach (CullRenderable thing in cullRenderableList) { _allPerFrameRenderablesSet.Add(thing); }
-                    foreach (Renderable thing in renderableList) { _allPerFrameRenderablesSet.Add(thing); }
+                    foreach (ResourceContainer thing in renderableList) { _allPerFrameRenderablesSet.Add(thing); }
                 }
             }
             else
             {
-                foreach (CullRenderable thing in cullRenderableList) { _allPerFrameRenderablesSet.Add(thing); }
-                foreach (Renderable thing in renderableList) { _allPerFrameRenderablesSet.Add(thing); }
+                foreach (ResourceContainer thing in renderableList) { _allPerFrameRenderablesSet.Add(thing); }
             }
         }
 
-        private readonly HashSet<Renderable> _allPerFrameRenderablesSet = new HashSet<Renderable>();
+        private readonly HashSet<ResourceContainer> _allPerFrameRenderablesSet = new HashSet<ResourceContainer>();
         private readonly RenderQueue[] _renderQueues = Enumerable.Range(0, 4).Select(_ => new RenderQueue()).ToArray();
-        private readonly List<CullRenderable>[] _cullableStage = Enumerable.Range(0, 4).Select(_ => new List<CullRenderable>()).ToArray();
-        private readonly List<Renderable>[] _renderableStage = Enumerable.Range(0, 4).Select(_ => new List<Renderable>()).ToArray();
+        private readonly List<IRenderable>[] _renderableStage = Enumerable.Range(0, 4).Select(_ => new List<IRenderable>()).ToArray();
 
-        private void CollectVisibleObjects(
-            ref BoundingFrustum frustum,
-            RenderPasses renderPass,
-            List<CullRenderable> renderables)
+        private void CollectFreeObjects(RenderPasses renderPass, List<IRenderable> renderables)
         {
-            _octree.GetContainedObjects(frustum, renderables, GetFilter(renderPass));
-        }
-
-        private void CollectFreeObjects(RenderPasses renderPass, List<Renderable> renderables)
-        {
-            foreach (Renderable r in _freeRenderables)
-            {
-                if ((r.RenderPasses & renderPass) != 0)
-                {
-                    renderables.Add(r);
-                }
-            }
-
-            foreach (Renderable r in _mapRenderables)
+            foreach (var r in _renderables)
             {
                 if ((r.RenderPasses & renderPass) != 0)
                 {
@@ -227,34 +180,11 @@ namespace SharpLife.Renderer
             }
         }
 
-        private static readonly Func<RenderPasses, Func<CullRenderable, bool>> s_createFilterFunc = CreateFilter;
         private CommandList _resourceUpdateCL;
-
-        private Func<CullRenderable, bool> GetFilter(RenderPasses passes)
-        {
-            return _filters.GetOrAdd(passes, s_createFilterFunc);
-        }
-
-        private static Func<CullRenderable, bool> CreateFilter(RenderPasses rp)
-        {
-            // This cannot be inlined into GetFilter -- a Roslyn bug causes copious allocations.
-            // https://github.com/dotnet/roslyn/issues/22589
-            return cr => (cr.RenderPasses & rp) == rp;
-        }
 
         internal void DestroyAllDeviceObjects()
         {
-            _cullableStage[0].Clear();
-            _octree.GetAllContainedObjects(_cullableStage[0]);
-            foreach (CullRenderable cr in _cullableStage[0])
-            {
-                cr.DestroyDeviceObjects();
-            }
-            foreach (Renderable r in _freeRenderables)
-            {
-                r.DestroyDeviceObjects();
-            }
-            foreach (Renderable r in _mapRenderables)
+            foreach (var r in _resourceContainers)
             {
                 r.DestroyDeviceObjects();
             }
@@ -264,28 +194,13 @@ namespace SharpLife.Renderer
 
         public void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
-            _cullableStage[0].Clear();
-            _octree.GetAllContainedObjects(_cullableStage[0]);
-            foreach (CullRenderable cr in _cullableStage[0])
-            {
-                cr.CreateDeviceObjects(gd, cl, sc);
-            }
-            foreach (Renderable r in _freeRenderables)
+            foreach (ResourceContainer r in _resourceContainers)
             {
                 r.CreateDeviceObjects(gd, cl, sc);
             }
-            CreateMapDeviceObjects(gd, cl, sc);
 
             _resourceUpdateCL = gd.ResourceFactory.CreateCommandList();
             _resourceUpdateCL.Name = "Scene Resource Update Command List";
-        }
-
-        public void CreateMapDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
-        {
-            foreach (Renderable r in _mapRenderables)
-            {
-                r.CreateDeviceObjects(gd, cl, sc);
-            }
         }
 
         private class RenderPassesComparer : IEqualityComparer<RenderPasses>

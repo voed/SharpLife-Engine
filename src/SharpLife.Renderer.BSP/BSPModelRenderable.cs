@@ -27,7 +27,7 @@ namespace SharpLife.Renderer.BSP
     /// <summary>
     /// The BSP World model renderable
     /// </summary>
-    public class BSPModelRenderable : Renderable
+    public class BSPModelRenderable : ResourceContainer, IRenderable
     {
         public struct WorldAndInverse
         {
@@ -67,6 +67,8 @@ namespace SharpLife.Renderer.BSP
 
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
+        public RenderPasses RenderPasses => RenderPasses.Standard;
+
         public BSPModelRenderable(BSPModel bspModel)
         {
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
@@ -80,7 +82,7 @@ namespace SharpLife.Renderer.BSP
             gd.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
         }
 
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {
             cl.SetPipeline(_pipeline);
 
@@ -160,7 +162,7 @@ namespace SharpLife.Renderer.BSP
             _disposeCollector.DisposeAll();
         }
 
-        public override RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
+        public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
         {
             return new RenderOrderKey();
         }

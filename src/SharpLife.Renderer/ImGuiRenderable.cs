@@ -20,7 +20,7 @@ using Veldrid;
 
 namespace SharpLife.Renderer
 {
-    public class ImGuiRenderable : Renderable, IUpdateable
+    public class ImGuiRenderable : ResourceContainer, IUpdateable, IRenderable
     {
         private IInputSystem _inputSystem;
         private ImGuiRenderer _imguiRenderer;
@@ -53,12 +53,12 @@ namespace SharpLife.Renderer
             _imguiRenderer.Dispose();
         }
 
-        public override RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
+        public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
         {
             return new RenderOrderKey(ulong.MaxValue);
         }
 
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {
             Debug.Assert(renderPass == RenderPasses.Overlay);
             _imguiRenderer.Render(gd, cl);
@@ -68,7 +68,7 @@ namespace SharpLife.Renderer
         {
         }
 
-        public override RenderPasses RenderPasses => RenderPasses.Overlay;
+        public RenderPasses RenderPasses => RenderPasses.Overlay;
 
         public void Update(float deltaSeconds)
         {

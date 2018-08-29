@@ -30,7 +30,7 @@ namespace SharpLife.Renderer.Objects
     /// <summary>
     /// Draws the 2D skybox at the outer edges of the world
     /// </summary>
-    public class Skybox2D : Renderable
+    public class Skybox2D : ResourceContainer, IRenderable
     {
         private struct CubemapPosition
         {
@@ -178,7 +178,7 @@ namespace SharpLife.Renderer.Objects
             _disposeCollector.DisposeAll();
         }
 
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass)
         {
             cl.SetVertexBuffer(0, _vb);
             cl.SetIndexBuffer(_ib, IndexFormat.UInt16);
@@ -189,9 +189,9 @@ namespace SharpLife.Renderer.Objects
             cl.DrawIndexed((uint)s_indices.Length, 1, 0, 0, 0);
         }
 
-        public override RenderPasses RenderPasses => RenderPasses.Standard;
+        public RenderPasses RenderPasses => RenderPasses.Standard;
 
-        public override RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
+        public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
         {
             return new RenderOrderKey(ulong.MaxValue);
         }
