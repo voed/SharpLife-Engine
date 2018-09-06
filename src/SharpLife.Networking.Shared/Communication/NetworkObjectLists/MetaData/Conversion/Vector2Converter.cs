@@ -71,8 +71,10 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public override void Decode(in Vector2 value, in Vector2 previousValue, out Vector2 result)
         {
-            //Already decoded by Read
-            result = value;
+            FloatConverter.Instance.Decode(value.X, previousValue.X, out var x);
+            FloatConverter.Instance.Decode(value.Y, previousValue.Y, out var y);
+
+            result = new Vector2(x, y);
         }
 
         public override bool Read(CodedInputStream stream, out Vector2 result)
