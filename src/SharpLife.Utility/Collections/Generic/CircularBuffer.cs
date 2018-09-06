@@ -91,6 +91,8 @@ namespace SharpLife.Utility.Collections.Generic
 
             _list[_nextIndex] = item;
 
+            _currentIndex = _nextIndex;
+
             if (_nextIndex + 1 >= Capacity)
             {
                 _nextIndex = 0;
@@ -101,8 +103,6 @@ namespace SharpLife.Utility.Collections.Generic
             {
                 ++_nextIndex;
             }
-
-            _currentIndex = (_currentIndex + 1) % Capacity;
 
             return oldValue;
         }
