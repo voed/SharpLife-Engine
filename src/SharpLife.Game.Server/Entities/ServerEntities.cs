@@ -140,6 +140,13 @@ namespace SharpLife.Game.Server.Entities
             }
         }
 
+        public void StartFrame()
+        {
+            //Run entity think methods
+
+            //TODO: need to implement physics
+        }
+
         private void LoadEntities(string entityData)
         {
             var keyvalues = KeyValuesParser.ParseAll(entityData);

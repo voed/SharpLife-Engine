@@ -320,6 +320,10 @@ namespace SharpLife.Engine.Server.Host
                 return;
             }
 
+            _game.StartFrame();
+
+            _game.EndFrame();
+
             _netServer.RunFrame();
         }
 

@@ -81,5 +81,15 @@ namespace SharpLife.Game.Server.API
 
             _active = false;
         }
+
+        public void StartFrame()
+        {
+            _entities.StartFrame();
+        }
+
+        public void EndFrame()
+        {
+
+        }
     }
 }
