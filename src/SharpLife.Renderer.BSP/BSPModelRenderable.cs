@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
@@ -71,16 +72,11 @@ namespace SharpLife.Renderer.BSP
 
         public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData)
         {
-            WorldAndInverse wai;
+            var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
 
-            //TODO: verify that the angles are correctly used here
-            wai.World = Matrix4x4.CreateScale(renderData.Scale)
-                * Matrix4x4.CreateFromYawPitchRoll(renderData.Angles.Y, renderData.Angles.X, renderData.Angles.Z)
-                * Matrix4x4.CreateTranslation(renderData.Origin);
+            cl.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
 
-            wai.InverseWorld = VdUtilities.CalculateInverseTranspose(ref wai.World);
-            gd.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
-
+            //TODO: duplicate SetPipeline call?
             cl.SetPipeline(_pipeline);
 
             foreach (var faces in _faces)
@@ -98,7 +94,7 @@ namespace SharpLife.Renderer.BSP
         {
             ResourceFactory disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
-            _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription(64 * 2, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             //Build a list of buffers, each buffer containing all of the faces that have the same texture
             //This reduces the number of buffers we have to create from a set for each face to a set for each texture and all of the faces referencing it
