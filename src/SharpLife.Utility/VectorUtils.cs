@@ -20,6 +20,15 @@ namespace SharpLife.Utility
 {
     public static class VectorUtils
     {
+        public static Vector3 ToRadians(in Vector3 anglesInDegrees)
+        {
+            return new Vector3(
+                MathUtils.ToRadians(anglesInDegrees.X),
+                MathUtils.ToRadians(anglesInDegrees.Y),
+                MathUtils.ToRadians(anglesInDegrees.Z)
+                );
+        }
+
         /// <summary>
         /// Converts a directional vector to angles
         /// </summary>
@@ -61,7 +70,7 @@ namespace SharpLife.Utility
         }
 
         /// <summary>
-        /// Converts an angle to directional vectors
+        /// Converts an angle into vectors representing the forward, right and up directions
         /// </summary>
         /// <param name="angles"></param>
         /// <param name="forward"></param>
@@ -69,15 +78,15 @@ namespace SharpLife.Utility
         /// <param name="up"></param>
         public static void AngleToVectors(in Vector3 angles, out Vector3 forward, out Vector3 right, out Vector3 up)
         {
-            float angle = (float)(angles.Y * (Math.PI * 2 / 360));
-            float sy = (float)Math.Sin(angle);
-            float cy = (float)Math.Cos(angle);
-            angle = (float)(angles.X * (Math.PI * 2 / 360));
-            float sp = (float)Math.Sin(angle);
-            float cp = (float)Math.Cos(angle);
-            angle = (float)(angles.Z * (Math.PI * 2 / 360));
-            float sr = (float)Math.Sin(angle);
-            float cr = (float)Math.Cos(angle);
+            var angle = angles.Y * (Math.PI * 2 / 360);
+            var sy = (float)Math.Sin(angle);
+            var cy = (float)Math.Cos(angle);
+            angle = angles.X * (Math.PI * 2 / 360);
+            var sp = (float)Math.Sin(angle);
+            var cp = (float)Math.Cos(angle);
+            angle = angles.Z * (Math.PI * 2 / 360);
+            var sr = (float)Math.Sin(angle);
+            var cr = (float)Math.Cos(angle);
 
             forward = new Vector3(
                 cp * cy,
@@ -96,6 +105,26 @@ namespace SharpLife.Utility
                 (cr * sp * sy) + (-sr * cy),
                 cr * cp
             );
+        }
+
+        public static void AngleToVectors(in Vector3 angles, out DirectionalVectors vectors)
+        {
+            AngleToVectors(angles, out vectors.Forward, out vectors.Right, out vectors.Up);
+        }
+
+        public static float AngleBetweenVectors(in Vector3 v1, in Vector3 v2)
+        {
+            var l1 = v1.Length();
+            var l2 = v2.Length();
+
+            if (l1 == 0 || l2 == 0)
+            {
+                return 0.0f;
+            }
+
+            var angle = Math.Acos(Vector3.Dot(v1, v2)) / (l1 * l2);
+
+            return (float)MathUtils.ToDegrees(angle);
         }
     }
 }
