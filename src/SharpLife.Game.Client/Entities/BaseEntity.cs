@@ -23,6 +23,8 @@ namespace SharpLife.Game.Client.Entities
     [Networkable]
     public abstract class BaseEntity : SharedBaseEntity, IRenderableEntity
     {
+        public EntityContext Context { get; set; }
+
         protected BaseEntity(bool networked)
             : base(networked)
         {

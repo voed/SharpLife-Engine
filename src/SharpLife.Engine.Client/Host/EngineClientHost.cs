@@ -166,6 +166,7 @@ namespace SharpLife.Engine.Client.Host
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IClientEngine>(this);
             serviceCollection.AddSingleton<IViewState>(_renderer);
+            serviceCollection.AddSingleton(_engine.EngineTime);
             serviceCollection.AddSingleton<IEngineModels>(_clientModels);
 
             _game.Initialize(serviceCollection);
