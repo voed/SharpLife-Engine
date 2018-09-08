@@ -37,21 +37,21 @@ namespace SharpLife.Game.Server.Entities.EntityList
 
         protected override void OnEntityCreated(EntityEntry entry)
         {
-            entry.entity.Context = _entityContext;
+            entry.Entity.Context = _entityContext;
 
-            if (entry.entity.Networked)
+            if (entry.Entity.Networked)
             {
-                var networkObject = _entitiesNetworkList.CreateNetworkObject(entry.entity);
+                var networkObject = _entitiesNetworkList.CreateNetworkObject(entry.Entity);
 
-                entry.entity.NetworkObject = networkObject;
+                entry.Entity.NetworkObject = networkObject;
             }
         }
 
         protected override void OnEntityDestroyed(EntityEntry entry)
         {
-            if (entry.entity.Networked)
+            if (entry.Entity.Networked)
             {
-                _entitiesNetworkList.DestroyNetworkObject(entry.entity.NetworkObject);
+                _entitiesNetworkList.DestroyNetworkObject(entry.Entity.NetworkObject);
             }
         }
     }

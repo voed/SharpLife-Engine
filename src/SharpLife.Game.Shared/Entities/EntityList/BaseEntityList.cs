@@ -45,11 +45,11 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
         protected sealed class EntityEntry
         {
-            public ushort serialNumber = 1;
+            public ushort SerialNumber = 1;
 
-            public TBaseEntity entity;
+            public TBaseEntity Entity;
 
-            public bool Valid => entity != null;
+            public bool Valid => Entity != null;
 
             public EntityEntry()
             {
@@ -93,9 +93,9 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
             var entry = _entities[handle.Id];
 
-            if (entry.serialNumber == handle.SerialNumber)
+            if (entry.SerialNumber == handle.SerialNumber)
             {
-                return entry.entity;
+                return entry.Entity;
             }
 
             return null;
@@ -105,9 +105,9 @@ namespace SharpLife.Game.Shared.Entities.EntityList
         {
             for (var i = startIndex; i <= HighestIndex; ++i)
             {
-                if (_entities[i].Valid == true)
+                if (_entities[i].Valid)
                 {
-                    return new ObjectHandle(i, _entities[i].serialNumber);
+                    return new ObjectHandle(i, _entities[i].SerialNumber);
                 }
             }
 
@@ -147,7 +147,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
         {
             for (int i = 0; i < _entities.Count; ++i)
             {
-                if (_entities[i].entity == null)
+                if (_entities[i].Entity == null)
                 {
                     return i;
                 }
@@ -187,8 +187,8 @@ namespace SharpLife.Game.Shared.Entities.EntityList
                 throw new InvalidOperationException($"Entity index {handle.Id} already has an entity associated with it");
             }
 
-            entry.entity = instance;
-            entry.serialNumber = (ushort)handle.SerialNumber;
+            entry.Entity = instance;
+            entry.SerialNumber = (ushort)handle.SerialNumber;
 
             //It is not an error to not set the classname here, the caller is responsible for it
 
@@ -236,11 +236,11 @@ namespace SharpLife.Game.Shared.Entities.EntityList
                     throw new InvalidOperationException($"Entity index {index} already has an entity associated with it");
                 }
 
-                entry.entity = (TBaseEntity)instance;
+                entry.Entity = (TBaseEntity)instance;
                 //The serial number is not incremented on creation because no valid handles can exist for it at this time
                 //++entry.serialNumber;
 
-                instance.Handle = new ObjectHandle(index, entry.serialNumber);
+                instance.Handle = new ObjectHandle(index, entry.SerialNumber);
 
                 instance.ClassName = metaData.Name;
 
@@ -253,7 +253,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
                     HighestIndex = index;
                 }
 
-                return entry.entity;
+                return entry.Entity;
             }
             catch (MissingMethodException e)
             {
@@ -287,8 +287,8 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
             OnEntityDestroyed(entry);
 
-            entry.entity = null;
-            ++entry.serialNumber;
+            entry.Entity = null;
+            ++entry.SerialNumber;
 
             --EntityCount;
 
@@ -298,7 +298,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
                 for (i = id - 1; i >= 0; --i)
                 {
-                    if (_entities[i].entity != null)
+                    if (_entities[i].Entity != null)
                     {
                         break;
                     }
@@ -323,7 +323,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
                 throw new ArgumentException("Entity has an invalid handle", nameof(entity));
             }
 
-            Debug.Assert(ReferenceEquals(entity, _entities[handle.Id].entity), "Entity must match the entry reference");
+            Debug.Assert(ReferenceEquals(entity, _entities[handle.Id].Entity), "Entity must match the entry reference");
 
             InternalDestroyEntity(handle.Id, true);
         }
@@ -338,7 +338,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
             //Anything past the highest index won't be valid anyway
             for (var i = 0; i <= HighestIndex; ++i)
             {
-                if (_entities[i].entity != null)
+                if (_entities[i].Entity != null)
                 {
                     InternalDestroyEntity(i, false);
                 }
