@@ -14,11 +14,10 @@
 ****/
 
 using SharpLife.FileFormats.WAD;
+using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Veldrid;
 using Veldrid.ImageSharp;
 
@@ -45,16 +44,9 @@ namespace SharpLife.Renderer.BSP
                     throw new InvalidOperationException($"Texture \"{texture.Name}\" has no pixel data");
                 }
 
-                var palette = texture.Palette;
+                var textureFormat = texture.Name.StartsWith('{') ? TextureFormat.AlphaTest : TextureFormat.Normal;
 
-                var pixels = new Rgba32[texture.Width * texture.Height];
-
-                foreach (var i in Enumerable.Range(0, (int)(texture.Width * texture.Height)))
-                {
-                    palette[data[i]].ToRgba32(ref pixels[i]);
-                }
-
-                //TODO: mark transparent color properly
+                var pixels = ImageConversionUtils.ConvertIndexedToRgba32(texture.Palette, texture.Data[0], (int)texture.Width, (int)texture.Height, textureFormat);
 
                 var image = Image.LoadPixelData(pixels, (int)texture.Width, (int)texture.Height);
 
