@@ -15,15 +15,15 @@
 
 using System.Numerics;
 
-namespace SharpLife.Renderer.BSP
+namespace SharpLife.Renderer.Utility
 {
     /// <summary>
-    /// Blittable type used to pass a vertex and texture coordinate to shaders
+    /// Blittable type used to pass a 3D vertex and 2D texture coordinate to shaders
     /// </summary>
-    public struct BSPCoordinate
+    public struct WorldTextureCoordinate
     {
-        public Vector3 vertex;
+        public Vector3 Vertex;
 
-        public Vector2 texture;
+        public Vector2 Texture;
     }
 }

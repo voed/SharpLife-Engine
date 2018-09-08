@@ -17,6 +17,7 @@ using SharpLife.FileFormats.BSP;
 using SharpLife.Models;
 using SharpLife.Models.BSP;
 using SharpLife.Renderer.Models;
+using SharpLife.Renderer.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,12 +32,6 @@ namespace SharpLife.Renderer.BSP
     /// </summary>
     public class BSPModelRenderable : ModelResourceContainer
     {
-        public struct WorldAndInverse
-        {
-            public Matrix4x4 World;
-            public Matrix4x4 InverseWorld;
-        }
-
         private class FaceBufferData : IDisposable
         {
             public DeviceBuffer VertexBuffer;
@@ -173,7 +168,7 @@ namespace SharpLife.Renderer.BSP
 
             var mipTexture = faces[0].TextureInfo.MipTexture;
 
-            var vertices = new List<BSPCoordinate>();
+            var vertices = new List<WorldTextureCoordinate>();
             var indices = new List<uint>();
 
             foreach (var face in faces)
@@ -198,10 +193,10 @@ namespace SharpLife.Renderer.BSP
                     var t = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
                     t /= mipTexture.Height;
 
-                    vertices.Add(new BSPCoordinate
+                    vertices.Add(new WorldTextureCoordinate
                     {
-                        vertex = point,
-                        texture = new Vector2(s, t)
+                        Vertex = point,
+                        Texture = new Vector2(s, t)
                     });
                 }
             }
