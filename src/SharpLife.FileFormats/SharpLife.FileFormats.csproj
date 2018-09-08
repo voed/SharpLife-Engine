@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="SixLabors.Core">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.Core.dll</HintPath>
+    </Reference>
     <Reference Include="SixLabors.ImageSharp">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
     </Reference>
