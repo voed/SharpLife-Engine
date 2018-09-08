@@ -15,6 +15,7 @@
 
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Renderer;
 
 namespace SharpLife.Game.Server.Entities
 {
@@ -150,6 +151,11 @@ namespace SharpLife.Game.Server.Entities
             {
                 InitializeGlobalState();
             }
+        }
+
+        //TODO: implement proper think logic
+        public virtual void Think()
+        {
         }
     }
 }
