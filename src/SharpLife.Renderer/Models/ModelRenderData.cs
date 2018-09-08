@@ -25,5 +25,12 @@ namespace SharpLife.Renderer.Models
         public Vector3 Origin;
         public Vector3 Angles;
         public Vector3 Scale;
+
+        public RenderFX RenderFX;
+        public RenderMode RenderMode;
+        public int RenderAmount;
+        public Vector3 RenderColor;
+
+        public int Frame;
     }
 }
