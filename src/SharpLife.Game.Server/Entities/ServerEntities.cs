@@ -16,6 +16,7 @@
 using Serilog;
 using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Engine.Shared.Utility;
 using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityData;
@@ -36,6 +37,8 @@ namespace SharpLife.Game.Server.Entities
 
         private readonly IServerEngine _serverEngine;
 
+        private readonly IEngineTime _engineTime;
+
         private readonly IEngineModels _serverModels;
 
         private ServerEntityList _entityList;
@@ -44,10 +47,11 @@ namespace SharpLife.Game.Server.Entities
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
 
-        public ServerEntities(ILogger logger, IServerEngine serverEngine, IEngineModels serverModels)
+        public ServerEntities(ILogger logger, IServerEngine serverEngine, IEngineTime engineTime, IEngineModels serverModels)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serverEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
+            _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
             _serverModels = serverModels ?? throw new ArgumentNullException(nameof(serverModels));
         }
 
@@ -128,7 +132,8 @@ namespace SharpLife.Game.Server.Entities
 
         public void MapLoadBegin(string entityData, bool loadGame)
         {
-            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _serverModels);
+            //TODO: the game needs a different time object that tracks game time
+            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _engineTime, _serverModels);
 
             if (loadGame)
             {
