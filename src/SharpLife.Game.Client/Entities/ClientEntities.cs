@@ -23,6 +23,7 @@ using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
+using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using System;
 using System.Linq;
@@ -151,7 +152,7 @@ namespace SharpLife.Game.Client.Entities
         {
         }
 
-        public void RenderEntities(IModelRenderer modelRenderer)
+        public void RenderEntities(IModelRenderer modelRenderer, IViewState viewState)
         {
             //This can be called when no maps have been loaded
             if (_entityList != null)
@@ -160,7 +161,7 @@ namespace SharpLife.Game.Client.Entities
                 {
                     if (entity is IRenderableEntity renderable)
                     {
-                        renderable.Render(modelRenderer);
+                        renderable.Render(modelRenderer, viewState);
                     }
                 }
             }

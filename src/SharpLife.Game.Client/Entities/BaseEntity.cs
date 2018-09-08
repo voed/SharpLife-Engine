@@ -30,7 +30,7 @@ namespace SharpLife.Game.Client.Entities
         {
         }
 
-        public virtual void Render(IModelRenderer modelRenderer)
+        public virtual void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model != null)
             {

@@ -13,12 +13,13 @@
 *
 ****/
 
+using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 
 namespace SharpLife.Engine.Shared.API.Game.Client
 {
     public interface IClientEntities
     {
-        void RenderEntities(IModelRenderer modelRenderer);
+        void RenderEntities(IModelRenderer modelRenderer, IViewState viewState);
     }
 }

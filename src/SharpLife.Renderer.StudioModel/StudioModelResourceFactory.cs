@@ -16,11 +16,25 @@
 using SharpLife.Models;
 using SharpLife.Renderer.Models;
 using System;
+using Veldrid;
 
 namespace SharpLife.Renderer.StudioModel
 {
     public sealed class StudioModelResourceFactory : IModelResourceFactory
     {
+        public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
+        {
+        }
+
+        public void DestroyDeviceObjects(ResourceScope scope)
+        {
+        }
+
+        public void Dispose()
+        {
+            DestroyDeviceObjects(ResourceScope.All);
+        }
+
         public ModelResourceContainer CreateContainer(IModel model)
         {
             if (!(model is SharpLife.Models.StudioModel studioModel))

@@ -19,8 +19,9 @@ namespace SharpLife.Renderer.Models
 {
     /// <summary>
     /// Factory to create model resource containers
+    /// Can manage model type-specific resources
     /// </summary>
-    public interface IModelResourceFactory
+    public interface IModelResourceFactory : IResourceContainer
     {
         ModelResourceContainer CreateContainer(IModel model);
     }

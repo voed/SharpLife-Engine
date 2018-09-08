@@ -90,8 +90,13 @@ namespace SharpLife.Renderer.BSP
             }
         }
 
-        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
+            if ((scope & ResourceScope.Map) == 0)
+            {
+                return;
+            }
+
             ResourceFactory disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
             _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
@@ -112,7 +117,7 @@ namespace SharpLife.Renderer.BSP
                 if (faces.Key != "sky")
                 {
                     //Don't use the dispose factory because some of the created resources are already managed elsewhere
-                    var facesData = BuildFacesBuffer(faces.ToList(), sc.ResourceCache, gd, cl, sc);
+                    var facesData = BuildFacesBuffer(faces.ToList(), sc.MapResourceCache, gd, cl, sc);
                     _disposeCollector.Add(facesData);
                     _faces.Add(facesData);
                 }
@@ -125,7 +130,7 @@ namespace SharpLife.Renderer.BSP
                     new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2))
             };
 
-            (Shader vs, Shader fs) = sc.ResourceCache.GetShaders(gd, gd.ResourceFactory, "LightMappedGeneric");
+            (Shader vs, Shader fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "LightMappedGeneric");
 
             _layout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -150,8 +155,13 @@ namespace SharpLife.Renderer.BSP
                 _worldAndInverseBuffer));
         }
 
-        public override void DestroyDeviceObjects()
+        public override void DestroyDeviceObjects(ResourceScope scope)
         {
+            if ((scope & ResourceScope.Map) == 0)
+            {
+                return;
+            }
+
             _disposeCollector.DisposeAll();
         }
 

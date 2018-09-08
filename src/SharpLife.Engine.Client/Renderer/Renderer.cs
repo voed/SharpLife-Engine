@@ -15,7 +15,6 @@
 
 using SDL2;
 using SharpLife.Engine.Shared;
-using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
@@ -31,7 +30,6 @@ using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
 using Veldrid;
 
 namespace SharpLife.Engine.Client.Renderer
@@ -40,13 +38,11 @@ namespace SharpLife.Engine.Client.Renderer
     /// The main renderer
     /// Manages current graphics state, devices, etc
     /// </summary>
-    public class Renderer : IViewState
+    public class Renderer
     {
         private readonly IntPtr _window;
         private readonly IntPtr _glContext;
         private readonly GraphicsDevice _gd;
-        private readonly Scene _scene;
-
         private readonly IFileSystem _fileSystem;
 
         private readonly IRendererListener _rendererListener;
@@ -57,6 +53,10 @@ namespace SharpLife.Engine.Client.Renderer
 
         private readonly ImGuiRenderable _imGuiRenderable;
 
+        private CoordinateAxes _coordinateAxes;
+
+        private readonly FinalPass _finalPass;
+
         private Skybox2D _skyboxRenderable;
 
         private readonly CommandList _frameCommands;
@@ -65,11 +65,7 @@ namespace SharpLife.Engine.Client.Renderer
 
         private event Action<int, int> _resizeHandled;
 
-        public Scene Scene => _scene;
-
-        public Vector3 Origin => _scene.Camera.Position;
-
-        public Vector3 Angles => VectorUtils.VectorToAngles(Vector3.Transform(Camera.DefaultLookDirection, _scene.Camera.RotationMatrix));
+        public Scene Scene { get; }
 
         private readonly ModelResourcesManager _modelResourcesManager;
         private readonly ModelRenderer _modelRenderer;
@@ -105,23 +101,19 @@ namespace SharpLife.Engine.Client.Renderer
 
             _gd = GraphicsDevice.CreateOpenGL(options, platformInfo, (uint)width, (uint)height);
 
-            _scene = new Scene(inputSystem, _gd, width, height);
+            Scene = new Scene(inputSystem, _gd, width, height);
 
-            _sc.SetCurrentScene(_scene);
+            _sc.SetCurrentScene(Scene);
 
             _imGuiRenderable = new ImGuiRenderable(inputSystem, width, height);
             _resizeHandled += _imGuiRenderable.WindowResized;
-            _scene.AddContainer(_imGuiRenderable);
-            _scene.AddRenderable(_imGuiRenderable);
-            _scene.AddUpdateable(_imGuiRenderable);
+            Scene.AddContainer(_imGuiRenderable);
+            Scene.AddRenderable(_imGuiRenderable);
+            Scene.AddUpdateable(_imGuiRenderable);
 
-            var coordinateAxes = new CoordinateAxes();
-            _scene.AddContainer(coordinateAxes);
-            _scene.AddRenderable(coordinateAxes);
-
-            FinalPass finalPass = new FinalPass();
-            _scene.AddContainer(finalPass);
-            _scene.AddRenderable(finalPass);
+            _finalPass = new FinalPass();
+            Scene.AddContainer(_finalPass);
+            Scene.AddRenderable(_finalPass);
 
             _modelResourcesManager = new ModelResourcesManager(
                 new Dictionary<Type, IModelResourceFactory>
@@ -129,9 +121,17 @@ namespace SharpLife.Engine.Client.Renderer
                     { typeof(BSPModel), new BSPModelResourceFactory() },
                     { typeof(StudioModel), new StudioModelResourceFactory() }
                 });
-            _modelRenderer = new ModelRenderer(_modelResourcesManager, modelRenderer => _rendererListener.OnRenderModels(modelRenderer));
+            _modelRenderer = new ModelRenderer(
+                _modelResourcesManager,
+                (modelRenderer, viewState) => _rendererListener.OnRenderModels(modelRenderer, viewState)
+                );
 
-            _scene.AddRenderable(_modelRenderer);
+            foreach (var factory in _modelResourcesManager.Factories)
+            {
+                Scene.AddContainer(factory);
+            }
+
+            Scene.AddRenderable(_modelRenderer);
 
             _frameCommands = _gd.ResourceFactory.CreateCommandList();
             _frameCommands.Name = "Frame Commands List";
@@ -139,7 +139,7 @@ namespace SharpLife.Engine.Client.Renderer
             initCL.Name = "Recreation Initialization Command List";
             initCL.Begin();
             _sc.CreateDeviceObjects(_gd, initCL, _sc);
-            _scene.CreateAllDeviceObjects(_gd, initCL, _sc);
+            Scene.CreateAllDeviceObjects(_gd, initCL, _sc, ResourceScope.Global);
             initCL.End();
             _gd.SubmitCommands(initCL);
             initCL.Dispose();
@@ -152,7 +152,7 @@ namespace SharpLife.Engine.Client.Renderer
 
         public void Update(float deltaSeconds)
         {
-            _scene.Update(deltaSeconds);
+            Scene.Update(deltaSeconds);
         }
 
         public void Draw()
@@ -164,7 +164,7 @@ namespace SharpLife.Engine.Client.Renderer
                 _windowResized = false;
 
                 _gd.ResizeMainWindow((uint)width, (uint)height);
-                _scene.Camera.WindowResized(width, height);
+                Scene.Camera.WindowResized(width, height);
                 _resizeHandled?.Invoke(width, height);
                 CommandList cl = _gd.ResourceFactory.CreateCommandList();
                 cl.Begin();
@@ -176,7 +176,7 @@ namespace SharpLife.Engine.Client.Renderer
 
             _frameCommands.Begin();
 
-            _scene.RenderAllStages(_gd, _frameCommands, _sc);
+            Scene.RenderAllStages(_gd, _frameCommands, _sc);
             _gd.SwapBuffers();
         }
 
@@ -208,7 +208,7 @@ namespace SharpLife.Engine.Client.Renderer
             //Upload all used textures
             var usedTextures = BSPUtilities.GetUsedTextures(worldModel.BSPFile, wadList);
 
-            WADUtilities.UploadTextures(_gd, _gd.ResourceFactory, _sc.ResourceCache, usedTextures);
+            WADUtilities.UploadTextures(_gd, _gd.ResourceFactory, _sc.MapResourceCache, usedTextures);
         }
 
         /// <summary>
@@ -237,25 +237,24 @@ namespace SharpLife.Engine.Client.Renderer
             {
                 var modelRenderable = _modelResourcesManager.CreateResources(model);
 
-                _scene.AddContainer(modelRenderable);
+                Scene.AddContainer(modelRenderable);
             }
+
+            _coordinateAxes = new CoordinateAxes();
+            Scene.AddContainer(_coordinateAxes);
+            Scene.AddRenderable(_coordinateAxes);
 
             //TODO: define default in config
             _skyboxRenderable = Skybox2D.LoadDefaultSkybox(_fileSystem, _envMapDirectory, "2desert");
-            _scene.AddContainer(_skyboxRenderable);
-            _scene.AddRenderable(_skyboxRenderable);
+            Scene.AddContainer(_skyboxRenderable);
+            Scene.AddRenderable(_skyboxRenderable);
 
             //Set up graphics data
             CommandList initCL = _gd.ResourceFactory.CreateCommandList();
             initCL.Name = "Model Initialization Command List";
             initCL.Begin();
 
-            foreach (var resource in _modelResourcesManager)
-            {
-                resource.CreateDeviceObjects(_gd, initCL, _sc);
-            }
-
-            _skyboxRenderable.CreateDeviceObjects(_gd, initCL, _sc);
+            Scene.CreateAllDeviceObjects(_gd, initCL, _sc, ResourceScope.Map);
 
             initCL.End();
             _gd.SubmitCommands(initCL);
@@ -264,23 +263,33 @@ namespace SharpLife.Engine.Client.Renderer
 
         public void ClearBSP()
         {
+            Scene.DestroyAllDeviceObjects(ResourceScope.Map);
+
             foreach (var resource in _modelResourcesManager)
             {
-                _scene.RemoveContainer(resource);
+                Scene.RemoveContainer(resource);
             }
 
             _modelResourcesManager.FreeAllResources();
 
             if (_skyboxRenderable != null)
             {
-                _scene.RemoveContainer(_skyboxRenderable);
-                _scene.RemoveRenderable(_skyboxRenderable);
+                Scene.RemoveContainer(_skyboxRenderable);
+                Scene.RemoveRenderable(_skyboxRenderable);
+                _skyboxRenderable.Dispose();
                 _skyboxRenderable = null;
             }
 
+            if (_coordinateAxes != null)
+            {
+                Scene.RemoveContainer(_coordinateAxes);
+                Scene.RemoveRenderable(_coordinateAxes);
+                _coordinateAxes.Dispose();
+                _coordinateAxes = null;
+            }
+
             //Clear all graphics data
-            //TODO: need to create separate caches for per-map and persistent data
-            _sc.ResourceCache.DestroyAllDeviceObjects();
+            _sc.MapResourceCache.DestroyAllDeviceObjects();
         }
     }
 }

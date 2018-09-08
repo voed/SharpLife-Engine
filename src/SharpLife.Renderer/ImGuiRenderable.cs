@@ -36,8 +36,13 @@ namespace SharpLife.Renderer
 
         public void WindowResized(int width, int height) => _imguiRenderer.WindowResized(width, height);
 
-        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
+            if ((scope & ResourceScope.Global) == 0)
+            {
+                return;
+            }
+
             if (_imguiRenderer == null)
             {
                 _imguiRenderer = new ImGuiRenderer(gd, sc.MainSceneFramebuffer.OutputDescription, _width, _height);
@@ -48,8 +53,13 @@ namespace SharpLife.Renderer
             }
         }
 
-        public override void DestroyDeviceObjects()
+        public override void DestroyDeviceObjects(ResourceScope scope)
         {
+            if ((scope & ResourceScope.Global) == 0)
+            {
+                return;
+            }
+
             _imguiRenderer.Dispose();
         }
 

@@ -13,17 +13,23 @@
 *
 ****/
 
-using System.Numerics;
+using System;
 
-namespace SharpLife.Engine.Shared.API.Engine.Client
+namespace SharpLife.Renderer
 {
-    /// <summary>
-    /// Provides read-only access to the client view state
-    /// </summary>
-    public interface IViewState
+    [Flags]
+    public enum ResourceScope
     {
-        Vector3 Origin { get; }
+        /// <summary>
+        /// Resources allocated for use over the duration of the program's lifetime
+        /// </summary>
+        Global = 1 << 0,
 
-        Vector3 Angles { get; }
+        /// <summary>
+        /// Resources allocated for one map. Freed when the map ends
+        /// </summary>
+        Map = 1 << 1,
+
+        All = Global | Map
     }
 }

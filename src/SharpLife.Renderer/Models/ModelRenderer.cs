@@ -24,7 +24,7 @@ namespace SharpLife.Renderer.Models
     /// </summary>
     public sealed class ModelRenderer : IModelRenderer, IRenderable
     {
-        public delegate void RenderModels(IModelRenderer modelRenderer);
+        public delegate void RenderModels(IModelRenderer modelRenderer, IViewState viewState);
 
         private readonly IModelResourcesManager _resourcesManager;
 
@@ -69,7 +69,7 @@ namespace SharpLife.Renderer.Models
             _active = true;
             _renderContext = new RenderContext { GraphicsDevice = gd, CommandList = cl, SceneContext = sc, RenderPass = renderPass };
 
-            _renderModels(this);
+            _renderModels(this, sc.ViewState);
 
             _renderContext = new RenderContext();
             _active = false;

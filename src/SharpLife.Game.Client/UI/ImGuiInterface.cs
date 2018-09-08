@@ -18,6 +18,7 @@ using Serilog;
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Logging;
+using SharpLife.Renderer;
 using SharpLife.Utility;
 using System;
 using System.Numerics;
@@ -45,8 +46,6 @@ namespace SharpLife.Game.Client.UI
 
         private readonly IClientEngine _engine;
 
-        private readonly IViewState _viewState;
-
         private bool _consoleVisible;
 
         private string _consoleText = string.Empty;
@@ -59,21 +58,20 @@ namespace SharpLife.Game.Client.UI
 
         private readonly byte[] _consoleInputBuffer = new byte[1024];
 
-        public ImGuiInterface(ILogger logger, IClientEngine engine, IViewState viewState)
+        public ImGuiInterface(ILogger logger, IClientEngine engine)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
-            _viewState = viewState ?? throw new ArgumentNullException(nameof(viewState));
 
             _engine.LogListener = this;
         }
 
-        public void Update(float deltaSeconds)
+        public void Update(float deltaSeconds, IViewState viewState)
         {
             _fta.AddTime(deltaSeconds);
         }
 
-        public void Draw()
+        public void Draw(IViewState viewState)
         {
             if (ImGui.BeginMainMenuBar())
             {
@@ -86,7 +84,7 @@ namespace SharpLife.Game.Client.UI
 
                 ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
 
-                ImGui.TextUnformatted($"Camera Position: {_viewState.Origin} Camera Angles: Pitch {_viewState.Angles.X} Yaw {_viewState.Angles.Y}");
+                ImGui.TextUnformatted($"Camera Position: {viewState.Origin} Camera Angles: Pitch {viewState.Angles.X} Yaw {viewState.Angles.Y}");
 
                 ImGui.EndMainMenuBar();
             }

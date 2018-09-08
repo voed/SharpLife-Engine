@@ -23,6 +23,7 @@ namespace SharpLife.Renderer
         /// Invoked when models should be rendered
         /// </summary>
         /// <param name="modelRenderer"></param>
-        void OnRenderModels(IModelRenderer modelRenderer);
+        /// <param name="viewState"></param>
+        void OnRenderModels(IModelRenderer modelRenderer, IViewState viewState);
     }
 }

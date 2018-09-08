@@ -27,6 +27,8 @@ namespace SharpLife.Renderer.Models
 
         private readonly Dictionary<IModel, ModelResourceContainer> _containers = new Dictionary<IModel, ModelResourceContainer>();
 
+        public IEnumerable<IModelResourceFactory> Factories => _resourceFactories.Values;
+
         /// <summary>
         /// Creates a new resources manager that can create resources using the given factories
         /// </summary>

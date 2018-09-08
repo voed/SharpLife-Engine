@@ -165,7 +165,6 @@ namespace SharpLife.Engine.Client.Host
 
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IClientEngine>(this);
-            serviceCollection.AddSingleton<IViewState>(_renderer);
             serviceCollection.AddSingleton(_engine.EngineTime);
             serviceCollection.AddSingleton<IEngineModels>(_clientModels);
 
@@ -245,7 +244,7 @@ namespace SharpLife.Engine.Client.Host
 
             _renderer.Update(deltaSeconds);
 
-            _clientUI.Update(deltaSeconds);
+            _clientUI.Update(deltaSeconds, _renderer.Scene);
 
             //Only send messages if we're still actively connected, once we start disconnecting all user messages should be stopped
             if (_netClient != null && _netClient.IsConnected && !_netClient.IsDisconnecting)
@@ -256,7 +255,7 @@ namespace SharpLife.Engine.Client.Host
 
         public void Draw()
         {
-            _clientUI.Draw();
+            _clientUI.Draw(_renderer.Scene);
 
             _renderer.Draw();
         }
@@ -266,9 +265,9 @@ namespace SharpLife.Engine.Client.Host
             _engine.EndGame(reason);
         }
 
-        public void OnRenderModels(IModelRenderer modelRenderer)
+        public void OnRenderModels(IModelRenderer modelRenderer, IViewState viewState)
         {
-            _clientEntities.RenderEntities(modelRenderer);
+            _clientEntities.RenderEntities(modelRenderer, viewState);
         }
     }
 }

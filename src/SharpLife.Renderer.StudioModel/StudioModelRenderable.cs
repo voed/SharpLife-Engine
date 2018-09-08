@@ -37,11 +37,11 @@ namespace SharpLife.Renderer.StudioModel
         {
         }
 
-        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
         }
 
-        public override void DestroyDeviceObjects()
+        public override void DestroyDeviceObjects(ResourceScope scope)
         {
         }
     }

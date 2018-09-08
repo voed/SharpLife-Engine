@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Input;
+using SharpLife.Utility;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -23,13 +24,21 @@ using Veldrid.Utilities;
 
 namespace SharpLife.Renderer
 {
-    public class Scene
+    public class Scene : IViewState
     {
-        private readonly List<ResourceContainer> _resourceContainers = new List<ResourceContainer>();
+        private readonly List<IResourceContainer> _resourceContainers = new List<IResourceContainer>();
         private readonly List<IUpdateable> _updateables = new List<IUpdateable>();
         private readonly List<IRenderable> _renderables = new List<IRenderable>();
 
         public Camera Camera { get; }
+
+        public Vector3 Origin => Camera.Position;
+
+        public Vector3 Angles => VectorUtils.VectorToAngles(Vector3.Transform(Camera.DefaultLookDirection, Camera.RotationMatrix));
+
+        private DirectionalVectors _viewAngles;
+
+        public DirectionalVectors ViewVectors => _viewAngles;
 
         public Scene(IInputSystem inputSystem, GraphicsDevice gd, int viewWidth, int viewHeight)
         {
@@ -37,12 +46,12 @@ namespace SharpLife.Renderer
             _updateables.Add(Camera);
         }
 
-        public void AddContainer(ResourceContainer r)
+        public void AddContainer(IResourceContainer r)
         {
             _resourceContainers.Add(r);
         }
 
-        public void RemoveContainer(ResourceContainer r)
+        public void RemoveContainer(IResourceContainer r)
         {
             _resourceContainers.Remove(r);
         }
@@ -65,6 +74,8 @@ namespace SharpLife.Renderer
 
         public void Update(float deltaSeconds)
         {
+            VectorUtils.AngleToVectors(Angles, out _viewAngles);
+
             foreach (IUpdateable updateable in _updateables)
             {
                 updateable.Update(deltaSeconds);
@@ -159,19 +170,19 @@ namespace SharpLife.Renderer
             }
         }
 
-        internal void DestroyAllDeviceObjects()
+        public void DestroyAllDeviceObjects(ResourceScope scope)
         {
             foreach (var r in _resourceContainers)
             {
-                r.DestroyDeviceObjects();
+                r.DestroyDeviceObjects(scope);
             }
         }
 
-        public void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
-            foreach (ResourceContainer r in _resourceContainers)
+            foreach (var r in _resourceContainers)
             {
-                r.CreateDeviceObjects(gd, cl, sc);
+                r.CreateDeviceObjects(gd, cl, sc, scope);
             }
         }
 

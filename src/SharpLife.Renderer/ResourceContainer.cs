@@ -13,19 +13,18 @@
 *
 ****/
 
-using System;
 using Veldrid;
 
 namespace SharpLife.Renderer
 {
-    public abstract class ResourceContainer : IDisposable
+    public abstract class ResourceContainer : IResourceContainer
     {
-        public abstract void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc);
-        public abstract void DestroyDeviceObjects();
+        public abstract void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope);
+        public abstract void DestroyDeviceObjects(ResourceScope scope);
 
         public void Dispose()
         {
-            DestroyDeviceObjects();
+            DestroyDeviceObjects(ResourceScope.All);
         }
     }
 }

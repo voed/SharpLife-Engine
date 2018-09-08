@@ -30,8 +30,13 @@ namespace SharpLife.Renderer.Objects
         private DeviceBuffer _ib;
         private DeviceBuffer _vb;
 
-        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
+            if ((scope & ResourceScope.Global) == 0)
+            {
+                return;
+            }
+
             DisposeCollectorResourceFactory factory = new DisposeCollectorResourceFactory(gd.ResourceFactory);
             _disposeCollector = factory.DisposeCollector;
 
@@ -39,7 +44,7 @@ namespace SharpLife.Renderer.Objects
                 new ResourceLayoutElementDescription("SourceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("SourceSampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
-            (Shader vs, Shader fs) = sc.ResourceCache.GetShaders(gd, gd.ResourceFactory, "FinalPass");
+            (Shader vs, Shader fs) = sc.GlobalResourceCache.GetShaders(gd, gd.ResourceFactory, "FinalPass");
 
             GraphicsPipelineDescription pd = new GraphicsPipelineDescription(
                 new BlendStateDescription(
@@ -70,8 +75,13 @@ namespace SharpLife.Renderer.Objects
             cl.UpdateBuffer(_ib, 0, s_quadIndices);
         }
 
-        public override void DestroyDeviceObjects()
+        public override void DestroyDeviceObjects(ResourceScope scope)
         {
+            if ((scope & ResourceScope.Global) == 0)
+            {
+                return;
+            }
+
             _disposeCollector.DisposeAll();
         }
 

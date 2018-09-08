@@ -33,8 +33,14 @@ namespace SharpLife.Renderer.Objects
             cl.DrawIndexed((uint)s_indices.Length, 1, 0, 0, 0);
         }
 
-        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
+            if ((scope & ResourceScope.Map) == 0)
+            {
+                return;
+            }
+
+            //TODO: use dispose factory
             var factory = gd.ResourceFactory;
 
             _vb = factory.CreateBuffer(new BufferDescription(s_vertices.SizeInBytes(), BufferUsage.VertexBuffer));
@@ -50,7 +56,7 @@ namespace SharpLife.Renderer.Objects
                     new VertexElementDescription("Color", VertexElementSemantic.Color, VertexElementFormat.Float3))
             };
 
-            (Shader vs, Shader fs) = sc.ResourceCache.GetShaders(gd, gd.ResourceFactory, "CoordinateAxes");
+            (Shader vs, Shader fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "CoordinateAxes");
 
             _layout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -75,9 +81,12 @@ namespace SharpLife.Renderer.Objects
             _disposeCollector.Add(_vb, _ib, _layout, _pipeline, _resourceSet, vs, fs);
         }
 
-        public override void DestroyDeviceObjects()
+        public override void DestroyDeviceObjects(ResourceScope scope)
         {
-            _disposeCollector.DisposeAll();
+            if ((scope & ResourceScope.Map) != 0)
+            {
+                _disposeCollector.DisposeAll();
+            }
         }
 
         public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)

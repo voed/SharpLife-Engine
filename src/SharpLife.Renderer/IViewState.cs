@@ -13,17 +13,23 @@
 *
 ****/
 
-using SharpLife.Renderer;
+using SharpLife.Utility;
+using System.Numerics;
 
-namespace SharpLife.Engine.Shared.API.Game.Client
+namespace SharpLife.Renderer
 {
     /// <summary>
-    /// The client UI, used to inform the client of engine level changes and to allow drawing
+    /// Provides read-only access to the renderer view state
     /// </summary>
-    public interface IClientUI
+    public interface IViewState
     {
-        void Update(float deltaSeconds, IViewState viewState);
+        Vector3 Origin { get; }
 
-        void Draw(IViewState viewState);
+        Vector3 Angles { get; }
+
+        /// <summary>
+        /// Gets the view angles as directional vectors
+        /// </summary>
+        DirectionalVectors ViewVectors { get; }
     }
 }

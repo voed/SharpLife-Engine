@@ -22,7 +22,8 @@ namespace SharpLife.Renderer
 {
     public class SceneContext
     {
-        public ResourceCache ResourceCache { get; }
+        public ResourceCache GlobalResourceCache { get; }
+        public ResourceCache MapResourceCache { get; }
 
         public DeviceBuffer ProjectionMatrixBuffer { get; private set; }
         public DeviceBuffer ViewMatrixBuffer { get; private set; }
@@ -42,11 +43,14 @@ namespace SharpLife.Renderer
 
         public Camera Camera { get; set; }
 
+        public IViewState ViewState { get; set; }
+
         public TextureSampleCount MainSceneSampleCount { get; internal set; }
 
         public SceneContext(IFileSystem fileSystem, string shadersDirectory)
         {
-            ResourceCache = new ResourceCache(fileSystem, shadersDirectory);
+            GlobalResourceCache = new ResourceCache(fileSystem, shadersDirectory);
+            MapResourceCache = new ResourceCache(fileSystem, shadersDirectory);
         }
 
         public virtual void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
@@ -101,6 +105,7 @@ namespace SharpLife.Renderer
         public void SetCurrentScene(Scene scene)
         {
             Camera = scene.Camera;
+            ViewState = scene;
         }
 
         public unsafe void UpdateCameraBuffers(CommandList cl)

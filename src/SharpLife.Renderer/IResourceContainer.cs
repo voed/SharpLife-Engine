@@ -13,17 +13,14 @@
 *
 ****/
 
-using SharpLife.Renderer;
+using System;
+using Veldrid;
 
-namespace SharpLife.Engine.Shared.API.Game.Client
+namespace SharpLife.Renderer
 {
-    /// <summary>
-    /// The client UI, used to inform the client of engine level changes and to allow drawing
-    /// </summary>
-    public interface IClientUI
+    public interface IResourceContainer : IDisposable
     {
-        void Update(float deltaSeconds, IViewState viewState);
-
-        void Draw(IViewState viewState);
+        void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope);
+        void DestroyDeviceObjects(ResourceScope scope);
     }
 }

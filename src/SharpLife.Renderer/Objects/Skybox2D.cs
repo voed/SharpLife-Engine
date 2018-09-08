@@ -71,8 +71,13 @@ namespace SharpLife.Renderer.Objects
             _bottom = bottom;
         }
 
-        public unsafe override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
+        public unsafe override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
+            if ((scope & ResourceScope.Map) == 0)
+            {
+                return;
+            }
+
             ResourceFactory factory = gd.ResourceFactory;
 
             _vb = factory.CreateBuffer(new BufferDescription(s_vertices.SizeInBytes(), BufferUsage.VertexBuffer));
@@ -129,7 +134,7 @@ namespace SharpLife.Renderer.Objects
                     new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3))
             };
 
-            (Shader vs, Shader fs) = sc.ResourceCache.GetShaders(gd, gd.ResourceFactory, "Skybox2D");
+            (Shader vs, Shader fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "Skybox2D");
 
             _layout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -169,8 +174,13 @@ namespace SharpLife.Renderer.Objects
                 Image.Load(fileSystem.OpenRead(Path.Combine(envDirectory, skyboxName + "dn.bmp"))));
         }
 
-        public override void DestroyDeviceObjects()
+        public override void DestroyDeviceObjects(ResourceScope scope)
         {
+            if ((scope & ResourceScope.Map) == 0)
+            {
+                return;
+            }
+
             _disposeCollector.DisposeAll();
         }
 
