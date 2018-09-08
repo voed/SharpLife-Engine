@@ -52,9 +52,62 @@ namespace SharpLife.Game.Server.Entities
         /// <returns></returns>
         public virtual bool KeyValue(string key, string value)
         {
+            //TODO: rework keyvalues
+            if (key == "origin")
+            {
+                Origin = KeyValueUtils.ParseVector3(value);
+
+                return true;
+            }
+
+            if (key == "angles")
+            {
+                Angles = KeyValueUtils.ParseVector3(value);
+
+                return true;
+            }
+
+            if (key == "scale")
+            {
+                Scale = KeyValueUtils.ParseFloat(value);
+
+                return true;
+            }
+
             if (key == "model")
             {
                 Model = Context.EngineModels.LoadModel(value);
+                return true;
+            }
+
+            if (key == "renderfx")
+            {
+                RenderFX = KeyValueUtils.ParseEnum(value, RenderFX.None);
+                return true;
+            }
+
+            if (key == "rendermode")
+            {
+                RenderMode = KeyValueUtils.ParseEnum(value, RenderMode.Normal);
+                return true;
+            }
+
+            if (key == "renderamt")
+            {
+                RenderAmount = KeyValueUtils.ParseInt(value);
+                return true;
+            }
+
+            if (key == "rendercolor")
+            {
+                RenderColor = KeyValueUtils.ParseVector3(value);
+
+                return true;
+            }
+
+            if (key == "framerate")
+            {
+                FrameRate = KeyValueUtils.ParseFloat(value);
                 return true;
             }
 

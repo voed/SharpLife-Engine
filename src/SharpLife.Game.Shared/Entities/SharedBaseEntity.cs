@@ -17,6 +17,7 @@ using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Models;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Renderer;
 using System.Numerics;
 
 namespace SharpLife.Game.Shared.Entities
@@ -45,6 +46,27 @@ namespace SharpLife.Game.Shared.Entities
 
         [Networked]
         public Vector3 Angles { get; set; }
+
+        [Networked]
+        public float Scale { get; set; }
+
+        [Networked]
+        public RenderFX RenderFX { get; set; }
+
+        [Networked]
+        public RenderMode RenderMode { get; set; }
+
+        [Networked]
+        public int RenderAmount { get; set; }
+
+        [Networked]
+        public Vector3 RenderColor { get; set; }
+
+        [Networked]
+        public float Frame { get; set; }
+
+        [Networked]
+        public float FrameRate { get; set; }
 
         [Networked]
         public EntityFlags Flags { get; set; }
