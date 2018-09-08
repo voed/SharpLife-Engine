@@ -27,9 +27,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
         public TypeMetaData MetaData { get; }
 
-        public object[] Snapshot { get; }
+        public MemberSnapshot[] Snapshot { get; }
 
-        public ObjectUpdate(in ObjectHandle objectHandle, TypeMetaData metaData, object[] snapshot)
+        public ObjectUpdate(in ObjectHandle objectHandle, TypeMetaData metaData, MemberSnapshot[] snapshot)
         {
             ObjectHandle = objectHandle;
             MetaData = metaData ?? throw new ArgumentNullException(nameof(metaData));
@@ -75,7 +75,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             return data;
         }
 
-        private bool SerializeDelta(NetworkObject networkObject, object[] previousSnapshot, CodedOutputStream stream)
+        private bool SerializeDelta(NetworkObject networkObject, MemberSnapshot[] previousSnapshot, CodedOutputStream stream)
         {
             var changes = false;
 
@@ -85,7 +85,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
                 if (!member.ChangeNotificationIndex.HasValue || networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value])
                 {
-                    changes = member.MetaData.Converter.EncodeAndWrite(Snapshot[i], previousSnapshot[i], stream) || changes;
+                    changes = member.MetaData.Converter.EncodeAndWrite(Snapshot[i].Value, previousSnapshot[i].Value, stream) || changes;
                 }
                 else
                 {
@@ -106,7 +106,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             {
                 var member = MetaData.Members[i];
 
-                member.MetaData.Converter.Write(Snapshot[i], stream);
+                member.MetaData.Converter.Write(Snapshot[i].Value, stream);
             }
 
             return true;
@@ -145,13 +145,15 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 {
                     var member = metaData.Members[i];
 
-                    if (member.MetaData.Converter.ReadAndDecode(stream, previousSnapshot[i], out var result))
+                    if (member.MetaData.Converter.ReadAndDecode(stream, previousSnapshot[i].Value, out var result))
                     {
-                        snapshot[i] = result;
+                        snapshot[i].Value = result;
+                        snapshot[i].Changed = true;
                     }
                     else
                     {
-                        snapshot[i] = previousSnapshot[i];
+                        snapshot[i].Value = previousSnapshot[i].Value;
+                        snapshot[i].Changed = false;
                     }
                 }
             }
@@ -167,7 +169,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                     //So don't check the return value
                     member.MetaData.Converter.Read(stream, out var result);
 
-                    snapshot[i] = result;
+                    snapshot[i].Value = result;
+                    snapshot[i].Changed = true;
                 }
             }
 

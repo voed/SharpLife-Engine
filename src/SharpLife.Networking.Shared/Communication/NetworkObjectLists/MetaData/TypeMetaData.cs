@@ -128,9 +128,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             return member;
         }
 
-        internal object[] AllocateSnapshot()
+        internal MemberSnapshot[] AllocateSnapshot()
         {
-            return new object[Members.Count];
+            return new MemberSnapshot[Members.Count];
         }
     }
 }

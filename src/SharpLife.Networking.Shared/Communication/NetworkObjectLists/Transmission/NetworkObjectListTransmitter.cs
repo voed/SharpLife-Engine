@@ -97,6 +97,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmiss
         /// <returns></returns>
         private Frame CreateFrame(NetworkFrameListTransmitter transmitter, NetworkObjectList objectList)
         {
+            var previousFrame = transmitter.CurrentList?.FindFrameByListId(objectList.Id);
+
             var frame = new Frame(objectList.Id);
 
             transmitter.Listener.OnBeginProcessList(objectList);
@@ -113,7 +115,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmiss
                 {
                     if (transmitter.Listener.FilterNetworkObject(objectList, networkObject))
                     {
-                        frame.CreateUpdate(networkObject);
+                        frame.CreateUpdate(networkObject, previousFrame);
                     }
                 }
             }

@@ -32,6 +32,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmiss
 
         public IFrameListTransmitterListener Listener { get; }
 
+        internal FrameList CurrentList => !_frameListLists.IsEmpty ? _frameListLists.Current : null;
+
         public NetworkFrameListTransmitter(NetworkObjectListTransmitter listTransmitter, int maxFrameLists, IFrameListTransmitterListener listener)
         {
             _listTransmitter = listTransmitter ?? throw new ArgumentNullException(nameof(listTransmitter));

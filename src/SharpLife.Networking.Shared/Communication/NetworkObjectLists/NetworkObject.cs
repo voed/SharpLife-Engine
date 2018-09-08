@@ -84,7 +84,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             ChangeNotifications[member.ChangeNotificationIndex.Value] = true;
         }
 
-        internal object[] TakeSnapshot()
+        internal MemberSnapshot[] TakeSnapshot(MemberSnapshot[] previousSnapshot)
         {
             var snapshot = MetaData.AllocateSnapshot();
 
@@ -94,13 +94,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
                 var childInstance = MetaData.Accessor[Instance, member.Info.Name];
 
-                snapshot[i] = member.MetaData.Converter.Copy(childInstance);
+                snapshot[i].Value = member.MetaData.Converter.Copy(childInstance);
+
+                //Only mark it as changed it if it actually changed
+                //This prevents client instances from being forcefully reset when the server isn't updating the value
+                //TODO: needs to be more robust (better comparison), a way to force updates
+                snapshot[i].Changed = snapshot[i].Value?.Equals(previousSnapshot?[i].Value) != true;
             }
 
             return snapshot;
         }
 
-        internal void ApplySnapshot(object[] snapshot)
+        internal void ApplySnapshot(MemberSnapshot[] snapshot)
         {
             if (snapshot == null)
             {
@@ -116,7 +121,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
             {
                 var member = MetaData.Members[i];
 
-                MetaData.Accessor[Instance, member.Info.Name] = member.MetaData.Converter.CreateInstance(member.MetaData.Type, snapshot[i]);
+                var currentValue = MetaData.Accessor[Instance, member.Info.Name];
+
+                if (snapshot[i].Changed)
+                {
+                    MetaData.Accessor[Instance, member.Info.Name] = member.MetaData.Converter.CreateInstance(member.MetaData.Type, snapshot[i].Value);
+                }
             }
         }
     }

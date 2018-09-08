@@ -67,14 +67,16 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             _destroyedObjects.Add(new ObjectDestruction { ObjectId = (uint)id });
         }
 
-        public void CreateUpdate(NetworkObject networkObject)
+        public void CreateUpdate(NetworkObject networkObject, Frame previousFrame)
         {
             if (networkObject == null)
             {
                 throw new ArgumentNullException(nameof(networkObject));
             }
 
-            _updates.Add(new ObjectUpdate(networkObject.Handle, networkObject.MetaData, networkObject.TakeSnapshot()));
+            var previousUpdate = previousFrame?.FindUpdateByObjectId(networkObject.Handle.Id);
+
+            _updates.Add(new ObjectUpdate(networkObject.Handle, networkObject.MetaData, networkObject.TakeSnapshot(previousUpdate?.Snapshot)));
         }
 
         private void DeserializeUpdate(ByteString data, TypeRegistry typeRegistry, Frame previousFrame)
