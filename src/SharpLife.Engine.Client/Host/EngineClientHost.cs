@@ -107,6 +107,7 @@ namespace SharpLife.Engine.Client.Host
             _renderer = new Renderer.Renderer(
                 _window.WindowHandle,
                 _window.GLContextHandle,
+                _logger,
                 _engine.FileSystem,
                 _userInterface.WindowManager.InputSystem,
                 this,

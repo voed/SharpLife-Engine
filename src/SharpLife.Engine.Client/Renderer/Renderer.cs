@@ -14,6 +14,7 @@
 ****/
 
 using SDL2;
+using Serilog;
 using SharpLife.Engine.Shared;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileFormats.WAD;
@@ -72,11 +73,17 @@ namespace SharpLife.Engine.Client.Renderer
 
         public Renderer(
             IntPtr window, IntPtr glContext,
+            ILogger logger,
             IFileSystem fileSystem, IInputSystem inputSystem, IRendererListener rendererListener,
             string envMapDirectory, string shadersDirectory)
         {
             _window = window;
             _glContext = glContext;
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
 
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _rendererListener = rendererListener ?? throw new ArgumentNullException(nameof(rendererListener));
