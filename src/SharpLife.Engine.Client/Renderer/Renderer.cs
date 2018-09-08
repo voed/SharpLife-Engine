@@ -22,10 +22,12 @@ using SharpLife.FileSystem;
 using SharpLife.Input;
 using SharpLife.Models;
 using SharpLife.Models.BSP;
+using SharpLife.Models.SPR;
 using SharpLife.Renderer;
 using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Objects;
+using SharpLife.Renderer.SpriteModel;
 using SharpLife.Renderer.StudioModel;
 using SharpLife.Utility;
 using System;
@@ -125,8 +127,9 @@ namespace SharpLife.Engine.Client.Renderer
             _modelResourcesManager = new ModelResourcesManager(
                 new Dictionary<Type, IModelResourceFactory>
                 {
-                    { typeof(BSPModel), new BSPModelResourceFactory() },
-                    { typeof(StudioModel), new StudioModelResourceFactory() }
+                    {typeof(SpriteModel), new SpriteModelResourceFactory(logger) },
+                    { typeof(StudioModel), new StudioModelResourceFactory() },
+                    { typeof(BSPModel), new BSPModelResourceFactory() }
                 });
             _modelRenderer = new ModelRenderer(
                 _modelResourcesManager,

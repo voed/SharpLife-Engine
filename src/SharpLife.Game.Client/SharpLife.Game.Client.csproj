@@ -22,4 +22,8 @@
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\Effects\" />
+  </ItemGroup>
+
 </Project>

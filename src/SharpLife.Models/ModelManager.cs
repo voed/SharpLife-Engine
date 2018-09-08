@@ -15,6 +15,7 @@
 
 using SharpLife.FileSystem;
 using SharpLife.Models.BSP;
+using SharpLife.Models.SPR;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace SharpLife.Models
     {
         private readonly IReadOnlyList<IModelLoader> _modelLoaders = new List<IModelLoader>
         {
+            new SpriteModelLoader(),
             new StudioModelLoader(),
 
             //BSP loader comes last due to not having a way to positively recognize the format
