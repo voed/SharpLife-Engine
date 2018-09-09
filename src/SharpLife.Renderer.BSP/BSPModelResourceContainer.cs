@@ -38,6 +38,14 @@ namespace SharpLife.Renderer.BSP
     {
         private const int NoLightStyle = -1;
 
+        private static readonly float[] DefaultStyleValues = new float[BSPConstants.MaxLightmaps]
+        {
+            NoLightStyle,
+            NoLightStyle,
+            NoLightStyle,
+            NoLightStyle
+        };
+
         private struct SingleFaceData : IDisposable
         {
             public Face Face;
@@ -323,6 +331,9 @@ namespace SharpLife.Renderer.BSP
                 }
 
                 var stylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<float>() * BSPConstants.MaxLightmaps), BufferUsage.UniformBuffer));
+
+                //Initialize styles so no invalid data could end up in the buffer
+                cl.UpdateBuffer(stylesBuffer, 0, DefaultStyleValues);
 
                 resources.Add(stylesBuffer);
 
