@@ -34,7 +34,7 @@ namespace SharpLife.Renderer.BSP
     /// <summary>
     /// The BSP World model renderable
     /// </summary>
-    public class BSPModelRenderable : ModelResourceContainer
+    public class BSPModelResourceContainer : ModelResourceContainer
     {
         private const int NoLightStyle = -1;
 
@@ -106,7 +106,7 @@ namespace SharpLife.Renderer.BSP
 
         public override IModel Model => _bspModel;
 
-        public BSPModelRenderable(BSPModelResourceFactory factory, BSPModel bspModel)
+        public BSPModelResourceContainer(BSPModelResourceFactory factory, BSPModel bspModel)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
@@ -366,8 +366,6 @@ namespace SharpLife.Renderer.BSP
                     }
 
                     var stylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<float>() * BSPConstants.MaxLightmaps), BufferUsage.UniformBuffer));
-
-                    //cl.UpdateBuffer(stylesBuffer, 0, styles);
 
                     resources.Add(stylesBuffer);
 
