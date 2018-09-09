@@ -43,5 +43,19 @@ namespace SharpLife.FileFormats.BSP
         public const int MaxPortals = 65536;
 
         public const int MaxLightmaps = 4;
+
+        public const int MaxLightStyles = 256;
+
+        /// <summary>
+        /// Indicates that a face style is not used
+        /// </summary>
+        public const int NoLightStyle = 255;
+
+        /// <summary>
+        /// Scale of a lightmap relative to a texture pixel
+        /// If texture scale is 1 1, then a texture pixel takes up a 1x1 physical pixel,
+        /// whereas a lightmap pixel takes up a 16x16 physical pixel
+        /// </summary>
+        public const int LightmapScale = 16;
     }
 }

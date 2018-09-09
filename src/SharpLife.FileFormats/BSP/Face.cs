@@ -32,5 +32,9 @@ namespace SharpLife.FileFormats.BSP
         public byte[] Styles { get; set; }
         //TODO
         public int LightOffset { get; set; }		// start of [numstyles*surfsize] samples
+
+        public int[] Extents { get; } = new int[2];
+
+        public int[] TextureMins { get; } = new int[2];
     }
 }

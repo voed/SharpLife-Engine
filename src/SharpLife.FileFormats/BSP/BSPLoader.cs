@@ -17,6 +17,7 @@ using Force.Crc32;
 using SharpLife.FileFormats.BSP.Disk;
 using SharpLife.FileFormats.WAD;
 using SharpLife.Utility;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -344,6 +345,49 @@ namespace SharpLife.FileFormats.BSP
             return surfEdges;
         }
 
+        private void CalculateExtents(Face face)
+        {
+            var mins = new Vector2(int.MaxValue, int.MaxValue);
+            var maxs = new Vector2(int.MinValue, int.MinValue);
+
+            for (var i = 0; i < face.Points.Count; ++i)
+            {
+                var point = face.Points[i];
+
+                var sValue = Vector3.Dot(point, face.TextureInfo.SNormal) + face.TextureInfo.SValue;
+                var tValue = Vector3.Dot(point, face.TextureInfo.TNormal) + face.TextureInfo.TValue;
+
+                if (sValue < mins.X)
+                {
+                    mins.X = sValue;
+                }
+
+                if (sValue > maxs.X)
+                {
+                    maxs.X = sValue;
+                }
+
+                if (tValue < mins.Y)
+                {
+                    mins.Y = tValue;
+                }
+
+                if (tValue > maxs.Y)
+                {
+                    maxs.Y = tValue;
+                }
+            }
+
+            var bmins = new[] { (int)Math.Floor(mins.X / BSPConstants.LightmapScale), (int)Math.Floor(mins.Y / BSPConstants.LightmapScale) };
+            var bmaxs = new[] { (int)Math.Ceiling(maxs.X / BSPConstants.LightmapScale), (int)Math.Ceiling(maxs.Y / BSPConstants.LightmapScale) };
+
+            face.Extents[0] = (bmaxs[0] - bmins[0]) * BSPConstants.LightmapScale;
+            face.Extents[1] = (bmaxs[1] - bmins[1]) * BSPConstants.LightmapScale;
+
+            face.TextureMins[0] = bmins[0] * BSPConstants.LightmapScale;
+            face.TextureMins[1] = bmins[1] * BSPConstants.LightmapScale;
+        }
+
         private List<Face> ReadFaces(ref Lump lump,
             IReadOnlyList<Plane> planes,
             IReadOnlyList<Vector3> vertexes,
@@ -393,6 +437,14 @@ namespace SharpLife.FileFormats.BSP
                 }
 
                 face.LightOffset = EndianConverter.Little(_reader.ReadInt32());
+
+                //Need to rescale the offset to match an index into the Rgb24 lighting array
+                if (face.LightOffset != -1)
+                {
+                    face.LightOffset /= 3;
+                }
+
+                CalculateExtents(face);
 
                 faces.Add(face);
             }
@@ -534,11 +586,27 @@ namespace SharpLife.FileFormats.BSP
             return _reader.ReadBytes(lump.filelen);
         }
 
-        private byte[] ReadLighting(ref Lump lump)
+        private Rgb24[] ReadLighting(ref Lump lump)
         {
             _reader.BaseStream.Position = lump.fileofs;
 
-            return _reader.ReadBytes(lump.filelen);
+            if (lump.filelen == 0)
+            {
+                return Array.Empty<Rgb24>();
+            }
+
+            var data = _reader.ReadBytes(lump.filelen);
+
+            var lighting = new Rgb24[data.Length / 3];
+
+            for (var i = 0; i < (data.Length / 3); ++i)
+            {
+                lighting[i].R = data[i * 3];
+                lighting[i].G = data[(i * 3) + 1];
+                lighting[i].B = data[(i * 3) + 2];
+            }
+
+            return lighting;
         }
 
         /// <summary>

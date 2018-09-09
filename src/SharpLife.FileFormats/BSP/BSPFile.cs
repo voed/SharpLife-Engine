@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.FileFormats.WAD;
+using SixLabors.ImageSharp.PixelFormats;
 using System.Collections.Generic;
 
 namespace SharpLife.FileFormats.BSP
@@ -40,7 +41,7 @@ namespace SharpLife.FileFormats.BSP
 
         public byte[] Visibility { get; set; }
 
-        public byte[] Lighting { get; set; }
+        public Rgb24[] Lighting { get; set; }
 
         /// <summary>
         /// Whether the BSP file uses Blue Shift style lump layout
