@@ -111,7 +111,7 @@ namespace SharpLife.Renderer.BSP
                 var style = _lightStyles[i];
 
                 //Styles can be empty if it hasn't been set yet
-                var value = style.Length > 0 ? style[offset % style.Length] - 'a' : UnstyledLightValue;
+                var value = style.Length > 0 ? 22 * (style[offset % style.Length] - 'a') : UnstyledLightValue;
 
                 _lightStyleValues[i] = Math.Min(LightScale * value / 256, byte.MaxValue);
             }
