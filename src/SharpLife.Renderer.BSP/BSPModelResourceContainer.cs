@@ -90,17 +90,12 @@ namespace SharpLife.Renderer.BSP
         }
 
         private readonly BSPModelResourceFactory _factory;
-
         private readonly BSPModel _bspModel;
 
-        private List<FaceBufferData> _faces;
-        private Pipeline _pipeline;
-        private ResourceSet _resourceSet;
-        private ResourceLayout _layout;
-        private ResourceLayout _textureLayout;
-        private ResourceLayout _lightmapsLayout;
-
         private DeviceBuffer _worldAndInverseBuffer;
+
+        private List<FaceBufferData> _faces;
+        private ResourceSet _sharedResourceSet;
 
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
@@ -118,8 +113,8 @@ namespace SharpLife.Renderer.BSP
 
             cl.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
 
-            cl.SetPipeline(_pipeline);
-            cl.SetGraphicsResourceSet(0, _resourceSet);
+            cl.SetPipeline(_factory.Pipeline);
+            cl.SetGraphicsResourceSet(0, _sharedResourceSet);
 
             var styles = stackalloc int[BSPConstants.MaxLightmaps];
 
@@ -164,7 +159,7 @@ namespace SharpLife.Renderer.BSP
                 return;
             }
 
-            ResourceFactory disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
+            var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
             _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
@@ -174,17 +169,6 @@ namespace SharpLife.Renderer.BSP
             var sortedFaces = _bspModel.SubModel.Faces.GroupBy(face => face.TextureInfo.MipTexture.Name);
 
             _faces = new List<FaceBufferData>();
-
-            _textureLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)));
-
-            _lightmapsLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("Lightmap0", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap1", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap2", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap3", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Styles", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
 
             foreach (var faces in sortedFaces)
             {
@@ -197,34 +181,8 @@ namespace SharpLife.Renderer.BSP
                 }
             }
 
-            VertexLayoutDescription[] vertexLayouts = new VertexLayoutDescription[]
-            {
-                new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                    new VertexElementDescription("LightmapCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2))
-            };
-
-            (Shader vs, Shader fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "LightMappedGeneric");
-
-            _layout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)));
-
-            GraphicsPipelineDescription pd = new GraphicsPipelineDescription(
-                BlendStateDescription.SingleAlphaBlend,
-                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
-                new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
-                PrimitiveTopology.TriangleList,
-                new ShaderSetDescription(vertexLayouts, new[] { vs, fs }),
-                new ResourceLayout[] { _layout, _textureLayout, _lightmapsLayout },
-                sc.MainSceneFramebuffer.OutputDescription);
-
-            _pipeline = disposeFactory.CreateGraphicsPipeline(ref pd);
-
-            _resourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
-                _layout,
+            _sharedResourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
+                _factory.SharedLayout,
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
                 _worldAndInverseBuffer));
@@ -238,6 +196,13 @@ namespace SharpLife.Renderer.BSP
             }
 
             _disposeCollector.DisposeAll();
+
+            foreach (var faces in _faces)
+            {
+                faces.Dispose();
+            }
+
+            _faces.Clear();
         }
 
         private Texture GenerateLightmap(GraphicsDevice gd, SceneContext sc, Face face, int lightmapIndex)
@@ -377,7 +342,7 @@ namespace SharpLife.Renderer.BSP
                         IndexBuffer = ib,
                         IndicesCount = (uint)indicesArray.Length,
                         Lightmaps = factory.CreateResourceSet(new ResourceSetDescription(
-                            _lightmapsLayout,
+                            _factory.LightmapsLayout,
                             resources.ToArray()
                         )),
                         Styles = stylesBuffer
@@ -395,7 +360,7 @@ namespace SharpLife.Renderer.BSP
             return new FaceBufferData
             {
                 Texture = factory.CreateResourceSet(new ResourceSetDescription(
-                    _textureLayout,
+                    _factory.TextureLayout,
                     view,
                     sc.MainSampler)),
                 Faces = facesData.ToArray()
