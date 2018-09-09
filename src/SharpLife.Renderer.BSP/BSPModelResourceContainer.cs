@@ -211,8 +211,8 @@ namespace SharpLife.Renderer.BSP
 
         private Texture GenerateLightmap(GraphicsDevice gd, SceneContext sc, Face face, int lightmapIndex)
         {
-            var smax = (face.Extents[0] / 16) + 1;
-            var tmax = (face.Extents[1] / 16) + 1;
+            var smax = (face.Extents[0] / BSPConstants.LightmapScale) + 1;
+            var tmax = (face.Extents[1] / BSPConstants.LightmapScale) + 1;
 
             var size = smax * tmax;
 
