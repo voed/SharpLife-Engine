@@ -16,6 +16,7 @@
 using SDL2;
 using Serilog;
 using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileFormats.BSP;
 using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
@@ -53,6 +54,8 @@ namespace SharpLife.Engine.Client.Renderer
         private readonly string _envMapDirectory;
 
         private readonly SceneContext _sc;
+
+        private readonly LightStyles _lightStyles;
 
         private readonly ImGuiRenderable _imGuiRenderable;
 
@@ -124,12 +127,14 @@ namespace SharpLife.Engine.Client.Renderer
             Scene.AddContainer(_finalPass);
             Scene.AddRenderable(_finalPass);
 
+            _lightStyles = new LightStyles();
+
             _modelResourcesManager = new ModelResourcesManager(
                 new Dictionary<Type, IModelResourceFactory>
                 {
                     {typeof(SpriteModel), new SpriteModelResourceFactory(logger) },
                     { typeof(StudioModel), new StudioModelResourceFactory() },
-                    { typeof(BSPModel), new BSPModelResourceFactory() }
+                    { typeof(BSPModel), new BSPModelResourceFactory(_lightStyles) }
                 });
             _modelRenderer = new ModelRenderer(
                 _modelResourcesManager,
@@ -160,8 +165,9 @@ namespace SharpLife.Engine.Client.Renderer
             _windowResized = true;
         }
 
-        public void Update(float deltaSeconds)
+        public void Update(IEngineTime engineTime, float deltaSeconds)
         {
+            _lightStyles.AnimateLights(engineTime);
             Scene.Update(deltaSeconds);
         }
 

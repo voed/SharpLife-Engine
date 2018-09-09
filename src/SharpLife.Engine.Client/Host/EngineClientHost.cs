@@ -243,7 +243,7 @@ namespace SharpLife.Engine.Client.Host
                 _netClient.RunFrame();
             }
 
-            _renderer.Update(deltaSeconds);
+            _renderer.Update(_engine.EngineTime, deltaSeconds);
 
             _clientUI.Update(deltaSeconds, _renderer.Scene);
 

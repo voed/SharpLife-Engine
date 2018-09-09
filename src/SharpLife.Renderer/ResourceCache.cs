@@ -24,6 +24,8 @@ namespace SharpLife.Renderer
     // Non-thread-safe cache for resources.
     public class ResourceCache
     {
+        private uint _nextUniqueId;
+
         private readonly Dictionary<GraphicsPipelineDescription, Pipeline> s_pipelines
             = new Dictionary<GraphicsPipelineDescription, Pipeline>();
 
@@ -141,6 +143,8 @@ namespace SharpLife.Renderer
                 kvp.Value.Dispose();
             }
             s_resourceSets.Clear();
+
+            _nextUniqueId = 0;
         }
 
         /// <summary>
@@ -162,6 +166,16 @@ namespace SharpLife.Renderer
             s_textures.Add(name, tex);
 
             return tex;
+        }
+
+        public void AddTexture2D(Texture tex, string name)
+        {
+            if (s_textures.ContainsKey(name))
+            {
+                throw new InvalidOperationException($"Cannot add texture \"{name}\", already uploaded");
+            }
+
+            s_textures.Add(name, tex);
         }
 
         public Texture GetTexture2D(string name)
@@ -206,6 +220,11 @@ namespace SharpLife.Renderer
             }
 
             return ret;
+        }
+
+        public uint GenerateUniqueId()
+        {
+            return _nextUniqueId++;
         }
     }
 }

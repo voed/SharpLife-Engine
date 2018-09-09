@@ -18,12 +18,15 @@ using SharpLife.Models;
 using SharpLife.Models.BSP;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
+using Veldrid.ImageSharp;
 using Veldrid.Utilities;
 
 namespace SharpLife.Renderer.BSP
@@ -33,23 +36,60 @@ namespace SharpLife.Renderer.BSP
     /// </summary>
     public class BSPModelRenderable : ModelResourceContainer
     {
-        private class FaceBufferData : IDisposable
+        private const int NoLightStyle = -1;
+
+        private struct SingleFaceData : IDisposable
         {
+            public Face Face;
+
+            public int[] CachedLightStyles;
+
             public DeviceBuffer VertexBuffer;
 
             public DeviceBuffer IndexBuffer;
 
             public uint IndicesCount;
 
-            public ResourceSet Texture;
+            /// <summary>
+            /// Up to <see cref="BSPConstants.MaxLightmaps"/> lightmap textures
+            /// </summary>
+            public ResourceSet Lightmaps;
+
+            public DeviceBuffer Styles;
 
             public void Dispose()
             {
                 VertexBuffer.Dispose();
                 IndexBuffer.Dispose();
-                Texture.Dispose();
+                Lightmaps.Dispose();
+                Styles.Dispose();
             }
         }
+
+        private class FaceBufferData : IDisposable
+        {
+            public ResourceSet Texture;
+
+            public SingleFaceData[] Faces;
+
+            public void Dispose()
+            {
+                Texture.Dispose();
+
+                for (var i = 0; i < Faces.Length; ++i)
+                {
+                    Faces[i].Dispose();
+                }
+            }
+        }
+
+        private struct BSPSurfaceData
+        {
+            public WorldTextureCoordinate WorldTexture;
+            public Vector2 Lightmap;
+        }
+
+        private readonly BSPModelResourceFactory _factory;
 
         private readonly BSPModel _bspModel;
 
@@ -58,6 +98,7 @@ namespace SharpLife.Renderer.BSP
         private ResourceSet _resourceSet;
         private ResourceLayout _layout;
         private ResourceLayout _textureLayout;
+        private ResourceLayout _lightmapsLayout;
 
         private DeviceBuffer _worldAndInverseBuffer;
 
@@ -65,28 +106,54 @@ namespace SharpLife.Renderer.BSP
 
         public override IModel Model => _bspModel;
 
-        public BSPModelRenderable(BSPModel bspModel)
+        public BSPModelRenderable(BSPModelResourceFactory factory, BSPModel bspModel)
         {
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
         }
 
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData)
+        public override unsafe void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData)
         {
             var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
 
             cl.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
 
-            //TODO: duplicate SetPipeline call?
             cl.SetPipeline(_pipeline);
+            cl.SetGraphicsResourceSet(0, _resourceSet);
+
+            var styles = stackalloc int[BSPConstants.MaxLightmaps];
 
             foreach (var faces in _faces)
             {
-                cl.SetVertexBuffer(0, faces.VertexBuffer);
-                cl.SetIndexBuffer(faces.IndexBuffer, IndexFormat.UInt32);
-                cl.SetPipeline(_pipeline);
-                cl.SetGraphicsResourceSet(0, _resourceSet);
                 cl.SetGraphicsResourceSet(1, faces.Texture);
-                cl.DrawIndexed(faces.IndicesCount, 1, 0, 0, 0);
+
+                for (var i = 0; i < faces.Faces.Length; ++i)
+                {
+                    ref var face = ref faces.Faces[i];
+
+                    for (var style = 0; style < BSPConstants.MaxLightmaps; ++style)
+                    {
+                        var styleIndex = face.Face.Styles[style];
+
+                        var styleValue = styleIndex != BSPConstants.NoLightStyle ? _factory.LightStyles.GetStyleValue(styleIndex) : NoLightStyle;
+
+                        //Cache style values to reduce the number of updates
+                        if (face.CachedLightStyles[style] != styleValue)
+                        {
+                            face.CachedLightStyles[style] = styleValue;
+
+                            //Convert to normalized [0, 1] range
+                            var inputValue = styleValue != NoLightStyle ? styleValue / 255.0f : NoLightStyle;
+
+                            cl.UpdateBuffer(face.Styles, (uint)(Marshal.SizeOf<float>() * style), ref inputValue);
+                        }
+                    }
+
+                    cl.SetGraphicsResourceSet(2, face.Lightmaps);
+                    cl.SetVertexBuffer(0, face.VertexBuffer);
+                    cl.SetIndexBuffer(face.IndexBuffer, IndexFormat.UInt32);
+                    cl.DrawIndexed(face.IndicesCount, 1, 0, 0, 0);
+                }
             }
         }
 
@@ -112,6 +179,13 @@ namespace SharpLife.Renderer.BSP
                 new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
+            _lightmapsLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("Lightmap0", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("Lightmap1", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("Lightmap2", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("Lightmap3", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("Styles", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
+
             foreach (var faces in sortedFaces)
             {
                 if (faces.Key != "sky")
@@ -127,7 +201,8 @@ namespace SharpLife.Renderer.BSP
             {
                 new VertexLayoutDescription(
                     new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2))
+                    new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    new VertexElementDescription("LightmapCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2))
             };
 
             (Shader vs, Shader fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "LightMappedGeneric");
@@ -143,7 +218,7 @@ namespace SharpLife.Renderer.BSP
                 new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
                 PrimitiveTopology.TriangleList,
                 new ShaderSetDescription(vertexLayouts, new[] { vs, fs }),
-                new ResourceLayout[] { _layout, _textureLayout },
+                new ResourceLayout[] { _layout, _textureLayout, _lightmapsLayout },
                 sc.MainSceneFramebuffer.OutputDescription);
 
             _pipeline = disposeFactory.CreateGraphicsPipeline(ref pd);
@@ -165,6 +240,44 @@ namespace SharpLife.Renderer.BSP
             _disposeCollector.DisposeAll();
         }
 
+        private Texture GenerateLightmap(GraphicsDevice gd, SceneContext sc, Face face, int lightmapIndex)
+        {
+            var smax = (face.Extents[0] / 16) + 1;
+            var tmax = (face.Extents[1] / 16) + 1;
+
+            var size = smax * tmax;
+
+            var colorData = new Rgba32[size];
+
+            if (_bspModel.BSPFile.Lighting.Length > 0 && face.LightOffset != -1)
+            {
+                //Initialize from light data
+                var lightmapData = new Span<Rgb24>(_bspModel.BSPFile.Lighting, face.LightOffset + (size * lightmapIndex), size);
+
+                for (var i = 0; i < size; ++i)
+                {
+                    //Lightmap data is passed directly to shaders; shaders will handle light styles and gamma correction
+                    lightmapData[i].ToRgba32(ref colorData[i]);
+                }
+            }
+            else
+            {
+                //Fill with fullbright
+                for (var i = 0; i < size; ++i)
+                {
+                    colorData[i].R = byte.MaxValue;
+                    colorData[i].G = byte.MaxValue;
+                    colorData[i].B = byte.MaxValue;
+                    colorData[i].A = byte.MaxValue;
+                }
+            }
+
+            using (var image = Image.LoadPixelData(colorData, smax, tmax))
+            {
+                return sc.MapResourceCache.AddTexture2D(gd, gd.ResourceFactory, new ImageSharpTexture(image, false), $"lightmap{sc.MapResourceCache.GenerateUniqueId()}");
+            }
+        }
+
         private FaceBufferData BuildFacesBuffer(IReadOnlyList<Face> faces, ResourceCache resourceCache, GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
             if (faces.Count == 0)
@@ -172,55 +285,107 @@ namespace SharpLife.Renderer.BSP
                 throw new ArgumentException("Cannot create a face buffer when no faces are provided");
             }
 
+            var factory = gd.ResourceFactory;
+
             var mipTexture = faces[0].TextureInfo.MipTexture;
 
-            var vertices = new List<WorldTextureCoordinate>();
-            var indices = new List<uint>();
+            var facesData = new List<SingleFaceData>();
 
-            foreach (var face in faces)
             {
-                var firstVertex = vertices.Count;
+                var vertices = new List<BSPSurfaceData>();
+                var indices = new List<uint>();
 
-                //Create triangles out of the face
-                foreach (var i in Enumerable.Range(vertices.Count + 1, face.Points.Count - 2))
+                foreach (var face in faces)
                 {
-                    indices.Add((uint)firstVertex);
-                    indices.Add((uint)i);
-                    indices.Add((uint)i + 1);
-                }
+                    vertices.Clear();
+                    indices.Clear();
 
-                var textureInfo = face.TextureInfo;
+                    var smax = (face.Extents[0] / 16) + 1;
+                    var tmax = (face.Extents[1] / 16) + 1;
 
-                foreach (var point in face.Points)
-                {
-                    var s = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
-                    s /= mipTexture.Width;
-
-                    var t = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
-                    t /= mipTexture.Height;
-
-                    vertices.Add(new WorldTextureCoordinate
+                    //Create triangles out of the face
+                    foreach (var i in Enumerable.Range(1, face.Points.Count - 2))
                     {
-                        Vertex = point,
-                        Texture = new Vector2(s, t)
+                        indices.Add(0U);
+                        indices.Add((uint)i);
+                        indices.Add((uint)i + 1);
+                    }
+
+                    var textureInfo = face.TextureInfo;
+
+                    foreach (var point in face.Points)
+                    {
+                        var s = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
+                        s /= mipTexture.Width;
+
+                        var t = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
+                        t /= mipTexture.Height;
+
+                        var lightmapS = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
+                        lightmapS -= face.TextureMins[0];
+                        lightmapS += 8;
+                        lightmapS /= smax * BSPConstants.LightmapScale;
+
+                        var lightmapT = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
+                        lightmapT -= face.TextureMins[1];
+                        lightmapT += 8;
+                        lightmapT /= tmax * BSPConstants.LightmapScale;
+
+                        vertices.Add(new BSPSurfaceData
+                        {
+                            WorldTexture = new WorldTextureCoordinate
+                            {
+                                Vertex = point,
+                                Texture = new Vector2(s, t)
+                            },
+                            Lightmap = new Vector2(lightmapS, lightmapT)
+                        });
+                    }
+
+                    var verticesArray = vertices.ToArray();
+                    var indicesArray = indices.ToArray();
+
+                    var vb = factory.CreateBuffer(new BufferDescription(verticesArray.SizeInBytes(), BufferUsage.VertexBuffer));
+
+                    cl.UpdateBuffer(vb, 0, verticesArray);
+
+                    var ib = factory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
+
+                    cl.UpdateBuffer(ib, 0, indicesArray);
+
+                    var resources = new List<BindableResource>(BSPConstants.MaxLightmaps);
+
+                    var styles = face.Styles.Select(value => (int)value).ToArray();
+
+                    for (var i = 0; i < BSPConstants.MaxLightmaps; ++i)
+                    {
+                        //Use pink texture if no style is provided
+                        var lightmap = face.Styles[i] != 255 ? GenerateLightmap(gd, sc, face, i) : sc.MapResourceCache.GetPinkTexture(gd, factory);
+
+                        resources.Add(sc.MapResourceCache.GetTextureView(factory, lightmap));
+                    }
+
+                    var stylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<float>() * BSPConstants.MaxLightmaps), BufferUsage.UniformBuffer));
+
+                    //cl.UpdateBuffer(stylesBuffer, 0, styles);
+
+                    resources.Add(stylesBuffer);
+
+                    facesData.Add(new SingleFaceData
+                    {
+                        Face = face,
+                        CachedLightStyles = new int[BSPConstants.MaxLightmaps] { NoLightStyle, NoLightStyle, NoLightStyle, NoLightStyle },
+                        VertexBuffer = vb,
+                        IndexBuffer = ib,
+                        IndicesCount = (uint)indicesArray.Length,
+                        Lightmaps = factory.CreateResourceSet(new ResourceSetDescription(
+                            _lightmapsLayout,
+                            resources.ToArray()
+                        )),
+                        Styles = stylesBuffer
                     });
                 }
             }
-
-            var verticesArray = vertices.ToArray();
-            var indicesArray = indices.ToArray();
-
-            var indicesCount = (uint)indicesArray.Length;
-
-            var factory = gd.ResourceFactory;
-
-            var vb = factory.CreateBuffer(new BufferDescription(verticesArray.SizeInBytes(), BufferUsage.VertexBuffer));
-
-            cl.UpdateBuffer(vb, 0, verticesArray);
-
-            var ib = factory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
-
-            cl.UpdateBuffer(ib, 0, indicesArray);
 
             var texture = resourceCache.GetTexture2D(mipTexture.Name);
 
@@ -231,13 +396,11 @@ namespace SharpLife.Renderer.BSP
 
             return new FaceBufferData
             {
-                VertexBuffer = vb,
-                IndexBuffer = ib,
-                IndicesCount = indicesCount,
                 Texture = factory.CreateResourceSet(new ResourceSetDescription(
                     _textureLayout,
                     view,
-                    sc.MainSampler))
+                    sc.MainSampler)),
+                Faces = facesData.ToArray()
             };
         }
     }

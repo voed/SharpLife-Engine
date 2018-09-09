@@ -23,6 +23,13 @@ namespace SharpLife.Renderer.BSP
 {
     public sealed class BSPModelResourceFactory : IModelResourceFactory
     {
+        public LightStyles LightStyles { get; }
+
+        public BSPModelResourceFactory(LightStyles lightStyles)
+        {
+            LightStyles = lightStyles ?? throw new ArgumentNullException(nameof(lightStyles));
+        }
+
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
         }
@@ -43,7 +50,7 @@ namespace SharpLife.Renderer.BSP
                 throw new ArgumentException("Model must be a BSP model", nameof(model));
             }
 
-            return new BSPModelRenderable(bspModel);
+            return new BSPModelRenderable(this, bspModel);
         }
     }
 }
