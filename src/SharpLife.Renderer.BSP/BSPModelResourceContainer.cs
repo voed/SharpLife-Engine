@@ -44,9 +44,7 @@ namespace SharpLife.Renderer.BSP
 
             public int[] CachedLightStyles;
 
-            public DeviceBuffer VertexBuffer;
-
-            public DeviceBuffer IndexBuffer;
+            public uint FirstIndex;
 
             public uint IndicesCount;
 
@@ -59,8 +57,6 @@ namespace SharpLife.Renderer.BSP
 
             public void Dispose()
             {
-                VertexBuffer.Dispose();
-                IndexBuffer.Dispose();
                 Lightmaps.Dispose();
                 Styles.Dispose();
             }
@@ -70,11 +66,18 @@ namespace SharpLife.Renderer.BSP
         {
             public ResourceSet Texture;
 
+            public DeviceBuffer VertexBuffer;
+
+            public DeviceBuffer IndexBuffer;
+
             public SingleFaceData[] Faces;
 
             public void Dispose()
             {
                 Texture.Dispose();
+
+                VertexBuffer.Dispose();
+                IndexBuffer.Dispose();
 
                 for (var i = 0; i < Faces.Length; ++i)
                 {
@@ -122,6 +125,9 @@ namespace SharpLife.Renderer.BSP
             {
                 cl.SetGraphicsResourceSet(1, faces.Texture);
 
+                cl.SetVertexBuffer(0, faces.VertexBuffer);
+                cl.SetIndexBuffer(faces.IndexBuffer, IndexFormat.UInt32);
+
                 for (var i = 0; i < faces.Faces.Length; ++i)
                 {
                     ref var face = ref faces.Faces[i];
@@ -145,9 +151,7 @@ namespace SharpLife.Renderer.BSP
                     }
 
                     cl.SetGraphicsResourceSet(2, face.Lightmaps);
-                    cl.SetVertexBuffer(0, face.VertexBuffer);
-                    cl.SetIndexBuffer(face.IndexBuffer, IndexFormat.UInt32);
-                    cl.DrawIndexed(face.IndicesCount, 1, 0, 0, 0);
+                    cl.DrawIndexed(face.IndicesCount, 1, face.FirstIndex, 0, 0);
                 }
             }
         }
@@ -256,99 +260,96 @@ namespace SharpLife.Renderer.BSP
 
             var facesData = new List<SingleFaceData>();
 
+            var vertices = new List<BSPSurfaceData>();
+            var indices = new List<uint>();
+
+            foreach (var face in faces)
             {
-                var vertices = new List<BSPSurfaceData>();
-                var indices = new List<uint>();
+                var smax = (face.Extents[0] / 16) + 1;
+                var tmax = (face.Extents[1] / 16) + 1;
 
-                foreach (var face in faces)
+                var firstVertex = vertices.Count;
+                var firstIndex = indices.Count;
+
+                //Create triangles out of the face
+                foreach (var i in Enumerable.Range(firstVertex + 1, face.Points.Count - 2))
                 {
-                    vertices.Clear();
-                    indices.Clear();
+                    indices.Add((uint)firstVertex);
+                    indices.Add((uint)i);
+                    indices.Add((uint)i + 1);
+                }
 
-                    var smax = (face.Extents[0] / 16) + 1;
-                    var tmax = (face.Extents[1] / 16) + 1;
+                var textureInfo = face.TextureInfo;
 
-                    //Create triangles out of the face
-                    foreach (var i in Enumerable.Range(1, face.Points.Count - 2))
+                foreach (var point in face.Points)
+                {
+                    var s = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
+                    s /= mipTexture.Width;
+
+                    var t = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
+                    t /= mipTexture.Height;
+
+                    var lightmapS = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
+                    lightmapS -= face.TextureMins[0];
+                    lightmapS += 8;
+                    lightmapS /= smax * BSPConstants.LightmapScale;
+
+                    var lightmapT = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
+                    lightmapT -= face.TextureMins[1];
+                    lightmapT += 8;
+                    lightmapT /= tmax * BSPConstants.LightmapScale;
+
+                    vertices.Add(new BSPSurfaceData
                     {
-                        indices.Add(0U);
-                        indices.Add((uint)i);
-                        indices.Add((uint)i + 1);
-                    }
-
-                    var textureInfo = face.TextureInfo;
-
-                    foreach (var point in face.Points)
-                    {
-                        var s = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
-                        s /= mipTexture.Width;
-
-                        var t = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
-                        t /= mipTexture.Height;
-
-                        var lightmapS = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
-                        lightmapS -= face.TextureMins[0];
-                        lightmapS += 8;
-                        lightmapS /= smax * BSPConstants.LightmapScale;
-
-                        var lightmapT = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
-                        lightmapT -= face.TextureMins[1];
-                        lightmapT += 8;
-                        lightmapT /= tmax * BSPConstants.LightmapScale;
-
-                        vertices.Add(new BSPSurfaceData
+                        WorldTexture = new WorldTextureCoordinate
                         {
-                            WorldTexture = new WorldTextureCoordinate
-                            {
-                                Vertex = point,
-                                Texture = new Vector2(s, t)
-                            },
-                            Lightmap = new Vector2(lightmapS, lightmapT)
-                        });
-                    }
-
-                    var verticesArray = vertices.ToArray();
-                    var indicesArray = indices.ToArray();
-
-                    var vb = factory.CreateBuffer(new BufferDescription(verticesArray.SizeInBytes(), BufferUsage.VertexBuffer));
-
-                    cl.UpdateBuffer(vb, 0, verticesArray);
-
-                    var ib = factory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
-
-                    cl.UpdateBuffer(ib, 0, indicesArray);
-
-                    var resources = new List<BindableResource>(BSPConstants.MaxLightmaps);
-
-                    var styles = face.Styles.Select(value => (int)value).ToArray();
-
-                    for (var i = 0; i < BSPConstants.MaxLightmaps; ++i)
-                    {
-                        //Use pink texture if no style is provided
-                        var lightmap = face.Styles[i] != 255 ? GenerateLightmap(gd, sc, face, i) : sc.MapResourceCache.GetPinkTexture(gd, factory);
-
-                        resources.Add(sc.MapResourceCache.GetTextureView(factory, lightmap));
-                    }
-
-                    var stylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<float>() * BSPConstants.MaxLightmaps), BufferUsage.UniformBuffer));
-
-                    resources.Add(stylesBuffer);
-
-                    facesData.Add(new SingleFaceData
-                    {
-                        Face = face,
-                        CachedLightStyles = new int[BSPConstants.MaxLightmaps] { NoLightStyle, NoLightStyle, NoLightStyle, NoLightStyle },
-                        VertexBuffer = vb,
-                        IndexBuffer = ib,
-                        IndicesCount = (uint)indicesArray.Length,
-                        Lightmaps = factory.CreateResourceSet(new ResourceSetDescription(
-                            _factory.LightmapsLayout,
-                            resources.ToArray()
-                        )),
-                        Styles = stylesBuffer
+                            Vertex = point,
+                            Texture = new Vector2(s, t)
+                        },
+                        Lightmap = new Vector2(lightmapS, lightmapT)
                     });
                 }
+
+                var resources = new List<BindableResource>(BSPConstants.MaxLightmaps);
+
+                var styles = face.Styles.Select(value => (int)value).ToArray();
+
+                for (var i = 0; i < BSPConstants.MaxLightmaps; ++i)
+                {
+                    //Use pink texture if no style is provided
+                    var lightmap = face.Styles[i] != 255 ? GenerateLightmap(gd, sc, face, i) : sc.MapResourceCache.GetPinkTexture(gd, factory);
+
+                    resources.Add(sc.MapResourceCache.GetTextureView(factory, lightmap));
+                }
+
+                var stylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<float>() * BSPConstants.MaxLightmaps), BufferUsage.UniformBuffer));
+
+                resources.Add(stylesBuffer);
+
+                facesData.Add(new SingleFaceData
+                {
+                    Face = face,
+                    CachedLightStyles = new int[BSPConstants.MaxLightmaps] { NoLightStyle, NoLightStyle, NoLightStyle, NoLightStyle },
+                    FirstIndex = (uint)firstIndex,
+                    IndicesCount = (uint)(indices.Count - firstIndex),
+                    Lightmaps = factory.CreateResourceSet(new ResourceSetDescription(
+                        _factory.LightmapsLayout,
+                        resources.ToArray()
+                    )),
+                    Styles = stylesBuffer
+                });
             }
+
+            var verticesArray = vertices.ToArray();
+            var indicesArray = indices.ToArray();
+
+            var vb = factory.CreateBuffer(new BufferDescription(verticesArray.SizeInBytes(), BufferUsage.VertexBuffer));
+
+            cl.UpdateBuffer(vb, 0, verticesArray);
+
+            var ib = factory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
+
+            cl.UpdateBuffer(ib, 0, indicesArray);
 
             var texture = resourceCache.GetTexture2D(mipTexture.Name);
 
@@ -363,6 +364,8 @@ namespace SharpLife.Renderer.BSP
                     _factory.TextureLayout,
                     view,
                     sc.MainSampler)),
+                VertexBuffer = vb,
+                IndexBuffer = ib,
                 Faces = facesData.ToArray()
             };
         }
