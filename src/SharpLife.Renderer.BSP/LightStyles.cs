@@ -47,6 +47,7 @@ namespace SharpLife.Renderer.BSP
         /// </summary>
         public void Initialize()
         {
+            _lightStyles.Clear();
             for (var i = 0; i < MaxControlledStyles; ++i)
             {
                 _lightStyles.Add(string.Empty);

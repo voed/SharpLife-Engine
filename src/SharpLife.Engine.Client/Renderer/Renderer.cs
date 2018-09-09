@@ -306,6 +306,9 @@ namespace SharpLife.Engine.Client.Renderer
 
             //Clear all graphics data
             _sc.MapResourceCache.DestroyAllDeviceObjects();
+
+            //Reset light styles
+            _lightStyles.Initialize();
         }
     }
 }
