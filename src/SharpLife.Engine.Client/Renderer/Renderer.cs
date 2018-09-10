@@ -35,6 +35,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Veldrid;
+using Veldrid.OpenGL;
 
 namespace SharpLife.Engine.Client.Renderer
 {
@@ -45,7 +46,9 @@ namespace SharpLife.Engine.Client.Renderer
     public class Renderer : IRenderer
     {
         private readonly IntPtr _window;
-        private readonly IntPtr _glContext;
+
+        private readonly ILogger _logger;
+
         private readonly GraphicsDevice _gd;
         private readonly IFileSystem _fileSystem;
 
@@ -81,18 +84,14 @@ namespace SharpLife.Engine.Client.Renderer
         public event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderEnd;
 
         public Renderer(
-            IntPtr window, IntPtr glContext,
+            IntPtr window,
             ILogger logger,
             IFileSystem fileSystem, IInputSystem inputSystem, IRendererListener rendererListener,
             string envMapDirectory, string shadersDirectory)
         {
             _window = window;
-            _glContext = glContext;
 
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _rendererListener = rendererListener ?? throw new ArgumentNullException(nameof(rendererListener));
@@ -103,21 +102,11 @@ namespace SharpLife.Engine.Client.Renderer
             //Configure Veldrid graphics device
             var options = new GraphicsDeviceOptions(false, PixelFormat.R8_G8_B8_A8_UNorm, false, ResourceBindingModel.Improved, true, true);
 
-            var platformInfo = new Veldrid.OpenGL.OpenGLPlatformInfo(
-                _glContext,
-                SDL.SDL_GL_GetProcAddress,
-                context => SDL.SDL_GL_MakeCurrent(_window, context),
-                SDL.SDL_GL_GetCurrentContext,
-                () => SDL.SDL_GL_MakeCurrent(IntPtr.Zero, IntPtr.Zero),
-                SDL.SDL_GL_DeleteContext,
-                () => SDL.SDL_GL_SwapWindow(_window),
-                sync => SDL.SDL_GL_SetSwapInterval(sync ? 1 : 0));
-
-            SDL.SDL_GetWindowSize(_window, out var width, out var height);
-
-            _gd = GraphicsDevice.CreateOpenGL(options, platformInfo, (uint)width, (uint)height);
+            _gd = CreateGraphicsDevice(options, GraphicsBackend.OpenGL);
 
             _gd.SyncToVerticalBlank = false;
+
+            SDL.SDL_GetWindowSize(_window, out var width, out var height);
 
             Scene = new Scene(inputSystem, _gd, width, height);
 
@@ -138,7 +127,7 @@ namespace SharpLife.Engine.Client.Renderer
             _modelResourcesManager = new ModelResourcesManager(
                 new Dictionary<Type, IModelResourceFactory>
                 {
-                    {typeof(SpriteModel), new SpriteModelResourceFactory(logger) },
+                    {typeof(SpriteModel), new SpriteModelResourceFactory(_logger) },
                     { typeof(StudioModel), new StudioModelResourceFactory() },
                     { typeof(BSPModel), new BSPModelResourceFactory(this, _lightStyles) }
                 });
@@ -164,6 +153,120 @@ namespace SharpLife.Engine.Client.Renderer
             initCL.End();
             _gd.SubmitCommands(initCL);
             initCL.Dispose();
+        }
+
+        private static SwapchainSource GetSwapchainSource(IntPtr window)
+        {
+            SDL.SDL_SysWMinfo sysWmInfo = new SDL.SDL_SysWMinfo();
+            SDL.SDL_GetVersion(out sysWmInfo.version);
+            SDL.SDL_GetWindowWMInfo(window, ref sysWmInfo);
+            switch (sysWmInfo.subsystem)
+            {
+                case SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS:
+                    ref var w32Info = ref sysWmInfo.info.win;
+                    return SwapchainSource.CreateWin32(w32Info.window, w32Info.hdc);
+                case SDL.SDL_SYSWM_TYPE.SDL_SYSWM_X11:
+                    ref var x11Info = ref sysWmInfo.info.x11;
+                    return SwapchainSource.CreateXlib(
+                        x11Info.display,
+                        x11Info.window);
+                case SDL.SDL_SYSWM_TYPE.SDL_SYSWM_COCOA:
+                    ref var cocoaInfo = ref sysWmInfo.info.cocoa;
+                    var nsWindow = cocoaInfo.window;
+                    return SwapchainSource.CreateNSWindow(nsWindow);
+                default:
+                    throw new PlatformNotSupportedException("Cannot create a SwapchainSource for " + sysWmInfo.subsystem + ".");
+            }
+        }
+
+        private GraphicsDevice CreateOpenGLGraphicsDevice(GraphicsDeviceOptions options)
+        {
+            SDL.SDL_GetWindowSize(_window, out var width, out var height);
+
+            var glContextHandle = SDL.SDL_GL_CreateContext(_window);
+
+            if (glContextHandle == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to create SDL Window");
+            }
+
+            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, out var r))
+            {
+                r = 0;
+                _logger.Information("Failed to get GL RED size ({0})", SDL.SDL_GetError());
+            }
+
+            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, out var g))
+            {
+                g = 0;
+                _logger.Information("Failed to get GL GREEN size ({0})", SDL.SDL_GetError());
+            }
+
+            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, out var b))
+            {
+                b = 0;
+                _logger.Information("Failed to get GL BLUE size ({0})", SDL.SDL_GetError());
+            }
+
+            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, out var a))
+            {
+                a = 0;
+                _logger.Information("Failed to get GL ALPHA size ({0})", SDL.SDL_GetError());
+            }
+
+            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, out var depth))
+            {
+                depth = 0;
+                _logger.Information("Failed to get GL DEPTH size ({0})", SDL.SDL_GetError());
+            }
+
+            _logger.Information($"GL_SIZES:  r:{r} g:{g} b:{b} a:{a} depth:{depth}");
+
+            if (r <= 4 || g <= 4 || b <= 4 || depth <= 15 /*|| gl_renderer && Q_strstr(gl_renderer, "GDI Generic")*/)
+            {
+                throw new InvalidOperationException("Failed to create SDL Window, unsupported video mode. A 16-bit color depth desktop is required and a supported GL driver");
+            }
+
+            var platformInfo = new OpenGLPlatformInfo(
+                glContextHandle,
+                SDL.SDL_GL_GetProcAddress,
+                context => SDL.SDL_GL_MakeCurrent(_window, context),
+                SDL.SDL_GL_GetCurrentContext,
+                () => SDL.SDL_GL_MakeCurrent(IntPtr.Zero, IntPtr.Zero),
+                SDL.SDL_GL_DeleteContext,
+                () => SDL.SDL_GL_SwapWindow(_window),
+                sync => SDL.SDL_GL_SetSwapInterval(sync ? 1 : 0));
+
+            return GraphicsDevice.CreateOpenGL(options, platformInfo, (uint)width, (uint)height);
+        }
+
+        private GraphicsDevice CreateVulkanGraphicsDevice(GraphicsDeviceOptions options)
+        {
+            SDL.SDL_GetWindowSize(_window, out var width, out var height);
+
+            var swapChainDescription = new SwapchainDescription(
+                GetSwapchainSource(_window),
+                (uint)width,
+                (uint)height,
+                options.SwapchainDepthFormat,
+                false
+                );
+
+            return GraphicsDevice.CreateVulkan(options, swapChainDescription);
+        }
+
+        private GraphicsDevice CreateGraphicsDevice(GraphicsDeviceOptions options, GraphicsBackend backend)
+        {
+            switch (backend)
+            {
+                case GraphicsBackend.OpenGL:
+                    return CreateOpenGLGraphicsDevice(options);
+
+                case GraphicsBackend.Vulkan:
+                    return CreateVulkanGraphicsDevice(options);
+
+                default: throw new NotSupportedException($"Graphics backend {backend} not supported");
+            }
         }
 
         public void WindowResized()

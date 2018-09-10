@@ -39,8 +39,6 @@ namespace SharpLife.Engine.Shared.UI
 
         public IntPtr WindowHandle { get; private set; }
 
-        public IntPtr GLContextHandle { get; private set; }
-
         public event Action Resized;
 
         public event Action Destroying;
@@ -117,50 +115,6 @@ namespace SharpLife.Engine.Shared.UI
             }
 
             SDL.SDL_ShowWindow(WindowHandle);
-
-            GLContextHandle = SDL.SDL_GL_CreateContext(WindowHandle);
-
-            if (GLContextHandle == IntPtr.Zero)
-            {
-                throw new InvalidOperationException("Failed to create SDL Window");
-            }
-
-            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, out var r))
-            {
-                r = 0;
-                logger.Information("Failed to get GL RED size ({0})", SDL.SDL_GetError());
-            }
-
-            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, out var g))
-            {
-                g = 0;
-                logger.Information("Failed to get GL GREEN size ({0})", SDL.SDL_GetError());
-            }
-
-            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, out var b))
-            {
-                b = 0;
-                logger.Information("Failed to get GL BLUE size ({0})", SDL.SDL_GetError());
-            }
-
-            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, out var a))
-            {
-                a = 0;
-                logger.Information("Failed to get GL ALPHA size ({0})", SDL.SDL_GetError());
-            }
-
-            if (0 != SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, out var depth))
-            {
-                depth = 0;
-                logger.Information("Failed to get GL DEPTH size ({0})", SDL.SDL_GetError());
-            }
-
-            logger.Information($"GL_SIZES:  r:{r} g:{g} b:{b} a:{a} depth:{depth}");
-
-            if (r <= 4 || g <= 4 || b <= 4 || depth <= 15 /*|| gl_renderer && Q_strstr(gl_renderer, "GDI Generic")*/)
-            {
-                throw new InvalidOperationException("Failed to create SDL Window, unsupported video mode. A 16-bit color depth desktop is required and a supported GL driver");
-            }
         }
 
         ~Window()
@@ -180,12 +134,6 @@ namespace SharpLife.Engine.Shared.UI
             {
                 //Both a pre and post callback are provided to allow resource cleanup to occur at the right time
                 Destroying?.Invoke();
-
-                if (GLContextHandle != IntPtr.Zero)
-                {
-                    SDL.SDL_GL_DeleteContext(GLContextHandle);
-                    GLContextHandle = IntPtr.Zero;
-                }
 
                 if (WindowHandle != IntPtr.Zero)
                 {

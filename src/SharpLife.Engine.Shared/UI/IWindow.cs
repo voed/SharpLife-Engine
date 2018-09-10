@@ -29,8 +29,6 @@ namespace SharpLife.Engine.Shared.UI
         //TODO: maybe make this internal so only code that needs to access these handles can get them?
         IntPtr WindowHandle { get; }
 
-        IntPtr GLContextHandle { get; }
-
         event Action Resized;
 
         /// <summary>
