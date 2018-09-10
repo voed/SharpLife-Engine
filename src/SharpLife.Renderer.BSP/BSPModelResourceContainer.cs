@@ -20,6 +20,8 @@ using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -190,11 +192,8 @@ namespace SharpLife.Renderer.BSP
             _faces.Clear();
         }
 
-        private Texture GenerateLightmap(GraphicsDevice gd, SceneContext sc, Face face, int lightmapIndex)
+        private Image<Rgba32> GenerateLightmap(Face face, int smax, int tmax, int lightmapIndex)
         {
-            var smax = (face.Extents[0] / BSPConstants.LightmapScale) + 1;
-            var tmax = (face.Extents[1] / BSPConstants.LightmapScale) + 1;
-
             var size = smax * tmax;
 
             var colorData = new Rgba32[size];
@@ -222,9 +221,50 @@ namespace SharpLife.Renderer.BSP
                 }
             }
 
-            using (var image = Image.LoadPixelData(colorData, smax, tmax))
+            return Image.LoadPixelData(colorData, smax, tmax);
+        }
+
+        /// <summary>
+        /// Create the lightmap texture for a surface
+        /// If the surface has no lightmaps, returns white texture
+        /// </summary>
+        /// <param name="face"></param>
+        /// <param name="resourceCache"></param>
+        /// <param name="gd"></param>
+        /// <param name="cl"></param>
+        /// <param name="sc"></param>
+        /// <param name="numLightmaps"></param>
+        /// <param name="smax"></param>
+        /// <param name="tmax"></param>
+        /// <returns></returns>
+        private Texture CreateLightmapTexture(Face face, ResourceCache resourceCache, GraphicsDevice gd, SceneContext sc, int numLightmaps, int smax, int tmax)
+        {
+            if (numLightmaps == 0)
             {
-                return sc.MapResourceCache.AddTexture2D(gd, gd.ResourceFactory, new ImageSharpTexture(image, false), $"lightmap{sc.MapResourceCache.GenerateUniqueId()}");
+                //A white texture is used so when rendering surfaces with no lightmaps, the surface is fullbright
+                //Since surfaces like these are typically triggers it makes things a lot easier
+                return resourceCache.GetWhiteTexture(gd, gd.ResourceFactory);
+            }
+
+            using (var lightmapData = new Image<Rgba32>(numLightmaps * smax, tmax))
+            {
+                var graphicsOptions = GraphicsOptions.Default;
+
+                graphicsOptions.BlenderMode = PixelBlenderMode.Src;
+
+                //Generate lightmap data for every style
+                for (var i = 0; i < numLightmaps; ++i)
+                {
+                    using (var styleData = GenerateLightmap(face, smax, tmax, i))
+                    {
+                        lightmapData.Mutate(context => context.DrawImage(graphicsOptions, styleData, new Point(i * smax, 0)));
+                    }
+                }
+
+                return resourceCache.AddTexture2D(
+                    gd,
+                    gd.ResourceFactory,
+                    new ImageSharpTexture(lightmapData, false), $"lightmap{sc.MapResourceCache.GenerateUniqueId()}");
             }
         }
 
@@ -262,6 +302,8 @@ namespace SharpLife.Renderer.BSP
 
                 var textureInfo = face.TextureInfo;
 
+                var numLightmaps = face.Styles.Count(style => style != BSPConstants.NoLightStyle);
+
                 foreach (var point in face.Points)
                 {
                     var s = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
@@ -274,6 +316,7 @@ namespace SharpLife.Renderer.BSP
                     lightmapS -= face.TextureMins[0];
                     lightmapS += 8;
                     lightmapS /= smax * BSPConstants.LightmapScale;
+                    lightmapS /= numLightmaps != 0 ? numLightmaps : 1; //Rescale X so it covers one lightmap in the texture
 
                     var lightmapT = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
                     lightmapT -= face.TextureMins[1];
@@ -295,15 +338,9 @@ namespace SharpLife.Renderer.BSP
                     });
                 }
 
-                var resources = new List<BindableResource>(BSPConstants.MaxLightmaps);
+                var lightmapTexture = CreateLightmapTexture(face, resourceCache, gd, sc, numLightmaps, smax, tmax);
 
-                for (var i = 0; i < BSPConstants.MaxLightmaps; ++i)
-                {
-                    //Use pink texture if no style is provided
-                    var lightmap = face.Styles[i] != 255 ? GenerateLightmap(gd, sc, face, i) : sc.MapResourceCache.GetPinkTexture(gd, factory);
-
-                    resources.Add(sc.MapResourceCache.GetTextureView(factory, lightmap));
-                }
+                var lightmapView = resourceCache.GetTextureView(factory, lightmapTexture);
 
                 facesData.Add(new SingleFaceData
                 {
@@ -312,7 +349,7 @@ namespace SharpLife.Renderer.BSP
                     IndicesCount = (uint)(indices.Count - firstIndex),
                     Lightmaps = factory.CreateResourceSet(new ResourceSetDescription(
                         _factory.LightmapsLayout,
-                        resources.ToArray()
+                        lightmapView
                     ))
                 });
             }

@@ -76,10 +76,7 @@ namespace SharpLife.Renderer.BSP
                 new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
             LightmapsLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("Lightmap0", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap1", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap2", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap3", ResourceKind.TextureReadOnly, ShaderStages.Fragment)));
+                new ResourceLayoutElementDescription("Lightmaps", ResourceKind.TextureReadOnly, ShaderStages.Fragment)));
 
             var vertexLayouts = new VertexLayoutDescription[]
             {

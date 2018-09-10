@@ -49,6 +49,8 @@ namespace SharpLife.Renderer
 
         private Texture _pinkTex;
 
+        private Texture _whiteTex;
+
         public readonly ResourceLayoutDescription ProjViewLayoutDescription = new ResourceLayoutDescription(
             new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
             new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex));
@@ -137,6 +139,8 @@ namespace SharpLife.Renderer
 
             _pinkTex?.Dispose();
             _pinkTex = null;
+            _whiteTex?.Dispose();
+            _whiteTex = null;
 
             foreach (KeyValuePair<ResourceSetDescription, ResourceSet> kvp in s_resourceSets)
             {
@@ -209,6 +213,18 @@ namespace SharpLife.Renderer
             }
 
             return _pinkTex;
+        }
+
+        public unsafe Texture GetWhiteTexture(GraphicsDevice gd, ResourceFactory factory)
+        {
+            if (_whiteTex == null)
+            {
+                var white = RgbaByte.White;
+                _whiteTex = factory.CreateTexture(TextureDescription.Texture2D(1, 1, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled));
+                gd.UpdateTexture(_whiteTex, (IntPtr)(&white), 4, 0, 0, 0, 1, 1, 1, 0, 0);
+            }
+
+            return _whiteTex;
         }
 
         public ResourceSet GetResourceSet(ResourceFactory factory, ResourceSetDescription description)
