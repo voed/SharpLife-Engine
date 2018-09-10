@@ -10,19 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0005" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="SixLabors.Core">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SixLabors.ImageSharp">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="SixLabors.ImageSharp.Drawing">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.Drawing.dll</HintPath>
-    </Reference>
     <Reference Include="Veldrid">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
     </Reference>

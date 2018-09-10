@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
 
@@ -26,14 +27,4 @@
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="SixLabors.Core">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SixLabors.ImageSharp">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SixLabors.ImageSharp.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

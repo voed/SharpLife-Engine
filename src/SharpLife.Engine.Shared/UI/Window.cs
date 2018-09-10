@@ -17,6 +17,7 @@ using SDL2;
 using Serilog;
 using SharpLife.FileSystem;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -95,13 +96,11 @@ namespace SharpLife.Engine.Shared.UI
 
                 if (image != null)
                 {
-                    var pixels = image.SavePixelData();
+                    var pixels = image.GetPixelSpan().ToArray();
 
-                    var nativeMemory = Marshal.AllocHGlobal(pixels.Length);
+                    var pixelsData = GCHandle.Alloc(pixels, GCHandleType.Pinned);
 
-                    Marshal.Copy(pixels, 0, nativeMemory, pixels.Length);
-
-                    var surface = SDL.SDL_CreateRGBSurfaceFrom(nativeMemory, image.Width, image.Height, 32, 4 * image.Width, 0xFF, 0xFF << 8, 0xFF << 16, unchecked((uint)(0xFF << 24)));
+                    var surface = SDL.SDL_CreateRGBSurfaceFrom(pixelsData.AddrOfPinnedObject(), image.Width, image.Height, 32, 4 * image.Width, 0xFF, 0xFF << 8, 0xFF << 16, unchecked((uint)(0xFF << 24)));
 
                     if (surface != IntPtr.Zero)
                     {
@@ -109,7 +108,7 @@ namespace SharpLife.Engine.Shared.UI
                         SDL.SDL_FreeSurface(surface);
                     }
 
-                    Marshal.FreeHGlobal(nativeMemory);
+                    pixelsData.Free();
                 }
             }
             catch (FileNotFoundException)
