@@ -100,7 +100,9 @@ namespace SharpLife.Engine.Client.Renderer
             _sc = new SceneContext(fileSystem, shadersDirectory);
 
             //Configure Veldrid graphics device
-            var options = new GraphicsDeviceOptions(false, PixelFormat.R8_G8_B8_A8_UNorm, false, ResourceBindingModel.Improved, true, true);
+            //Don't use a swap chain depth format, it won't render anything on Vulkan
+            //It isn't needed right now so it should be disabled for the time being
+            var options = new GraphicsDeviceOptions(false, null/*PixelFormat.R8_G8_B8_A8_UNorm*/, false, ResourceBindingModel.Improved, true, true);
 
             _gd = CreateGraphicsDevice(options, GraphicsBackend.OpenGL);
 

@@ -44,7 +44,9 @@ namespace SharpLife.Renderer.Objects
                 new ResourceLayoutElementDescription("SourceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("SourceSampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
-            (Shader vs, Shader fs) = sc.GlobalResourceCache.GetShaders(gd, gd.ResourceFactory, "FinalPass");
+            var shaderName = gd.IsUvOriginTopLeft ? "FinalPass_inverted" : "FinalPass";
+
+            (var vs, var fs) = sc.GlobalResourceCache.GetShaders(gd, gd.ResourceFactory, shaderName);
 
             GraphicsPipelineDescription pd = new GraphicsPipelineDescription(
                 new BlendStateDescription(
