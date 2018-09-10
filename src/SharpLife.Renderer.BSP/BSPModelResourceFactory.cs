@@ -38,7 +38,7 @@ namespace SharpLife.Renderer.BSP
 
         public ResourceLayout SharedLayout { get; private set; }
         public ResourceLayout TextureLayout { get; private set; }
-        public ResourceLayout LightmapsLayout { get; private set; }
+        public ResourceLayout LightmapLayout { get; private set; }
 
         public Pipeline Pipeline { get; private set; }
 
@@ -75,7 +75,7 @@ namespace SharpLife.Renderer.BSP
                 new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
-            LightmapsLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
+            LightmapLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Lightmaps", ResourceKind.TextureReadOnly, ShaderStages.Fragment)));
 
             var vertexLayouts = new VertexLayoutDescription[]
@@ -95,7 +95,7 @@ namespace SharpLife.Renderer.BSP
                 new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
                 PrimitiveTopology.TriangleList,
                 new ShaderSetDescription(vertexLayouts, new[] { vs, fs }),
-                new ResourceLayout[] { SharedLayout, TextureLayout, LightmapsLayout },
+                new ResourceLayout[] { SharedLayout, TextureLayout, LightmapLayout },
                 sc.MainSceneFramebuffer.OutputDescription);
 
             Pipeline = disposeFactory.CreateGraphicsPipeline(ref pd);
