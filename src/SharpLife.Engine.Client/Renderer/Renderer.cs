@@ -117,6 +117,8 @@ namespace SharpLife.Engine.Client.Renderer
 
             _gd = GraphicsDevice.CreateOpenGL(options, platformInfo, (uint)width, (uint)height);
 
+            _gd.SyncToVerticalBlank = false;
+
             Scene = new Scene(inputSystem, _gd, width, height);
 
             _sc.SetCurrentScene(Scene);
