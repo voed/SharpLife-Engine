@@ -44,7 +44,7 @@ namespace SharpLife.FileFormats.BSP
 
         public const int MaxLightmaps = 4;
 
-        public const int MaxLightStyles = 256;
+        public const int MaxLightStyles = 64;
 
         /// <summary>
         /// Indicates that a face style is not used

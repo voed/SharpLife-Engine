@@ -16,7 +16,6 @@
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileFormats.BSP;
 using System;
-using System.Collections.Generic;
 
 namespace SharpLife.Renderer.BSP
 {
@@ -28,11 +27,13 @@ namespace SharpLife.Renderer.BSP
         private const int NormalLightValue = 264;
         private const int UnstyledLightValue = 256;
 
-        private const int MaxControlledStyles = 64;
+        private struct LightStyle
+        {
+            public string StylePattern;
+            public int Value;
+        }
 
-        private readonly List<string> _lightStyles = new List<string>(MaxControlledStyles);
-
-        private readonly int[] _lightStyleValues = new int[BSPConstants.MaxLightStyles];
+        private readonly LightStyle[] _lightStyles = new LightStyle[BSPConstants.MaxLightStyles];
 
         //TODO: make configurable
         private static readonly int LightScale = (int)((Math.Pow(2.0f, 1.0f / 2.5f) * 256.0f) + 0.5f);
@@ -47,54 +48,33 @@ namespace SharpLife.Renderer.BSP
         /// </summary>
         public void Initialize()
         {
-            _lightStyles.Clear();
-            for (var i = 0; i < MaxControlledStyles; ++i)
+            for (var i = 0; i < _lightStyles.Length; ++i)
             {
-                _lightStyles.Add(string.Empty);
+                _lightStyles[i].StylePattern = string.Empty;
+                _lightStyles[i].Value = NormalLightValue;
             }
-
-            Array.Fill(_lightStyleValues, NormalLightValue);
         }
 
         public int GetStyleValue(int style)
         {
-            if (style < 0 || style >= BSPConstants.MaxLightStyles)
+            if (style < 0 || style >= _lightStyles.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(style));
             }
 
-            return _lightStyleValues[style];
+            return _lightStyles[style].Value;
         }
 
         public void SetStyle(int style, string value)
         {
-            if (style < 0)
+            if (style < 0 || style >= _lightStyles.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(style));
-            }
-
-            if (style >= MaxControlledStyles)
-            {
-                throw new ArgumentOutOfRangeException(nameof(style));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
             }
 
             //TODO: unlimited number of controlled lights
-            //if (_lightStyles.Count <= style)
-            //{
-            //    _lightStyles.Capacity = style + 1;
-            //
-            //    while (_lightStyles.Count <= style)
-            //    {
-            //        _lightStyles.Add(string.Empty);
-            //    }
-            //}
 
-            _lightStyles[style] = value;
+            _lightStyles[style].StylePattern = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public void AnimateLights(IEngineTime engineTime)
@@ -106,14 +86,14 @@ namespace SharpLife.Renderer.BSP
 
             var offset = (int)(10.0 * engineTime.ElapsedTime);
 
-            for (var i = 0; i < _lightStyles.Count; ++i)
+            for (var i = 0; i < _lightStyles.Length; ++i)
             {
-                var style = _lightStyles[i];
+                ref var style = ref _lightStyles[i];
 
                 //Styles can be empty if it hasn't been set yet
-                var value = style.Length > 0 ? 22 * (style[offset % style.Length] - 'a') : UnstyledLightValue;
+                var value = style.StylePattern.Length > 0 ? 22 * (style.StylePattern[offset % style.StylePattern.Length] - 'a') : UnstyledLightValue;
 
-                _lightStyleValues[i] = Math.Min(LightScale * value / 256, byte.MaxValue);
+                style.Value = Math.Min(LightScale * value / 256, byte.MaxValue);
             }
         }
     }
