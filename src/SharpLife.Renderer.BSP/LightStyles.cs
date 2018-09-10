@@ -26,6 +26,7 @@ namespace SharpLife.Renderer.BSP
     {
         private const int NormalLightValue = 264;
         private const int UnstyledLightValue = 256;
+        public const int InvalidLightValue = -1;
 
         private struct LightStyle
         {

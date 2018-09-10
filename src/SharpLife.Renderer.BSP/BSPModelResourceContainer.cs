@@ -36,21 +36,9 @@ namespace SharpLife.Renderer.BSP
     /// </summary>
     public class BSPModelResourceContainer : ModelResourceContainer
     {
-        private const int NoLightStyle = -1;
-
-        private static readonly float[] DefaultStyleValues = new float[BSPConstants.MaxLightmaps]
-        {
-            NoLightStyle,
-            NoLightStyle,
-            NoLightStyle,
-            NoLightStyle
-        };
-
         private struct SingleFaceData : IDisposable
         {
             public Face Face;
-
-            public int[] CachedLightStyles;
 
             public uint FirstIndex;
 
@@ -61,12 +49,9 @@ namespace SharpLife.Renderer.BSP
             /// </summary>
             public ResourceSet Lightmaps;
 
-            public DeviceBuffer Styles;
-
             public void Dispose()
             {
                 Lightmaps.Dispose();
-                Styles.Dispose();
             }
         }
 
@@ -98,6 +83,11 @@ namespace SharpLife.Renderer.BSP
         {
             public WorldTextureCoordinate WorldTexture;
             public Vector2 Lightmap;
+
+            public int Style0;
+            public int Style1;
+            public int Style2;
+            public int Style3;
         }
 
         private readonly BSPModelResourceFactory _factory;
@@ -140,24 +130,6 @@ namespace SharpLife.Renderer.BSP
                 {
                     ref var face = ref faces.Faces[i];
 
-                    for (var style = 0; style < BSPConstants.MaxLightmaps; ++style)
-                    {
-                        var styleIndex = face.Face.Styles[style];
-
-                        var styleValue = styleIndex != BSPConstants.NoLightStyle ? _factory.LightStyles.GetStyleValue(styleIndex) : NoLightStyle;
-
-                        //Cache style values to reduce the number of updates
-                        if (face.CachedLightStyles[style] != styleValue)
-                        {
-                            face.CachedLightStyles[style] = styleValue;
-
-                            //Convert to normalized [0, 1] range
-                            var inputValue = styleValue != NoLightStyle ? styleValue / 255.0f : NoLightStyle;
-
-                            cl.UpdateBuffer(face.Styles, (uint)(Marshal.SizeOf<float>() * style), ref inputValue);
-                        }
-                    }
-
                     cl.SetGraphicsResourceSet(2, face.Lightmaps);
                     cl.DrawIndexed(face.IndicesCount, 1, face.FirstIndex, 0, 0);
                 }
@@ -197,7 +169,8 @@ namespace SharpLife.Renderer.BSP
                 _factory.SharedLayout,
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
-                _worldAndInverseBuffer));
+                _worldAndInverseBuffer,
+                _factory.LightStylesBuffer));
         }
 
         public override void DestroyDeviceObjects(ResourceScope scope)
@@ -314,13 +287,15 @@ namespace SharpLife.Renderer.BSP
                             Vertex = point,
                             Texture = new Vector2(s, t)
                         },
-                        Lightmap = new Vector2(lightmapS, lightmapT)
+                        Lightmap = new Vector2(lightmapS, lightmapT),
+                        Style0 = face.Styles[0],
+                        Style1 = face.Styles[1],
+                        Style2 = face.Styles[2],
+                        Style3 = face.Styles[3]
                     });
                 }
 
                 var resources = new List<BindableResource>(BSPConstants.MaxLightmaps);
-
-                var styles = face.Styles.Select(value => (int)value).ToArray();
 
                 for (var i = 0; i < BSPConstants.MaxLightmaps; ++i)
                 {
@@ -330,24 +305,15 @@ namespace SharpLife.Renderer.BSP
                     resources.Add(sc.MapResourceCache.GetTextureView(factory, lightmap));
                 }
 
-                var stylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<float>() * BSPConstants.MaxLightmaps), BufferUsage.UniformBuffer));
-
-                //Initialize styles so no invalid data could end up in the buffer
-                cl.UpdateBuffer(stylesBuffer, 0, DefaultStyleValues);
-
-                resources.Add(stylesBuffer);
-
                 facesData.Add(new SingleFaceData
                 {
                     Face = face,
-                    CachedLightStyles = new int[BSPConstants.MaxLightmaps] { NoLightStyle, NoLightStyle, NoLightStyle, NoLightStyle },
                     FirstIndex = (uint)firstIndex,
                     IndicesCount = (uint)(indices.Count - firstIndex),
                     Lightmaps = factory.CreateResourceSet(new ResourceSetDescription(
                         _factory.LightmapsLayout,
                         resources.ToArray()
-                    )),
-                    Styles = stylesBuffer
+                    ))
                 });
             }
 

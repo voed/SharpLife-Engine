@@ -42,7 +42,7 @@ namespace SharpLife.Engine.Client.Renderer
     /// The main renderer
     /// Manages current graphics state, devices, etc
     /// </summary>
-    public class Renderer
+    public class Renderer : IRenderer
     {
         private readonly IntPtr _window;
         private readonly IntPtr _glContext;
@@ -75,6 +75,10 @@ namespace SharpLife.Engine.Client.Renderer
 
         private readonly ModelResourcesManager _modelResourcesManager;
         private readonly ModelRenderer _modelRenderer;
+
+        public event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderBegin;
+
+        public event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderEnd;
 
         public Renderer(
             IntPtr window, IntPtr glContext,
@@ -134,7 +138,7 @@ namespace SharpLife.Engine.Client.Renderer
                 {
                     {typeof(SpriteModel), new SpriteModelResourceFactory(logger) },
                     { typeof(StudioModel), new StudioModelResourceFactory() },
-                    { typeof(BSPModel), new BSPModelResourceFactory(_lightStyles) }
+                    { typeof(BSPModel), new BSPModelResourceFactory(this, _lightStyles) }
                 });
             _modelRenderer = new ModelRenderer(
                 _modelResourcesManager,
@@ -192,7 +196,12 @@ namespace SharpLife.Engine.Client.Renderer
 
             _frameCommands.Begin();
 
+            OnRenderBegin?.Invoke(this, _gd, _frameCommands, _sc);
+
             Scene.RenderAllStages(_gd, _frameCommands, _sc);
+
+            OnRenderEnd?.Invoke(this, _gd, _frameCommands, _sc);
+
             _gd.SwapBuffers();
         }
 

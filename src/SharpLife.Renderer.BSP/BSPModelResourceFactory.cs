@@ -13,10 +13,13 @@
 *
 ****/
 
+using SharpLife.FileFormats.BSP;
 using SharpLife.Models;
 using SharpLife.Models.BSP;
 using SharpLife.Renderer.Models;
 using System;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
@@ -24,7 +27,12 @@ namespace SharpLife.Renderer.BSP
 {
     public sealed class BSPModelResourceFactory : IModelResourceFactory
     {
+        //Must be sizeof(vec4) / sizeof(float) so it matches the buffer padding
+        private static readonly int LightStylesElementMultiplier = Marshal.SizeOf<Vector4>() / Marshal.SizeOf<float>();
+
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
+
+        private readonly int[] _cachedLightStyles = new int[BSPConstants.MaxLightStyles];
 
         public LightStyles LightStyles { get; }
 
@@ -34,8 +42,17 @@ namespace SharpLife.Renderer.BSP
 
         public Pipeline Pipeline { get; private set; }
 
-        public BSPModelResourceFactory(LightStyles lightStyles)
+        public DeviceBuffer LightStylesBuffer { get; private set; }
+
+        public BSPModelResourceFactory(IRenderer renderer, LightStyles lightStyles)
         {
+            if (renderer == null)
+            {
+                throw new ArgumentNullException(nameof(renderer));
+            }
+
+            renderer.OnRenderBegin += OnRenderBegin;
+
             LightStyles = lightStyles ?? throw new ArgumentNullException(nameof(lightStyles));
         }
 
@@ -51,7 +68,8 @@ namespace SharpLife.Renderer.BSP
             SharedLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
-                new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)));
+                new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("LightStyles", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
 
             TextureLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
@@ -61,15 +79,15 @@ namespace SharpLife.Renderer.BSP
                 new ResourceLayoutElementDescription("Lightmap0", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Lightmap1", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Lightmap2", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Lightmap3", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("Styles", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
+                new ResourceLayoutElementDescription("Lightmap3", ResourceKind.TextureReadOnly, ShaderStages.Fragment)));
 
             var vertexLayouts = new VertexLayoutDescription[]
             {
                 new VertexLayoutDescription(
                     new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                     new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                    new VertexElementDescription("LightmapCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2))
+                    new VertexElementDescription("LightmapCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    new VertexElementDescription("StyleIndices", VertexElementSemantic.Position, VertexElementFormat.Int4))
             };
 
             (var vs, var fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "LightMappedGeneric");
@@ -84,6 +102,20 @@ namespace SharpLife.Renderer.BSP
                 sc.MainSceneFramebuffer.OutputDescription);
 
             Pipeline = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            //Reset the buffer so all styles will update in OnRenderBegin
+            Array.Fill(_cachedLightStyles, LightStyles.InvalidLightValue);
+
+            //Float arrays are handled by padding each element up to the size of a vec4,
+            //so we have to account for the padding in creating and initializing the buffer
+            var numLightStyleElements = BSPConstants.MaxLightStyles * LightStylesElementMultiplier;
+
+            LightStylesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(numLightStyleElements * Marshal.SizeOf<float>()), BufferUsage.UniformBuffer));
+
+            //Initialize the buffer to all zeroes
+            var lightStylesValues = new float[numLightStyleElements];
+            Array.Fill(lightStylesValues, 0.0f);
+            gd.UpdateBuffer(LightStylesBuffer, 0, lightStylesValues);
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -94,6 +126,8 @@ namespace SharpLife.Renderer.BSP
             }
 
             _disposeCollector.DisposeAll();
+
+            LightStylesBuffer = null;
         }
 
         public void Dispose()
@@ -109,6 +143,29 @@ namespace SharpLife.Renderer.BSP
             }
 
             return new BSPModelResourceContainer(this, bspModel);
+        }
+
+        private void OnRenderBegin(IRenderer renderer, GraphicsDevice gd, CommandList cl, SceneContext sc)
+        {
+            if (LightStylesBuffer != null)
+            {
+                //Update the style buffer now, before anything is drawn
+                for (var i = 0; i < BSPConstants.MaxLightStyles; ++i)
+                {
+                    var value = LightStyles.GetStyleValue(i);
+
+                    if (_cachedLightStyles[i] != value)
+                    {
+                        _cachedLightStyles[i] = value;
+
+                        //Convert to normalized [0, 1] range
+                        var inputValue = value / (float)byte.MaxValue;
+
+                        //Index is multiplied here because of padding. See buffer creation code
+                        gd.UpdateBuffer(LightStylesBuffer, (uint)(i * Marshal.SizeOf<float>() * LightStylesElementMultiplier), ref inputValue);
+                    }
+                }
+            }
         }
     }
 }
