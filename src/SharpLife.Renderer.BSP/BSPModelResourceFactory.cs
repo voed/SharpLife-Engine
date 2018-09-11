@@ -84,6 +84,8 @@ namespace SharpLife.Renderer.BSP
                     new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                     new VertexElementDescription("TextureCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
                     new VertexElementDescription("LightmapCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                    //Used for multiple light styles; this is the offset to apply to lightmap X coordinates
+                    new VertexElementDescription("LightmapXOffset", VertexElementSemantic.Position, VertexElementFormat.Float1),
                     new VertexElementDescription("StyleIndices", VertexElementSemantic.Position, VertexElementFormat.Int4))
             };
 

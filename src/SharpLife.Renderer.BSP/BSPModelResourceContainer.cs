@@ -120,6 +120,8 @@ namespace SharpLife.Renderer.BSP
             public WorldTextureCoordinate WorldTexture;
             public Vector2 Lightmap;
 
+            public float LightmapXOffset;
+
             public int Style0;
             public int Style1;
             public int Style2;
@@ -434,6 +436,7 @@ namespace SharpLife.Renderer.BSP
                                 Texture = new Vector2(s, t)
                             },
                             Lightmap = new Vector2(lightmapS, lightmapT),
+                            LightmapXOffset = smax / (float)lightmapBuilder.Width,
                             Style0 = face.Styles[0],
                             Style1 = face.Styles[1],
                             Style2 = face.Styles[2],
