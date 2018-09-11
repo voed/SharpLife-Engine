@@ -19,6 +19,7 @@ using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
+using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
@@ -109,7 +110,9 @@ namespace SharpLife.Engine.Engines
             }
         }
 
-        private readonly double _desiredFrameLengthSeconds = 1.0 / 60.0;
+        private double _desiredFrameLengthSeconds = 1.0 / 60.0;
+
+        private IVariable _fpsMax;
 
         private IEngineClientHost _client;
         private IEngineServerHost _server;
@@ -267,6 +270,14 @@ namespace SharpLife.Engine.Engines
             CommonCommands.AddExec(CommandSystem.SharedContext, Logger, FileSystem, ExecPathIDs);
             CommonCommands.AddEcho(CommandSystem.SharedContext, Logger);
             CommonCommands.AddAlias(CommandSystem.SharedContext, Logger);
+
+            _fpsMax = CommandSystem.SharedContext.RegisterVariable(
+                new VariableInfo("fps_max")
+                .WithHelpInfo("Sets the maximum frames per second")
+                .WithNumberFilter(true)
+                //Avoid division by zero and negative maximum
+                .WithDelegateFilter((ref string _, ref float floatValue) => floatValue > 0)
+                .WithChangeHandler((ref VariableChangeEvent @event) => _desiredFrameLengthSeconds = 1.0 / @event.Integer));
 
             //Get the build date from the generated resource file
             var assembly = typeof(ClientServerEngine).Assembly;

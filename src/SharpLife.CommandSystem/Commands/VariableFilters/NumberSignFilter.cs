@@ -16,31 +16,24 @@
 namespace SharpLife.CommandSystem.Commands.VariableFilters
 {
     /// <summary>
-    /// Denies any non-numeric inputs
+    /// Denies any numeric inputs that are either positive or negative
     /// </summary>
-    public class NumberFilter : IVariableFilter
+    public class NumberSignFilter : IVariableFilter
     {
-        private readonly bool _integerOnly;
+        private readonly bool _positive;
 
         /// <summary>
-        /// Creates a new number filter
+        /// Creates a new number sign filter
         /// </summary>
-        /// <param name="integerOnly">If true, only integer numbers are allowed</param>
-        public NumberFilter(bool integerOnly = false)
+        /// <param name="positive">If true, positive numbers are allowed and negative numbers are denied. If false, the opposite is true</param>
+        public NumberSignFilter(bool positive)
         {
-            _integerOnly = integerOnly;
+            _positive = positive;
         }
 
         public bool Filter(ref string stringValue, ref float floatValue)
         {
-            if (_integerOnly)
-            {
-                return int.TryParse(stringValue, out var _);
-            }
-            else
-            {
-                return float.TryParse(stringValue, out var _);
-            }
+            return (floatValue < 0) ^ _positive;
         }
     }
 }

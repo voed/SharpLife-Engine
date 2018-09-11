@@ -28,9 +28,26 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
             return @this.WithFilter(new BooleanFilter());
         }
 
-        public static VariableInfo WithNumberFilter(this VariableInfo @this)
+        /// <summary>
+        /// <see cref="NumberFilter(bool)"/>
+        /// </summary>
+        /// <param name="this"></param>
+        /// <param name="integerOnly"></param>
+        /// <returns></returns>
+        public static VariableInfo WithNumberFilter(this VariableInfo @this, bool integerOnly = false)
         {
-            return @this.WithFilter(new NumberFilter());
+            return @this.WithFilter(new NumberFilter(integerOnly));
+        }
+
+        /// <summary>
+        /// <see cref="NumberSignFilter(bool)"/>
+        /// </summary>
+        /// <param name="this"></param>
+        /// <param name="positive"></param>
+        /// <returns></returns>
+        public static VariableInfo WithNumberSignFilter(this VariableInfo @this, bool positive)
+        {
+            return @this.WithFilter(new NumberSignFilter(positive));
         }
 
         public static VariableInfo WithMinMaxFilter(this VariableInfo @this, float? min, float? max, bool denyOutOfRangeValues = false)
