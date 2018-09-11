@@ -59,6 +59,8 @@ namespace SharpLife.Engine.Engines
             FileSystemConstants.PathID.All
         };
 
+        private const int MaximumFPS = 1000;
+
         public ICommandLine CommandLine { get; private set; }
 
         public IFileSystem FileSystem { get; private set; }
@@ -275,9 +277,18 @@ namespace SharpLife.Engine.Engines
                 new VariableInfo("fps_max")
                 .WithHelpInfo("Sets the maximum frames per second")
                 .WithNumberFilter(true)
-                //Avoid division by zero and negative maximum
-                .WithDelegateFilter((ref string _, ref float floatValue) => floatValue > 0)
-                .WithChangeHandler((ref VariableChangeEvent @event) => _desiredFrameLengthSeconds = 1.0 / @event.Integer));
+                //Avoid negative maximum
+                .WithMinMaxFilter(0, MaximumFPS)
+                .WithChangeHandler((ref VariableChangeEvent @event) =>
+                {
+                    var desiredFPS = @event.Integer;
+
+                    if (desiredFPS == 0)
+                    {
+                        desiredFPS = MaximumFPS;
+                    }
+                    _desiredFrameLengthSeconds = 1.0 / desiredFPS;
+                }));
 
             //Get the build date from the generated resource file
             var assembly = typeof(ClientServerEngine).Assembly;
