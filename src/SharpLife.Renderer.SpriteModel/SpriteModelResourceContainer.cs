@@ -257,7 +257,7 @@ namespace SharpLife.Renderer.SpriteModel
 
             var frameBuffer = _frameBuffers[renderData.Frame];
 
-            var pipeline = _factory.GetPipeline(renderData.RenderMode);
+            var pipeline = _factory.Pipelines[renderData.RenderMode];
 
             cl.SetVertexBuffer(0, frameBuffer);
             cl.SetIndexBuffer(_ib, IndexFormat.UInt16);

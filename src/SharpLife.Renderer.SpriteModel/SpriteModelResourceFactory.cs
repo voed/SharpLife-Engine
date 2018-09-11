@@ -16,6 +16,7 @@
 using Serilog;
 using SharpLife.Models;
 using SharpLife.Renderer.Models;
+using SharpLife.Renderer.Utility;
 using System;
 using Veldrid;
 using Veldrid.Utilities;
@@ -30,7 +31,7 @@ namespace SharpLife.Renderer.SpriteModel
 
         public ResourceLayout Layout { get; private set; }
 
-        private readonly Pipeline[] _pipelines = new Pipeline[(int)RenderMode.Last + 1];
+        public RenderModePipelines Pipelines { get; private set; }
 
         public SpriteModelResourceFactory(ILogger logger)
         {
@@ -79,15 +80,17 @@ namespace SharpLife.Renderer.SpriteModel
                 new ResourceLayout[] { Layout },
                 sc.MainSceneFramebuffer.OutputDescription);
 
-            _pipelines[(int)RenderMode.Normal] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            var pipelines = new Pipeline[(int)RenderMode.Last + 1];
+
+            pipelines[(int)RenderMode.Normal] = disposeFactory.CreateGraphicsPipeline(ref pd);
 
             //Same pipeline as normal when sprite blending is enabled in vanilla
-            _pipelines[(int)RenderMode.TransTexture] = _pipelines[(int)RenderMode.Normal];
+            pipelines[(int)RenderMode.TransTexture] = pipelines[(int)RenderMode.Normal];
 
             //TODO: tune these
 
             //Identical to Texture, vanilla GoldSource uses an invalid texture env mode that happens to use GL_MODULATE so for consistency this is required
-            _pipelines[(int)RenderMode.TransColor] = _pipelines[(int)RenderMode.TransTexture];
+            pipelines[(int)RenderMode.TransColor] = pipelines[(int)RenderMode.TransTexture];
 
             //Additive blend that matches glBlendFunc(GL_ONE, GL_ONE)
             var additiveBlend = new BlendStateDescription
@@ -116,7 +119,7 @@ namespace SharpLife.Renderer.SpriteModel
                 new ResourceLayout[] { Layout },
                 sc.MainSceneFramebuffer.OutputDescription);
 
-            _pipelines[(int)RenderMode.Glow] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.Glow] = disposeFactory.CreateGraphicsPipeline(ref pd);
 
             //Identical to Texture, but does not write to the depth buffer
             pd = new GraphicsPipelineDescription(
@@ -128,7 +131,7 @@ namespace SharpLife.Renderer.SpriteModel
                 new ResourceLayout[] { Layout },
                 sc.MainSceneFramebuffer.OutputDescription);
 
-            _pipelines[(int)RenderMode.TransAlpha] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.TransAlpha] = disposeFactory.CreateGraphicsPipeline(ref pd);
 
             //Identical to Glow, but still uses depth testing
             pd = new GraphicsPipelineDescription(
@@ -140,7 +143,9 @@ namespace SharpLife.Renderer.SpriteModel
                 new ResourceLayout[] { Layout },
                 sc.MainSceneFramebuffer.OutputDescription);
 
-            _pipelines[(int)RenderMode.TransAdd] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.TransAdd] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            Pipelines = new RenderModePipelines(pipelines);
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -156,11 +161,6 @@ namespace SharpLife.Renderer.SpriteModel
         public void Dispose()
         {
             DestroyDeviceObjects(ResourceScope.All);
-        }
-
-        public Pipeline GetPipeline(RenderMode renderMode)
-        {
-            return _pipelines[(int)renderMode];
         }
 
         public ModelResourceContainer CreateContainer(IModel model)
