@@ -34,17 +34,6 @@ namespace SharpLife.Renderer.SpriteModel
 {
     public class SpriteModelResourceContainer : ModelResourceContainer
     {
-        private struct RenderArguments
-        {
-            public RenderMode RenderMode;
-
-            public int padding0;
-            public int padding1;
-            public int padding2;
-
-            public Vector4 RenderColor;
-        }
-
         private readonly SpriteModelResourceFactory _factory;
 
         private readonly SharpLife.Models.SPR.SpriteModel _spriteModel;
@@ -55,7 +44,7 @@ namespace SharpLife.Renderer.SpriteModel
 
         private DeviceBuffer _ib;
         private DeviceBuffer _worldAndInverseBuffer;
-        private DeviceBuffer _renderArgumentsBuffer;
+        private DeviceBuffer _renderColorBuffer;
         private ResourceSet _resourceSet;
 
         public override IModel Model => _spriteModel;
@@ -260,15 +249,9 @@ namespace SharpLife.Renderer.SpriteModel
                     break;
             }
 
-            var renderColor = new Vector4(CalculateSpriteColor(ref renderData, blend), alpha);
+            var renderColor = new Vector4(CalculateSpriteColor(ref renderData, blend), alpha) / 255.0f;
 
-            var renderArguments = new RenderArguments
-            {
-                RenderMode = renderData.RenderMode,
-                RenderColor = renderColor / 255.0f,
-            };
-
-            cl.UpdateBuffer(_renderArgumentsBuffer, 0, ref renderArguments);
+            cl.UpdateBuffer(_renderColorBuffer, 0, ref renderColor);
 
             renderData.Frame = Math.Clamp(renderData.Frame, 0, _frameBuffers.Count - 1);
 
@@ -303,7 +286,7 @@ namespace SharpLife.Renderer.SpriteModel
 
             _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            _renderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<RenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            _renderColorBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Vector4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             var view = sc.MapResourceCache.GetTextureView(gd.ResourceFactory, texture);
 
@@ -312,9 +295,9 @@ namespace SharpLife.Renderer.SpriteModel
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
                 _worldAndInverseBuffer,
-                _renderArgumentsBuffer,
                 view,
-                sc.MainSampler));
+                sc.MainSampler,
+                _renderColorBuffer));
         }
 
         private Image<Rgba32> CreateSpriteAtlas(GraphicsDevice gd, DisposeCollectorResourceFactory disposeFactory)
