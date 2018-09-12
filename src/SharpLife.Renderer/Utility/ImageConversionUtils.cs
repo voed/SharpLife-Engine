@@ -350,7 +350,7 @@ namespace SharpLife.Renderer.Utility
         {
             var scaledValue = MathUtils.NearestUpperPowerOf2(value);
 
-            if ((value < scaledValue) && (roundDownExponent == 1 || ((scaledValue - value) > (scaledValue >> roundDownExponent))))
+            if ((roundDownExponent > 0) && (value < scaledValue) && (roundDownExponent == 1 || ((scaledValue - value) > (scaledValue >> roundDownExponent))))
             {
                 scaledValue /= 2;
             }
