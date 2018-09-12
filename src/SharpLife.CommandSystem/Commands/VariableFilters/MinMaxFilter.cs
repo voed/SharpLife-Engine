@@ -22,11 +22,11 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
     /// </summary>
     public class MinMaxFilter : IVariableFilter
     {
-        private readonly float? _min;
+        public float? Min { get; }
 
-        private readonly float? _max;
+        public float? Max { get; }
 
-        private readonly bool _denyOutOfRangeValues;
+        public bool DenyOutOfRangeValues { get; }
 
         /// <summary>
         /// Creates a new min-max filter
@@ -47,15 +47,15 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
                 throw new ArgumentOutOfRangeException("Minimum value must be less than maximum value");
             }
 
-            _min = min;
-            _max = max;
-            _denyOutOfRangeValues = denyOutOfRangeValues;
+            Min = min;
+            Max = max;
+            DenyOutOfRangeValues = denyOutOfRangeValues;
         }
 
         public bool Filter(ref string stringValue, ref float floatValue)
         {
-            var min = _min ?? floatValue;
-            var max = _max ?? floatValue;
+            var min = Min ?? floatValue;
+            var max = Max ?? floatValue;
 
             //For unbounded clamps make sure the range is correct
             if (max < min)
@@ -69,7 +69,7 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
 
             if (clampedValue != floatValue)
             {
-                if (_denyOutOfRangeValues)
+                if (DenyOutOfRangeValues)
                 {
                     return false;
                 }

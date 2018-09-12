@@ -15,6 +15,8 @@
 
 using ImGuiNET;
 using Serilog;
+using SharpLife.CommandSystem.Commands;
+using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Logging;
@@ -48,6 +50,8 @@ namespace SharpLife.Game.Client.UI
 
         private bool _consoleVisible;
 
+        private bool _materialControlVisible;
+
         private string _consoleText = string.Empty;
 
         private const int _maxConsoleChars = ushort.MaxValue;
@@ -57,6 +61,12 @@ namespace SharpLife.Game.Client.UI
         private TextAdded _textAdded;
 
         private readonly byte[] _consoleInputBuffer = new byte[1024];
+
+        private IVariable _fpsMax;
+        private IVariable _mainGamma;
+        private IVariable _textureGamma;
+        private IVariable _lightingGamma;
+        private IVariable _brightness;
 
         public ImGuiInterface(ILogger logger, IClientEngine engine)
         {
@@ -79,6 +89,8 @@ namespace SharpLife.Game.Client.UI
                 {
                     ImGui.Checkbox("Toggle Console", ref _consoleVisible);
 
+                    ImGui.Checkbox("Toggle Material Control", ref _materialControlVisible);
+
                     ImGui.EndMenu();
                 }
 
@@ -89,6 +101,40 @@ namespace SharpLife.Game.Client.UI
                 ImGui.EndMainMenuBar();
             }
 
+            DrawConsole();
+
+            DrawMaterialControl();
+        }
+
+        public void Write(char value)
+        {
+            _consoleText += value;
+
+            _textAdded = TextAdded.Yes;
+
+            TruncateConsoleText();
+        }
+
+        public void Write(char[] buffer, int index, int count)
+        {
+            var text = new string(buffer, index, count);
+            _consoleText += text;
+
+            _textAdded = TextAdded.Yes;
+
+            TruncateConsoleText();
+        }
+
+        private void TruncateConsoleText()
+        {
+            if (_consoleText.Length > _maxConsoleChars)
+            {
+                _consoleText = _consoleText.Substring(_consoleText.Length - _maxConsoleChars);
+            }
+        }
+
+        private void DrawConsole()
+        {
             if (_consoleVisible && ImGui.BeginWindow("Console", ref _consoleVisible, WindowFlags.NoCollapse))
             {
                 var textHeight = ImGuiNative.igGetTextLineHeight();
@@ -174,30 +220,62 @@ namespace SharpLife.Game.Client.UI
             }
         }
 
-        public void Write(char value)
+        private void CacheVariable(ref IVariable variable, string name)
         {
-            _consoleText += value;
-
-            _textAdded = TextAdded.Yes;
-
-            TruncateConsoleText();
-        }
-
-        public void Write(char[] buffer, int index, int count)
-        {
-            var text = new string(buffer, index, count);
-            _consoleText += text;
-
-            _textAdded = TextAdded.Yes;
-
-            TruncateConsoleText();
-        }
-
-        private void TruncateConsoleText()
-        {
-            if (_consoleText.Length > _maxConsoleChars)
+            if (variable == null)
             {
-                _consoleText = _consoleText.Substring(_consoleText.Length - _maxConsoleChars);
+                variable = _engine.CommandContext.FindCommand<IVariable>(name) ?? throw new NotSupportedException($"Couldn't get console variable {name}");
+            }
+        }
+
+        private void CacheConsoleVariables()
+        {
+            CacheVariable(ref _fpsMax, "fps_max");
+            CacheVariable(ref _mainGamma, "mat_gamma");
+            CacheVariable(ref _textureGamma, "mat_texgamma");
+            CacheVariable(ref _lightingGamma, "mat_lightgamma");
+            CacheVariable(ref _brightness, "mat_brightness");
+        }
+
+        private void DrawFloatSlider(IVariable variable, string sliderLabel, float fallbackMin, float fallbackMax, string displayText)
+        {
+            var minMaxFilter = variable.GetFilter<MinMaxFilter>();
+
+            if (minMaxFilter != null)
+            {
+                var value = variable.Float;
+
+                if (ImGui.SliderFloat(sliderLabel, ref value, minMaxFilter.Min ?? fallbackMin, minMaxFilter.Max ?? fallbackMax, displayText, 1))
+                {
+                    variable.Float = value;
+                }
+            }
+        }
+
+        private void DrawMaterialControl()
+        {
+            if (_materialControlVisible && ImGui.BeginWindow("Material Control", ref _materialControlVisible, WindowFlags.NoCollapse))
+            {
+                CacheConsoleVariables();
+
+                var minMaxFilter = _fpsMax.GetFilter<MinMaxFilter>();
+
+                if (minMaxFilter != null)
+                {
+                    int fpsMax = _fpsMax.Integer;
+
+                    if (ImGui.SliderInt("Maximum Frames Per Second", ref fpsMax, (int)(minMaxFilter.Min ?? 0), (int)(minMaxFilter.Max ?? 1000), "%d FPS"))
+                    {
+                        _fpsMax.Integer = fpsMax;
+                    }
+                }
+
+                DrawFloatSlider(_mainGamma, "Main Gamma", 0, 10, "%0.1f");
+                DrawFloatSlider(_textureGamma, "Texture Gamma", 0, 10, "%0.1f");
+                DrawFloatSlider(_lightingGamma, "Lighting Gamma", 0, 10, "%0.1f");
+                DrawFloatSlider(_brightness, "Brightness Override", 0, 10, "%0.1f");
+
+                ImGui.EndWindow();
             }
         }
     }

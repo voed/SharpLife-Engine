@@ -52,5 +52,13 @@ namespace SharpLife.CommandSystem.Commands
         /// </summary>
         /// <param name="filter"></param>
         void AddFilter(IVariableFilter filter);
+
+        /// <summary>
+        /// Gets a filter by type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="System.Reflection.AmbiguousMatchException">If more than one filter of the given type exists on this variable</exception>
+        T GetFilter<T>() where T : class, IVariableFilter;
     }
 }
