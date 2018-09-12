@@ -54,7 +54,18 @@ namespace SharpLife.CommandSystem.Commands.VariableFilters
 
         public bool Filter(ref string stringValue, ref float floatValue)
         {
-            var clampedValue = Math.Clamp(floatValue, _min ?? floatValue, _max ?? floatValue);
+            var min = _min ?? floatValue;
+            var max = _max ?? floatValue;
+
+            //For unbounded clamps make sure the range is correct
+            if (max < min)
+            {
+                var temp = min;
+                min = max;
+                max = temp;
+            }
+
+            var clampedValue = Math.Clamp(floatValue, min, max);
 
             if (clampedValue != floatValue)
             {
