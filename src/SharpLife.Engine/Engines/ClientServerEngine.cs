@@ -61,6 +61,8 @@ namespace SharpLife.Engine.Engines
 
         private const int MaximumFPS = 1000;
 
+        private const int DefaultFPS = 60;
+
         public ICommandLine CommandLine { get; private set; }
 
         public IFileSystem FileSystem { get; private set; }
@@ -112,7 +114,7 @@ namespace SharpLife.Engine.Engines
             }
         }
 
-        private double _desiredFrameLengthSeconds = 1.0 / 60.0;
+        private double _desiredFrameLengthSeconds = 1.0 / DefaultFPS;
 
         private IVariable _fpsMax;
 
@@ -275,6 +277,7 @@ namespace SharpLife.Engine.Engines
 
             _fpsMax = CommandSystem.SharedContext.RegisterVariable(
                 new VariableInfo("fps_max")
+                .WithValue(DefaultFPS)
                 .WithHelpInfo("Sets the maximum frames per second")
                 .WithNumberFilter(true)
                 //Avoid negative maximum
