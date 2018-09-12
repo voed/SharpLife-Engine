@@ -13,8 +13,12 @@
 *
 ****/
 
+using SharpLife.CommandSystem;
+using SharpLife.CommandSystem.Commands;
+using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Input;
 using SharpLife.Utility;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -30,6 +34,16 @@ namespace SharpLife.Renderer
         private readonly List<IUpdateable> _updateables = new List<IUpdateable>();
         private readonly List<IRenderable> _renderables = new List<IRenderable>();
 
+        private readonly IVariable _mainGamma;
+
+        private readonly IVariable _textureGamma;
+
+        private readonly IVariable _lightingGamma;
+
+        private readonly IVariable _brightness;
+
+        private bool _lightingSettingChanged;
+
         public Camera Camera { get; }
 
         public Vector3 Origin => Camera.Position;
@@ -40,10 +54,46 @@ namespace SharpLife.Renderer
 
         public DirectionalVectors ViewVectors => _viewAngles;
 
-        public Scene(IInputSystem inputSystem, GraphicsDevice gd, int viewWidth, int viewHeight)
+        public Scene(IInputSystem inputSystem, ICommandContext commandContext, GraphicsDevice gd, int viewWidth, int viewHeight)
         {
             Camera = new Camera(inputSystem, gd, viewWidth, viewHeight);
             _updateables.Add(Camera);
+
+            if (commandContext == null)
+            {
+                throw new ArgumentNullException(nameof(commandContext));
+            }
+
+            //TODO: might need to move these somewhere else
+            //TODO: archived, but circular dependency on engine helpers makes it impossible for now
+            _mainGamma = commandContext.RegisterVariable(
+                new VariableInfo("mat_gamma")
+                .WithValue(2.5f)
+                .WithHelpInfo("The main gamma value to use for gamma correction")
+                .WithMinMaxFilter(1.8f, 3.0f)
+                .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
+
+            _textureGamma = commandContext.RegisterVariable(
+                new VariableInfo("mat_texgamma")
+                .WithValue(2.0f)
+                .WithHelpInfo("The texture gamma value to use for gamma correction")
+                .WithMinMaxFilter(1.8f, null)
+                .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
+
+            _lightingGamma = commandContext.RegisterVariable(
+                new VariableInfo("mat_lightgamma")
+                .WithValue(2.5f)
+                .WithHelpInfo("The lighting gamma value to use for gamma correction")
+                .WithMinMaxFilter(1.8f, null)
+                .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
+
+            //TODO: archived
+            _brightness = commandContext.RegisterVariable(
+                new VariableInfo("mat_brightness")
+                .WithValue(0.0f)
+                .WithHelpInfo("The lighting brightness multiplier. Set to 0 to disable")
+                .WithMinMaxFilter(0.0f, 2.0f)
+                .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
         }
 
         public void AddContainer(IResourceContainer r)
@@ -89,6 +139,8 @@ namespace SharpLife.Renderer
 
         private void RenderAllSingleThread(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
+            CheckLightingInfo(gd, sc);
+
             float depthClear = gd.IsDepthRangeZeroToOne ? 0f : 1f;
 
             // Main scene
@@ -156,6 +208,32 @@ namespace SharpLife.Renderer
             }
         }
 
+        private void UpdateLightingInfo(GraphicsDevice gd, SceneContext sc)
+        {
+            if (sc.LightingInfoBuffer != null)
+            {
+                var info = new LightingInfo
+                {
+                    MainGamma = _mainGamma.Float,
+                    TextureGamma = _textureGamma.Float,
+                    LightingGamma = _lightingGamma.Float,
+                    Brightness = _brightness.Float
+                };
+
+                gd.UpdateBuffer(sc.LightingInfoBuffer, 0, ref info);
+
+                _lightingSettingChanged = false;
+            }
+        }
+
+        private void CheckLightingInfo(GraphicsDevice gd, SceneContext sc)
+        {
+            if (_lightingSettingChanged)
+            {
+                UpdateLightingInfo(gd, sc);
+            }
+        }
+
         private readonly RenderQueue[] _renderQueues = Enumerable.Range(0, 4).Select(_ => new RenderQueue()).ToArray();
         private readonly List<IRenderable>[] _renderableStage = Enumerable.Range(0, 4).Select(_ => new List<IRenderable>()).ToArray();
 
@@ -180,6 +258,8 @@ namespace SharpLife.Renderer
 
         public void CreateAllDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
+            UpdateLightingInfo(gd, sc);
+
             foreach (var r in _resourceContainers)
             {
                 r.CreateDeviceObjects(gd, cl, sc, scope);

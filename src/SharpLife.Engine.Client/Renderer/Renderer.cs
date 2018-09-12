@@ -15,6 +15,7 @@
 
 using SDL2;
 using Serilog;
+using SharpLife.CommandSystem;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileFormats.BSP;
@@ -86,7 +87,7 @@ namespace SharpLife.Engine.Client.Renderer
         public Renderer(
             IntPtr window,
             ILogger logger,
-            IFileSystem fileSystem, IInputSystem inputSystem, IRendererListener rendererListener,
+            IFileSystem fileSystem, ICommandContext commandContext, IInputSystem inputSystem, IRendererListener rendererListener,
             string envMapDirectory, string shadersDirectory)
         {
             _window = window;
@@ -110,7 +111,7 @@ namespace SharpLife.Engine.Client.Renderer
 
             SDL.SDL_GetWindowSize(_window, out var width, out var height);
 
-            Scene = new Scene(inputSystem, _gd, width, height);
+            Scene = new Scene(inputSystem, commandContext, _gd, width, height);
 
             _sc.SetCurrentScene(Scene);
 

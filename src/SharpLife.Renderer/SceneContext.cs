@@ -29,6 +29,11 @@ namespace SharpLife.Renderer
         public DeviceBuffer ViewMatrixBuffer { get; private set; }
         public DeviceBuffer CameraInfoBuffer { get; private set; }
 
+        /// <summary>
+        /// Contains lighting info for gamma correction and brightness adjustment
+        /// </summary>
+        public DeviceBuffer LightingInfoBuffer { get; private set; }
+
         // MainSceneView resource set uses this.
         public ResourceLayout TextureSamplerResourceLayout { get; private set; }
 
@@ -59,6 +64,7 @@ namespace SharpLife.Renderer
             ProjectionMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             ViewMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             CameraInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            LightingInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<LightingInfo>(), BufferUsage.UniformBuffer));
 
             //TODO: pull filter settings and anisotropy from config
             var mainSamplerDescription = new SamplerDescription
@@ -92,6 +98,8 @@ namespace SharpLife.Renderer
             ProjectionMatrixBuffer.Dispose();
             ViewMatrixBuffer.Dispose();
             CameraInfoBuffer.Dispose();
+            LightingInfoBuffer.Dispose();
+            LightingInfoBuffer = null;
             MainSampler.Dispose();
             MainSceneColorTexture.Dispose();
             MainSceneResolvedColorTexture.Dispose();

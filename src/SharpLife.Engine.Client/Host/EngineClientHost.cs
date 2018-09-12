@@ -108,6 +108,7 @@ namespace SharpLife.Engine.Client.Host
                 _window.WindowHandle,
                 _logger,
                 _engine.FileSystem,
+                CommandContext,
                 _userInterface.WindowManager.InputSystem,
                 this,
                 Framework.Path.EnvironmentMaps,

@@ -19,7 +19,6 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Veldrid;
 using Veldrid.ImageSharp;
 
@@ -46,14 +45,12 @@ namespace SharpLife.Renderer.BSP
                     throw new InvalidOperationException($"Texture \"{texture.Name}\" has no pixel data");
                 }
 
-                var palette = texture.Palette.ToArray();
-
                 var width = (int)texture.Width;
                 var height = (int)texture.Height;
 
                 var textureFormat = texture.Name.StartsWith('{') ? TextureFormat.AlphaTest : TextureFormat.Normal;
 
-                var pixels = ImageConversionUtils.ConvertIndexedToRgba32(palette, texture.Data[0], width, height, textureFormat);
+                var pixels = ImageConversionUtils.ConvertIndexedToRgba32(texture.Palette, texture.Data[0], width, height, textureFormat);
 
                 //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
                 //This stops the color from bleeding through

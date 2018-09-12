@@ -275,6 +275,7 @@ namespace SharpLife.Renderer.BSP
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
                 _worldAndInverseBuffer,
+                sc.LightingInfoBuffer,
                 _factory.LightStylesBuffer,
                 _factory.RenderColorBuffer));
         }
