@@ -17,6 +17,7 @@ using SharpLife.FileFormats.BSP;
 using SharpLife.Models;
 using SharpLife.Models.BSP;
 using SharpLife.Renderer.Models;
+using SharpLife.Renderer.Utility;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -27,6 +28,17 @@ namespace SharpLife.Renderer.BSP
 {
     public sealed class BSPModelResourceFactory : IModelResourceFactory
     {
+        public struct RenderArguments
+        {
+            public Vector4 RenderColor;
+
+            public RenderMode RenderMode;
+
+            public int Padding0;
+            public int Padding1;
+            public int Padding2;
+        }
+
         //Must be sizeof(vec4) / sizeof(float) so it matches the buffer padding
         private static readonly int LightStylesElementMultiplier = Marshal.SizeOf<Vector4>() / Marshal.SizeOf<float>();
 
@@ -40,9 +52,11 @@ namespace SharpLife.Renderer.BSP
         public ResourceLayout TextureLayout { get; private set; }
         public ResourceLayout LightmapLayout { get; private set; }
 
-        public Pipeline Pipeline { get; private set; }
+        public RenderModePipelines Pipelines { get; private set; }
 
         public DeviceBuffer LightStylesBuffer { get; private set; }
+
+        public DeviceBuffer RenderColorBuffer { get; private set; }
 
         public BSPModelResourceFactory(IRenderer renderer, LightStyles lightStyles)
         {
@@ -69,7 +83,8 @@ namespace SharpLife.Renderer.BSP
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("LightStyles", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
+                new ResourceLayoutElementDescription("LightStyles", ResourceKind.UniformBuffer, ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("RenderColor", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
 
             TextureLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
@@ -91,16 +106,82 @@ namespace SharpLife.Renderer.BSP
 
             (var vs, var fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, "LightMappedGeneric");
 
-            var pd = new GraphicsPipelineDescription(
-                BlendStateDescription.SingleAlphaBlend,
-                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
-                new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
-                PrimitiveTopology.TriangleList,
-                new ShaderSetDescription(vertexLayouts, new[] { vs, fs }),
-                new ResourceLayout[] { SharedLayout, TextureLayout, LightmapLayout },
-                sc.MainSceneFramebuffer.OutputDescription);
+            //Create render mode pipelines
+            var rasterizerState = new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
+            const PrimitiveTopology primitiveTopology = PrimitiveTopology.TriangleList;
+            var shaderSets = new ShaderSetDescription(vertexLayouts, new[] { vs, fs });
+            var resourceLayouts = new ResourceLayout[] { SharedLayout, TextureLayout, LightmapLayout };
+            var outputDescription = sc.MainSceneFramebuffer.OutputDescription;
 
-            Pipeline = disposeFactory.CreateGraphicsPipeline(ref pd);
+            var pipelines = new Pipeline[(int)RenderMode.Last + 1];
+
+            var pd = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleDisabled,
+                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
+                rasterizerState,
+                primitiveTopology,
+                shaderSets,
+                resourceLayouts,
+                outputDescription);
+
+            pipelines[(int)RenderMode.Normal] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            pipelines[(int)RenderMode.TransColor] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            pd = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleAlphaBlend,
+                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
+                rasterizerState,
+                primitiveTopology,
+                shaderSets,
+                resourceLayouts,
+                outputDescription);
+
+            pipelines[(int)RenderMode.TransTexture] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            //Glow uses the same pipeline as texture
+            pipelines[(int)RenderMode.Glow] = pipelines[(int)RenderMode.TransTexture];
+
+            pd = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleDisabled,
+                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
+                rasterizerState,
+                primitiveTopology,
+                shaderSets,
+                resourceLayouts,
+                outputDescription);
+
+            pipelines[(int)RenderMode.TransAlpha] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            var additiveBlend = new BlendStateDescription
+            {
+                AttachmentStates = new[]
+                {
+                    new BlendAttachmentDescription
+                    {
+                        BlendEnabled = true,
+                        SourceColorFactor = BlendFactor.One,
+                        DestinationColorFactor = BlendFactor.One,
+                        ColorFunction = BlendFunction.Add,
+                        SourceAlphaFactor = BlendFactor.One,
+                        DestinationAlphaFactor = BlendFactor.One,
+                        AlphaFunction = BlendFunction.Add,
+                    }
+                }
+            };
+
+            pd = pd = new GraphicsPipelineDescription(
+                additiveBlend,
+                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
+                rasterizerState,
+                primitiveTopology,
+                shaderSets,
+                resourceLayouts,
+                outputDescription);
+
+            pipelines[(int)RenderMode.TransAdd] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            Pipelines = new RenderModePipelines(pipelines);
 
             //Reset the buffer so all styles will update in OnRenderBegin
             Array.Fill(_cachedLightStyles, LightStyles.InvalidLightValue);
@@ -115,6 +196,8 @@ namespace SharpLife.Renderer.BSP
             var lightStylesValues = new float[numLightStyleElements];
             Array.Fill(lightStylesValues, 0.0f);
             gd.UpdateBuffer(LightStylesBuffer, 0, lightStylesValues);
+
+            RenderColorBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<RenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -127,6 +210,7 @@ namespace SharpLife.Renderer.BSP
             _disposeCollector.DisposeAll();
 
             LightStylesBuffer = null;
+            RenderColorBuffer = null;
         }
 
         public void Dispose()

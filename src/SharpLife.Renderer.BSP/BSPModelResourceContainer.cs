@@ -29,6 +29,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
+using static SharpLife.Renderer.BSP.BSPModelResourceFactory;
 
 namespace SharpLife.Renderer.BSP
 {
@@ -149,13 +150,45 @@ namespace SharpLife.Renderer.BSP
             _bspModel = bspModel ?? throw new ArgumentNullException(nameof(bspModel));
         }
 
+        private static Vector4 GetBrushColor(ref ModelRenderData renderData)
+        {
+            switch (renderData.RenderMode)
+            {
+                case RenderMode.Normal:
+                case RenderMode.TransAlpha:
+                    return new Vector4(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+
+                case RenderMode.TransColor:
+                    return new Vector4(renderData.RenderColor, renderData.RenderAmount);
+
+                case RenderMode.TransTexture:
+                case RenderMode.Glow:
+                    return new Vector4(byte.MaxValue, byte.MaxValue, byte.MaxValue, renderData.RenderAmount);
+
+                case RenderMode.TransAdd:
+                    return new Vector4(renderData.RenderAmount, renderData.RenderAmount, renderData.RenderAmount, byte.MaxValue);
+
+                default: throw new InvalidOperationException($"Render mode {renderData.RenderMode} not supported");
+            }
+        }
+
         public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData)
         {
             var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
 
             cl.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
 
-            cl.SetPipeline(_factory.Pipeline);
+            var renderArguments = new RenderArguments
+            {
+                RenderColor = GetBrushColor(ref renderData) / 255.0f,
+                RenderMode = renderData.RenderMode
+            };
+
+            cl.UpdateBuffer(_factory.RenderColorBuffer, 0, ref renderArguments);
+
+            var pipeline = _factory.Pipelines[renderData.RenderMode];
+
+            cl.SetPipeline(pipeline);
             cl.SetGraphicsResourceSet(0, _sharedResourceSet);
 
             cl.SetVertexBuffer(0, _vertexBuffer);
@@ -242,7 +275,8 @@ namespace SharpLife.Renderer.BSP
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
                 _worldAndInverseBuffer,
-                _factory.LightStylesBuffer));
+                _factory.LightStylesBuffer,
+                _factory.RenderColorBuffer));
         }
 
         public override void DestroyDeviceObjects(ResourceScope scope)

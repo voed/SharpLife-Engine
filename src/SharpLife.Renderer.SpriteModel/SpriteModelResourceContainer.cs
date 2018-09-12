@@ -214,9 +214,7 @@ namespace SharpLife.Renderer.SpriteModel
 
             var blend = renderData.RenderMode != RenderMode.Normal ? renderData.RenderAmount : 255;
 
-            //TODO: render fx
             //TODO: glow sprite visibility testing
-            //TODO: glow sprite scale
             var angles = GetSpriteAngles(ref renderData, _spriteModel.SpriteFile.Type, sc.ViewState);
 
             angles = VectorUtils.ToRadians(angles);

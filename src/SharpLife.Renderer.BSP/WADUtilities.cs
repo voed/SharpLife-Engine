@@ -16,8 +16,10 @@
 using SharpLife.FileFormats.WAD;
 using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Veldrid;
 using Veldrid.ImageSharp;
 
@@ -44,11 +46,30 @@ namespace SharpLife.Renderer.BSP
                     throw new InvalidOperationException($"Texture \"{texture.Name}\" has no pixel data");
                 }
 
+                var palette = texture.Palette.ToArray();
+
+                var width = (int)texture.Width;
+                var height = (int)texture.Height;
+
                 var textureFormat = texture.Name.StartsWith('{') ? TextureFormat.AlphaTest : TextureFormat.Normal;
 
-                var pixels = ImageConversionUtils.ConvertIndexedToRgba32(texture.Palette, texture.Data[0], (int)texture.Width, (int)texture.Height, textureFormat);
+                var pixels = ImageConversionUtils.ConvertIndexedToRgba32(palette, texture.Data[0], width, height, textureFormat);
 
-                var image = Image.LoadPixelData(pixels, (int)texture.Width, (int)texture.Height);
+                //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
+                //This stops the color from bleeding through
+                if (textureFormat == TextureFormat.AlphaTest
+                    || textureFormat == TextureFormat.IndexAlpha)
+                {
+                    ImageConversionUtils.BoxFilter3x3(pixels, width, height);
+                }
+
+                //Rescale image to nearest power of 2
+                //TODO: use cvar for round down & division
+                (var scaledWidth, var scaledHeight) = ImageConversionUtils.ComputeScaledSize(width, height, 3, 0);
+
+                var scaledPixels = ImageConversionUtils.ResampleTexture(new Span<Rgba32>(pixels), width, height, scaledWidth, scaledHeight);
+
+                var image = Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
 
                 cache.AddTexture2D(gd, factory, new ImageSharpTexture(image, true), texture.Name);
             }

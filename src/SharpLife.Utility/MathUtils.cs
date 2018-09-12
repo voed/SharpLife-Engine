@@ -38,5 +38,30 @@ namespace SharpLife.Utility
         {
             return (float)ToDegrees((double)degrees);
         }
+
+        /// <summary>
+        /// Returns the nearest upper power of 2 for the given value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int NearestUpperPowerOf2(int value)
+        {
+            //Check if value is itself a power of 2
+            if (value != 0 && (value & (value - 1)) == 0)
+            {
+                return value;
+            }
+
+            var count = 0;
+
+            while (value != 0)
+            {
+                value >>= 1;
+
+                ++count;
+            }
+
+            return 1 << count;
+        }
     }
 }

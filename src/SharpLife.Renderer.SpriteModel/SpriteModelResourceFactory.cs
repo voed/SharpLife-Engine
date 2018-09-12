@@ -87,8 +87,6 @@ namespace SharpLife.Renderer.SpriteModel
             //Same pipeline as normal when sprite blending is enabled in vanilla
             pipelines[(int)RenderMode.TransTexture] = pipelines[(int)RenderMode.Normal];
 
-            //TODO: tune these
-
             //Identical to Texture, vanilla GoldSource uses an invalid texture env mode that happens to use GL_MODULATE so for consistency this is required
             pipelines[(int)RenderMode.TransColor] = pipelines[(int)RenderMode.TransTexture];
 
