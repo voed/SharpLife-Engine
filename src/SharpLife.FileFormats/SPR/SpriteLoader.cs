@@ -175,18 +175,18 @@ namespace SharpLife.FileFormats.SPR
 
             //Read the palette
             var colorCount = EndianConverter.Little(_reader.ReadInt16());
-            var paletteData = new byte[Constants.PaletteSizeInBytes];
-            _reader.Read(paletteData, 0, colorCount * Constants.NumPaletteComponents * Constants.PaletteComponentSizeInBytes);
+            var paletteData = new byte[WADConstants.PaletteSizeInBytes];
+            _reader.Read(paletteData, 0, colorCount * WADConstants.NumPaletteComponents * WADConstants.PaletteComponentSizeInBytes);
 
             //Convert the palette to an Rgb24 array
-            var palette = new Rgb24[Constants.NumPaletteColors];
+            var palette = new Rgb24[WADConstants.NumPaletteColors];
 
-            for (var i = 0; i < Constants.NumPaletteColors; ++i)
+            for (var i = 0; i < WADConstants.NumPaletteColors; ++i)
             {
                 palette[i] = new Rgb24(
-                    paletteData[i * Constants.NumPaletteComponents],
-                    paletteData[(i * Constants.NumPaletteComponents) + 1],
-                    paletteData[(i * Constants.NumPaletteComponents) + 2]
+                    paletteData[i * WADConstants.NumPaletteComponents],
+                    paletteData[(i * WADConstants.NumPaletteComponents) + 1],
+                    paletteData[(i * WADConstants.NumPaletteComponents) + 2]
                     );
             }
 

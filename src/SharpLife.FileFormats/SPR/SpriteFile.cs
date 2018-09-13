@@ -39,14 +39,14 @@ namespace SharpLife.FileFormats.SPR
         public SpriteFile()
         {
             //TODO: move palette constants to utility
-            Palette = new Rgb24[Constants.NumPaletteColors];
+            Palette = new Rgb24[WADConstants.NumPaletteColors];
         }
 
         public SpriteFile(Rgb24[] palette)
         {
             Palette = palette ?? throw new ArgumentNullException(nameof(palette));
 
-            if (palette.Length != Constants.NumPaletteColors)
+            if (palette.Length != WADConstants.NumPaletteColors)
             {
                 throw new ArgumentException("Palette size is invalid");
             }

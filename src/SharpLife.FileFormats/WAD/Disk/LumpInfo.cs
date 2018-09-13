@@ -27,7 +27,7 @@ namespace SharpLife.FileFormats.WAD.Disk
         public byte type;
         public byte compression;
         public byte pad1, pad2;
-        public fixed byte name[Constants.MaxTextureNameLength + 1];		// must be null terminated
+        public fixed byte name[WADConstants.MaxTextureNameLength + 1];		// must be null terminated
 
         public string Name
         {
@@ -35,7 +35,7 @@ namespace SharpLife.FileFormats.WAD.Disk
             {
                 fixed (byte* pName = name)
                 {
-                    return Encoding.UTF8.GetString(pName, Constants.MaxTextureNameLength + 1);
+                    return Encoding.UTF8.GetString(pName, WADConstants.MaxTextureNameLength + 1);
                 }
             }
         }

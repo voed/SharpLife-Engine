@@ -99,13 +99,13 @@ namespace SharpLife.FileFormats.WAD
             var startPos = reader.BaseStream.Position = fileOffset;
 
             //Read fixed size array from file
-            var name = reader.ReadBytes(Constants.MaxTextureNameLength + 1);
+            var name = reader.ReadBytes(WADConstants.MaxTextureNameLength + 1);
             var width = reader.ReadUInt32();
             var height = reader.ReadUInt32();
 
-            var offsets = new uint[Constants.NumMipLevels];
+            var offsets = new uint[WADConstants.NumMipLevels];
 
-            foreach (var offset in Enumerable.Range(0, Constants.NumMipLevels))
+            foreach (var offset in Enumerable.Range(0, WADConstants.NumMipLevels))
             {
                 offsets[offset] = reader.ReadUInt32();
             }
@@ -125,7 +125,7 @@ namespace SharpLife.FileFormats.WAD
             //Maps always have miptex entries, but they aren't necessarily embedded textures
             if (offsets[0] != 0)
             {
-                foreach (var offset in Enumerable.Range(0, Constants.NumMipLevels))
+                foreach (var offset in Enumerable.Range(0, WADConstants.NumMipLevels))
                 {
                     //The offsets are relative to the start of the mipmap structure
                     reader.BaseStream.Position = startPos + offsets[offset];
@@ -144,14 +144,14 @@ namespace SharpLife.FileFormats.WAD
 
                 var paletteSize = reader.ReadInt16();
 
-                if (paletteSize != Constants.NumPaletteColors)
+                if (paletteSize != WADConstants.NumPaletteColors)
                 {
                     throw new FileLoadFailureException("Invalid miptex");
                 }
 
-                foreach (var i in Enumerable.Range(0, Constants.NumPaletteColors))
+                foreach (var i in Enumerable.Range(0, WADConstants.NumPaletteColors))
                 {
-                    var paletteData = reader.ReadBytes(Constants.NumPaletteComponents * Constants.PaletteComponentSizeInBytes);
+                    var paletteData = reader.ReadBytes(WADConstants.NumPaletteComponents * WADConstants.PaletteComponentSizeInBytes);
 
                     GCHandle handle = GCHandle.Alloc(paletteData, GCHandleType.Pinned);
                     texture.Palette[i] = Marshal.PtrToStructure<Rgb24>(handle.AddrOfPinnedObject());

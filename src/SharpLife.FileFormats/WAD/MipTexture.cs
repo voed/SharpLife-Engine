@@ -27,8 +27,8 @@ namespace SharpLife.FileFormats.WAD
         /// <summary>
         /// Texture data stored as raw bytes
         /// </summary>
-        public byte[][] Data { get; } = new byte[Constants.NumMipLevels][]; // four mip maps stored
+        public byte[][] Data { get; } = new byte[WADConstants.NumMipLevels][]; // four mip maps stored
 
-        public Rgb24[] Palette { get; } = new Rgb24[Constants.NumPaletteColors];
+        public Rgb24[] Palette { get; } = new Rgb24[WADConstants.NumPaletteColors];
     }
 }

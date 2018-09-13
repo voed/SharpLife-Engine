@@ -15,7 +15,7 @@
 
 namespace SharpLife.FileFormats.WAD
 {
-    public static class Constants
+    public static class WADConstants
     {
         /// <summary>
         /// Maximum byte length for texture names, excluding null terminator
