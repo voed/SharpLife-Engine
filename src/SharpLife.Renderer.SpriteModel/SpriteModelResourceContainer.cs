@@ -273,7 +273,7 @@ namespace SharpLife.Renderer.SpriteModel
 
             var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
-            var atlasImage = CreateSpriteAtlas(gd, disposeFactory);
+            var atlasImage = CreateSpriteAtlas(gd, disposeFactory, sc);
 
             //TODO: disable mipmapping for certain sprites?
             var texture = sc.MapResourceCache.AddTexture2D(gd, disposeFactory, new ImageSharpTexture(atlasImage, true), $"{_spriteModel.Name}_atlas");
@@ -299,7 +299,7 @@ namespace SharpLife.Renderer.SpriteModel
                 _renderColorBuffer));
         }
 
-        private Image<Rgba32> CreateSpriteAtlas(GraphicsDevice gd, DisposeCollectorResourceFactory disposeFactory)
+        private Image<Rgba32> CreateSpriteAtlas(GraphicsDevice gd, DisposeCollectorResourceFactory disposeFactory, SceneContext sc)
         {
             //Merge all of the sprite frames together into one texture
             //The sprite's bounds are the maximum size that a frame can be
@@ -309,8 +309,11 @@ namespace SharpLife.Renderer.SpriteModel
             //This helps optimize texture size
             var framesPerLine = (int)Math.Ceiling(Math.Sqrt(_spriteModel.SpriteFile.Frames.Count));
 
-            var totalWidth = _spriteModel.SpriteFile.MaximumWidth * framesPerLine;
-            var totalHeight = _spriteModel.SpriteFile.MaximumHeight * framesPerLine;
+            //Account for the change in size when converting textures
+            (var maximumWith, var maximumHeight) = sc.TextureLoader.ComputeScaledSize(_spriteModel.SpriteFile.MaximumWidth, _spriteModel.SpriteFile.MaximumHeight);
+
+            var totalWidth = maximumWith * framesPerLine;
+            var totalHeight = maximumHeight * framesPerLine;
 
             var atlasImage = new Image<Rgba32>(totalWidth, totalHeight);
 
@@ -339,10 +342,10 @@ namespace SharpLife.Renderer.SpriteModel
 
             foreach (var frame in _spriteModel.SpriteFile.Frames)
             {
-                var frameImage = Image.LoadPixelData(
-                    ImageConversionUtils.ConvertIndexedToRgba32(_spriteModel.SpriteFile.Palette, frame.TextureData, frame.Area.Width, frame.Area.Height, textureFormat),
-                    frame.Area.Width,
-                    frame.Area.Height);
+                //Each individual texture is converted before being added to the atlas to avoid bleeding effects between frames
+                var frameImage = sc.TextureLoader.ConvertTexture(
+                    new IndexedColor256Texture(_spriteModel.SpriteFile.Palette, frame.TextureData, frame.Area.Width, frame.Area.Height),
+                    textureFormat);
 
                 atlasImage.Mutate(context => context.DrawImage(graphicsOptions, frameImage, nextFramePosition));
 
@@ -350,7 +353,7 @@ namespace SharpLife.Renderer.SpriteModel
                 //Important! these are float types
                 PointF frameOrigin = nextFramePosition;
 
-                var frameSize = new SizeF(frame.Area.Width, frame.Area.Height);
+                var frameSize = new SizeF(frameImage.Width, frameImage.Height);
 
                 //Convert to texture coordinates
                 frameOrigin.X /= totalWidth;
@@ -360,6 +363,7 @@ namespace SharpLife.Renderer.SpriteModel
                 frameSize.Height /= totalHeight;
 
                 //The vertices should be scaled to match the frame size
+                //These don't need to be modified to account for texture scale!
                 var scale = new Vector3(0, frame.Area.Width, frame.Area.Height);
                 var translation = new Vector3(0, frame.Area.X, frame.Area.Y);
 
@@ -395,13 +399,13 @@ namespace SharpLife.Renderer.SpriteModel
 
                 _frameBuffers.Add(vb);
 
-                nextFramePosition.X += _spriteModel.SpriteFile.MaximumWidth;
+                nextFramePosition.X += maximumWith;
 
                 //Wrap to next line
                 if (nextFramePosition.X >= totalWidth)
                 {
                     nextFramePosition.X = 0;
-                    nextFramePosition.Y += _spriteModel.SpriteFile.MaximumHeight;
+                    nextFramePosition.Y += maximumHeight;
                 }
             }
 

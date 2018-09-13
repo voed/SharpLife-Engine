@@ -56,7 +56,18 @@ namespace SharpLife.Renderer
                 .WithMinMaxFilter(ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, true));
         }
 
-        private ImageSharpTexture InternalLoadTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
+        /// <summary>
+        /// Computes the scaled size of a texture that has the given width and height
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        public (int, int) ComputeScaledSize(int width, int height)
+        {
+            return ImageConversionUtils.ComputeScaledSize(width, height, _roundDown.Integer, _picMip.Integer);
+        }
+
+        private Image<Rgba32> InternalConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
         {
             var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputTexture.Palette, inputTexture.Pixels, inputTexture.Width, inputTexture.Height, textureFormat);
 
@@ -69,11 +80,47 @@ namespace SharpLife.Renderer
             }
 
             //Rescale image to nearest power of 2
-            (var scaledWidth, var scaledHeight) = ImageConversionUtils.ComputeScaledSize(inputTexture.Width, inputTexture.Height, _roundDown.Integer, _picMip.Integer);
+            (var scaledWidth, var scaledHeight) = ComputeScaledSize(inputTexture.Width, inputTexture.Height);
 
             var scaledPixels = ImageConversionUtils.ResampleTexture(new Span<Rgba32>(pixels), inputTexture.Width, inputTexture.Height, scaledWidth, scaledHeight);
 
-            var image = Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
+            return Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
+        }
+
+        /// <summary>
+        /// Converts an indexed 256 color texture to Rgba32
+        /// </summary>
+        /// <param name="inputTexture"></param>
+        /// <param name="textureFormat"></param>
+        /// <returns></returns>
+        public Image<Rgba32> ConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
+        {
+            if (inputTexture == null)
+            {
+                throw new ArgumentNullException(nameof(inputTexture));
+            }
+
+            var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputTexture.Palette, inputTexture.Pixels, inputTexture.Width, inputTexture.Height, textureFormat);
+
+            //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
+            //This stops the color from bleeding through
+            if (textureFormat == TextureFormat.AlphaTest
+                || textureFormat == TextureFormat.IndexAlpha)
+            {
+                ImageConversionUtils.BoxFilter3x3(pixels, inputTexture.Width, inputTexture.Height);
+            }
+
+            //Rescale image to nearest power of 2
+            (var scaledWidth, var scaledHeight) = ComputeScaledSize(inputTexture.Width, inputTexture.Height);
+
+            var scaledPixels = ImageConversionUtils.ResampleTexture(new Span<Rgba32>(pixels), inputTexture.Width, inputTexture.Height, scaledWidth, scaledHeight);
+
+            return Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
+        }
+
+        private ImageSharpTexture InternalLoadTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
+        {
+            var image = InternalConvertTexture(inputTexture, textureFormat);
 
             return new ImageSharpTexture(image, true);
         }
