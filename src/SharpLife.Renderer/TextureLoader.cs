@@ -27,8 +27,14 @@ namespace SharpLife.Renderer
 {
     public class TextureLoader
     {
+        //Different from ImageConversionUtils.MinimumMaxTextureSize because that is used to create non-zero sizes
+        //This ensures the maximum size is constrained to a sensible value
+        private const int MinimumMaxSize = 128;
+        private const int DefaultMaxSize = 256;
         private const int DefaultRoundDown = 3;
         private const int DefaultPicMip = 0;
+
+        private readonly IVariable _maxSize;
 
         private readonly IVariable _roundDown;
 
@@ -40,6 +46,13 @@ namespace SharpLife.Renderer
             {
                 throw new ArgumentNullException(nameof(commandContext));
             }
+
+            _maxSize = commandContext.RegisterVariable(
+                new VariableInfo("mat_max_size")
+                .WithValue(DefaultMaxSize)
+                .WithHelpInfo("This is used to constrain texture sizes")
+                .WithNumberFilter(true)
+                .WithMinMaxFilter(MinimumMaxSize, null, true));
 
             _roundDown = commandContext.RegisterVariable(
                 new VariableInfo("mat_round_down")
@@ -64,7 +77,7 @@ namespace SharpLife.Renderer
         /// <returns></returns>
         public (int, int) ComputeScaledSize(int width, int height)
         {
-            return ImageConversionUtils.ComputeScaledSize(width, height, _roundDown.Integer, _picMip.Integer);
+            return ImageConversionUtils.ComputeScaledSize(width, height, _maxSize.Integer, _roundDown.Integer, _picMip.Integer);
         }
 
         private Image<Rgba32> InternalConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)

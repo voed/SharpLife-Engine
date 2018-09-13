@@ -21,6 +21,7 @@ using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Renderer;
+using SharpLife.Renderer.Utility;
 using SharpLife.Utility;
 using System;
 using System.Numerics;
@@ -67,6 +68,9 @@ namespace SharpLife.Game.Client.UI
         private IVariable _textureGamma;
         private IVariable _lightingGamma;
         private IVariable _brightness;
+        private IVariable _maxSize;
+        private IVariable _roundDown;
+        private IVariable _picMip;
 
         public ImGuiInterface(ILogger logger, IClientEngine engine)
         {
@@ -235,6 +239,29 @@ namespace SharpLife.Game.Client.UI
             CacheVariable(ref _textureGamma, "mat_texgamma");
             CacheVariable(ref _lightingGamma, "mat_lightgamma");
             CacheVariable(ref _brightness, "mat_brightness");
+            CacheVariable(ref _maxSize, "mat_max_size");
+            CacheVariable(ref _roundDown, "mat_round_down");
+            CacheVariable(ref _picMip, "mat_picmip");
+        }
+
+        private void DrawIntSlider(IVariable variable, string sliderLabel, int fallbackMin, int fallbackMax, string displayText, Func<IVariable, int> getValue, Action<IVariable, int> setValue)
+        {
+            var minMaxFilter = variable.GetFilter<MinMaxFilter>();
+
+            if (minMaxFilter != null)
+            {
+                var value = getValue(variable);
+
+                if (ImGui.SliderInt(sliderLabel, ref value, (int)(minMaxFilter.Min ?? fallbackMin), (int)(minMaxFilter.Max ?? fallbackMax), displayText))
+                {
+                    setValue(variable, value);
+                }
+            }
+        }
+
+        private void DrawIntSlider(IVariable variable, string sliderLabel, int fallbackMin, int fallbackMax, string displayText)
+        {
+            DrawIntSlider(variable, sliderLabel, fallbackMin, fallbackMax, displayText, var => var.Integer, (var, value) => var.Integer = value);
         }
 
         private void DrawFloatSlider(IVariable variable, string sliderLabel, float fallbackMin, float fallbackMax, string displayText)
@@ -258,22 +285,16 @@ namespace SharpLife.Game.Client.UI
             {
                 CacheConsoleVariables();
 
-                var minMaxFilter = _fpsMax.GetFilter<MinMaxFilter>();
-
-                if (minMaxFilter != null)
-                {
-                    int fpsMax = _fpsMax.Integer;
-
-                    if (ImGui.SliderInt("Maximum Frames Per Second", ref fpsMax, (int)(minMaxFilter.Min ?? 0), (int)(minMaxFilter.Max ?? 1000), "%d FPS"))
-                    {
-                        _fpsMax.Integer = fpsMax;
-                    }
-                }
+                DrawIntSlider(_fpsMax, "Maximum Frames Per Second", 0, 1000, "%d FPS");
 
                 DrawFloatSlider(_mainGamma, "Main Gamma", 0, 10, "%0.1f");
                 DrawFloatSlider(_textureGamma, "Texture Gamma", 0, 10, "%0.1f");
                 DrawFloatSlider(_lightingGamma, "Lighting Gamma", 0, 10, "%0.1f");
                 DrawFloatSlider(_brightness, "Brightness Override", 0, 10, "%0.1f");
+
+                DrawIntSlider(_maxSize, "Constrain texture scales to this maximum size", ImageConversionUtils.MinimumMaxTextureSize, 1 << 14, "%d");
+                DrawIntSlider(_roundDown, "Round Down texture scales using this exponent", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
+                DrawIntSlider(_picMip, "Scale down texture scales this many times", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
 
                 ImGui.EndWindow();
             }

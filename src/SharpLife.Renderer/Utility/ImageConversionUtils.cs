@@ -31,6 +31,8 @@ namespace SharpLife.Renderer.Utility
 
         private const int ResampleRatio = 0x10000;
 
+        public const int MinimumMaxTextureSize = 1;
+
         public const int MinSizeExponent = 0;
         public static readonly int MaxSizeExponent = (8 * Marshal.SizeOf<int>()) - 1;
 
@@ -350,7 +352,7 @@ namespace SharpLife.Renderer.Utility
             return output;
         }
 
-        private static int ComputeRoundedDownValue(int value, int roundDownExponent, int divisorExponent)
+        private static int ComputeRoundedDownValue(int value, int maxValue, int roundDownExponent, int divisorExponent)
         {
             var scaledValue = MathUtils.NearestUpperPowerOf2(value);
 
@@ -361,7 +363,8 @@ namespace SharpLife.Renderer.Utility
 
             scaledValue >>= divisorExponent;
 
-            return scaledValue;
+            //Make sure it's always valid
+            return Math.Clamp(scaledValue, 1, maxValue);
         }
 
         /// <summary>
@@ -369,10 +372,11 @@ namespace SharpLife.Renderer.Utility
         /// </summary>
         /// <param name="inWidth">Original width</param>
         /// <param name="inHeight">Original height</param>
+        /// <param name="maxValue">The maximum value that a scaled size can be</param>
         /// <param name="roundDownExponent">Exponent used to round down the scaled size</param>
         /// <param name="divisorExponent">Exponent used to divide the scaled size further</param>
         /// <returns></returns>
-        public static (int, int) ComputeScaledSize(int inWidth, int inHeight, int roundDownExponent, int divisorExponent)
+        public static (int, int) ComputeScaledSize(int inWidth, int inHeight, int maxValue, int roundDownExponent, int divisorExponent)
         {
             if (inWidth <= 0)
             {
@@ -382,6 +386,11 @@ namespace SharpLife.Renderer.Utility
             if (inHeight <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(inHeight));
+            }
+
+            if (maxValue < MinimumMaxTextureSize)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxValue));
             }
 
             if (roundDownExponent < MinSizeExponent || roundDownExponent > MaxSizeExponent)
@@ -395,8 +404,8 @@ namespace SharpLife.Renderer.Utility
             }
 
             //Rescale image to nearest power of 2
-            var scaledWidth = ComputeRoundedDownValue(inWidth, roundDownExponent, divisorExponent);
-            var scaledHeight = ComputeRoundedDownValue(inHeight, roundDownExponent, divisorExponent);
+            var scaledWidth = ComputeRoundedDownValue(inWidth, maxValue, roundDownExponent, divisorExponent);
+            var scaledHeight = ComputeRoundedDownValue(inHeight, maxValue, roundDownExponent, divisorExponent);
 
             return (scaledWidth, scaledHeight);
         }
