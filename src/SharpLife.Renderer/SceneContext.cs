@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
 using System;
 using System.Runtime.CompilerServices;
@@ -24,6 +25,8 @@ namespace SharpLife.Renderer
     {
         public ResourceCache GlobalResourceCache { get; }
         public ResourceCache MapResourceCache { get; }
+
+        public TextureLoader TextureLoader { get; }
 
         public DeviceBuffer ProjectionMatrixBuffer { get; private set; }
         public DeviceBuffer ViewMatrixBuffer { get; private set; }
@@ -52,10 +55,11 @@ namespace SharpLife.Renderer
 
         public TextureSampleCount MainSceneSampleCount { get; internal set; }
 
-        public SceneContext(IFileSystem fileSystem, string shadersDirectory)
+        public SceneContext(IFileSystem fileSystem, ICommandContext commandContext, string shadersDirectory)
         {
             GlobalResourceCache = new ResourceCache(fileSystem, shadersDirectory);
             MapResourceCache = new ResourceCache(fileSystem, shadersDirectory);
+            TextureLoader = new TextureLoader(commandContext);
         }
 
         public virtual void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)

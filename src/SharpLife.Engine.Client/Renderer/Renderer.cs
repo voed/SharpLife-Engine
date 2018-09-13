@@ -98,7 +98,7 @@ namespace SharpLife.Engine.Client.Renderer
             _rendererListener = rendererListener ?? throw new ArgumentNullException(nameof(rendererListener));
             _envMapDirectory = envMapDirectory ?? throw new ArgumentNullException(nameof(envMapDirectory));
 
-            _sc = new SceneContext(fileSystem, shadersDirectory);
+            _sc = new SceneContext(fileSystem, commandContext, shadersDirectory);
 
             //Configure Veldrid graphics device
             //Don't use a swap chain depth format, it won't render anything on Vulkan
@@ -341,7 +341,7 @@ namespace SharpLife.Engine.Client.Renderer
             //Upload all used textures
             var usedTextures = BSPUtilities.GetUsedTextures(worldModel.BSPFile, wadList);
 
-            WADUtilities.UploadTextures(_gd, _gd.ResourceFactory, _sc.MapResourceCache, usedTextures);
+            WADUtilities.UploadTextures(usedTextures, _sc.TextureLoader, _gd, _sc.MapResourceCache);
         }
 
         /// <summary>

@@ -15,12 +15,8 @@
 
 using SharpLife.FileFormats.WAD;
 using SharpLife.Renderer.Utility;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using System;
 using System.Collections.Generic;
 using Veldrid;
-using Veldrid.ImageSharp;
 
 namespace SharpLife.Renderer.BSP
 {
@@ -29,46 +25,27 @@ namespace SharpLife.Renderer.BSP
         /// <summary>
         /// Uploads all of the given textures, adding them to the cache
         /// </summary>
-        /// <param name="gd"></param>
-        /// <param name="factory"></param>
-        /// <param name="cache"></param>
         /// <param name="textures"></param>
-        public static void UploadTextures(GraphicsDevice gd, ResourceFactory factory, ResourceCache cache, IReadOnlyList<MipTexture> textures)
+        /// <param name="textureLoader"></param>
+        /// <param name="gd"></param>
+        /// <param name="cache"></param>
+        public static void UploadTextures(IReadOnlyList<MipTexture> textures, TextureLoader textureLoader, GraphicsDevice gd, ResourceCache cache)
         {
             foreach (var texture in textures)
             {
                 //Convert the image data to an ImageSharp image
-                var data = texture.Data[0];
-
-                if (data == null)
-                {
-                    throw new InvalidOperationException($"Texture \"{texture.Name}\" has no pixel data");
-                }
-
-                var width = (int)texture.Width;
-                var height = (int)texture.Height;
-
                 var textureFormat = texture.Name.StartsWith('{') ? TextureFormat.AlphaTest : TextureFormat.Normal;
 
-                var pixels = ImageConversionUtils.ConvertIndexedToRgba32(texture.Palette, texture.Data[0], width, height, textureFormat);
-
-                //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
-                //This stops the color from bleeding through
-                if (textureFormat == TextureFormat.AlphaTest
-                    || textureFormat == TextureFormat.IndexAlpha)
-                {
-                    ImageConversionUtils.BoxFilter3x3(pixels, width, height);
-                }
-
-                //Rescale image to nearest power of 2
-                //TODO: use cvar for round down & division
-                (var scaledWidth, var scaledHeight) = ImageConversionUtils.ComputeScaledSize(width, height, 3, 0);
-
-                var scaledPixels = ImageConversionUtils.ResampleTexture(new Span<Rgba32>(pixels), width, height, scaledWidth, scaledHeight);
-
-                var image = Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
-
-                cache.AddTexture2D(gd, factory, new ImageSharpTexture(image, true), texture.Name);
+                textureLoader.LoadTexture(
+                    new IndexedColor256Texture(
+                        texture.Palette,
+                        texture.Data[0],
+                        (int)texture.Width,
+                        (int)texture.Height),
+                    textureFormat,
+                    texture.Name,
+                    gd,
+                    cache);
             }
         }
     }

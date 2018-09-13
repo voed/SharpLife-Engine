@@ -17,6 +17,7 @@ using SharpLife.Utility;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace SharpLife.Renderer.Utility
 {
@@ -29,6 +30,9 @@ namespace SharpLife.Renderer.Utility
         public const byte IndexedAlphaColorIndex = 255;
 
         private const int ResampleRatio = 0x10000;
+
+        public const int MinSizeExponent = 0;
+        public static readonly int MaxSizeExponent = (8 * Marshal.SizeOf<int>()) - 1;
 
         /// <summary>
         /// Convert an indexed 256 color image to an Rgba32 image
@@ -380,12 +384,12 @@ namespace SharpLife.Renderer.Utility
                 throw new ArgumentOutOfRangeException(nameof(inHeight));
             }
 
-            if (roundDownExponent < 0 || roundDownExponent > 31)
+            if (roundDownExponent < MinSizeExponent || roundDownExponent > MaxSizeExponent)
             {
                 throw new ArgumentOutOfRangeException(nameof(roundDownExponent));
             }
 
-            if (divisorExponent < 0 || divisorExponent > 31)
+            if (divisorExponent < MinSizeExponent || divisorExponent > MaxSizeExponent)
             {
                 throw new ArgumentOutOfRangeException(nameof(divisorExponent));
             }

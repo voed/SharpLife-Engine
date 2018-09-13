@@ -13,17 +13,10 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.WAD
+namespace SharpLife.Renderer.Utility
 {
-    public static class Constants
+    public static class IndexPaletteConstants
     {
-        /// <summary>
-        /// Maximum byte length for texture names, excluding null terminator
-        /// </summary>
-        public const int MaxTextureNameLength = 15;
-        public const int NumMipLevels = 4;
-
-        //TODO: remove and use the constants in IndexPaletteConstants
         public const int NumPaletteColors = 256;
         public const int NumPaletteComponents = 3;
         public const int PaletteComponentSizeInBytes = 1;
