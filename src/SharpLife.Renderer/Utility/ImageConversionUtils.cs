@@ -263,7 +263,7 @@ namespace SharpLife.Renderer.Utility
                     pixels[i] = InternalBoxFilter3x3(
                         pixels,
                         w, h,
-                        i % w, i / h);
+                        i % w, i / w);
                 }
             }
         }
