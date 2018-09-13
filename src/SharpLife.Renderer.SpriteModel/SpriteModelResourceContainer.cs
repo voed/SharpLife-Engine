@@ -295,6 +295,7 @@ namespace SharpLife.Renderer.SpriteModel
                 _worldAndInverseBuffer,
                 view,
                 sc.MainSampler,
+                sc.LightingInfoBuffer,
                 _renderColorBuffer));
         }
 
