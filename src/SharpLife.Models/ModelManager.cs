@@ -16,6 +16,7 @@
 using SharpLife.FileSystem;
 using SharpLife.Models.BSP;
 using SharpLife.Models.SPR;
+using SharpLife.Models.Studio;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -20,13 +20,13 @@ using Veldrid;
 
 namespace SharpLife.Renderer.StudioModel
 {
-    public sealed class StudioModelRenderable : ModelResourceContainer
+    public sealed class StudioModelResourceContainer : ModelResourceContainer
     {
-        private readonly SharpLife.Models.StudioModel _studioModel;
+        private readonly SharpLife.Models.Studio.StudioModel _studioModel;
 
         public override IModel Model => _studioModel;
 
-        public StudioModelRenderable(SharpLife.Models.StudioModel studioModel)
+        public StudioModelResourceContainer(SharpLife.Models.Studio.StudioModel studioModel)
         {
             _studioModel = studioModel ?? throw new ArgumentNullException(nameof(studioModel));
         }

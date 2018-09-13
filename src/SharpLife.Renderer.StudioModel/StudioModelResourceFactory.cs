@@ -37,12 +37,12 @@ namespace SharpLife.Renderer.StudioModel
 
         public ModelResourceContainer CreateContainer(IModel model)
         {
-            if (!(model is SharpLife.Models.StudioModel studioModel))
+            if (!(model is SharpLife.Models.Studio.StudioModel studioModel))
             {
                 throw new ArgumentException("Model must be a Studio model", nameof(model));
             }
 
-            return new StudioModelRenderable(studioModel);
+            return new StudioModelResourceContainer(studioModel);
         }
     }
 }

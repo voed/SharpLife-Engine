@@ -25,6 +25,7 @@ using SharpLife.Input;
 using SharpLife.Models;
 using SharpLife.Models.BSP;
 using SharpLife.Models.SPR;
+using SharpLife.Models.Studio;
 using SharpLife.Renderer;
 using SharpLife.Renderer.BSP;
 using SharpLife.Renderer.Models;

@@ -17,7 +17,7 @@ using SharpLife.FileFormats.MDL;
 using System;
 using System.IO;
 
-namespace SharpLife.Models
+namespace SharpLife.Models.Studio
 {
     public sealed class StudioModelLoader : IModelLoader
     {

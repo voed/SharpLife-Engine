@@ -16,7 +16,7 @@
 using SharpLife.FileFormats.MDL;
 using System;
 
-namespace SharpLife.Models
+namespace SharpLife.Models.Studio
 {
     public sealed class StudioModel : BaseModel
     {
