@@ -13,58 +13,15 @@
 *
 ****/
 
-using System;
 using System.Collections.Generic;
 
 namespace SharpLife.FileFormats.MDL
 {
     public class Animation
     {
-        public struct AnimationValue
-        {
-            public short Value;
-            public int Count;
-        }
-
         /// <summary>
         /// List of animation values for a specific frame for each axis
-        /// Compressed by storing repeated values as one entry
         /// </summary>
-        public List<AnimationValue>[] Values { get; } = new List<AnimationValue>[MDLConstants.NumAxes];
-
-        public bool TryGetValue(int axis, int frame, out short value)
-        {
-            if (axis < 0 || axis >= MDLConstants.NumAxes)
-            {
-                throw new ArgumentOutOfRangeException(nameof(axis));
-            }
-
-            if (frame < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(frame));
-            }
-
-            var list = Values[axis];
-
-            var currentFrame = 0;
-
-            for (var i = 0; i < list.Count; ++i)
-            {
-                var animValue = list[i];
-
-                if (frame < currentFrame + animValue.Count)
-                {
-                    //Found the value range
-                    value = animValue.Value;
-                    return true;
-                }
-
-                currentFrame += animValue.Count;
-            }
-
-            value = default;
-
-            return false;
-        }
+        public List<short>[] Values { get; } = new List<short>[MDLConstants.NumAxes];
     }
 }

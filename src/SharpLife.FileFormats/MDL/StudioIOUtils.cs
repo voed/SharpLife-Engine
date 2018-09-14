@@ -82,9 +82,8 @@ namespace SharpLife.FileFormats.MDL
                         {
                             reader.BaseStream.Position = animationPosition + (Marshal.SizeOf<Disk.Animation>() * bone) + rawAnimation.Offset[axis];
 
-                            var values = new List<Animation.AnimationValue>();
+                            var values = new List<short>(sequence.FrameCount);
 
-                            //TODO: verify that this is correct
                             for (var frame = 0; frame < sequence.FrameCount;)
                             {
                                 var count = reader.ReadStructure<AnimationValue>();
@@ -96,11 +95,7 @@ namespace SharpLife.FileFormats.MDL
                                 {
                                     var animValue = reader.ReadStructure<AnimationValue>();
 
-                                    values.Add(new Animation.AnimationValue
-                                    {
-                                        Value = animValue.Value,
-                                        Count = 1
-                                    });
+                                    values.Add(animValue.Value);
                                 }
 
                                 //If it's a run, convert it
@@ -108,10 +103,10 @@ namespace SharpLife.FileFormats.MDL
                                 {
                                     var value = values[values.Count - 1];
 
-                                    //Get number of repetitions
-                                    value.Count = count.Num.Total - (count.Num.Valid - 1);
-
-                                    values[values.Count - 1] = value;
+                                    for (; i < count.Num.Total; ++i)
+                                    {
+                                        values.Add(value);
+                                    }
                                 }
 
                                 frame += count.Num.Total;
