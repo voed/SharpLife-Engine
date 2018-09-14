@@ -13,20 +13,41 @@
 *
 ****/
 
+using System;
+
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+    [Flags]
+    public enum MotionTypes
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        None = 0,
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        X = 1 << 0,
+        Y = 1 << 1,
+        Z = 1 << 2,
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
+        XR = 1 << 3,
+        YR = 1 << 4,
+        ZR = 1 << 5,
 
-        public const int NumBlendTypes = 2;
+        LX = 1 << 6,
+        LY = 1 << 7,
+        LZ = 1 << 8,
+
+        AX = 1 << 9,
+        AY = 1 << 10,
+        AZ = 1 << 11,
+
+        AXR = 1 << 12,
+        AYR = 1 << 13,
+        AZR = 1 << 14,
+
+        Types = X | Y | Z
+            | XR | YR | ZR
+            | LX | LY | LZ
+            | AX | AY | AZ
+            | AXR | AYR | AZR,
+
+        RLoop = 1 << 15
     }
 }

@@ -13,20 +13,16 @@
 *
 ****/
 
+using System.Collections.Generic;
+
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+    public class SequenceGroup
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public string Label { get; set; }
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public string Name { get; set; }
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
-
-        public const int NumBlendTypes = 2;
+        public List<SequenceDescriptor> Sequences { get; set; }
     }
 }

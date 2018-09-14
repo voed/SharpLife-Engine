@@ -171,7 +171,7 @@ namespace SharpLife.Renderer.BSP
                 }
             };
 
-            pd = pd = new GraphicsPipelineDescription(
+            pd = new GraphicsPipelineDescription(
                 additiveBlend,
                 gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
                 rasterizerState,

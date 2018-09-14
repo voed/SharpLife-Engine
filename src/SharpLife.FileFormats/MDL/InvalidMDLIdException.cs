@@ -13,20 +13,26 @@
 *
 ****/
 
+using System;
+
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+#pragma warning disable RCS1194 // Implement exception constructors.
+    public sealed class InvalidMDLIdException : FileLoadFailureException
+#pragma warning restore RCS1194 // Implement exception constructors.
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public InvalidMDLIdException()
+        {
+        }
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public InvalidMDLIdException(string message)
+            : base(message)
+        {
+        }
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
-
-        public const int NumBlendTypes = 2;
+        public InvalidMDLIdException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

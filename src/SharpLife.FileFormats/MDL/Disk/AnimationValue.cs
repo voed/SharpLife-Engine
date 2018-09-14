@@ -13,20 +13,23 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.MDL
+using System.Runtime.InteropServices;
+
+namespace SharpLife.FileFormats.MDL.Disk
 {
-    public static class MDLConstants
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct AnimationValue
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        internal struct Number
+        {
+            internal byte Valid;
+            internal byte Total;
+        }
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        [FieldOffset(0)]
+        internal Number Num;
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
-
-        public const int NumBlendTypes = 2;
+        [FieldOffset(0)]
+        internal short Value;
     }
 }

@@ -13,20 +13,14 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.MDL
+namespace SharpLife.FileFormats.MDL.Disk
 {
-    public static class MDLConstants
+    internal struct BodyMesh
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
-
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
-
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
-
-        public const int NumBlendTypes = 2;
+        internal int NumTris;
+        internal int TriIndex;
+        internal int SkinRef;
+        internal int NumNorms;
+        internal int NormIndex;
     }
 }

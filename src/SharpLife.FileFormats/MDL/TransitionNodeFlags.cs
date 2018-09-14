@@ -13,20 +13,14 @@
 *
 ****/
 
+using System;
+
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+    [Flags]
+    public enum TransitionNodeFlags
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
-
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
-
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
-
-        public const int NumBlendTypes = 2;
+        None = 0,
+        Reverse = 1 << 0
     }
 }

@@ -15,18 +15,14 @@
 
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+    public class Event
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public int Frame { get; set; }
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public int EventId { get; set; }
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
+        public int Type { get; set; }
 
-        public const int NumBlendTypes = 2;
+        public string Options { get; set; }
     }
 }

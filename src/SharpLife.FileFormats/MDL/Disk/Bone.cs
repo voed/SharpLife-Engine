@@ -13,20 +13,22 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.MDL
+namespace SharpLife.FileFormats.MDL.Disk
 {
-    public static class MDLConstants
+    internal unsafe struct Bone
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public const int NameSize = 32;
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        internal fixed byte Name[NameSize];
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
+        internal int Parent;
 
-        public const int NumBlendTypes = 2;
+        internal int Flags;
+
+        internal fixed int BoneController[MDLConstants.NumAxes];
+
+        internal fixed float Value[MDLConstants.NumAxes];
+
+        internal fixed float Scale[MDLConstants.NumAxes];
     }
 }

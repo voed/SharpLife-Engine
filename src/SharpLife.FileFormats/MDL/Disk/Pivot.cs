@@ -13,20 +13,14 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.MDL
+using System.Numerics;
+
+namespace SharpLife.FileFormats.MDL.Disk
 {
-    public static class MDLConstants
+    internal struct Pivot
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
-
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
-
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
-
-        public const int NumBlendTypes = 2;
+        internal Vector3 org;
+        internal int start;
+        internal int end;
     }
 }

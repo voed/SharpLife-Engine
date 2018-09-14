@@ -13,20 +13,23 @@
 *
 ****/
 
+using System.Collections.Generic;
+using System.Numerics;
+
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+    public class BodyMesh
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public class NormalInfo
+        {
+            public int Bone;
+            public Vector3 Normal;
+        }
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public List<short> TriangleCommands { get; set; }
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
+        public List<NormalInfo> Normals { get; set; }
 
-        public const int NumBlendTypes = 2;
+        public int Skin { get; set; }
     }
 }

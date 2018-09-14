@@ -37,7 +37,34 @@ namespace SharpLife.Models.Studio
 
             var loader = new StudioLoader(reader);
 
-            var studioFile = loader.ReadStudioFile();
+            (var studioFile, var rawSequences) = loader.ReadStudioFile();
+
+            var baseName = Path.GetFileNameWithoutExtension(name);
+            var extension = Path.GetExtension(name);
+
+            if (studioFile.Textures == null)
+            {
+                //Read the textures
+                var textureFileName = Path.Combine(Path.GetDirectoryName(name), baseName + "T" + extension);
+
+                var textureLoader = new StudioLoader(new BinaryReader(fileSystem.OpenRead(textureFileName)));
+
+                (var textureFile, _) = textureLoader.ReadStudioFile();
+
+                //Merge into main file
+                studioFile.Textures = textureFile.Textures;
+                studioFile.Skins = textureFile.Skins;
+            }
+
+            //Read animation data from sequence files
+            for (var i = 1; i < studioFile.SequenceGroups.Count; ++i)
+            {
+                var sequenceFileName = Path.Combine(Path.GetDirectoryName(name), baseName + i.ToString("D2") + extension);
+
+                var sequenceLoader = new StudioSequenceLoader(new BinaryReader(fileSystem.OpenRead(sequenceFileName)));
+
+                sequenceLoader.ReadAnimations(studioFile, i, rawSequences);
+            }
 
             uint crc = 0;
 

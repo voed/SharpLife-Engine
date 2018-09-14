@@ -15,18 +15,16 @@
 
 namespace SharpLife.FileFormats.MDL
 {
-    public static class MDLConstants
+    public class Bone
     {
-        /// <summary>
-        /// Identifier for the main and texture studio model headers
-        /// </summary>
-        public const int MainHeaderIdentifier = ((byte)'T' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public string Name { get; set; }
 
-        public const int SequenceHeaderIdentifier = ((byte)'Q' << 24) + ((byte)'S' << 16) + ((byte)'D' << 8) + (byte)'I';
+        public Bone Parent { get; set; }
 
-        //XYZ translation, XYZ rotation
-        public const int NumAxes = 6;
+        public BoneController[] BoneControllers { get; } = new BoneController[MDLConstants.NumAxes];
 
-        public const int NumBlendTypes = 2;
+        public float[] Values { get; } = new float[MDLConstants.NumAxes];
+
+        public float[] Scales { get; } = new float[MDLConstants.NumAxes];
     }
 }
