@@ -13,7 +13,6 @@
 *
 ****/
 
-using Force.Crc32;
 using SharpLife.FileFormats.SPR.Disk;
 using SharpLife.FileFormats.WAD;
 using SharpLife.Utility;
@@ -221,35 +220,7 @@ namespace SharpLife.FileFormats.SPR
 
         public uint ComputeCRC()
         {
-            var currentPosition = _reader.BaseStream.Position;
-
-            _reader.BaseStream.Position = _startPosition;
-
-            try
-            {
-                uint crc = 0;
-
-                var buffer = new byte[1024];
-
-                var bytesLeft = _reader.BaseStream.Length;
-
-                while (bytesLeft > 0)
-                {
-                    var bytesToRead = bytesLeft < buffer.Length ? (int)bytesLeft : buffer.Length;
-
-                    var bytesRead = _reader.Read(buffer, 0, bytesToRead);
-
-                    crc = Crc32Algorithm.Append(crc, buffer, 0, bytesToRead);
-
-                    bytesLeft -= bytesToRead;
-                }
-
-                return crc;
-            }
-            finally
-            {
-                _reader.BaseStream.Position = currentPosition;
-            }
+            return CrcUtils.ComputeCRC(_reader, _startPosition);
         }
     }
 }
