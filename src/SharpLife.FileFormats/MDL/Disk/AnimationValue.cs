@@ -22,8 +22,10 @@ namespace SharpLife.FileFormats.MDL.Disk
     {
         internal struct Number
         {
+#pragma warning disable CS0649
             internal byte Valid;
             internal byte Total;
+#pragma warning restore CS0649
         }
 
         [FieldOffset(0)]

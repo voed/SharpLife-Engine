@@ -17,10 +17,12 @@ namespace SharpLife.FileFormats.MDL.Disk
 {
     internal struct BodyMesh
     {
+#pragma warning disable CS0649
         internal int NumTris;
         internal int TriIndex;
         internal int SkinRef;
         internal int NumNorms;
         internal int NormIndex;
+#pragma warning restore CS0649
     }
 }

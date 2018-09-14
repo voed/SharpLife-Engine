@@ -21,6 +21,7 @@ namespace SharpLife.FileFormats.MDL.Disk
 
         internal fixed byte Name[NameSize];
 
+#pragma warning disable CS0649
         internal int Parent;
 
         internal int Flags;
@@ -30,5 +31,6 @@ namespace SharpLife.FileFormats.MDL.Disk
         internal fixed float Value[MDLConstants.NumAxes];
 
         internal fixed float Scale[MDLConstants.NumAxes];
+#pragma warning restore CS0649
     }
 }

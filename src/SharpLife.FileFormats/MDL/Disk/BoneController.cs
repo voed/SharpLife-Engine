@@ -17,6 +17,7 @@ namespace SharpLife.FileFormats.MDL.Disk
 {
     internal struct BoneController
     {
+#pragma warning disable CS0649
         internal int Bone;
 
         internal int Type;
@@ -28,5 +29,6 @@ namespace SharpLife.FileFormats.MDL.Disk
         internal int Rest;
 
         internal int Index;
+#pragma warning restore CS0649
     }
 }

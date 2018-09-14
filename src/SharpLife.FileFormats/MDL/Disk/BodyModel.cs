@@ -21,6 +21,7 @@ namespace SharpLife.FileFormats.MDL.Disk
 
         internal fixed byte Name[NameSize];
 
+#pragma warning disable CS0649
         internal int Type;
 
         internal float BoundingRadius;
@@ -37,5 +38,6 @@ namespace SharpLife.FileFormats.MDL.Disk
 
         internal int NumGroups;      // deformation groups
         internal int GroupIndex;
+#pragma warning restore CS0649
     }
 }

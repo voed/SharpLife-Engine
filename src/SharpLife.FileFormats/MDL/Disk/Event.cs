@@ -19,9 +19,11 @@ namespace SharpLife.FileFormats.MDL.Disk
     {
         internal const int OptionsSize = 64;
 
+#pragma warning disable CS0649
         internal int Frame;
         internal int EventId;
         internal int Type;
         internal fixed byte Options[OptionsSize];
+#pragma warning restore CS0649
     }
 }

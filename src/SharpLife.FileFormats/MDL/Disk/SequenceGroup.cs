@@ -20,6 +20,7 @@ namespace SharpLife.FileFormats.MDL.Disk
         internal const int LabelSize = 32;
         internal const int NameSize = 64;
 
+#pragma warning disable CS0649
         internal fixed byte Label[LabelSize];
 
         internal fixed byte Name[NameSize];
@@ -27,5 +28,6 @@ namespace SharpLife.FileFormats.MDL.Disk
         internal int Cache;
 
         internal int Data;
+#pragma warning restore CS0649
     }
 }

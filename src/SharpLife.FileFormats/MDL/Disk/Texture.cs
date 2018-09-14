@@ -20,9 +20,11 @@ namespace SharpLife.FileFormats.MDL.Disk
         internal const int NameSize = 64;
 
         internal fixed byte Name[NameSize];
+#pragma warning disable CS0649
         internal int Flags;
         internal int Width;
         internal int Height;
         internal int Index;
+#pragma warning restore CS0649
     }
 }

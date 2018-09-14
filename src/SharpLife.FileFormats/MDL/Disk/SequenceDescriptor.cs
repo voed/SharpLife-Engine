@@ -23,6 +23,7 @@ namespace SharpLife.FileFormats.MDL.Disk
 
         internal fixed byte Label[LabelSize];
 
+#pragma warning disable CS0649
         internal float FPS;
         internal int Flags;
 
@@ -61,5 +62,6 @@ namespace SharpLife.FileFormats.MDL.Disk
         internal int NodeFlags;
 
         internal int NextSeq;
+#pragma warning restore CS0649
     }
 }

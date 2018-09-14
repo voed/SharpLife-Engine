@@ -19,11 +19,13 @@ namespace SharpLife.FileFormats.MDL.Disk
 {
     internal struct BoundingBox
     {
+#pragma warning disable CS0649
         internal int Bone;
 
         internal int Group;
 
         internal Vector3 BBMin;
         internal Vector3 BBMax;
+#pragma warning restore CS0649
     }
 }

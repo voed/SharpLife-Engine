@@ -19,8 +19,10 @@ namespace SharpLife.FileFormats.MDL.Disk
 {
     internal struct Pivot
     {
+#pragma warning disable CS0649
         internal Vector3 org;
         internal int start;
         internal int end;
+#pragma warning restore CS0649
     }
 }
