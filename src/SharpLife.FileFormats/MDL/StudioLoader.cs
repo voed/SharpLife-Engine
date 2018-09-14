@@ -432,19 +432,19 @@ namespace SharpLife.FileFormats.MDL
             return list;
         }
 
-        private List<List<Texture>> ReadSkins(in MainHeader header, IReadOnlyList<Texture> textures)
+        private List<List<int>> ReadSkins(in MainHeader header)
         {
             _reader.BaseStream.Position = header.SkinIndex;
 
-            var list = new List<List<Texture>>(header.NumSkinFamilies);
+            var list = new List<List<int>>(header.NumSkinFamilies);
 
             for (var i = 0; i < header.NumSkinFamilies; ++i)
             {
-                var skinRefs = new List<Texture>(header.NumSkinRef);
+                var skinRefs = new List<int>(header.NumSkinRef);
 
                 for (var j = 0; j < header.NumSkinRef; ++j)
                 {
-                    skinRefs.Add(textures[EndianConverter.Little(_reader.ReadInt16())]);
+                    skinRefs.Add(EndianConverter.Little(_reader.ReadInt16()));
                 }
 
                 list.Add(skinRefs);
@@ -515,9 +515,34 @@ namespace SharpLife.FileFormats.MDL
                         rawMesh.NumTris = EndianConverter.Little(rawMesh.NumTris);
                         rawMesh.NumNorms = EndianConverter.Little(rawMesh.NumNorms);
 
+                        //The triangle command list has no fixed size and cannot be determined from other fields
+                        //The number of triangles can be used to determine the minimum number of values that will be stored
+                        //4 commands per vertex minimum
+                        var triangleCommands = new List<short>(rawMesh.NumTris * 4);
+
                         _reader.BaseStream.Position = rawMesh.TriIndex;
 
-                        var triangleCommands = _reader.ReadStructureArray<short>(rawMesh.NumTris).ToList();
+                        for (var command = EndianConverter.Little(_reader.ReadInt16());
+                            command != 0;
+                            command = EndianConverter.Little(_reader.ReadInt16()))
+                        {
+                            triangleCommands.Add(command);
+
+                            var numCommands = Math.Abs(command);
+
+                            while (numCommands > 0)
+                            {
+                                --numCommands;
+
+                                for (var cmd = 0; cmd < 4; ++cmd)
+                                {
+                                    triangleCommands.Add(EndianConverter.Little(_reader.ReadInt16()));
+                                }
+                            }
+                        }
+
+                        //TODO: Could be omitted since we know the total number of commands
+                        triangleCommands.Add(0);
 
                         _reader.BaseStream.Position = rawBodyModel.NormIndex + normalOffset;
 
@@ -651,7 +676,7 @@ namespace SharpLife.FileFormats.MDL
             if (header.TextureIndex != 0)
             {
                 studioFile.Textures = ReadTextures(header);
-                studioFile.Skins = ReadSkins(header, studioFile.Textures);
+                studioFile.Skins = ReadSkins(header);
             }
 
             return (studioFile, rawSequences);

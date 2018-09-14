@@ -45,7 +45,7 @@ namespace SharpLife.FileFormats.MDL
 
         public List<Texture> Textures { get; set; }
 
-        public List<List<Texture>> Skins { get; set; }
+        public List<List<int>> Skins { get; set; }
 
         public List<BodyPart> BodyParts { get; set; }
 
