@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.FileFormats.MDL;
+using SharpLife.FileSystem;
 using System;
 using System.IO;
 
@@ -21,7 +22,7 @@ namespace SharpLife.Models.Studio
 {
     public sealed class StudioModelLoader : IModelLoader
     {
-        public IModel Load(string name, BinaryReader reader, bool computeCRC)
+        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, bool computeCRC)
         {
             if (reader == null)
             {

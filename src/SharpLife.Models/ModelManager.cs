@@ -69,7 +69,7 @@ namespace SharpLife.Models
 
             foreach (var loader in _modelLoaders)
             {
-                var model = loader.Load(modelName, reader, true);
+                var model = loader.Load(modelName, _fileSystem, reader, true);
 
                 if (model != null)
                 {
