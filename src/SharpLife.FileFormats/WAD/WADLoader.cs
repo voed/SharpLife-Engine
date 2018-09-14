@@ -110,10 +110,7 @@ namespace SharpLife.FileFormats.WAD
                 offsets[offset] = reader.ReadUInt32();
             }
 
-            var utf8Name = Encoding.UTF8.GetString(name);
-
-            //Remove null terminator and any other characters following the name
-            utf8Name = utf8Name.Substring(0, Math.Max(0, utf8Name.IndexOf('\0')));
+            var utf8Name = StringUtils.GetStringFromNullTerminated(Encoding.UTF8, name);
 
             var texture = new MipTexture
             {

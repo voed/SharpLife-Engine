@@ -568,15 +568,7 @@ namespace SharpLife.FileFormats.BSP
 
             var rawBytes = _reader.ReadBytes(lump.filelen);
 
-            var entityData = Encoding.UTF8.GetString(rawBytes);
-
-            //Check if there's a null terminator, remove it if so
-            if (entityData.EndsWith('\0'))
-            {
-                entityData = entityData.Remove(entityData.Length - 1);
-            }
-
-            return entityData;
+            return StringUtils.GetStringFromNullTerminated(Encoding.UTF8, rawBytes);
         }
 
         private byte[] ReadVisibility(ref Lump lump)

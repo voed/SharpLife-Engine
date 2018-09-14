@@ -84,5 +84,26 @@ namespace SharpLife.Utility
         {
             return EncodeNullTerminatedString(encoding, input, buffer, 0, buffer.Length);
         }
+
+        /// <summary>
+        /// Gets a string from a null terminated byte buffer
+        /// </summary>
+        /// <param name="encoding"></param>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string GetStringFromNullTerminated(Encoding encoding, ReadOnlySpan<byte> bytes)
+        {
+            var result = encoding.GetString(bytes);
+
+            //Check if there's a null terminator, remove it if so
+            var nullTerminatorIndex = result.IndexOf('\0');
+
+            if (nullTerminatorIndex != -1)
+            {
+                result = result.Substring(0, nullTerminatorIndex);
+            }
+
+            return result;
+        }
     }
 }
