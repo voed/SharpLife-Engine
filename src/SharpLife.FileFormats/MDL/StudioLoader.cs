@@ -411,7 +411,7 @@ namespace SharpLife.FileFormats.MDL
                     Height = EndianConverter.Little(rawTexture.Height)
                 };
 
-                _reader.BaseStream.Position = header.TextureDataIndex + EndianConverter.Little(rawTexture.Index);
+                _reader.BaseStream.Position = EndianConverter.Little(rawTexture.Index);
 
                 //Texture data is pixels followed by palette
                 texture.Pixels = _reader.ReadBytes(texture.Width * texture.Height);
