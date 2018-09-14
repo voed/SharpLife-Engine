@@ -35,6 +35,7 @@ namespace SharpLife.FileFormats.MDL.Disk
 
         internal int FrameCount;
 
+        //Written to file, but never used
         internal int NumPivots;
         internal int PivotIndex;
 

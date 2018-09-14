@@ -307,7 +307,6 @@ namespace SharpLife.FileFormats.MDL
                 rawSequences.Add(rawSequence);
 
                 //Part of sequence conversion is done when reading sequence groups
-                //TODO: pivots
                 var sequence = new SequenceDescriptor
                 {
                     Name = StringUtils.GetStringFromNullTerminated(Encoding.UTF8, new ReadOnlySpan<byte>(rawSequence.Label, Disk.SequenceDescriptor.LabelSize)),
