@@ -189,7 +189,7 @@ namespace SharpLife.Game.Client.Entities
                     RenderAmount = renderAmount,
                     RenderColor = RenderColor,
 
-                    Frame = (int)Frame
+                    Frame = Frame
                 };
 
                 modelRenderer.Render(ref renderData);

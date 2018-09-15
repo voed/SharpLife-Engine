@@ -31,6 +31,6 @@ namespace SharpLife.Renderer.Models
         public int RenderAmount;
         public Vector3 RenderColor;
 
-        public int Frame;
+        public float Frame;
     }
 }

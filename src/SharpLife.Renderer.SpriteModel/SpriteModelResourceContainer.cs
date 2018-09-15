@@ -251,9 +251,9 @@ namespace SharpLife.Renderer.SpriteModel
 
             cl.UpdateBuffer(_renderColorBuffer, 0, ref renderColor);
 
-            renderData.Frame = Math.Clamp(renderData.Frame, 0, _frameBuffers.Count - 1);
+            renderData.Frame = Math.Clamp((int)renderData.Frame, 0, _frameBuffers.Count - 1);
 
-            var frameBuffer = _frameBuffers[renderData.Frame];
+            var frameBuffer = _frameBuffers[(int)renderData.Frame];
 
             var pipeline = _factory.Pipelines[renderData.RenderMode];
 
