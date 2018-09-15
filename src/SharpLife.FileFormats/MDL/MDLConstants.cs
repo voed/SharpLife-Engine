@@ -31,6 +31,10 @@ namespace SharpLife.FileFormats.MDL
 
         public const int MaxBones = 128;
 
+        public const int MaxControllers = 8;
+
+        public const int MaxBlenders = 2;
+
         public const int NoBoneController = -1;
 
         public const int NoBoneParent = -1;
