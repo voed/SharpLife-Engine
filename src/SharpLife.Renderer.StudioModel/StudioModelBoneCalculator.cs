@@ -30,6 +30,18 @@ namespace SharpLife.Renderer.StudioModel
 
         private readonly float[] _boneAdjust = new float[MDLConstants.MaxControllers];
 
+        private readonly float[] _controllerNormalizers = new float[MDLConstants.MaxControllers]
+        {
+            255.0f,
+            255.0f,
+            255.0f,
+            64.0f, //Mouth
+            255.0f,
+            255.0f,
+            255.0f,
+            255.0f
+        };
+
         private readonly Vector3[] _pos1 = new Vector3[MDLConstants.MaxBones];
         private readonly Vector3[] _pos2 = new Vector3[MDLConstants.MaxBones];
         private readonly Vector3[] _pos3 = new Vector3[MDLConstants.MaxBones];
@@ -41,6 +53,11 @@ namespace SharpLife.Renderer.StudioModel
         private readonly Quaternion[] _q4 = new Quaternion[MDLConstants.MaxBones];
 
         private readonly Matrix4x4[] _bones = new Matrix4x4[MDLConstants.MaxBones];
+
+        private static bool ShouldCompensateForLoop(int controllerIndex)
+        {
+            return controllerIndex != MDLConstants.MouthControllerIndex;
+        }
 
         public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, in StudioModelRenderData renderData)
         {
@@ -151,33 +168,19 @@ namespace SharpLife.Renderer.StudioModel
             {
                 var controller = _currentModel.BoneControllers[j];
 
-                var i = controller.Index;
-
                 float value;
 
-                //TODO: allow use of all 8 controllers
-                if (i <= 3)
+                // check for 360% wrapping
+                //TODO: this code does not match the game's code
+                if (ShouldCompensateForLoop(controller.Index) && (controller.Type & MotionTypes.RLoop) != 0)
                 {
-                    // check for 360% wrapping
-                    //TODO: this code does not match the game's code
-                    if ((controller.Type & MotionTypes.RLoop) != 0)
-                    {
-                        value = (renderData.GetController(i) * (360.0f / 256.0f)) + controller.Start;
-                    }
-                    else
-                    {
-                        value = renderData.GetController(i) / 255.0f;
-
-                        value = Math.Clamp(value, 0, 1.0f);
-
-                        value = ((1.0f - value) * controller.Start) + (value * controller.End);
-                    }
+                    value = (renderData.GetController(controller.Index) * (360.0f / 256.0f)) + controller.Start;
                 }
                 else
                 {
-                    value = renderData.Mouth / 64.0f;
+                    value = renderData.GetController(controller.Index) / _controllerNormalizers[controller.Index];
 
-                    value = Math.Min(1.0f, value);
+                    value = Math.Clamp(value, 0.0f, 1.0f);
 
                     value = ((1.0f - value) * controller.Start) + (value * controller.End);
                 }

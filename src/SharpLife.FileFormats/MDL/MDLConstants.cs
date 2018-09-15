@@ -33,6 +33,8 @@ namespace SharpLife.FileFormats.MDL
 
         public const int MaxControllers = 8;
 
+        public const int MouthControllerIndex = 4;
+
         public const int MaxBlenders = 2;
 
         public const int NoBoneController = -1;
