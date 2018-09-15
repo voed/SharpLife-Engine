@@ -170,12 +170,14 @@ namespace SharpLife.FileFormats.MDL
                 var bone = new Bone
                 {
                     Name = StringUtils.GetStringFromNullTerminated(Encoding.UTF8, new ReadOnlySpan<byte>(rawBone.Name, Disk.Bone.NameSize)),
+                    Parent = EndianConverter.Little(rawBone.Parent)
                 };
 
                 for (var j = 0; j < MDLConstants.NumAxes; ++j)
                 {
                     bone.Values[j] = EndianConverter.Little(rawBone.Value[j]);
                     bone.Scales[j] = EndianConverter.Little(rawBone.Scale[j]);
+                    bone.BoneControllers[j] = MDLConstants.NoBoneController;
                 }
 
                 //Controllers are initialized after the list is loaded
@@ -233,7 +235,7 @@ namespace SharpLife.FileFormats.MDL
                     default: throw new FileLoadFailureException($"Invalid bone controller type {boneController.Type}");
                 }
 
-                boneController.Bone.BoneControllers[controllerIndex] = boneController;
+                boneController.Bone.BoneControllers[controllerIndex] = i;
 
                 list.Add(boneController);
             }
@@ -284,7 +286,7 @@ namespace SharpLife.FileFormats.MDL
             return list;
         }
 
-        private unsafe (List<SequenceDescriptor>, List<Disk.SequenceDescriptor>) ReadSequences(in MainHeader header, IReadOnlyList<Bone> bones)
+        private unsafe (List<SequenceDescriptor>, List<Disk.SequenceDescriptor>) ReadSequences(in MainHeader header)
         {
             var sequenceSize = Marshal.SizeOf<Disk.SequenceDescriptor>();
 
@@ -323,7 +325,7 @@ namespace SharpLife.FileFormats.MDL
                     FrameCount = EndianConverter.Little(rawSequence.FrameCount),
 
                     MotionType = (MotionTypes)EndianConverter.Little(rawSequence.MotionType),
-                    MotionBone = bones[EndianConverter.Little(rawSequence.MotionBone)],
+                    MotionBone = EndianConverter.Little(rawSequence.MotionBone),
 
                     LinearMovement = EndianTypeConverter.Little(rawSequence.LinearMovement),
 
@@ -488,7 +490,7 @@ namespace SharpLife.FileFormats.MDL
 
                     _reader.BaseStream.Position = rawBodyModel.VertInfoIndex;
 
-                    var vertexBones = _reader.ReadStructureArray<int>(rawBodyModel.NumVerts);
+                    var vertexBones = _reader.ReadStructureArray<byte>(rawBodyModel.NumVerts);
 
                     var vertices = new List<BodyModel.VertexInfo>(rawBodyModel.NumVerts);
 
@@ -550,7 +552,7 @@ namespace SharpLife.FileFormats.MDL
 
                         _reader.BaseStream.Position = rawBodyModel.NormInfoIndex + normalOffset;
 
-                        var normalBones = _reader.ReadStructureArray<int>(rawMesh.NumNorms);
+                        var normalBones = _reader.ReadStructureArray<byte>(rawMesh.NumNorms);
 
                         var normals = new List<BodyMesh.NormalInfo>(rawMesh.NumNorms);
 
@@ -665,7 +667,7 @@ namespace SharpLife.FileFormats.MDL
                 studioFile.Bones = ReadBones(header);
                 studioFile.BoneControllers = ReadBoneControllers(header, studioFile.Bones);
                 studioFile.Hitboxes = ReadHitBoxes(header, studioFile.Bones);
-                (studioFile.Sequences, rawSequences) = ReadSequences(header, studioFile.Bones);
+                (studioFile.Sequences, rawSequences) = ReadSequences(header);
                 studioFile.SequenceGroups = ReadSequenceGroups(header, studioFile.Sequences, rawSequences);
                 studioFile.BodyParts = ReadBodyParts(header);
                 studioFile.Attachments = ReadAttachments(header, studioFile.Bones);

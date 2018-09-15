@@ -19,9 +19,9 @@ namespace SharpLife.FileFormats.MDL
     {
         public string Name { get; set; }
 
-        public Bone Parent { get; set; }
+        public int Parent { get; set; }
 
-        public BoneController[] BoneControllers { get; } = new BoneController[MDLConstants.NumAxes];
+        public int[] BoneControllers { get; } = new int[MDLConstants.NumAxes];
 
         public float[] Values { get; } = new float[MDLConstants.NumAxes];
 

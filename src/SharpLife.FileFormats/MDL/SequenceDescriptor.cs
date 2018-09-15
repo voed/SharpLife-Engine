@@ -43,7 +43,7 @@ namespace SharpLife.FileFormats.MDL
 
         public MotionTypes MotionType { get; set; }
 
-        public Bone MotionBone { get; set; }
+        public int MotionBone { get; set; }
 
         public Vector3 LinearMovement { get; set; }
 

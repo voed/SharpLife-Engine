@@ -28,5 +28,11 @@ namespace SharpLife.FileFormats.MDL
         public const int NumAxes = 6;
 
         public const int NumBlendTypes = 2;
+
+        public const int MaxBones = 128;
+
+        public const int NoBoneController = -1;
+
+        public const int NoBoneParent = -1;
     }
 }
