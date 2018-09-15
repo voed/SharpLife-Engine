@@ -20,6 +20,8 @@ namespace SharpLife.Utility
 {
     public static class VectorUtils
     {
+        public const float EqualEpsilon = 0.001f;
+
         public static Vector3 ToRadians(in Vector3 anglesInDegrees)
         {
             return new Vector3(
@@ -125,6 +127,19 @@ namespace SharpLife.Utility
             var angle = Math.Acos(Vector3.Dot(v1, v2)) / (l1 * l2);
 
             return (float)MathUtils.ToDegrees(angle);
+        }
+
+        /// <summary>
+        /// Compares two vectors and returns if they are equal, to within <see cref="EqualEpsilon"/> units difference
+        /// </summary>
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        public static bool VectorsEqual(in Vector3 lhs, in Vector3 rhs)
+        {
+            return (Math.Abs(lhs.X - rhs.X) <= EqualEpsilon)
+                && (Math.Abs(lhs.Y - rhs.Y) <= EqualEpsilon)
+                && (Math.Abs(lhs.Z - rhs.Z) <= EqualEpsilon);
         }
     }
 }
