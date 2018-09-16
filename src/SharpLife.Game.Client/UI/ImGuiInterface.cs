@@ -69,6 +69,7 @@ namespace SharpLife.Game.Client.UI
         private IVariable _lightingGamma;
         private IVariable _brightness;
         private IVariable _overbright;
+        private IVariable _fullbright;
         private IVariable _maxSize;
         private IVariable _roundDown;
         private IVariable _picMip;
@@ -241,6 +242,7 @@ namespace SharpLife.Game.Client.UI
             CacheVariable(ref _lightingGamma, "mat_lightgamma");
             CacheVariable(ref _brightness, "mat_brightness");
             CacheVariable(ref _overbright, "mat_overbright");
+            CacheVariable(ref _fullbright, "mat_fullbright");
             CacheVariable(ref _maxSize, "mat_max_size");
             CacheVariable(ref _roundDown, "mat_round_down");
             CacheVariable(ref _picMip, "mat_picmip");
@@ -309,6 +311,7 @@ namespace SharpLife.Game.Client.UI
                 DrawIntSlider(_picMip, "Scale down texture scales this many times", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
 
                 DrawCheckbox(_overbright, "Enable overbright");
+                DrawCheckbox(_fullbright, "Enable fullbright");
 
                 ImGui.EndWindow();
             }

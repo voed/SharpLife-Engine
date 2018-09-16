@@ -23,9 +23,10 @@ namespace SharpLife.Renderer
         public float Brightness;
         public int LightScale;
 
-        public bool OverbrightEnabled;
+        //Booleans are handled as ints in code
+        public int OverbrightEnabled;
+        public int Fullbright;
 
-        public float padding1;
-        public float padding2;
+        private float padding0;
     }
 }

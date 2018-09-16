@@ -46,6 +46,8 @@ namespace SharpLife.Renderer
 
         private readonly IVariable _overbright;
 
+        private readonly IVariable _fullbright;
+
         private bool _lightingSettingChanged;
 
         public Camera Camera { get; }
@@ -104,6 +106,14 @@ namespace SharpLife.Renderer
                 new VariableInfo("mat_overbright")
                 .WithValue(1)
                 .WithHelpInfo("Enable or disable overbright lighting")
+                .WithBooleanFilter()
+                .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
+
+            //TODO: mark as cheat cvar
+            _fullbright = commandContext.RegisterVariable(
+                new VariableInfo("mat_fullbright")
+                .WithValue(0)
+                .WithHelpInfo("Enable or disable full brightness (debug)")
                 .WithBooleanFilter()
                 .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
         }
@@ -243,7 +253,9 @@ namespace SharpLife.Renderer
                     LightingGamma = _lightingGamma.Float,
                     Brightness = _brightness.Float,
                     LightScale = lightScale,
-                    OverbrightEnabled = _overbright.Boolean,
+                    //Only enable if fullbright is turned off
+                    OverbrightEnabled = (!_fullbright.Boolean && _overbright.Boolean) ? 1 : 0,
+                    Fullbright = _fullbright.Boolean ? 1 : 0,
                 };
 
                 gd.UpdateBuffer(sc.LightingInfoBuffer, 0, ref info);
