@@ -104,7 +104,7 @@ namespace SharpLife.Renderer
             //TODO: archived
             _overbright = commandContext.RegisterVariable(
                 new VariableInfo("mat_overbright")
-                .WithValue(1)
+                .WithValue(true)
                 .WithHelpInfo("Enable or disable overbright lighting")
                 .WithBooleanFilter()
                 .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
@@ -112,7 +112,7 @@ namespace SharpLife.Renderer
             //TODO: mark as cheat cvar
             _fullbright = commandContext.RegisterVariable(
                 new VariableInfo("mat_fullbright")
-                .WithValue(0)
+                .WithValue(false)
                 .WithHelpInfo("Enable or disable full brightness (debug)")
                 .WithBooleanFilter()
                 .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));

@@ -73,6 +73,15 @@ namespace SharpLife.CommandSystem.Commands
             return this;
         }
 
+        public VariableInfo WithValue(bool value)
+        {
+            IntegerValue = value ? 1 : 0;
+            StringValue = null;
+            FloatValue = null;
+
+            return this;
+        }
+
         public VariableInfo WithFilter(IVariableFilter filter)
         {
             if (filter == null)
