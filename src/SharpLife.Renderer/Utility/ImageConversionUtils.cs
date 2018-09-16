@@ -352,13 +352,22 @@ namespace SharpLife.Renderer.Utility
             return output;
         }
 
-        private static int ComputeRoundedDownValue(int value, int maxValue, int roundDownExponent, int divisorExponent)
+        private static int ComputeRoundedDownValue(int value, bool doPowerOf2Rescale, int maxValue, int roundDownExponent, int divisorExponent)
         {
-            var scaledValue = MathUtils.NearestUpperPowerOf2(value);
+            int scaledValue;
 
-            if ((roundDownExponent > 0) && (value < scaledValue) && (roundDownExponent == 1 || ((scaledValue - value) > (scaledValue >> roundDownExponent))))
+            if (doPowerOf2Rescale)
             {
-                scaledValue /= 2;
+                scaledValue = MathUtils.NearestUpperPowerOf2(value);
+
+                if ((roundDownExponent > 0) && (value < scaledValue) && (roundDownExponent == 1 || ((scaledValue - value) > (scaledValue >> roundDownExponent))))
+                {
+                    scaledValue /= 2;
+                }
+            }
+            else
+            {
+                scaledValue = value;
             }
 
             scaledValue >>= divisorExponent;
@@ -372,11 +381,12 @@ namespace SharpLife.Renderer.Utility
         /// </summary>
         /// <param name="inWidth">Original width</param>
         /// <param name="inHeight">Original height</param>
+        /// <param name="doPowerOf2Rescale">Whether to rescale textures to power of 2</param>
         /// <param name="maxValue">The maximum value that a scaled size can be</param>
         /// <param name="roundDownExponent">Exponent used to round down the scaled size</param>
         /// <param name="divisorExponent">Exponent used to divide the scaled size further</param>
         /// <returns></returns>
-        public static (int, int) ComputeScaledSize(int inWidth, int inHeight, int maxValue, int roundDownExponent, int divisorExponent)
+        public static (int, int) ComputeScaledSize(int inWidth, int inHeight, bool doPowerOf2Rescale, int maxValue, int roundDownExponent, int divisorExponent)
         {
             if (inWidth <= 0)
             {
@@ -404,8 +414,8 @@ namespace SharpLife.Renderer.Utility
             }
 
             //Rescale image to nearest power of 2
-            var scaledWidth = ComputeRoundedDownValue(inWidth, maxValue, roundDownExponent, divisorExponent);
-            var scaledHeight = ComputeRoundedDownValue(inHeight, maxValue, roundDownExponent, divisorExponent);
+            var scaledWidth = ComputeRoundedDownValue(inWidth, doPowerOf2Rescale, maxValue, roundDownExponent, divisorExponent);
+            var scaledHeight = ComputeRoundedDownValue(inHeight, doPowerOf2Rescale, maxValue, roundDownExponent, divisorExponent);
 
             return (scaledWidth, scaledHeight);
         }

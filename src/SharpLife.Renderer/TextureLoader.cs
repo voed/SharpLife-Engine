@@ -33,12 +33,15 @@ namespace SharpLife.Renderer
         private const int DefaultMaxSize = 256;
         private const int DefaultRoundDown = 3;
         private const int DefaultPicMip = 0;
+        private const bool DefaultRescaleTextures = true;
 
         private readonly IVariable _maxSize;
 
         private readonly IVariable _roundDown;
 
         private readonly IVariable _picMip;
+
+        private readonly IVariable _powerOf2Textures;
 
         public TextureLoader(ICommandContext commandContext)
         {
@@ -57,7 +60,7 @@ namespace SharpLife.Renderer
             _roundDown = commandContext.RegisterVariable(
                 new VariableInfo("mat_round_down")
                 .WithValue(DefaultRoundDown)
-                .WithHelpInfo("If not 0, this is used to round down texture sizes")
+                .WithHelpInfo("If not 0, this is used to round down texture sizes when rescaling to power of 2. Ignored when mat_powerof2textures is false")
                 .WithNumberFilter(true)
                 .WithMinMaxFilter(ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, true));
 
@@ -67,6 +70,12 @@ namespace SharpLife.Renderer
                 .WithValue(DefaultPicMip)
                 .WithNumberFilter(true)
                 .WithMinMaxFilter(ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, true));
+
+            _powerOf2Textures = commandContext.RegisterVariable(
+                new VariableInfo("mat_powerof2textures")
+                .WithValue(DefaultRescaleTextures)
+                .WithHelpInfo("Whether to rescale textures to power of 2")
+                .WithBooleanFilter());
         }
 
         /// <summary>
@@ -77,7 +86,7 @@ namespace SharpLife.Renderer
         /// <returns></returns>
         public (int, int) ComputeScaledSize(int width, int height)
         {
-            return ImageConversionUtils.ComputeScaledSize(width, height, _maxSize.Integer, _roundDown.Integer, _picMip.Integer);
+            return ImageConversionUtils.ComputeScaledSize(width, height, _powerOf2Textures.Boolean, _maxSize.Integer, _roundDown.Integer, _picMip.Integer);
         }
 
         private Image<Rgba32> InternalConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
@@ -113,22 +122,7 @@ namespace SharpLife.Renderer
                 throw new ArgumentNullException(nameof(inputTexture));
             }
 
-            var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputTexture.Palette, inputTexture.Pixels, inputTexture.Width, inputTexture.Height, textureFormat);
-
-            //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
-            //This stops the color from bleeding through
-            if (textureFormat == TextureFormat.AlphaTest
-                || textureFormat == TextureFormat.IndexAlpha)
-            {
-                ImageConversionUtils.BoxFilter3x3(pixels, inputTexture.Width, inputTexture.Height);
-            }
-
-            //Rescale image to nearest power of 2
-            (var scaledWidth, var scaledHeight) = ComputeScaledSize(inputTexture.Width, inputTexture.Height);
-
-            var scaledPixels = ImageConversionUtils.ResampleTexture(new Span<Rgba32>(pixels), inputTexture.Width, inputTexture.Height, scaledWidth, scaledHeight);
-
-            return Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
+            return InternalConvertTexture(inputTexture, textureFormat);
         }
 
         private ImageSharpTexture InternalLoadTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)

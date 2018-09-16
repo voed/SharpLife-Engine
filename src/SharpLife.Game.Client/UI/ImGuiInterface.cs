@@ -73,6 +73,7 @@ namespace SharpLife.Game.Client.UI
         private IVariable _maxSize;
         private IVariable _roundDown;
         private IVariable _picMip;
+        private IVariable _powerOf2Textures;
 
         public ImGuiInterface(ILogger logger, IClientEngine engine)
         {
@@ -246,6 +247,7 @@ namespace SharpLife.Game.Client.UI
             CacheVariable(ref _maxSize, "mat_max_size");
             CacheVariable(ref _roundDown, "mat_round_down");
             CacheVariable(ref _picMip, "mat_picmip");
+            CacheVariable(ref _powerOf2Textures, "mat_powerof2textures");
         }
 
         private void DrawIntSlider(IVariable variable, string sliderLabel, int fallbackMin, int fallbackMax, string displayText, Func<IVariable, int> getValue, Action<IVariable, int> setValue)
@@ -312,6 +314,7 @@ namespace SharpLife.Game.Client.UI
 
                 DrawCheckbox(_overbright, "Enable overbright");
                 DrawCheckbox(_fullbright, "Enable fullbright");
+                DrawCheckbox(_powerOf2Textures, "Enable power of 2 texture rescaling");
 
                 ImGui.EndWindow();
             }
