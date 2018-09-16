@@ -191,7 +191,7 @@ namespace SharpLife.Renderer.BSP
             //so we have to account for the padding in creating and initializing the buffer
             var numLightStyleElements = BSPConstants.MaxLightStyles * LightStylesElementMultiplier;
 
-            LightStylesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(numLightStyleElements * Marshal.SizeOf<float>()), BufferUsage.UniformBuffer));
+            LightStylesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(numLightStyleElements * Marshal.SizeOf<int>()), BufferUsage.UniformBuffer));
 
             //Initialize the buffer to all zeroes
             var lightStylesValues = new float[numLightStyleElements];
@@ -242,11 +242,8 @@ namespace SharpLife.Renderer.BSP
                     {
                         _cachedLightStyles[i] = value;
 
-                        //Convert to normalized [0, 1] range
-                        var inputValue = value / (float)byte.MaxValue;
-
                         //Index is multiplied here because of padding. See buffer creation code
-                        gd.UpdateBuffer(LightStylesBuffer, (uint)(i * Marshal.SizeOf<float>() * LightStylesElementMultiplier), ref inputValue);
+                        gd.UpdateBuffer(LightStylesBuffer, (uint)(i * Marshal.SizeOf<float>() * LightStylesElementMultiplier), ref value);
                     }
                 }
             }
