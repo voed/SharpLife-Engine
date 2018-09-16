@@ -94,7 +94,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
                 var childInstance = MetaData.Accessor[Instance, member.Info.Name];
 
-                snapshot[i].Value = member.MetaData.Converter.Copy(childInstance);
+                snapshot[i].Value = member.Converter.Copy(childInstance);
 
                 //Only mark it as changed it if it actually changed
                 //This prevents client instances from being forcefully reset when the server isn't updating the value
@@ -125,7 +125,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
 
                 if (snapshot[i].Changed)
                 {
-                    MetaData.Accessor[Instance, member.Info.Name] = member.MetaData.Converter.CreateInstance(member.MetaData.Type, snapshot[i].Value);
+                    MetaData.Accessor[Instance, member.Info.Name] = member.Converter.CreateInstance(member.MetaData.Type, snapshot[i].Value);
                 }
             }
         }

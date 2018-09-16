@@ -48,10 +48,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
 
             public int? ChangeNotificationIndex { get; }
 
-            public Member(MemberInfo info, TypeMetaData metaData, int? changeNotificationIndex)
+            public ITypeConverter Converter { get; }
+
+            public Member(MemberInfo info, TypeMetaData metaData, ITypeConverter typeConverter, int? changeNotificationIndex)
             {
                 Info = info ?? throw new ArgumentNullException(nameof(info));
                 MetaData = metaData ?? throw new ArgumentNullException(nameof(metaData));
+                Converter = typeConverter ?? MetaData.Converter;
                 ChangeNotificationIndex = changeNotificationIndex;
             }
         }
@@ -104,6 +107,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// <summary>
         /// Creates an instance of the type
         /// </summary>
+        /// <param name="handle"></param>
         /// <returns></returns>
         public INetworkable CreateInstance(in ObjectHandle handle) => Factory(this, handle);
 

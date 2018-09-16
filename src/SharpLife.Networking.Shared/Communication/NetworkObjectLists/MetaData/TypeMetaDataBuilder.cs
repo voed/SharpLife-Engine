@@ -90,7 +90,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             return this;
         }
 
-        private void InternalAddMember(MemberInfo memberInfo, Type type, bool usesChangeNotification)
+        private void InternalAddMember(MemberInfo memberInfo, Type type, ITypeConverter typeConverter, bool usesChangeNotification)
         {
             var typeMetaData = _registryBuilder.LookupMemberType(type);
 
@@ -99,10 +99,17 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 throw new ArgumentException($"Type {type.FullName} has not been registered and is used as a networked member \"{memberInfo.Name}\" in {Type.FullName}", nameof(type));
             }
 
-            _members.Add(new TypeMetaData.Member(memberInfo, typeMetaData, usesChangeNotification ? _nextChangeNotificationIndex++ : (int?)null));
+            _members.Add(new TypeMetaData.Member(memberInfo, typeMetaData, typeConverter, usesChangeNotification ? _nextChangeNotificationIndex++ : (int?)null));
         }
 
-        public TypeMetaDataBuilder AddMember(string name, bool usesChangeNotification = false)
+        /// <summary>
+        /// Adds a member
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="typeConverter">If specified, this converter will be used instead of the default for the member type</param>
+        /// <param name="usesChangeNotification"></param>
+        /// <returns></returns>
+        public TypeMetaDataBuilder AddMember(string name, ITypeConverter typeConverter = null, bool usesChangeNotification = false)
         {
             if (name == null)
             {
@@ -135,12 +142,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 type = ((PropertyInfo)memberInfo).PropertyType;
             }
 
-            InternalAddMember(memberInfo, type, usesChangeNotification);
+            InternalAddMember(memberInfo, type, typeConverter, usesChangeNotification);
 
             return this;
         }
 
-        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, bool usesChangeNotification)
+        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, ITypeConverter typeConverter, bool usesChangeNotification)
         {
             if (info == null)
             {
@@ -158,19 +165,32 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 throw new InvalidOperationException($"Member {info.Name} has already been added as a networked member for type {Type.FullName}");
             }
 
-            InternalAddMember(info, type, usesChangeNotification);
+            InternalAddMember(info, type, typeConverter, usesChangeNotification);
 
             return this;
         }
 
-        public TypeMetaDataBuilder AddMember(PropertyInfo propInfo, bool usesChangeNotification = false)
+        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, Type typeConverterType, bool usesChangeNotification)
         {
-            return InternalAddMemberInfo(propInfo, propInfo.PropertyType, usesChangeNotification);
+            ITypeConverter typeConverter = null;
+
+            //Try to create the converter if provided
+            if (typeConverterType != null)
+            {
+                typeConverter = (ITypeConverter)Activator.CreateInstance(typeConverterType);
+            }
+
+            return InternalAddMemberInfo(info, type, typeConverter, usesChangeNotification);
         }
 
-        public TypeMetaDataBuilder AddMember(FieldInfo fieldInfo, bool usesChangeNotification = false)
+        public TypeMetaDataBuilder AddMember(PropertyInfo propInfo, ITypeConverter typeConverter = null, bool usesChangeNotification = false)
         {
-            return InternalAddMemberInfo(fieldInfo, fieldInfo.FieldType, usesChangeNotification);
+            return InternalAddMemberInfo(propInfo, propInfo.PropertyType, typeConverter, usesChangeNotification);
+        }
+
+        public TypeMetaDataBuilder AddMember(FieldInfo fieldInfo, ITypeConverter typeConverter = null, bool usesChangeNotification = false)
+        {
+            return InternalAddMemberInfo(fieldInfo, fieldInfo.FieldType, typeConverter, usesChangeNotification);
         }
 
         /// <summary>
@@ -185,7 +205,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             {
                 var attr = member.GetCustomAttribute<NetworkedAttribute>();
 
-                InternalAddMemberInfo(member, member.FieldType, attr.UsesChangeNotification);
+                InternalAddMemberInfo(member, member.FieldType, attr.TypeConverterType, attr.UsesChangeNotification);
             }
 
             return this;
@@ -203,7 +223,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             {
                 var attr = member.GetCustomAttribute<NetworkedAttribute>();
 
-                InternalAddMemberInfo(member, member.PropertyType, attr.UsesChangeNotification);
+                InternalAddMemberInfo(member, member.PropertyType, attr.TypeConverterType, attr.UsesChangeNotification);
             }
 
             return this;
@@ -215,9 +235,10 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// <returns></returns>
         public TypeMetaDataBuilder AddAllFields()
         {
+            //TODO: check for NetworkedAttribute?
             foreach (var member in Type.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
-                AddMember(member, false);
+                AddMember(member, null, false);
             }
 
             return this;
@@ -237,9 +258,10 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 flags |= BindingFlags.NonPublic;
             }
 
+            //TODO: check for NetworkedAttribute?
             foreach (var member in Type.GetProperties(flags))
             {
-                AddMember(member, false);
+                AddMember(member, null, false);
             }
 
             return this;

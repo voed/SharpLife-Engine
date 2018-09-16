@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Models;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
@@ -62,7 +63,7 @@ namespace SharpLife.Game.Shared.Entities
         [Networked]
         public Vector3 RenderColor { get; set; }
 
-        [Networked]
+        [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
         [Networked]

@@ -15,19 +15,16 @@
 
 using System;
 
-namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.BitConverters
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public sealed class NetworkedAttribute : Attribute
+    [Flags]
+    public enum BitConverterFlags
     {
-        /// <summary>
-        /// If true, user code will inform the network object when this member is changed
-        /// </summary>
-        public bool UsesChangeNotification { get; set; }
+        None = 0,
 
         /// <summary>
-        /// If specified, this converter is used instead of the default converter for the member type
+        /// Send sign bit
         /// </summary>
-        public Type TypeConverterType { get; set; }
+        Signed = 1 << 0,
     }
 }

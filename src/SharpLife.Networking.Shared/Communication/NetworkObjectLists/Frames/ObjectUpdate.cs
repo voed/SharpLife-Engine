@@ -85,12 +85,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
                 if (!member.ChangeNotificationIndex.HasValue || networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value])
                 {
-                    changes = member.MetaData.Converter.EncodeAndWrite(Snapshot[i].Value, previousSnapshot[i].Value, stream) || changes;
+                    changes = member.Converter.EncodeAndWrite(Snapshot[i].Value, previousSnapshot[i].Value, stream) || changes;
                 }
                 else
                 {
                     //Write unchanged values for each member
-                    for (var unchanged = 0; unchanged < member.MetaData.Converter.MemberCount; ++unchanged)
+                    for (var unchanged = 0; unchanged < member.Converter.MemberCount; ++unchanged)
                     {
                         ConversionUtils.AddUnchangedValue(stream);
                     }
@@ -106,7 +106,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             {
                 var member = MetaData.Members[i];
 
-                member.MetaData.Converter.Write(Snapshot[i].Value, stream);
+                member.Converter.Write(Snapshot[i].Value, stream);
             }
 
             return true;
@@ -145,7 +145,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 {
                     var member = metaData.Members[i];
 
-                    if (member.MetaData.Converter.ReadAndDecode(stream, previousSnapshot[i].Value, out var result))
+                    if (member.Converter.ReadAndDecode(stream, previousSnapshot[i].Value, out var result))
                     {
                         snapshot[i].Value = result;
                         snapshot[i].Changed = true;
@@ -167,7 +167,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
                     //Full updates can contain deltas, in which case we can just use the default value provided by the Read method
                     //So don't check the return value
-                    member.MetaData.Converter.Read(stream, out var result);
+                    member.Converter.Read(stream, out var result);
 
                     snapshot[i].Value = result;
                     snapshot[i].Changed = true;
