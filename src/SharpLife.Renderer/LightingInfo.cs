@@ -23,7 +23,8 @@ namespace SharpLife.Renderer
         public float Brightness;
         public int LightScale;
 
-        public float padding0;
+        public bool OverbrightEnabled;
+
         public float padding1;
         public float padding2;
     }

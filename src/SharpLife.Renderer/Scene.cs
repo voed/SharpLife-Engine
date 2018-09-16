@@ -30,6 +30,8 @@ namespace SharpLife.Renderer
 {
     public class Scene : IViewState
     {
+        private const int LightScaleRange = 256;
+
         private readonly List<IResourceContainer> _resourceContainers = new List<IResourceContainer>();
         private readonly List<IUpdateable> _updateables = new List<IUpdateable>();
         private readonly List<IRenderable> _renderables = new List<IRenderable>();
@@ -41,6 +43,8 @@ namespace SharpLife.Renderer
         private readonly IVariable _lightingGamma;
 
         private readonly IVariable _brightness;
+
+        private readonly IVariable _overbright;
 
         private bool _lightingSettingChanged;
 
@@ -93,6 +97,14 @@ namespace SharpLife.Renderer
                 .WithValue(0.0f)
                 .WithHelpInfo("The lighting brightness multiplier. Set to 0 to disable")
                 .WithMinMaxFilter(0.0f, 2.0f)
+                .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
+
+            //TODO: archived
+            _overbright = commandContext.RegisterVariable(
+                new VariableInfo("mat_overbright")
+                .WithValue(1)
+                .WithHelpInfo("Enable or disable overbright lighting")
+                .WithBooleanFilter()
                 .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
         }
 
@@ -212,7 +224,17 @@ namespace SharpLife.Renderer
         {
             if (sc.LightingInfoBuffer != null)
             {
-                var lightScale = (int)((Math.Pow(2.0, 1.0 / _lightingGamma.Float) * 256.0) + 0.5);
+                int lightScale;
+
+                if (_overbright.Boolean)
+                {
+                    lightScale = LightScaleRange;
+                }
+                else
+                {
+                    //Round up the scale
+                    lightScale = (int)((Math.Pow(2.0, 1.0 / _lightingGamma.Float) * LightScaleRange) + 0.5);
+                }
 
                 var info = new LightingInfo
                 {
@@ -221,6 +243,7 @@ namespace SharpLife.Renderer
                     LightingGamma = _lightingGamma.Float,
                     Brightness = _brightness.Float,
                     LightScale = lightScale,
+                    OverbrightEnabled = _overbright.Boolean,
                 };
 
                 gd.UpdateBuffer(sc.LightingInfoBuffer, 0, ref info);

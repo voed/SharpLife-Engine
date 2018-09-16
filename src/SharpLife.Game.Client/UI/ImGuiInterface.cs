@@ -68,6 +68,7 @@ namespace SharpLife.Game.Client.UI
         private IVariable _textureGamma;
         private IVariable _lightingGamma;
         private IVariable _brightness;
+        private IVariable _overbright;
         private IVariable _maxSize;
         private IVariable _roundDown;
         private IVariable _picMip;
@@ -239,6 +240,7 @@ namespace SharpLife.Game.Client.UI
             CacheVariable(ref _textureGamma, "mat_texgamma");
             CacheVariable(ref _lightingGamma, "mat_lightgamma");
             CacheVariable(ref _brightness, "mat_brightness");
+            CacheVariable(ref _overbright, "mat_overbright");
             CacheVariable(ref _maxSize, "mat_max_size");
             CacheVariable(ref _roundDown, "mat_round_down");
             CacheVariable(ref _picMip, "mat_picmip");
@@ -279,6 +281,16 @@ namespace SharpLife.Game.Client.UI
             }
         }
 
+        private void DrawCheckbox(IVariable variable, string label)
+        {
+            var value = variable.Boolean;
+
+            if (ImGui.Checkbox(label, ref value))
+            {
+                variable.Boolean = value;
+            }
+        }
+
         private void DrawMaterialControl()
         {
             if (_materialControlVisible && ImGui.BeginWindow("Material Control", ref _materialControlVisible, WindowFlags.NoCollapse))
@@ -295,6 +307,8 @@ namespace SharpLife.Game.Client.UI
                 DrawIntSlider(_maxSize, "Constrain texture scales to this maximum size", ImageConversionUtils.MinimumMaxTextureSize, 1 << 14, "%d");
                 DrawIntSlider(_roundDown, "Round Down texture scales using this exponent", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
                 DrawIntSlider(_picMip, "Scale down texture scales this many times", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
+
+                DrawCheckbox(_overbright, "Enable overbright");
 
                 ImGui.EndWindow();
             }
