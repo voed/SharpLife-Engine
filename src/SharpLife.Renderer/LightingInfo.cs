@@ -21,5 +21,10 @@ namespace SharpLife.Renderer
         public float TextureGamma;
         public float LightingGamma;
         public float Brightness;
+        public int LightScale;
+
+        public float padding0;
+        public float padding1;
+        public float padding2;
     }
 }

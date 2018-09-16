@@ -212,12 +212,15 @@ namespace SharpLife.Renderer
         {
             if (sc.LightingInfoBuffer != null)
             {
+                var lightScale = (int)((Math.Pow(2.0, 1.0 / _lightingGamma.Float) * 256.0) + 0.5);
+
                 var info = new LightingInfo
                 {
                     MainGamma = _mainGamma.Float,
                     TextureGamma = _textureGamma.Float,
                     LightingGamma = _lightingGamma.Float,
-                    Brightness = _brightness.Float
+                    Brightness = _brightness.Float,
+                    LightScale = lightScale,
                 };
 
                 gd.UpdateBuffer(sc.LightingInfoBuffer, 0, ref info);
