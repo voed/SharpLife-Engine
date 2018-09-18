@@ -45,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Models.BSP", "Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Models.SPR", "SharpLife.Models.SPR\SharpLife.Models.SPR.csproj", "{F1479E3D-F874-4F86-99AE-8A1B1FDB2A99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.Models.MDL", "SharpLife.Models.MDL\SharpLife.Models.MDL.csproj", "{A7FFE5F3-D225-4AFE-B665-AAAF755128EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Models.MDL", "SharpLife.Models.MDL\SharpLife.Models.MDL.csproj", "{A7FFE5F3-D225-4AFE-B665-AAAF755128EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
