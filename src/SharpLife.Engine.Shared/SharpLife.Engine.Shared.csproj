@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.CommandSystem\SharpLife.CommandSystem.csproj" />
-    <ProjectReference Include="..\SharpLife.FileFormats\SharpLife.FileFormats.csproj" />
     <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />
     <ProjectReference Include="..\SharpLife.Models.BSP\SharpLife.Models.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />

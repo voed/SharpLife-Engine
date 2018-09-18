@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpLife.FileFormats\SharpLife.FileFormats.csproj" />
+    <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
   </ItemGroup>
 
 </Project>
