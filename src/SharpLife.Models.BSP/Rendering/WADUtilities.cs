@@ -14,11 +14,12 @@
 ****/
 
 using SharpLife.FileFormats.WAD;
+using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using System.Collections.Generic;
 using Veldrid;
 
-namespace SharpLife.Renderer.BSP
+namespace SharpLife.Models.BSP.Rendering
 {
     public static class WADUtilities
     {
