@@ -18,7 +18,9 @@ namespace SharpLife.Models.BSP.FileFormat.Disk
 {
     internal unsafe struct BaseNode
     {
+#pragma warning disable CS0649
         public int planenum;
         public fixed short children[2];  // negative numbers are -(leafs+1), not nodes
+#pragma warning restore CS0649
     }
 }

@@ -18,8 +18,10 @@ namespace SharpLife.Models.BSP.FileFormat.Disk
 {
     internal unsafe struct TextureInfo
     {
+#pragma warning disable CS0649
         public fixed float vecs[8];		// [s/t][xyz offset]
         public int miptex;
         public TextureFlags flags;
+#pragma warning restore CS0649
     }
 }

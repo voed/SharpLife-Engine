@@ -18,6 +18,7 @@ namespace SharpLife.Models.BSP.FileFormat.Disk
 {
     internal unsafe struct Leaf
     {
+#pragma warning disable CS0649
         public Contents contents;
         public int visofs;             // -1 = no visibility info
 
@@ -28,5 +29,6 @@ namespace SharpLife.Models.BSP.FileFormat.Disk
         public ushort nummarksurfaces;
 
         public fixed byte ambient_level[(int)Ambient.LastAmbient + 1];
+#pragma warning restore CS0649
     }
 }

@@ -19,10 +19,12 @@ namespace SharpLife.Models.BSP.FileFormat.Disk
 {
     internal unsafe struct Model
     {
+#pragma warning disable CS0649
         public Vector3 mins, maxs;
         public Vector3 origin;
         public fixed int headnode[BSPConstants.MaxHulls];
         public int visleafs;       // not including the solid leaf 0
         public int firstface, numfaces;
+#pragma warning restore CS0649
     }
 }

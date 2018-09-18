@@ -18,8 +18,10 @@ namespace SharpLife.FileFormats.WAD.Disk
 {
     internal struct Header
     {
+#pragma warning disable CS0649
         public uint identification;
         public int numlumps;
         public int infotableofs;
+#pragma warning restore CS0649
     }
 }

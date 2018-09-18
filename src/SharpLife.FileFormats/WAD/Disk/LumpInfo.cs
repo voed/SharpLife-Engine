@@ -19,13 +19,15 @@ namespace SharpLife.FileFormats.WAD.Disk
 {
     internal unsafe struct LumpInfo
     {
+#pragma warning disable CS0649
         public int filepos;
         public int disksize;
         public int size;                // uncompressed
         public byte type;
         public byte compression;
         public byte pad1, pad2;
-        public fixed byte name[WADConstants.MaxTextureNameLength + 1];		// must be null terminated
+        public fixed byte name[WADConstants.MaxTextureNameLength + 1];      // must be null terminated
+#pragma warning restore CS0649
 
         public string Name
         {
