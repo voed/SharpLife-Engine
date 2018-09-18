@@ -17,9 +17,11 @@ using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Client.Networking;
+using SharpLife.Game.Client.Renderer;
 using SharpLife.Game.Client.UI;
 using SharpLife.Game.Shared.Models;
 using SharpLife.Models;
+using SharpLife.Renderer.Models;
 using System;
 using System.Collections.Generic;
 
@@ -27,6 +29,8 @@ namespace SharpLife.Game.Client.API
 {
     public sealed class GameClient : IGameClient
     {
+        private GameRenderer _gameRenderer;
+
         private ClientNetworking _networking;
 
         private ClientEntities _entities;
@@ -41,6 +45,7 @@ namespace SharpLife.Game.Client.API
             serviceCollection.AddSingleton<IClientUI, ImGuiInterface>();
 
             //Expose as both to get the implementation
+            serviceCollection.AddSingleton<GameRenderer>();
             serviceCollection.AddSingleton<ClientNetworking>();
             serviceCollection.AddSingleton<IClientNetworking>(provider => provider.GetRequiredService<ClientNetworking>());
             serviceCollection.AddSingleton<ClientEntities>();
@@ -53,6 +58,8 @@ namespace SharpLife.Game.Client.API
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
+
+            _gameRenderer = serviceProvider.GetRequiredService<GameRenderer>();
 
             _networking = serviceProvider.GetRequiredService<ClientNetworking>();
 
@@ -67,8 +74,12 @@ namespace SharpLife.Game.Client.API
 
         public IReadOnlyList<IModelLoader> GetModelLoaders() => GameModelUtils.GetModelLoaders();
 
+        public IReadOnlyDictionary<Type, IModelResourceFactory> GetModelResourceFactories() => _gameRenderer.GetModelResourceFactories();
+
         public void MapLoadBegin(string entityData)
         {
+            _gameRenderer.MapLoadBegin();
+
             _entities.MapLoadBegin();
         }
 
@@ -80,6 +91,11 @@ namespace SharpLife.Game.Client.API
         public void MapShutdown()
         {
             _entities.MapShutdown();
+        }
+
+        public void Update(float deltaSeconds)
+        {
+            _gameRenderer.Update();
         }
     }
 }

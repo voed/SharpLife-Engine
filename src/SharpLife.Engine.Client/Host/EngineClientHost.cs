@@ -167,6 +167,7 @@ namespace SharpLife.Engine.Client.Host
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IClientEngine>(this);
             serviceCollection.AddSingleton(_engine.EngineTime);
+            serviceCollection.AddSingleton<IRenderer>(_renderer);
             serviceCollection.AddSingleton<IEngineModels>(_clientModels);
 
             _game.Initialize(serviceCollection);
@@ -180,6 +181,7 @@ namespace SharpLife.Engine.Client.Host
             _game.Startup(serviceProvider);
 
             _engine.ModelManager.SetLoaders(_game.GetModelLoaders());
+            _renderer.SetModelResourceFactories(_game.GetModelResourceFactories());
         }
 
         public void Shutdown()

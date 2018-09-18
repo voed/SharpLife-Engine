@@ -24,10 +24,6 @@ using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Models.BSP.Loading;
 using SharpLife.Models.BSP.Rendering;
-using SharpLife.Models.MDL.Loading;
-using SharpLife.Models.MDL.Rendering;
-using SharpLife.Models.SPR.Loading;
-using SharpLife.Models.SPR.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Objects;
@@ -127,22 +123,11 @@ namespace SharpLife.Engine.Client.Renderer
 
             _lightStyles = new LightStyles();
 
-            _modelResourcesManager = new ModelResourcesManager(
-                new Dictionary<Type, IModelResourceFactory>
-                {
-                    {typeof(SpriteModel), new SpriteModelResourceFactory(_logger) },
-                    { typeof(StudioModel), new StudioModelResourceFactory() },
-                    { typeof(BSPModel), new BSPModelResourceFactory(this, _lightStyles) }
-                });
+            _modelResourcesManager = new ModelResourcesManager();
             _modelRenderer = new ModelRenderer(
                 _modelResourcesManager,
                 (modelRenderer, viewState) => _rendererListener.OnRenderModels(modelRenderer, viewState)
                 );
-
-            foreach (var factory in _modelResourcesManager.Factories)
-            {
-                Scene.AddContainer(factory);
-            }
 
             Scene.AddRenderable(_modelRenderer);
 
@@ -156,6 +141,22 @@ namespace SharpLife.Engine.Client.Renderer
             initCL.End();
             _gd.SubmitCommands(initCL);
             initCL.Dispose();
+        }
+
+        public void SetModelResourceFactories(IReadOnlyDictionary<Type, IModelResourceFactory> resourceFactories)
+        {
+            //Remove existing containers first
+            foreach (var factory in _modelResourcesManager.Factories)
+            {
+                Scene.RemoveContainer(factory);
+            }
+
+            _modelResourcesManager.SetResourceFactories(resourceFactories);
+
+            foreach (var factory in _modelResourcesManager.Factories)
+            {
+                Scene.AddContainer(factory);
+            }
         }
 
         private static SwapchainSource GetSwapchainSource(IntPtr window)

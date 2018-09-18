@@ -23,17 +23,21 @@ namespace SharpLife.Renderer.Models
 {
     public sealed class ModelResourcesManager : IModelResourcesManager, IEnumerable<ModelResourceContainer>
     {
-        private readonly Dictionary<Type, IModelResourceFactory> _resourceFactories;
+        private IReadOnlyDictionary<Type, IModelResourceFactory> _resourceFactories = new Dictionary<Type, IModelResourceFactory>();
 
         private readonly Dictionary<IModel, ModelResourceContainer> _containers = new Dictionary<IModel, ModelResourceContainer>();
 
         public IEnumerable<IModelResourceFactory> Factories => _resourceFactories.Values;
 
         /// <summary>
-        /// Creates a new resources manager that can create resources using the given factories
+        /// Creates a new resources manager that can create resources
         /// </summary>
         /// <param name="resourceFactories"></param>
-        public ModelResourcesManager(IReadOnlyDictionary<Type, IModelResourceFactory> resourceFactories)
+        public ModelResourcesManager()
+        {
+        }
+
+        public void SetResourceFactories(IReadOnlyDictionary<Type, IModelResourceFactory> resourceFactories)
         {
             if (resourceFactories == null)
             {

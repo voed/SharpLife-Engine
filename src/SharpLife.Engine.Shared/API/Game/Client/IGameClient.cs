@@ -15,6 +15,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Models;
+using SharpLife.Renderer.Models;
 using System;
 using System.Collections.Generic;
 
@@ -38,6 +39,8 @@ namespace SharpLife.Engine.Shared.API.Game.Client
 
         IReadOnlyList<IModelLoader> GetModelLoaders();
 
+        IReadOnlyDictionary<Type, IModelResourceFactory> GetModelResourceFactories();
+
         /// <summary>
         /// Called when the map has started loading
         /// </summary>
@@ -47,5 +50,7 @@ namespace SharpLife.Engine.Shared.API.Game.Client
         void MapLoadFinished();
 
         void MapShutdown();
+
+        void Update(float deltaSeconds);
     }
 }
