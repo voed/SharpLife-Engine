@@ -13,28 +13,26 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
+using SharpLife.FileFormats.WAD;
+using System.Numerics;
 
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Models.BSP.FileFormat
 {
     /// <summary>
-    /// Provides access to map info
+    /// Each texture info contains data about a texture used on a surface
+    /// S and T are normals indicating how to project the texture, with values to offset the texture in 2D space
     /// </summary>
-    public interface IMapInfo
+    public class TextureInfo
     {
-        /// <summary>
-        /// The name of the map, excluding directory and extension
-        /// </summary>
-        string Name { get; }
+        public Vector3 SNormal { get; set; }
 
-        /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
-        /// </summary>
-        string PreviousMapName { get; }
+        public float SValue { get; set; }
 
-        /// <summary>
-        /// The map model
-        /// </summary>
-        BSPModel Model { get; }
+        public Vector3 TNormal { get; set; }
+
+        public float TValue { get; set; }
+
+        public MipTexture MipTexture { get; set; }
+        public TextureFlags Flags { get; set; }
     }
 }

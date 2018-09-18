@@ -17,13 +17,13 @@ using SDL2;
 using Serilog;
 using SharpLife.CommandSystem;
 using SharpLife.Engine.Shared;
-using SharpLife.Engine.Shared.Utility;
-using SharpLife.FileFormats.BSP;
 using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
 using SharpLife.Input;
 using SharpLife.Models;
-using SharpLife.Models.BSP;
+using SharpLife.Models.BSP.FileFormat;
+using SharpLife.Models.BSP.Loading;
+using SharpLife.Models.BSP.Rendering;
 using SharpLife.Models.SPR;
 using SharpLife.Models.Studio;
 using SharpLife.Renderer;
@@ -278,7 +278,7 @@ namespace SharpLife.Engine.Client.Renderer
             _windowResized = true;
         }
 
-        public void Update(IEngineTime engineTime, float deltaSeconds)
+        public void Update(ITime engineTime, float deltaSeconds)
         {
             _lightStyles.AnimateLights(engineTime);
             Scene.Update(deltaSeconds);

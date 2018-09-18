@@ -15,10 +15,10 @@
 
 using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
-using SharpLife.Engine.Shared.Utility;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
+using SharpLife.Utility;
 using System;
 
 namespace SharpLife.Game.Server.Entities.EntityList
@@ -29,7 +29,7 @@ namespace SharpLife.Game.Server.Entities.EntityList
 
         private readonly EntityContext _entityContext;
 
-        public ServerEntityList(EntityDictionary entityDictionary, INetworkObjectList entitiesNetworkList, IServerEngine serverEngine, IEngineTime time, IEngineModels engineModels)
+        public ServerEntityList(EntityDictionary entityDictionary, INetworkObjectList entitiesNetworkList, IServerEngine serverEngine, ITime time, IEngineModels engineModels)
             : base(entityDictionary)
         {
             _entitiesNetworkList = entitiesNetworkList ?? throw new ArgumentNullException(nameof(entitiesNetworkList));

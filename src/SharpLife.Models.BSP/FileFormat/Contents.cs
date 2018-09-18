@@ -13,28 +13,30 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
-
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Models.BSP.FileFormat
 {
     /// <summary>
-    /// Provides access to map info
+    /// contents of a spot in the world
     /// </summary>
-    public interface IMapInfo
+    public enum Contents
     {
-        /// <summary>
-        /// The name of the map, excluding directory and extension
-        /// </summary>
-        string Name { get; }
+        Empty = -1,
+        Solid = -2,
+        Water = -3,
+        Slime = -4,
+        Lava = -5,
+        Sky = -6,
 
-        /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
-        /// </summary>
-        string PreviousMapName { get; }
+        Origin = -7,        // removed at csg time
+        Clip = -8,          // changed to contents_solid
+        Current0 = -9,
+        Current90 = -10,
+        Current180 = -11,
+        Current270 = -12,
+        CurrentUp = -13,
+        CurrentDown = -14,
+        Translucent = -15,
 
-        /// <summary>
-        /// The map model
-        /// </summary>
-        BSPModel Model { get; }
+        Ladder = -16,
     }
 }

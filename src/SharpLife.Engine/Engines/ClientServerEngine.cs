@@ -30,7 +30,6 @@ using SharpLife.Engine.Shared.Events;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.Loop;
 using SharpLife.Engine.Shared.UI;
-using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Models;
 using SharpLife.Networking.Shared;
@@ -73,9 +72,9 @@ namespace SharpLife.Engine.Engines
 
         public IUserInterface UserInterface { get; private set; }
 
-        private EngineTime EngineTime { get; } = new EngineTime();
+        private StopwatchTime EngineTime { get; } = new StopwatchTime();
 
-        IEngineTime IEngine.EngineTime => EngineTime;
+        ITime IEngine.EngineTime => EngineTime;
 
         public ModelUtils ModelUtils { get; private set; }
 

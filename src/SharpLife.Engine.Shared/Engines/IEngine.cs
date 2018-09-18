@@ -17,7 +17,6 @@ using SharpLife.CommandSystem;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Engine.Shared.UI;
-using SharpLife.Engine.Shared.Utility;
 using SharpLife.FileSystem;
 using SharpLife.Models;
 using SharpLife.Utility;
@@ -60,7 +59,7 @@ namespace SharpLife.Engine.Shared.Engines
         /// <summary>
         /// Gets the engine time
         /// </summary>
-        IEngineTime EngineTime { get; }
+        ITime EngineTime { get; }
 
         ModelUtils ModelUtils { get; }
 

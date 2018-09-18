@@ -13,28 +13,13 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
-
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Models.BSP.FileFormat
 {
     /// <summary>
-    /// Provides access to map info
+    /// Supported BSP versions
     /// </summary>
-    public interface IMapInfo
+    public enum BSPVersion
     {
-        /// <summary>
-        /// The name of the map, excluding directory and extension
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
-        /// </summary>
-        string PreviousMapName { get; }
-
-        /// <summary>
-        /// The map model
-        /// </summary>
-        BSPModel Model { get; }
+        HalfLife1 = 30
     }
 }

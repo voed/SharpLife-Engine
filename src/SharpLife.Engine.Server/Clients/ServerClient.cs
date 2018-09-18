@@ -15,10 +15,10 @@
 
 using Google.Protobuf;
 using Lidgren.Network;
-using SharpLife.Engine.Shared.Utility;
 using SharpLife.Networking.Shared.Communication.Messages;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
+using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -34,7 +34,7 @@ namespace SharpLife.Engine.Server.Clients
 
         public NetConnection Connection { get; }
 
-        private readonly IEngineTime _engineTime;
+        private readonly ITime _engineTime;
 
         public IPEndPoint RemoteEndPoint => Connection?.RemoteEndPoint;
 
@@ -97,7 +97,7 @@ namespace SharpLife.Engine.Server.Clients
         private ServerClient(
             SendMappings sendMappings,
             NetConnection connection,
-            IEngineTime engineTime,
+            ITime engineTime,
             NetworkObjectListTransmitter objectListTransmitter,
             int index,
             int userId,
@@ -140,7 +140,7 @@ namespace SharpLife.Engine.Server.Clients
         public static ServerClient CreateClient(
             SendMappings sendMappings,
             NetConnection connection,
-            IEngineTime engineTime,
+            ITime engineTime,
             NetworkObjectListTransmitter objectListTransmitter,
             int index,
             int userId,

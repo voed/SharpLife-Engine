@@ -13,28 +13,27 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
+using System;
 
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Utility
 {
     /// <summary>
-    /// Provides access to map info
+    /// Provides a means to query time
+    /// See <see cref="System.Diagnostics.Stopwatch"/> for API documentation
     /// </summary>
-    public interface IMapInfo
+    public interface ITime
     {
-        /// <summary>
-        /// The name of the map, excluding directory and extension
-        /// </summary>
-        string Name { get; }
+        long Frequency { get; }
+
+        TimeSpan Elapsed { get; }
+
+        long ElapsedMilliseconds { get; }
+
+        long ElapsedTicks { get; }
 
         /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
+        /// Time in seconds
         /// </summary>
-        string PreviousMapName { get; }
-
-        /// <summary>
-        /// The map model
-        /// </summary>
-        BSPModel Model { get; }
+        double ElapsedTime { get; }
     }
 }

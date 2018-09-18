@@ -16,7 +16,6 @@
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Client;
-using SharpLife.Engine.Shared.Utility;
 using SharpLife.Game.Client.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.MetaData;
@@ -25,6 +24,7 @@ using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
+using SharpLife.Utility;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -35,7 +35,7 @@ namespace SharpLife.Game.Client.Entities
     {
         private readonly IClientEngine _clientEngine;
 
-        private readonly IEngineTime _engineTime;
+        private readonly ITime _engineTime;
 
         private readonly IEngineModels _engineModels;
 
@@ -45,7 +45,7 @@ namespace SharpLife.Game.Client.Entities
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
 
-        public ClientEntities(IClientEngine clientEngine, IEngineTime engineTime, IEngineModels engineModels)
+        public ClientEntities(IClientEngine clientEngine, ITime engineTime, IEngineModels engineModels)
         {
             _clientEngine = clientEngine ?? throw new ArgumentNullException(nameof(clientEngine));
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));

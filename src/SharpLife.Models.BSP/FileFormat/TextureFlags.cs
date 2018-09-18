@@ -13,28 +13,16 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
+using System;
 
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Models.BSP.FileFormat
 {
-    /// <summary>
-    /// Provides access to map info
-    /// </summary>
-    public interface IMapInfo
+    [Flags]
+    public enum TextureFlags
     {
         /// <summary>
-        /// The name of the map, excluding directory and extension
+        /// sky or slime, no lightmap or 256 subdivision
         /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
-        /// </summary>
-        string PreviousMapName { get; }
-
-        /// <summary>
-        /// The map model
-        /// </summary>
-        BSPModel Model { get; }
+        Special = 1,
     }
 }

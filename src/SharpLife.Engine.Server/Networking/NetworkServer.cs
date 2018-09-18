@@ -18,7 +18,6 @@ using Serilog;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Server.Clients;
 using SharpLife.Engine.Server.Host;
-using SharpLife.Engine.Shared.Utility;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
@@ -28,6 +27,7 @@ using SharpLife.Networking.Shared.Communication.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Client;
 using SharpLife.Networking.Shared.Messages.NetworkStringLists;
 using SharpLife.Networking.Shared.Messages.Server;
+using SharpLife.Utility;
 using System;
 using System.Net;
 
@@ -50,7 +50,7 @@ namespace SharpLife.Engine.Server.Networking
 
         private readonly TypeRegistry _objectListTypeRegistry;
 
-        private readonly IEngineTime _engineTime;
+        private readonly ITime _engineTime;
 
         private readonly NetServer _server;
 
@@ -90,7 +90,7 @@ namespace SharpLife.Engine.Server.Networking
             MessagesReceiveHandler receiveHandler,
             BinaryDataTransmissionDescriptorSet binaryDataDescriptorSet,
             TypeRegistry objectListTypeRegistry,
-            IEngineTime engineTime,
+            ITime engineTime,
             IVariable maxPlayers,
             string appIdentifier,
             IPEndPoint ipAddress,
