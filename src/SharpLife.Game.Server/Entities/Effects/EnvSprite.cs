@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Models.SPR;
+using SharpLife.Models.SPR.Loading;
 
 namespace SharpLife.Game.Server.Entities.Effects
 {

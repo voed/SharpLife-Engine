@@ -13,12 +13,12 @@
 *
 ****/
 
-using SharpLife.FileFormats.SPR;
 using SharpLife.FileSystem;
+using SharpLife.Models.SPR.FileFormat;
 using System;
 using System.IO;
 
-namespace SharpLife.Models.SPR
+namespace SharpLife.Models.SPR.Loading
 {
     public sealed class SpriteModelLoader : IModelLoader
     {

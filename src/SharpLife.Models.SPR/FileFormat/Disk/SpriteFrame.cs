@@ -13,13 +13,12 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.SPR
+namespace SharpLife.Models.SPR.FileFormat.Disk
 {
-    public enum SpriteTextureFormat
+    internal unsafe struct SpriteFrame
     {
-        Normal = 0,
-        Additive,
-        IndexedAlpha,
-        AlphaTest
+        public fixed int Origin[2];
+        public int Width;
+        public int Height;
     }
 }

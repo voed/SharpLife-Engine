@@ -13,10 +13,14 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.SPR
+using SixLabors.Primitives;
+
+namespace SharpLife.Models.SPR.FileFormat
 {
-    public enum SpriteVersion
+    public class SpriteFrame
     {
-        HalfLife1 = 2
+        public Rectangle Area { get; set; }
+
+        public byte[] TextureData { get; set; }
     }
 }

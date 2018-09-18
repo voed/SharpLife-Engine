@@ -13,19 +13,19 @@
 *
 ****/
 
-using SharpLife.FileFormats.SPR;
-using System;
-
-namespace SharpLife.Models.SPR
+namespace SharpLife.Models.SPR.FileFormat.Disk
 {
-    public sealed class SpriteModel : BaseModel
+    internal struct SpriteHeader
     {
-        public SpriteFile SpriteFile { get; }
-
-        public SpriteModel(string name, uint crc, SpriteFile spriteFile)
-            : base(name, crc)
-        {
-            SpriteFile = spriteFile ?? throw new ArgumentNullException(nameof(spriteFile));
-        }
+        public int Identifier;
+        public int Version;
+        public int Type;
+        public int TextureFormat;
+        public float BoundingRadius;
+        public int Width;
+        public int Height;
+        public int NumFrames;
+        public float BeamLength;
+        public int SyncType;
     }
 }

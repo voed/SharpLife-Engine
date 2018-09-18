@@ -16,7 +16,7 @@
 using SharpLife.Utility;
 using System;
 
-namespace SharpLife.FileFormats.SPR
+namespace SharpLife.Models.SPR.FileFormat
 {
 #pragma warning disable RCS1194 // Implement exception constructors.
     /// <summary>

@@ -13,19 +13,14 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.SPR.Disk
+namespace SharpLife.Models.SPR.FileFormat
 {
-    internal struct SpriteHeader
+    public enum SpriteType
     {
-        public int Identifier;
-        public int Version;
-        public int Type;
-        public int TextureFormat;
-        public float BoundingRadius;
-        public int Width;
-        public int Height;
-        public int NumFrames;
-        public float BeamLength;
-        public int SyncType;
+        ParallelUpright = 0,
+        FacingUpright,
+        Parallel,
+        Oriented,
+        ParallelOriented
     }
 }

@@ -13,12 +13,14 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.SPR.Disk
+
+namespace SharpLife.Models.SPR.FileFormat
 {
-    internal unsafe struct SpriteFrame
+    public static class SPRConstants
     {
-        public fixed int Origin[2];
-        public int Width;
-        public int Height;
+        /// <summary>
+        /// little-endian "IDSP"
+        /// </summary>
+        public const int Identifier = (byte)'I' | ((byte)'D' << 8) | ((byte)'S' << 16) | ((byte)'P' << 24);
     }
 }

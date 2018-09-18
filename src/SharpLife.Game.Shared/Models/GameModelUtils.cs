@@ -16,7 +16,7 @@
 using SharpLife.Engine.Shared;
 using SharpLife.Models;
 using SharpLife.Models.BSP.Loading;
-using SharpLife.Models.SPR;
+using SharpLife.Models.SPR.Loading;
 using SharpLife.Models.Studio;
 using System.Collections.Generic;
 

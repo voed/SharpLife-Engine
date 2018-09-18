@@ -14,14 +14,15 @@
 ****/
 
 using Serilog;
-using SharpLife.Models;
+using SharpLife.Models.SPR.Loading;
+using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
 using System;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Renderer.SpriteModel
+namespace SharpLife.Models.SPR.Rendering
 {
     public sealed class SpriteModelResourceFactory : IModelResourceFactory
     {
@@ -164,7 +165,7 @@ namespace SharpLife.Renderer.SpriteModel
 
         public ModelResourceContainer CreateContainer(IModel model)
         {
-            if (!(model is SharpLife.Models.SPR.SpriteModel spriteModel))
+            if (!(model is SpriteModel spriteModel))
             {
                 throw new ArgumentException("Model must be a sprite model", nameof(model));
             }

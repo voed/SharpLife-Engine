@@ -13,12 +13,12 @@
 *
 ****/
 
-using SharpLife.FileFormats.WAD;
+using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 
-namespace SharpLife.FileFormats.SPR
+namespace SharpLife.Models.SPR.FileFormat
 {
     public class SpriteFile
     {
@@ -39,14 +39,14 @@ namespace SharpLife.FileFormats.SPR
         public SpriteFile()
         {
             //TODO: move palette constants to utility
-            Palette = new Rgb24[WADConstants.NumPaletteColors];
+            Palette = new Rgb24[IndexPaletteConstants.NumPaletteColors];
         }
 
         public SpriteFile(Rgb24[] palette)
         {
             Palette = palette ?? throw new ArgumentNullException(nameof(palette));
 
-            if (palette.Length != WADConstants.NumPaletteColors)
+            if (palette.Length != IndexPaletteConstants.NumPaletteColors)
             {
                 throw new ArgumentException("Palette size is invalid");
             }

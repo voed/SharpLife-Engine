@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.SPR.Disk
+namespace SharpLife.Models.SPR.FileFormat.Disk
 {
     internal enum SpriteFrameType
     {

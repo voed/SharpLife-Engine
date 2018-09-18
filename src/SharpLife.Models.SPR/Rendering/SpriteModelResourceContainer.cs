@@ -13,8 +13,9 @@
 *
 ****/
 
-using SharpLife.FileFormats.SPR;
-using SharpLife.Models;
+using SharpLife.Models.SPR.FileFormat;
+using SharpLife.Models.SPR.Loading;
+using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
 using SharpLife.Utility;
@@ -30,13 +31,13 @@ using Veldrid;
 using Veldrid.ImageSharp;
 using Veldrid.Utilities;
 
-namespace SharpLife.Renderer.SpriteModel
+namespace SharpLife.Models.SPR.Rendering
 {
     public class SpriteModelResourceContainer : ModelResourceContainer
     {
         private readonly SpriteModelResourceFactory _factory;
 
-        private readonly SharpLife.Models.SPR.SpriteModel _spriteModel;
+        private readonly SpriteModel _spriteModel;
 
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
@@ -49,7 +50,7 @@ namespace SharpLife.Renderer.SpriteModel
 
         public override IModel Model => _spriteModel;
 
-        public SpriteModelResourceContainer(SpriteModelResourceFactory factory, SharpLife.Models.SPR.SpriteModel spriteModel)
+        public SpriteModelResourceContainer(SpriteModelResourceFactory factory, SpriteModel spriteModel)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             _spriteModel = spriteModel ?? throw new ArgumentNullException(nameof(spriteModel));

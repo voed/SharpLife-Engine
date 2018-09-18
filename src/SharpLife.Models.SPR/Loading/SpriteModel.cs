@@ -13,14 +13,19 @@
 *
 ****/
 
-namespace SharpLife.FileFormats.SPR
+using SharpLife.Models.SPR.FileFormat;
+using System;
+
+namespace SharpLife.Models.SPR.Loading
 {
-    public enum SpriteType
+    public sealed class SpriteModel : BaseModel
     {
-        ParallelUpright = 0,
-        FacingUpright,
-        Parallel,
-        Oriented,
-        ParallelOriented
+        public SpriteFile SpriteFile { get; }
+
+        public SpriteModel(string name, uint crc, SpriteFile spriteFile)
+            : base(name, crc)
+        {
+            SpriteFile = spriteFile ?? throw new ArgumentNullException(nameof(spriteFile));
+        }
     }
 }
