@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj" />
+    <ProjectReference Include="..\SharpLife.Models.MDL\SharpLife.Models.MDL.csproj" />
     <ProjectReference Include="..\SharpLife.Models.SPR\SharpLife.Models.SPR.csproj" />
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />
   </ItemGroup>
