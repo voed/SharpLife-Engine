@@ -22,12 +22,5 @@ namespace SharpLife.FileFormats.WAD
         /// </summary>
         public const int MaxTextureNameLength = 15;
         public const int NumMipLevels = 4;
-
-        //TODO: remove and use the constants in IndexPaletteConstants
-        public const int NumPaletteColors = 256;
-        public const int NumPaletteComponents = 3;
-        public const int PaletteComponentSizeInBytes = 1;
-
-        public const int PaletteSizeInBytes = NumPaletteColors * NumPaletteComponents * PaletteComponentSizeInBytes;
     }
 }

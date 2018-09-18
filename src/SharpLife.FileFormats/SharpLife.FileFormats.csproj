@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.FileSystem\SharpLife.FileSystem.csproj" />
+    <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>
 </Project>

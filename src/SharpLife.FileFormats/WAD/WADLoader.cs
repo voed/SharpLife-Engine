@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.FileFormats.WAD.Disk;
+using SharpLife.Renderer.Utility;
 using SharpLife.Utility;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -141,14 +142,14 @@ namespace SharpLife.FileFormats.WAD
 
                 var paletteSize = reader.ReadInt16();
 
-                if (paletteSize != WADConstants.NumPaletteColors)
+                if (paletteSize != IndexPaletteConstants.NumPaletteColors)
                 {
                     throw new FileLoadFailureException("Invalid miptex");
                 }
 
-                foreach (var i in Enumerable.Range(0, WADConstants.NumPaletteColors))
+                foreach (var i in Enumerable.Range(0, IndexPaletteConstants.NumPaletteColors))
                 {
-                    var paletteData = reader.ReadBytes(WADConstants.NumPaletteComponents * WADConstants.PaletteComponentSizeInBytes);
+                    var paletteData = reader.ReadBytes(IndexPaletteConstants.NumPaletteComponents * IndexPaletteConstants.PaletteComponentSizeInBytes);
 
                     GCHandle handle = GCHandle.Alloc(paletteData, GCHandleType.Pinned);
                     texture.Palette[i] = Marshal.PtrToStructure<Rgb24>(handle.AddrOfPinnedObject());

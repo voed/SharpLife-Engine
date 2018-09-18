@@ -13,8 +13,8 @@
 *
 ****/
 
-using SharpLife.FileFormats.WAD;
 using SharpLife.Models.SPR.FileFormat.Disk;
+using SharpLife.Renderer.Utility;
 using SharpLife.Utility;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Primitives;
@@ -174,18 +174,19 @@ namespace SharpLife.Models.SPR.FileFormat
 
             //Read the palette
             var colorCount = EndianConverter.Little(_reader.ReadInt16());
-            var paletteData = new byte[WADConstants.PaletteSizeInBytes];
-            _reader.Read(paletteData, 0, colorCount * WADConstants.NumPaletteComponents * WADConstants.PaletteComponentSizeInBytes);
+            var paletteData = new byte[IndexPaletteConstants.PaletteSizeInBytes];
+            //TODO: similar code in wad loader
+            _reader.Read(paletteData, 0, colorCount * IndexPaletteConstants.NumPaletteComponents * IndexPaletteConstants.PaletteComponentSizeInBytes);
 
             //Convert the palette to an Rgb24 array
-            var palette = new Rgb24[WADConstants.NumPaletteColors];
+            var palette = new Rgb24[IndexPaletteConstants.NumPaletteColors];
 
-            for (var i = 0; i < WADConstants.NumPaletteColors; ++i)
+            for (var i = 0; i < IndexPaletteConstants.NumPaletteColors; ++i)
             {
                 palette[i] = new Rgb24(
-                    paletteData[i * WADConstants.NumPaletteComponents],
-                    paletteData[(i * WADConstants.NumPaletteComponents) + 1],
-                    paletteData[(i * WADConstants.NumPaletteComponents) + 2]
+                    paletteData[i * IndexPaletteConstants.NumPaletteComponents],
+                    paletteData[(i * IndexPaletteConstants.NumPaletteComponents) + 1],
+                    paletteData[(i * IndexPaletteConstants.NumPaletteComponents) + 2]
                     );
             }
 

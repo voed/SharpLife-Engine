@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace SharpLife.FileFormats.WAD
@@ -29,6 +30,6 @@ namespace SharpLife.FileFormats.WAD
         /// </summary>
         public byte[][] Data { get; } = new byte[WADConstants.NumMipLevels][]; // four mip maps stored
 
-        public Rgb24[] Palette { get; } = new Rgb24[WADConstants.NumPaletteColors];
+        public Rgb24[] Palette { get; } = new Rgb24[IndexPaletteConstants.NumPaletteColors];
     }
 }
