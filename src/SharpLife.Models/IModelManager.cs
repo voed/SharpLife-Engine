@@ -46,6 +46,12 @@ namespace SharpLife.Models
         event Action<IModel> OnModelLoaded;
 
         /// <summary>
+        /// Sets the model loaders to use
+        /// </summary>
+        /// <param name="loaders"></param>
+        void SetLoaders(IReadOnlyList<IModelLoader> loaders);
+
+        /// <summary>
         /// Returns whether a model with the given name has been loaded
         /// </summary>
         /// <param name="modelName"></param>

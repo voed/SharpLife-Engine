@@ -14,7 +14,9 @@
 ****/
 
 using Microsoft.Extensions.DependencyInjection;
+using SharpLife.Models;
 using System;
+using System.Collections.Generic;
 
 namespace SharpLife.Engine.Shared.API.Game.Client
 {
@@ -33,6 +35,8 @@ namespace SharpLife.Engine.Shared.API.Game.Client
         void Startup(IServiceProvider serviceProvider);
 
         void Shutdown();
+
+        IReadOnlyList<IModelLoader> GetModelLoaders();
 
         /// <summary>
         /// Called when the map has started loading

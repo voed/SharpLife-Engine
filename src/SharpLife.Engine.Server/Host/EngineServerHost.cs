@@ -156,6 +156,12 @@ namespace SharpLife.Engine.Server.Host
             _serverNetworking = serviceProvider.GetRequiredService<IServerNetworking>();
 
             _game.Startup(serviceProvider);
+
+            //Listen servers have the client do this
+            if (_engine.IsDedicatedServer)
+            {
+                _engine.ModelManager.SetLoaders(_game.GetModelLoaders());
+            }
         }
 
         public void Shutdown()

@@ -18,7 +18,10 @@ using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Client.Networking;
 using SharpLife.Game.Client.UI;
+using SharpLife.Game.Shared.Models;
+using SharpLife.Models;
 using System;
+using System.Collections.Generic;
 
 namespace SharpLife.Game.Client.API
 {
@@ -61,6 +64,8 @@ namespace SharpLife.Game.Client.API
         public void Shutdown()
         {
         }
+
+        public IReadOnlyList<IModelLoader> GetModelLoaders() => GameModelUtils.GetModelLoaders();
 
         public void MapLoadBegin(string entityData)
         {

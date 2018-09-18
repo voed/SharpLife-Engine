@@ -178,6 +178,8 @@ namespace SharpLife.Engine.Client.Host
             _clientEntities = serviceProvider.GetRequiredService<IClientEntities>();
 
             _game.Startup(serviceProvider);
+
+            _engine.ModelManager.SetLoaders(_game.GetModelLoaders());
         }
 
         public void Shutdown()

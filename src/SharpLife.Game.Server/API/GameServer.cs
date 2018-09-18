@@ -17,7 +17,10 @@ using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Server.Networking;
+using SharpLife.Game.Shared.Models;
+using SharpLife.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SharpLife.Game.Server.API
@@ -54,6 +57,8 @@ namespace SharpLife.Game.Server.API
         public void Shutdown()
         {
         }
+
+        public IReadOnlyList<IModelLoader> GetModelLoaders() => GameModelUtils.GetModelLoaders();
 
         public void MapLoadBegin(string entityData, bool loadGame)
         {

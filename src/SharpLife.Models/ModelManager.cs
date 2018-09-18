@@ -15,8 +15,6 @@
 
 using SharpLife.FileSystem;
 using SharpLife.Models.BSP;
-using SharpLife.Models.SPR;
-using SharpLife.Models.Studio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,14 +24,7 @@ namespace SharpLife.Models
 {
     public sealed class ModelManager : IModelManager
     {
-        private readonly IReadOnlyList<IModelLoader> _modelLoaders = new List<IModelLoader>
-        {
-            new SpriteModelLoader(),
-            new StudioModelLoader(),
-
-            //BSP loader comes last due to not having a way to positively recognize the format
-            new BSPModelLoader()
-        };
+        private IReadOnlyList<IModelLoader> _modelLoaders = new List<IModelLoader>();
 
         private readonly IFileSystem _fileSystem;
 
@@ -56,6 +47,11 @@ namespace SharpLife.Models
 
             //Names are case insensitive to account for differences in the filesystem
             _models = new Dictionary<string, IModel>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void SetLoaders(IReadOnlyList<IModelLoader> loaders)
+        {
+            _modelLoaders = loaders ?? throw new ArgumentNullException(nameof(loaders));
         }
 
         public bool Contains(string modelName)
