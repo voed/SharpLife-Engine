@@ -22,7 +22,14 @@ namespace SharpLife.Models.BSP
 {
     public sealed class BSPModelLoader : IModelLoader
     {
-        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, bool computeCRC)
+        private readonly string _bspModelNamePrefix;
+
+        public BSPModelLoader(string bspModelNamePrefix)
+        {
+            _bspModelNamePrefix = bspModelNamePrefix ?? throw new ArgumentNullException(nameof(bspModelNamePrefix));
+        }
+
+        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, Delegates.AddModel addModelCallback, bool computeCRC)
         {
             if (reader == null)
             {
@@ -48,7 +55,14 @@ namespace SharpLife.Models.BSP
                 crc = loader.ComputeCRC();
             }
 
-            //World is the first submodel
+            //add all of its submodels
+            //First submodel (0) is the world
+            for (var i = 1; i < bspFile.Models.Count; ++i)
+            {
+                var subModelName = $"{_bspModelNamePrefix}{i}";
+                addModelCallback(subModelName, new BSPModel(subModelName, crc, bspFile, bspFile.Models[i]));
+            }
+
             return new BSPModel(name, crc, bspFile, bspFile.Models[0]);
         }
     }

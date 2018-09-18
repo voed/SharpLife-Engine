@@ -22,7 +22,7 @@ namespace SharpLife.Models.Studio
 {
     public sealed class StudioModelLoader : IModelLoader
     {
-        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, bool computeCRC)
+        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, Delegates.AddModel addModelCallback, bool computeCRC)
         {
             if (reader == null)
             {

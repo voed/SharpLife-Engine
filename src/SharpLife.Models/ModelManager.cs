@@ -14,7 +14,6 @@
 ****/
 
 using SharpLife.FileSystem;
-using SharpLife.Models.BSP;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,8 +27,6 @@ namespace SharpLife.Models
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly string _bspModelNamePrefix;
-
         private readonly Dictionary<string, IModel> _models;
 
         public IModel this[string modelName] => _models[modelName];
@@ -40,10 +37,9 @@ namespace SharpLife.Models
 
         public event Action<IModel> OnModelLoaded;
 
-        public ModelManager(IFileSystem fileSystem, string bspModelNamePrefix)
+        public ModelManager(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _bspModelNamePrefix = bspModelNamePrefix ?? throw new ArgumentNullException(nameof(bspModelNamePrefix));
 
             //Names are case insensitive to account for differences in the filesystem
             _models = new Dictionary<string, IModel>(StringComparer.OrdinalIgnoreCase);
@@ -59,13 +55,18 @@ namespace SharpLife.Models
             return _models.ContainsKey(modelName);
         }
 
+        private void AddSubModel(string modelName, IModel model)
+        {
+            _models.Add(modelName, model);
+        }
+
         internal IModel LoadModel(string modelName)
         {
             var reader = new BinaryReader(_fileSystem.OpenRead(modelName));
 
             foreach (var loader in _modelLoaders)
             {
-                var model = loader.Load(modelName, _fileSystem, reader, true);
+                var model = loader.Load(modelName, _fileSystem, reader, AddSubModel, true);
 
                 if (model != null)
                 {
@@ -88,18 +89,6 @@ namespace SharpLife.Models
             if (model != null)
             {
                 _models.Add(modelName, model);
-
-                //if it's a BSP model, also add all of its submodels
-                //TODO: should ideally be handled in the loader
-                if (model is BSPModel bspModel)
-                {
-                    //First submodel (0) is the world
-                    for (var i = 1; i < bspModel.BSPFile.Models.Count; ++i)
-                    {
-                        var name = $"{_bspModelNamePrefix}{i}";
-                        _models.Add(name, new BSPModel(name, bspModel.CRC, bspModel.BSPFile, bspModel.BSPFile.Models[i]));
-                    }
-                }
 
                 OnModelLoaded?.Invoke(model);
             }

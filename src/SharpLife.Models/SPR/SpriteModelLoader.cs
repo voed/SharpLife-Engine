@@ -22,7 +22,7 @@ namespace SharpLife.Models.SPR
 {
     public sealed class SpriteModelLoader : IModelLoader
     {
-        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, bool computeCRC)
+        public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, Delegates.AddModel addModelCallback, bool computeCRC)
         {
             if (reader == null)
             {

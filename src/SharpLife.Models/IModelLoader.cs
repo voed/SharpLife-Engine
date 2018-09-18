@@ -29,8 +29,9 @@ namespace SharpLife.Models
         /// <param name="name">Name to associate with the model</param>
         /// <param name="fileSystem">Filesystem to use when loading additional files</param>
         /// <param name="reader"></param>
+        /// <param name="addModelCallback">Callback to add more models if a model contains submodels</param>
         /// <param name="computeCRC">Whether to compute the CRC for this model</param>
         /// <returns>The model and the CRC</returns>
-        IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, bool computeCRC);
+        IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, Delegates.AddModel addModelCallback, bool computeCRC);
     }
 }

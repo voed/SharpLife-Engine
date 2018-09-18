@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Engine.Shared;
 using SharpLife.Models;
 using SharpLife.Models.BSP;
 using SharpLife.Models.SPR;
@@ -31,7 +32,7 @@ namespace SharpLife.Game.Shared.Models
                 new StudioModelLoader(),
 
                 //BSP loader comes last due to not having a way to positively recognize the format
-                new BSPModelLoader()
+                new BSPModelLoader(Framework.BSPModelNamePrefix)
             };
         }
     }

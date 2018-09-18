@@ -306,7 +306,7 @@ namespace SharpLife.Engine.Engines
 
             ModelUtils = new ModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP);
 
-            ModelManager = new ModelManager(FileSystem, Framework.BSPModelNamePrefix);
+            ModelManager = new ModelManager(FileSystem);
 
             //TODO: initialize subsystems
 
