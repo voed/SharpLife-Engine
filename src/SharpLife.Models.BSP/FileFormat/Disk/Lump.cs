@@ -13,11 +13,9 @@
 *
 ****/
 
-using System.Runtime.InteropServices;
 
 namespace SharpLife.Models.BSP.FileFormat.Disk
 {
-    [StructLayout(LayoutKind.Sequential)]
     internal struct Lump
     {
         public int fileofs, filelen;

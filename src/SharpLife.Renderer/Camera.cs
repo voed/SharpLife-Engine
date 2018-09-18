@@ -18,7 +18,6 @@ using SDL2;
 using SharpLife.Input;
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Veldrid;
 
 namespace SharpLife.Renderer
@@ -189,7 +188,6 @@ namespace SharpLife.Renderer
         };
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     public struct CameraInfo
     {
         public Vector3 CameraPosition_WorldSpace;

@@ -14,11 +14,9 @@
 ****/
 
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace SharpLife.Models.BSP.FileFormat.Disk
 {
-    [StructLayout(LayoutKind.Sequential)]
     public struct Plane
     {
         public Vector3 Normal;

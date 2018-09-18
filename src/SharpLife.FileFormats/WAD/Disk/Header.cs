@@ -13,11 +13,9 @@
 *
 ****/
 
-using System.Runtime.InteropServices;
 
 namespace SharpLife.FileFormats.WAD.Disk
 {
-    [StructLayout(LayoutKind.Sequential)]
     internal struct Header
     {
         public uint identification;

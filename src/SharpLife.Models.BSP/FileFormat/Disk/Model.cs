@@ -14,11 +14,9 @@
 ****/
 
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace SharpLife.Models.BSP.FileFormat.Disk
 {
-    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct Model
     {
         public Vector3 mins, maxs;

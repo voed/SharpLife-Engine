@@ -13,12 +13,10 @@
 *
 ****/
 
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SharpLife.FileFormats.WAD.Disk
 {
-    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct LumpInfo
     {
         public int filepos;

@@ -13,11 +13,9 @@
 *
 ****/
 
-using System.Runtime.InteropServices;
 
 namespace SharpLife.Models.BSP.FileFormat.Disk
 {
-    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct BaseNode
     {
         public int planenum;
