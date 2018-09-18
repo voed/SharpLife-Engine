@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace SharpLife.FileFormats
+namespace SharpLife.Utility
 {
     /// <summary>
     /// Base class for all exceptions thrown when a file fails to load

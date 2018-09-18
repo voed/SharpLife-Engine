@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Utility;
 using System;
 
 namespace SharpLife.FileFormats.WAD
