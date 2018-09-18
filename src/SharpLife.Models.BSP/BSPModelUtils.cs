@@ -20,7 +20,7 @@ using System.Text.RegularExpressions;
 
 namespace SharpLife.Models
 {
-    public sealed class ModelUtils
+    public sealed class BSPModelUtils
     {
         private readonly string _bspModelNamePrefix;
 
@@ -30,7 +30,7 @@ namespace SharpLife.Models
 
         private readonly string _mapFileNameBaseRegexString;
 
-        public ModelUtils(string bspModelNamePrefix, string mapsDirectory, string bspExtension)
+        public BSPModelUtils(string bspModelNamePrefix, string mapsDirectory, string bspExtension)
         {
             _bspModelNamePrefix = bspModelNamePrefix ?? throw new ArgumentNullException(nameof(bspModelNamePrefix));
             _mapsDirectory = mapsDirectory ?? throw new ArgumentNullException(nameof(mapsDirectory));

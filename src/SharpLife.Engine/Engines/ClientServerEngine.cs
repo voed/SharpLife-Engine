@@ -76,7 +76,7 @@ namespace SharpLife.Engine.Engines
 
         ITime IEngine.EngineTime => EngineTime;
 
-        public ModelUtils ModelUtils { get; private set; }
+        public BSPModelUtils ModelUtils { get; private set; }
 
         public IModelManager ModelManager { get; private set; }
 
@@ -303,7 +303,7 @@ namespace SharpLife.Engine.Engines
                 Logger.Information($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
-            ModelUtils = new ModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP);
+            ModelUtils = new BSPModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP);
 
             ModelManager = new ModelManager(FileSystem);
 

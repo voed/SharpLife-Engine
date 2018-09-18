@@ -26,7 +26,7 @@ namespace SharpLife.Engine.Client.Resources
 {
     internal sealed class ClientModels : IEngineModels
     {
-        private readonly ModelUtils _modelUtils;
+        private readonly BSPModelUtils _modelUtils;
         private readonly IModelManager _modelManager;
 
         private INetworkStringList _models;
@@ -39,7 +39,7 @@ namespace SharpLife.Engine.Client.Resources
 
         private int _nextClientIndex;
 
-        public ClientModels(ModelUtils modelUtils, IModelManager modelManager)
+        public ClientModels(BSPModelUtils modelUtils, IModelManager modelManager)
         {
             _modelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
             _modelManager = modelManager ?? throw new ArgumentNullException(nameof(modelManager));

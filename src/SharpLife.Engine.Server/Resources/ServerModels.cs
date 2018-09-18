@@ -26,7 +26,7 @@ namespace SharpLife.Engine.Server.Resources
 {
     internal sealed class ServerModels : IEngineModels
     {
-        private readonly ModelUtils _modelUtils;
+        private readonly BSPModelUtils _modelUtils;
 
         private readonly IModelManager _modelManager;
 
@@ -34,7 +34,7 @@ namespace SharpLife.Engine.Server.Resources
 
         private INetworkStringList _models;
 
-        public ServerModels(ModelUtils modelUtils, IModelManager modelManager, string fallbackModelName)
+        public ServerModels(BSPModelUtils modelUtils, IModelManager modelManager, string fallbackModelName)
         {
             _modelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
             _modelManager = modelManager ?? throw new ArgumentNullException(nameof(modelManager));
