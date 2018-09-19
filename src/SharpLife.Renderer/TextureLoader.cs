@@ -89,45 +89,45 @@ namespace SharpLife.Renderer
             return ImageConversionUtils.ComputeScaledSize(width, height, _powerOf2Textures.Boolean, _maxSize.Integer, _roundDown.Integer, _picMip.Integer);
         }
 
-        private Image<Rgba32> InternalConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
+        private Image<Rgba32> InternalConvertTexture(IndexedColor256Image inputImage, TextureFormat textureFormat)
         {
-            var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputTexture, textureFormat);
+            var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputImage, textureFormat);
 
             //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
             //This stops the color from bleeding through
             if (textureFormat == TextureFormat.AlphaTest
                 || textureFormat == TextureFormat.IndexAlpha)
             {
-                ImageConversionUtils.BoxFilter3x3(pixels, inputTexture.Width, inputTexture.Height);
+                ImageConversionUtils.BoxFilter3x3(pixels, inputImage.Width, inputImage.Height);
             }
 
             //Rescale image to nearest power of 2
-            (var scaledWidth, var scaledHeight) = ComputeScaledSize(inputTexture.Width, inputTexture.Height);
+            (var scaledWidth, var scaledHeight) = ComputeScaledSize(inputImage.Width, inputImage.Height);
 
-            var scaledPixels = ImageConversionUtils.ResampleTexture(new Span<Rgba32>(pixels), inputTexture.Width, inputTexture.Height, scaledWidth, scaledHeight);
+            var scaledPixels = ImageConversionUtils.ResampleImage(new Span<Rgba32>(pixels), inputImage.Width, inputImage.Height, scaledWidth, scaledHeight);
 
             return Image.LoadPixelData(scaledPixels, scaledWidth, scaledHeight);
         }
 
         /// <summary>
-        /// Converts an indexed 256 color texture to Rgba32
+        /// Converts an indexed 256 color image to Rgba32
         /// </summary>
-        /// <param name="inputTexture"></param>
+        /// <param name="inputImage"></param>
         /// <param name="textureFormat"></param>
         /// <returns></returns>
-        public Image<Rgba32> ConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
+        public Image<Rgba32> ConvertTexture(IndexedColor256Image inputImage, TextureFormat textureFormat)
         {
-            if (inputTexture == null)
+            if (inputImage == null)
             {
-                throw new ArgumentNullException(nameof(inputTexture));
+                throw new ArgumentNullException(nameof(inputImage));
             }
 
-            return InternalConvertTexture(inputTexture, textureFormat);
+            return InternalConvertTexture(inputImage, textureFormat);
         }
 
-        private ImageSharpTexture InternalLoadTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
+        private ImageSharpTexture InternalLoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat)
         {
-            var image = InternalConvertTexture(inputTexture, textureFormat);
+            var image = InternalConvertTexture(inputImage, textureFormat);
 
             return new ImageSharpTexture(image, true);
         }
@@ -135,19 +135,19 @@ namespace SharpLife.Renderer
         /// <summary>
         /// Loads a texture and creates it using the specified factory
         /// </summary>
-        /// <param name="inputTexture"></param>
+        /// <param name="inputImage"></param>
         /// <param name="textureFormat"></param>
         /// <param name="gd"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Texture LoadTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat, GraphicsDevice gd, ResourceFactory factory)
+        public Texture LoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, GraphicsDevice gd, ResourceFactory factory)
         {
-            if (inputTexture == null)
+            if (inputImage == null)
             {
-                throw new ArgumentNullException(nameof(inputTexture));
+                throw new ArgumentNullException(nameof(inputImage));
             }
 
-            var imageSharpTexture = InternalLoadTexture(inputTexture, textureFormat);
+            var imageSharpTexture = InternalLoadTexture(inputImage, textureFormat);
 
             return imageSharpTexture.CreateDeviceTexture(gd, factory);
         }
@@ -156,17 +156,17 @@ namespace SharpLife.Renderer
         /// Loads a texture and creates it using the specified graphics device's resource factory
         /// The texture is added to the given cache
         /// </summary>
-        /// <param name="inputTexture"></param>
+        /// <param name="inputImage"></param>
         /// <param name="textureFormat"></param>
         /// <param name="name"></param>
         /// <param name="gd"></param>
         /// <param name="cache"></param>
         /// <returns></returns>
-        public Texture LoadTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat, string name, GraphicsDevice gd, ResourceCache cache)
+        public Texture LoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, string name, GraphicsDevice gd, ResourceCache cache)
         {
-            if (inputTexture == null)
+            if (inputImage == null)
             {
-                throw new ArgumentNullException(nameof(inputTexture));
+                throw new ArgumentNullException(nameof(inputImage));
             }
 
             if (name == null)
@@ -174,7 +174,7 @@ namespace SharpLife.Renderer
                 throw new ArgumentNullException(nameof(name));
             }
 
-            var imageSharpTexture = InternalLoadTexture(inputTexture, textureFormat);
+            var imageSharpTexture = InternalLoadTexture(inputImage, textureFormat);
 
             return cache.AddTexture2D(gd, gd.ResourceFactory, imageSharpTexture, name);
         }

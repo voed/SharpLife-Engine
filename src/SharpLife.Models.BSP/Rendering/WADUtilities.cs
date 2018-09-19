@@ -38,7 +38,7 @@ namespace SharpLife.Models.BSP.Rendering
                 var textureFormat = texture.Name.StartsWith('{') ? TextureFormat.AlphaTest : TextureFormat.Normal;
 
                 textureLoader.LoadTexture(
-                    new IndexedColor256Texture(
+                    new IndexedColor256Image(
                         texture.Palette,
                         texture.Data[0],
                         (int)texture.Width,

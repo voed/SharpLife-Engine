@@ -31,7 +31,7 @@ namespace SharpLife.Renderer.Utility
 
         private const int ResampleRatio = 0x10000;
 
-        public const int MinimumMaxTextureSize = 1;
+        public const int MinimumMaxImageSize = 1;
 
         public const int MinSizeExponent = 0;
         public static readonly int MaxSizeExponent = (8 * Marshal.SizeOf<int>()) - 1;
@@ -39,17 +39,17 @@ namespace SharpLife.Renderer.Utility
         /// <summary>
         /// Convert an indexed 256 color image to an Rgba32 image
         /// </summary>
-        /// <param name="texture"></param>
+        /// <param name="image"></param>
         /// <returns></returns>
-        private static Rgba32[] ConvertNormal(IndexedColor256Texture texture)
+        private static Rgba32[] ConvertNormal(IndexedColor256Image image)
         {
-            var size = texture.Size;
+            var size = image.Size;
 
             var pixels = new Rgba32[size];
 
             foreach (var i in Enumerable.Range(0, size))
             {
-                texture.Palette[texture.Pixels[i]].ToRgba32(ref pixels[i]);
+                image.Palette[image.Pixels[i]].ToRgba32(ref pixels[i]);
             }
 
             return pixels;
@@ -58,21 +58,21 @@ namespace SharpLife.Renderer.Utility
         /// <summary>
         /// Alpha test: convert all indices to their color except index 255, which is converted as fully transparent
         /// </summary>
-        /// <param name="texture"></param>
+        /// <param name="image"></param>
         /// <returns></returns>
-        private static Rgba32[] ConvertAlphaTest(IndexedColor256Texture texture)
+        private static Rgba32[] ConvertAlphaTest(IndexedColor256Image image)
         {
-            var size = texture.Size;
+            var size = image.Size;
 
             var pixels = new Rgba32[size];
 
             foreach (var i in Enumerable.Range(0, size))
             {
-                var index = texture.Pixels[i];
+                var index = image.Pixels[i];
 
                 if (index != AlphaTestTransparentIndex)
                 {
-                    texture.Palette[index].ToRgba32(ref pixels[i]);
+                    image.Palette[index].ToRgba32(ref pixels[i]);
                 }
                 else
                 {
@@ -88,40 +88,40 @@ namespace SharpLife.Renderer.Utility
         /// Indexed alpha: grayscale indexed 255 color image with single color gradient
         /// Transparency is determined by index value
         /// </summary>
-        /// <param name="texture"></param>
+        /// <param name="image"></param>
         /// <returns></returns>
-        private static Rgba32[] ConvertIndexedAlpha(IndexedColor256Texture texture)
+        private static Rgba32[] ConvertIndexedAlpha(IndexedColor256Image image)
         {
-            var size = texture.Size;
+            var size = image.Size;
 
             var pixels = new Rgba32[size];
 
-            ref var color = ref texture.Palette[IndexedAlphaColorIndex];
+            ref var color = ref image.Palette[IndexedAlphaColorIndex];
 
             foreach (var i in Enumerable.Range(0, size))
             {
                 pixels[i].Rgb = color;
-                pixels[i].A = texture.Pixels[i];
+                pixels[i].A = image.Pixels[i];
             }
 
             return pixels;
         }
 
-        public static Rgba32[] ConvertIndexedToRgba32(IndexedColor256Texture texture, TextureFormat format)
+        public static Rgba32[] ConvertIndexedToRgba32(IndexedColor256Image image, TextureFormat format)
         {
-            if (texture == null)
+            if (image == null)
             {
-                throw new ArgumentNullException(nameof(texture));
+                throw new ArgumentNullException(nameof(image));
             }
 
             switch (format)
             {
                 case TextureFormat.Normal:
-                    return ConvertNormal(texture);
+                    return ConvertNormal(image);
                 case TextureFormat.AlphaTest:
-                    return ConvertAlphaTest(texture);
+                    return ConvertAlphaTest(image);
                 case TextureFormat.IndexAlpha:
-                    return ConvertIndexedAlpha(texture);
+                    return ConvertIndexedAlpha(image);
 
                 default: throw new ArgumentException("Invalid texture format", nameof(format));
             }
@@ -203,7 +203,7 @@ namespace SharpLife.Renderer.Utility
 
             if (pixels.Length != w * h)
             {
-                throw new ArgumentException("The given pixels span does not match the size of the given texture bounds");
+                throw new ArgumentException("The given pixels span does not match the size of the given image bounds");
             }
 
             return InternalBoxFilter3x3(pixels, w, h, x, y);
@@ -232,7 +232,7 @@ namespace SharpLife.Renderer.Utility
 
             if (pixels.Length != w * h)
             {
-                throw new ArgumentException("The given pixels span does not match the size of the given texture bounds");
+                throw new ArgumentException("The given pixels span does not match the size of the given image bounds");
             }
 
             for (var i = 0; i < pixels.Length; ++i)
@@ -248,7 +248,7 @@ namespace SharpLife.Renderer.Utility
         }
 
         /// <summary>
-        /// Rescales and resamples a texture
+        /// Rescales and resamples an image
         /// </summary>
         /// <param name="pixels"></param>
         /// <param name="inWidth"></param>
@@ -256,7 +256,7 @@ namespace SharpLife.Renderer.Utility
         /// <param name="outWidth"></param>
         /// <param name="outHeight"></param>
         /// <returns></returns>
-        public static Rgba32[] ResampleTexture(Span<Rgba32> pixels, int inWidth, int inHeight, int outWidth, int outHeight)
+        public static Rgba32[] ResampleImage(Span<Rgba32> pixels, int inWidth, int inHeight, int outWidth, int outHeight)
         {
             if (inWidth <= 0)
             {
@@ -280,7 +280,7 @@ namespace SharpLife.Renderer.Utility
 
             if (pixels.Length != inWidth * inHeight)
             {
-                throw new ArgumentException("The given pixels span does not match the size of the given texture bounds");
+                throw new ArgumentException("The given pixels span does not match the size of the given image bounds");
             }
 
             var p1 = new int[outWidth];
@@ -354,11 +354,11 @@ namespace SharpLife.Renderer.Utility
         }
 
         /// <summary>
-        /// Computes the new size of a texture
+        /// Computes the new size of an image
         /// </summary>
         /// <param name="inWidth">Original width</param>
         /// <param name="inHeight">Original height</param>
-        /// <param name="doPowerOf2Rescale">Whether to rescale textures to power of 2</param>
+        /// <param name="doPowerOf2Rescale">Whether to rescale images to power of 2</param>
         /// <param name="maxValue">The maximum value that a scaled size can be</param>
         /// <param name="roundDownExponent">Exponent used to round down the scaled size</param>
         /// <param name="divisorExponent">Exponent used to divide the scaled size further</param>
@@ -375,7 +375,7 @@ namespace SharpLife.Renderer.Utility
                 throw new ArgumentOutOfRangeException(nameof(inHeight));
             }
 
-            if (maxValue < MinimumMaxTextureSize)
+            if (maxValue < MinimumMaxImageSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxValue));
             }

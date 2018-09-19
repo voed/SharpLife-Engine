@@ -345,7 +345,7 @@ namespace SharpLife.Models.SPR.Rendering
             {
                 //Each individual texture is converted before being added to the atlas to avoid bleeding effects between frames
                 var frameImage = sc.TextureLoader.ConvertTexture(
-                    new IndexedColor256Texture(_spriteModel.SpriteFile.Palette, frame.TextureData, frame.Area.Width, frame.Area.Height),
+                    new IndexedColor256Image(_spriteModel.SpriteFile.Palette, frame.TextureData, frame.Area.Width, frame.Area.Height),
                     textureFormat);
 
                 atlasImage.Mutate(context => context.DrawImage(graphicsOptions, frameImage, nextFramePosition));

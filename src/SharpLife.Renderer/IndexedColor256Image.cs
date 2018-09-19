@@ -23,7 +23,7 @@ namespace SharpLife.Renderer
     /// <summary>
     /// Immutable container for indexed 256 color images
     /// </summary>
-    public sealed class IndexedColor256Texture
+    public sealed class IndexedColor256Image
     {
         public Rgb24[] Palette { get; }
 
@@ -38,7 +38,7 @@ namespace SharpLife.Renderer
         /// </summary>
         public int Size => Width * Height;
 
-        public IndexedColor256Texture(Rgb24[] palette, byte[] pixels, int width, int height)
+        public IndexedColor256Image(Rgb24[] palette, byte[] pixels, int width, int height)
         {
             Palette = (palette ?? throw new ArgumentNullException(nameof(palette))).ToArray();
 

@@ -294,7 +294,7 @@ namespace SharpLife.Models.MDL.Rendering
             {
                 //TODO: disable mipmaps when NoMips is provided
                 var uploadedTexture = sc.TextureLoader.LoadTexture(
-                        new IndexedColor256Texture(texture.Palette, texture.Pixels, texture.Width, texture.Height),
+                        new IndexedColor256Image(texture.Palette, texture.Pixels, texture.Width, texture.Height),
                         (texture.Flags & TextureFlags.Alpha) != 0 ? TextureFormat.AlphaTest : TextureFormat.Normal,
                         _studioModel.Name + texture.Name,
                         gd,

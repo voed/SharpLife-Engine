@@ -308,7 +308,7 @@ namespace SharpLife.Game.Client.UI
                 DrawFloatSlider(_lightingGamma, "Lighting Gamma", 0, 10, "%0.1f");
                 DrawFloatSlider(_brightness, "Brightness Override", 0, 10, "%0.1f");
 
-                DrawIntSlider(_maxSize, "Constrain texture scales to this maximum size", ImageConversionUtils.MinimumMaxTextureSize, 1 << 14, "%d");
+                DrawIntSlider(_maxSize, "Constrain texture scales to this maximum size", ImageConversionUtils.MinimumMaxImageSize, 1 << 14, "%d");
                 DrawIntSlider(_roundDown, "Round Down texture scales using this exponent", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
                 DrawIntSlider(_picMip, "Scale down texture scales this many times", ImageConversionUtils.MinSizeExponent, ImageConversionUtils.MaxSizeExponent, "%d");
 
