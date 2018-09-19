@@ -42,6 +42,7 @@ namespace SharpLife.Game.Client.Renderer
 
         public void MapLoadBegin()
         {
+            //Reset light styles
             _lightStyles.Initialize();
         }
 

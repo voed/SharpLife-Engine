@@ -55,8 +55,6 @@ namespace SharpLife.Engine.Client.Renderer
 
         private readonly SceneContext _sc;
 
-        private readonly LightStyles _lightStyles;
-
         private readonly ImGuiRenderable _imGuiRenderable;
 
         private CoordinateAxes _coordinateAxes;
@@ -120,8 +118,6 @@ namespace SharpLife.Engine.Client.Renderer
             _finalPass = new FinalPass();
             Scene.AddContainer(_finalPass);
             Scene.AddRenderable(_finalPass);
-
-            _lightStyles = new LightStyles();
 
             _modelResourcesManager = new ModelResourcesManager();
             _modelRenderer = new ModelRenderer(
@@ -280,7 +276,6 @@ namespace SharpLife.Engine.Client.Renderer
 
         public void Update(ITime engineTime, float deltaSeconds)
         {
-            _lightStyles.AnimateLights(engineTime);
             Scene.Update(deltaSeconds);
         }
 
@@ -424,9 +419,6 @@ namespace SharpLife.Engine.Client.Renderer
 
             //Clear all graphics data
             _sc.MapResourceCache.DestroyAllDeviceObjects();
-
-            //Reset light styles
-            _lightStyles.Initialize();
         }
     }
 }
