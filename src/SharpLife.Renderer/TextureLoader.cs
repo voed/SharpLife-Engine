@@ -91,7 +91,7 @@ namespace SharpLife.Renderer
 
         private Image<Rgba32> InternalConvertTexture(IndexedColor256Texture inputTexture, TextureFormat textureFormat)
         {
-            var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputTexture.Palette, inputTexture.Pixels, inputTexture.Width, inputTexture.Height, textureFormat);
+            var pixels = ImageConversionUtils.ConvertIndexedToRgba32(inputTexture, textureFormat);
 
             //Alpha tested textures have their fully transparent pixels modified so samplers won't sample the color used and blend it
             //This stops the color from bleeding through

@@ -39,18 +39,17 @@ namespace SharpLife.Renderer.Utility
         /// <summary>
         /// Convert an indexed 256 color image to an Rgba32 image
         /// </summary>
-        /// <param name="palette"></param>
-        /// <param name="bitmap"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="texture"></param>
         /// <returns></returns>
-        private static Rgba32[] ConvertNormal(Rgb24[] palette, byte[] bitmap, int width, int height)
+        private static Rgba32[] ConvertNormal(IndexedColor256Texture texture)
         {
-            var pixels = new Rgba32[width * height];
+            var size = texture.Size;
 
-            foreach (var i in Enumerable.Range(0, width * height))
+            var pixels = new Rgba32[size];
+
+            foreach (var i in Enumerable.Range(0, size))
             {
-                palette[bitmap[i]].ToRgba32(ref pixels[i]);
+                texture.Palette[texture.Pixels[i]].ToRgba32(ref pixels[i]);
             }
 
             return pixels;
@@ -59,22 +58,21 @@ namespace SharpLife.Renderer.Utility
         /// <summary>
         /// Alpha test: convert all indices to their color except index 255, which is converted as fully transparent
         /// </summary>
-        /// <param name="palette"></param>
-        /// <param name="bitmap"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="texture"></param>
         /// <returns></returns>
-        private static Rgba32[] ConvertAlphaTest(Rgb24[] palette, byte[] bitmap, int width, int height)
+        private static Rgba32[] ConvertAlphaTest(IndexedColor256Texture texture)
         {
-            var pixels = new Rgba32[width * height];
+            var size = texture.Size;
 
-            foreach (var i in Enumerable.Range(0, width * height))
+            var pixels = new Rgba32[size];
+
+            foreach (var i in Enumerable.Range(0, size))
             {
-                var index = bitmap[i];
+                var index = texture.Pixels[i];
 
                 if (index != AlphaTestTransparentIndex)
                 {
-                    palette[index].ToRgba32(ref pixels[i]);
+                    texture.Palette[index].ToRgba32(ref pixels[i]);
                 }
                 else
                 {
@@ -90,61 +88,40 @@ namespace SharpLife.Renderer.Utility
         /// Indexed alpha: grayscale indexed 255 color image with single color gradient
         /// Transparency is determined by index value
         /// </summary>
-        /// <param name="palette"></param>
-        /// <param name="bitmap"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="texture"></param>
         /// <returns></returns>
-        private static Rgba32[] ConvertIndexedAlpha(Rgb24[] palette, byte[] bitmap, int width, int height)
+        private static Rgba32[] ConvertIndexedAlpha(IndexedColor256Texture texture)
         {
-            var pixels = new Rgba32[width * height];
+            var size = texture.Size;
 
-            ref var color = ref palette[IndexedAlphaColorIndex];
+            var pixels = new Rgba32[size];
 
-            foreach (var i in Enumerable.Range(0, width * height))
+            ref var color = ref texture.Palette[IndexedAlphaColorIndex];
+
+            foreach (var i in Enumerable.Range(0, size))
             {
                 pixels[i].Rgb = color;
-                pixels[i].A = bitmap[i];
+                pixels[i].A = texture.Pixels[i];
             }
 
             return pixels;
         }
 
-        public static Rgba32[] ConvertIndexedToRgba32(Rgb24[] palette, byte[] bitmap, int width, int height, TextureFormat format)
+        public static Rgba32[] ConvertIndexedToRgba32(IndexedColor256Texture texture, TextureFormat format)
         {
-            if (palette == null)
+            if (texture == null)
             {
-                throw new ArgumentNullException(nameof(palette));
-            }
-
-            if (bitmap == null)
-            {
-                throw new ArgumentNullException(nameof(bitmap));
-            }
-
-            if (width < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(width));
-            }
-
-            if (height < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(height));
-            }
-
-            if (bitmap.Length != (width * height))
-            {
-                throw new ArgumentException("Bitmap does not have correct dimensions");
+                throw new ArgumentNullException(nameof(texture));
             }
 
             switch (format)
             {
                 case TextureFormat.Normal:
-                    return ConvertNormal(palette, bitmap, width, height);
+                    return ConvertNormal(texture);
                 case TextureFormat.AlphaTest:
-                    return ConvertAlphaTest(palette, bitmap, width, height);
+                    return ConvertAlphaTest(texture);
                 case TextureFormat.IndexAlpha:
-                    return ConvertIndexedAlpha(palette, bitmap, width, height);
+                    return ConvertIndexedAlpha(texture);
 
                 default: throw new ArgumentException("Invalid texture format", nameof(format));
             }

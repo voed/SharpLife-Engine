@@ -33,6 +33,11 @@ namespace SharpLife.Renderer
 
         public int Height { get; }
 
+        /// <summary>
+        /// Size in pixels of the image
+        /// </summary>
+        public int Size => Width * Height;
+
         public IndexedColor256Texture(Rgb24[] palette, byte[] pixels, int width, int height)
         {
             Palette = (palette ?? throw new ArgumentNullException(nameof(palette))).ToArray();
