@@ -18,7 +18,7 @@ using Serilog;
 using SharpLife.Engine.Shared;
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Game.Client;
-using SharpLife.Engine.Shared.Game.Shared;
+using SharpLife.Engine.Shared.API.Game.Shared;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Client.Networking;
 using SharpLife.Game.Client.UI;

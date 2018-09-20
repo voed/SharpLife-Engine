@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.Game.Shared;
+using SharpLife.Engine.Shared.API.Game.Shared;
 
 namespace SharpLife.Game.Shared.Bridge
 {

@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.Engine.Shared;
-using SharpLife.Models;
+using SharpLife.Models.BSP;
 using System;
 
 namespace SharpLife.Game.Shared.Bridge

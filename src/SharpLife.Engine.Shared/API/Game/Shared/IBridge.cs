@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Engine.Shared.Game.Shared
+namespace SharpLife.Engine.Shared.API.Game.Shared
 {
     /// <summary>
     /// Tag interface used to share the game bridge through the engine

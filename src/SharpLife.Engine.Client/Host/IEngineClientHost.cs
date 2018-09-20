@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
-using SharpLife.Engine.Shared.Game.Shared;
+using SharpLife.Engine.Shared.API.Game.Shared;
 using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Client.Host

@@ -18,7 +18,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace SharpLife.Models
+namespace SharpLife.Models.BSP
 {
     public sealed class BSPModelUtils
     {
