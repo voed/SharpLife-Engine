@@ -140,7 +140,7 @@ namespace SharpLife.Engine.Client.Host
 
             _window.Center();
 
-            _clientModels = new ClientModels(_engine.ModelUtils, _engine.ModelManager);
+            _clientModels = new ClientModels(_engine.ModelManager);
 
             LoadGameClient();
 

@@ -26,17 +26,14 @@ namespace SharpLife.Engine.Server.Resources
 {
     internal sealed class ServerModels : IEngineModels
     {
-        private readonly BSPModelUtils _modelUtils;
-
         private readonly IModelManager _modelManager;
 
         private readonly string _fallbackModelName;
 
         private INetworkStringList _models;
 
-        public ServerModels(BSPModelUtils modelUtils, IModelManager modelManager, string fallbackModelName)
+        public ServerModels(IModelManager modelManager, string fallbackModelName)
         {
-            _modelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
             _modelManager = modelManager ?? throw new ArgumentNullException(nameof(modelManager));
             _fallbackModelName = fallbackModelName ?? throw new ArgumentNullException(nameof(fallbackModelName));
         }
@@ -91,7 +88,7 @@ namespace SharpLife.Engine.Server.Resources
         {
             if (index.Valid)
             {
-                var internalIndex = _modelUtils.GetInternalIndex(index);
+                var internalIndex = ModelUtils.GetInternalIndex(index);
 
                 if (internalIndex < 0 || internalIndex >= _models.Count)
                 {
@@ -115,7 +112,7 @@ namespace SharpLife.Engine.Server.Resources
 
             if (index != -1)
             {
-                return _modelUtils.CreateModelIndex(index);
+                return ModelUtils.CreateModelIndex(index);
             }
 
             return new ModelIndex();

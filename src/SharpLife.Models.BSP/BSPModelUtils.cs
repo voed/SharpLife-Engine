@@ -42,16 +42,6 @@ namespace SharpLife.Models
             + Regex.Escape(FileExtensionUtils.AsExtension(bspExtension));
         }
 
-        public ModelIndex CreateModelIndex(int index)
-        {
-            return new ModelIndex(index + 1);
-        }
-
-        public int GetInternalIndex(ModelIndex index)
-        {
-            return index.Index - 1;
-        }
-
         public bool IsBSPModelName(string modelName)
         {
             if (modelName == null)

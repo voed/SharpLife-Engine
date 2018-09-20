@@ -121,7 +121,7 @@ namespace SharpLife.Engine.Server.Host
                 _maxPlayers.String = maxPlayersValue;
             }
 
-            _serverModels = new ServerModels(_engine.ModelUtils, _engine.ModelManager, Framework.FallbackModelName);
+            _serverModels = new ServerModels(_engine.ModelManager, Framework.FallbackModelName);
 
             LoadGameServer();
 

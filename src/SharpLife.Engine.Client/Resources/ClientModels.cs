@@ -26,7 +26,6 @@ namespace SharpLife.Engine.Client.Resources
 {
     internal sealed class ClientModels : IEngineModels
     {
-        private readonly BSPModelUtils _modelUtils;
         private readonly IModelManager _modelManager;
 
         private INetworkStringList _models;
@@ -39,9 +38,8 @@ namespace SharpLife.Engine.Client.Resources
 
         private int _nextClientIndex;
 
-        public ClientModels(BSPModelUtils modelUtils, IModelManager modelManager)
+        public ClientModels(IModelManager modelManager)
         {
-            _modelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
             _modelManager = modelManager ?? throw new ArgumentNullException(nameof(modelManager));
         }
 
@@ -133,7 +131,7 @@ namespace SharpLife.Engine.Client.Resources
         {
             if (index.Valid)
             {
-                var internalIndex = _modelUtils.GetInternalIndex(index);
+                var internalIndex = ModelUtils.GetInternalIndex(index);
 
                 if (_loadedModels.TryGetValue(internalIndex, out var model))
                 {
@@ -155,7 +153,7 @@ namespace SharpLife.Engine.Client.Resources
 
             if (_nameToIndex.TryGetValue(NetUtilities.ConvertToNetworkPath(model.Name), out var index))
             {
-                return _modelUtils.CreateModelIndex(index);
+                return ModelUtils.CreateModelIndex(index);
             }
 
             return new ModelIndex();
