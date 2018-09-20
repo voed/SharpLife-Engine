@@ -26,16 +26,15 @@ using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Engines;
+using SharpLife.Engine.Shared.Game.Shared;
 using SharpLife.Engine.Shared.Logging;
-using SharpLife.Engine.Shared.Maps;
 using SharpLife.Engine.Shared.UI;
 using SharpLife.FileSystem;
 using SharpLife.Game.Client.API;
+using SharpLife.Models;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
@@ -44,11 +43,15 @@ using System.Net;
 
 namespace SharpLife.Engine.Client.Host
 {
-    public partial class EngineClientHost : IEngineClientHost, IClientEngine, IRendererListener
+    public partial class EngineClientHost : IEngineClientHost, IClientEngine
     {
+        public IFileSystem FileSystem => _engine.FileSystem;
+
         public ICommandContext CommandContext { get; }
 
         public IEventSystem EventSystem => _engine.EventSystem;
+
+        public IBridge GameBridge { get; private set; }
 
         public ILogListener LogListener
         {
@@ -56,27 +59,25 @@ namespace SharpLife.Engine.Client.Host
             set => _engine.LogTextWriter.Listener = value;
         }
 
-        public IMapInfo MapInfo { get; private set; }
+        public IWindow GameWindow { get; }
+
+        public IUserInterface UserInterface { get; }
+
+        public ITime Time => _engine.EngineTime;
+
+        public IModelManager ModelManager => _engine.ModelManager;
+
+        public IEngineModels Models => _clientModels;
 
         private readonly IEngine _engine;
 
         private readonly ILogger _logger;
-
-        private readonly IUserInterface _userInterface;
-
-        private readonly IWindow _window;
-
-        private readonly Renderer.Renderer _renderer;
 
         //Engine API
         private readonly ClientModels _clientModels;
 
         //Game API
         private IGameClient _game;
-
-        private IClientUI _clientUI;
-
-        private IClientEntities _clientEntities;
 
         private readonly IVariable _clientport;
         private readonly IVariable _cl_resend;
@@ -91,7 +92,7 @@ namespace SharpLife.Engine.Client.Host
 
             CommandContext = _engine.CommandSystem.CreateContext("ClientContext");
 
-            _userInterface = _engine.CreateUserInterface();
+            UserInterface = _engine.CreateUserInterface();
 
             var gameWindowName = _engine.EngineConfiguration.DefaultGameName;
 
@@ -100,21 +101,9 @@ namespace SharpLife.Engine.Client.Host
                 gameWindowName = _engine.EngineConfiguration.GameName;
             }
 
-            _window = _userInterface.CreateMainWindow(gameWindowName, _engine.CommandLine.Contains("-noborder") ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0);
+            GameWindow = UserInterface.CreateMainWindow(gameWindowName, _engine.CommandLine.Contains("-noborder") ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0);
 
-            _window.Center();
-
-            _renderer = new Renderer.Renderer(
-                _window.WindowHandle,
-                _logger,
-                _engine.FileSystem,
-                CommandContext,
-                _userInterface.WindowManager.InputSystem,
-                this,
-                Framework.Path.EnvironmentMaps,
-                Framework.Path.Shaders);
-
-            _window.Resized += _renderer.WindowResized;
+            GameWindow.Center();
 
             CommandContext.RegisterCommand(new CommandInfo("connect", Connect).WithHelpInfo("Connect to a server"));
             CommandContext.RegisterCommand(new CommandInfo("disconnect", Disconnect).WithHelpInfo("Disconnect from a server"));
@@ -137,8 +126,6 @@ namespace SharpLife.Engine.Client.Host
             //TODO: add change handler to send update to server if connected
             _cl_name = CommandContext.RegisterVariable(new VariableInfo("name")
                 .WithHelpInfo("Your name as seen by other players"));
-
-            _window.Center();
 
             _clientModels = new ClientModels(_engine.ModelManager);
 
@@ -167,21 +154,18 @@ namespace SharpLife.Engine.Client.Host
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IClientEngine>(this);
             serviceCollection.AddSingleton(_engine.EngineTime);
-            serviceCollection.AddSingleton<IRenderer>(_renderer);
             serviceCollection.AddSingleton<IEngineModels>(_clientModels);
 
             _game.Initialize(serviceCollection);
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            _clientUI = serviceProvider.GetRequiredService<IClientUI>();
+            GameBridge = serviceProvider.GetRequiredService<IBridge>();
             _clientNetworking = serviceProvider.GetRequiredService<IClientNetworking>();
-            _clientEntities = serviceProvider.GetRequiredService<IClientEntities>();
 
             _game.Startup(serviceProvider);
 
             _engine.ModelManager.SetLoaders(_game.GetModelLoaders());
-            _renderer.SetModelResourceFactories(_game.GetModelResourceFactories());
         }
 
         public void Shutdown()
@@ -247,9 +231,7 @@ namespace SharpLife.Engine.Client.Host
                 _netClient.RunFrame();
             }
 
-            _renderer.Update(_engine.EngineTime, deltaSeconds);
-
-            _clientUI.Update(deltaSeconds, _renderer.Scene);
+            _game.Update(deltaSeconds);
 
             //Only send messages if we're still actively connected, once we start disconnecting all user messages should be stopped
             if (_netClient != null && _netClient.IsConnected && !_netClient.IsDisconnecting)
@@ -260,19 +242,12 @@ namespace SharpLife.Engine.Client.Host
 
         public void Draw()
         {
-            _clientUI.Draw(_renderer.Scene);
-
-            _renderer.Draw();
+            _game.Draw();
         }
 
         public void EndGame(string reason)
         {
             _engine.EndGame(reason);
-        }
-
-        public void OnRenderModels(IModelRenderer modelRenderer, IViewState viewState)
-        {
-            _clientEntities.RenderEntities(modelRenderer, viewState);
         }
     }
 }

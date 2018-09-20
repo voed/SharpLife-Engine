@@ -1,0 +1,10 @@
+syntax = "proto3";
+package SharpLife.Game.Shared.Networking.Messages.Server;
+
+//Information about the game server that the client needs to know
+message GameServerInfo
+{
+	string map_file_name = 1;
+	uint32 map_crc = 2;
+	bool allow_cheats = 3;
+}

@@ -13,10 +13,13 @@
 *
 ****/
 
+using Google.Protobuf;
 using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Client;
+using SharpLife.Game.Client.API;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Shared.Networking;
+using SharpLife.Game.Shared.Networking.Messages.Server;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
 using System;
@@ -26,12 +29,22 @@ namespace SharpLife.Game.Client.Networking
     internal sealed class ClientNetworking : IClientNetworking
     {
         private readonly IEngineModels _engineModels;
+        private readonly GameClient _gameClient;
         private readonly ClientEntities _entities;
 
-        public ClientNetworking(IEngineModels engineModels, ClientEntities entities)
+        public ClientNetworking(IEngineModels engineModels, GameClient gameClient, ClientEntities entities)
         {
             _engineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
+            _gameClient = gameClient ?? throw new ArgumentNullException(nameof(gameClient));
             _entities = entities ?? throw new ArgumentNullException(nameof(entities));
+        }
+
+        public void ProcessGameInfoMessage(ByteString encodedMessage)
+        {
+            var message = GameServerInfo.Parser.ParseFrom(encodedMessage);
+
+            //Cache off the name so we can look it up later
+            _gameClient.CachedMapName = message.MapFileName;
         }
 
         public void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder)

@@ -18,7 +18,6 @@ using Serilog;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.Shared.API.Engine.Client;
-using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Logging;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;

@@ -25,32 +25,28 @@ using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Engine.Shared.Engines;
 using SharpLife.Engine.Shared.Events;
-using SharpLife.Engine.Shared.Maps;
+using SharpLife.Engine.Shared.Game.Shared;
+using SharpLife.FileSystem;
 using SharpLife.Game.Server.API;
-using SharpLife.Models;
-using SharpLife.Models.BSP.FileFormat;
-using SharpLife.Models.BSP.Loading;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Utility.Events;
 using System;
-using System.IO;
-using System.Linq;
 
 namespace SharpLife.Engine.Server.Host
 {
     public partial class EngineServerHost : IEngineServerHost, IServerEngine
     {
+        public IFileSystem FileSystem => _engine.FileSystem;
+
         public ICommandContext CommandContext { get; }
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
-        public bool GameAssemblyLoaded => _game != null;
+        public bool IsDedicatedServer => _engine.IsDedicatedServer;
 
         public bool Active { get; private set; }
-
-        public IMapInfo MapInfo { get; private set; }
 
         private readonly IEngine _engine;
 
@@ -69,11 +65,9 @@ namespace SharpLife.Engine.Server.Host
 
         private readonly IVariable _maxPlayers;
 
-        private uint _mapCRC = 0;
-
         private int _spawnCount = 0;
 
-        public EngineServerHost(IEngine engine, ILogger logger)
+        public EngineServerHost(IEngine engine, ILogger logger, IBridge gameBridge)
         {
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -123,7 +117,7 @@ namespace SharpLife.Engine.Server.Host
 
             _serverModels = new ServerModels(_engine.ModelManager, Framework.FallbackModelName);
 
-            LoadGameServer();
+            LoadGameServer(gameBridge);
 
             var objectListTypeRegistryBuilder = new TypeRegistryBuilder();
 
@@ -138,7 +132,7 @@ namespace SharpLife.Engine.Server.Host
             _binaryDataDescriptorSet = dataSetBuilder.BuildTransmissionSet();
         }
 
-        private void LoadGameServer()
+        private void LoadGameServer(IBridge gameBridge)
         {
             _game = new GameServer();
 
@@ -146,8 +140,15 @@ namespace SharpLife.Engine.Server.Host
 
             serviceCollection.AddSingleton(_logger);
             serviceCollection.AddSingleton<IServerEngine>(this);
+
+            if (gameBridge != null)
+            {
+                serviceCollection.AddSingleton(gameBridge);
+            }
+
             serviceCollection.AddSingleton(_engine.EngineTime);
             serviceCollection.AddSingleton<IEngineModels>(_serverModels);
+            serviceCollection.AddSingleton<IServerModels>(_serverModels);
 
             _game.Initialize(serviceCollection);
 
@@ -178,12 +179,6 @@ namespace SharpLife.Engine.Server.Host
 
         public bool Start(string mapName, string startSpot = null, ServerStartFlags flags = ServerStartFlags.None)
         {
-            EventSystem.DispatchEvent(new MapStartedLoading(
-                mapName,
-                MapInfo?.Name,
-                (flags & ServerStartFlags.ChangeLevel) != 0,
-                (flags & ServerStartFlags.LoadGame) != 0));
-
             //TODO: start transitioning clients
 
             CreateNetworkServer();
@@ -211,70 +206,20 @@ namespace SharpLife.Engine.Server.Host
 
             EventSystem.DispatchEvent(EngineEvents.ServerMapDataStartLoad);
 
-            var mapFileName = _engine.ModelUtils.FormatMapFileName(mapName);
-
-            IModel worldModel;
-
-            try
+            if (!_game.TryMapLoadBegin(mapName, flags))
             {
-                worldModel = _serverModels.LoadModel(mapFileName);
-            }
-            catch (Exception e)
-            {
-                //TODO: needs a rework
-                if (e is InvalidOperationException
-                    || e is InvalidBSPVersionException
-                    || e is IOException)
-                {
-                    worldModel = null;
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            if (worldModel == null)
-            {
-                _logger.Information($"Couldn't spawn server {mapFileName}");
                 Stop();
                 return false;
             }
-
-            EventSystem.DispatchEvent(EngineEvents.ServerMapDataFinishLoad);
-
-            if (!(worldModel is BSPModel bspWorldModel))
-            {
-                _logger.Information($"Model {mapFileName} is not a map");
-                Stop();
-                return false;
-            }
-
-            _mapCRC = worldModel.CRC;
-
-            EventSystem.DispatchEvent(EngineEvents.ServerMapCRCComputed);
-
-            MapInfo = new MapInfo(mapName, MapInfo?.Name, bspWorldModel);
-
-            //Load world sub models
-            foreach (var i in Enumerable.Range(1, bspWorldModel.BSPFile.Models.Count - 1))
-            {
-                _serverModels.LoadModel($"{Framework.BSPModelNamePrefix}{i}");
-            }
-
-            //Load the fallback model now to ensure that BSP indices are matched up
-            _serverModels.LoadFallbackModel();
-
-            //TODO: create models for BSP models
-
-            //TODO: initialize sky
 
             return true;
         }
 
         public void InitializeMap(ServerStartFlags flags)
         {
-            _game.MapLoadBegin(MapInfo.Model.BSPFile.Entities, (flags & ServerStartFlags.LoadGame) != 0);
+            _game.MapLoadContinue((flags & ServerStartFlags.LoadGame) != 0);
+
+            //Engine can handle map load stuff here if needed
 
             _game.MapLoadFinished();
         }
@@ -336,7 +281,7 @@ namespace SharpLife.Engine.Server.Host
 
         public bool IsMapValid(string mapName)
         {
-            return _engine.FileSystem.Exists(_engine.ModelUtils.FormatMapFileName(mapName));
+            return _game.IsMapValid(mapName);
         }
     }
 }

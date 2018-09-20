@@ -23,8 +23,6 @@ namespace SharpLife.Engine.Client.Host
         IMessageReceiveHandler<ServerInfo>,
         IMessageReceiveHandler<Print>
     {
-        private string _cachedMapName;
-
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
             receiveHandler.RegisterHandler<ServerInfo>(this);
@@ -36,8 +34,7 @@ namespace SharpLife.Engine.Client.Host
             //TODO: implement
             //TODO: when finished, move this into NetworkClient if possible
 
-            //Cache off the name so we can look it up later
-            _cachedMapName = message.MapFileName;
+            _clientNetworking.ProcessGameInfoMessage(message.GameInfo);
 
             _netClient.OnNewMapStarted();
 

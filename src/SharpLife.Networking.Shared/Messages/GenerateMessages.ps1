@@ -1,6 +1,9 @@
 #Generate Protobuf source files in directory tree
+param([string]$basePath)
 
-$fileNames = Get-ChildItem -Path $scriptPath -File -Recurse
+Write-Host "Base path is $basePath"
+
+$fileNames = Get-ChildItem -Path $basePath -File -Recurse
 
 foreach ($file in $fileNames)
 {

@@ -13,24 +13,17 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Renderer;
 
-namespace SharpLife.Game.Server.Entities
+namespace SharpLife.Game.Client.UI
 {
-    [LinkEntityToClass("worldspawn")]
-    [Networkable]
-    public sealed class World : NetworkedEntity
+    /// <summary>
+    /// The client UI, used to allow drawing
+    /// </summary>
+    public interface IClientUI
     {
-        public override void Precache()
-        {
-            base.Precache();
+        void Update(float deltaSeconds, IViewState viewState);
 
-            Model = Context.MapInfo.Model;
-        }
-
-        protected override void Spawn()
-        {
-            Precache();
-        }
+        void Draw(IViewState viewState);
     }
 }

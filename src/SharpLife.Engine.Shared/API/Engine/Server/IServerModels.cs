@@ -13,24 +13,12 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 
-namespace SharpLife.Game.Server.Entities
+namespace SharpLife.Engine.Shared.API.Engine.Server
 {
-    [LinkEntityToClass("worldspawn")]
-    [Networkable]
-    public sealed class World : NetworkedEntity
+    public interface IServerModels : IEngineModels
     {
-        public override void Precache()
-        {
-            base.Precache();
-
-            Model = Context.MapInfo.Model;
-        }
-
-        protected override void Spawn()
-        {
-            Precache();
-        }
+        void LoadFallbackModel();
     }
 }

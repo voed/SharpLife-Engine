@@ -13,16 +13,12 @@
 *
 ****/
 
-using System;
-
-namespace SharpLife.Engine.Server.Host
+namespace SharpLife.Engine.Shared.Game.Shared
 {
-    [Flags]
-    public enum ServerStartFlags
+    /// <summary>
+    /// Tag interface used to share the game bridge through the engine
+    /// </summary>
+    public interface IBridge
     {
-        None = 0,
-        IsDemo = 1 << 0,
-        LoadGame = 1 << 1,
-        ChangeLevel = 1 << 2
     }
 }

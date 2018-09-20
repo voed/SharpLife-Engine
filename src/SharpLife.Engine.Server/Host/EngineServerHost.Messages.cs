@@ -54,18 +54,17 @@ namespace SharpLife.Engine.Server.Host
             const int buildNumber = 0;
             client.AddMessage(new Print { MessageContents = $"{(char)2}\nBUILD {buildNumber} SERVER (0 CRC)\nServer # {_spawnCount}" }, true);
 
+            var gameServerInfo = _serverNetworking.CreateGameInfoMessage();
+
             client.AddMessage(new ServerInfo
             {
                 ProtocolVersion = NetConstants.ProtocolVersion,
                 SpawnCount = _spawnCount,
-                MapCrc = _mapCRC,
                 ClientDllMd5 = ByteString.Empty, //TODO: define
                 MaxClients = (uint)_maxPlayers.Integer,
                 GameName = _engine.GameDirectory,
                 HostName = "", //TODO: define cvar
-                //In case the file format/directory ever changes, use the full file name
-                MapFileName = NetUtilities.ConvertToNetworkPath(MapInfo.Model.Name),
-                AllowCheats = false, //TODO: define cvar
+                GameInfo = gameServerInfo.ToByteString(),
             }, true);
 
             //TODO: tell game to send its own info now

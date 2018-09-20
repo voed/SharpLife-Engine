@@ -53,6 +53,7 @@ namespace SharpLife.Engine.Shared.UI
             }
 
             //This differs from vanilla GoldSource; set the OpenGL context version to 3.0 so we can use shaders
+            //TODO: maybe set this somewhere else
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_FLAGS, (int)SDL.SDL_GLcontext.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -90,6 +91,7 @@ namespace SharpLife.Engine.Shared.UI
             //Load the game icon
             try
             {
+                //TODO: let user provide the name
                 var image = Image.Load(fileSystem.OpenRead("game.png"));
 
                 if (image != null)
@@ -153,6 +155,11 @@ namespace SharpLife.Engine.Shared.UI
             {
                 SDL.SDL_SetWindowPosition(WindowHandle, (bounds.w - windowWidth) / 2, (bounds.h - windowHeight) / 2);
             }
+        }
+
+        public void GetSize(out int width, out int height)
+        {
+            SDL.SDL_GetWindowSize(WindowHandle, out width, out height);
         }
 
         internal void ProcessEvent(ref SDL.SDL_Event sdlEvent)

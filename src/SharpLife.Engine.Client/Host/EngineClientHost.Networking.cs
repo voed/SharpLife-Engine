@@ -17,8 +17,6 @@ using SharpLife.CommandSystem.Commands;
 using SharpLife.Engine.Client.Networking;
 using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.Events;
-using SharpLife.Engine.Shared.Maps;
-using SharpLife.Models.BSP.Loading;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.Messages;
@@ -92,19 +90,9 @@ namespace SharpLife.Engine.Client.Host
             //All resources are loaded, let's start
             //TODO: implement
 
-            var worldModel = _clientModels.LoadModel(_cachedMapName);
+            _game.MapLoadBegin();
 
-            //This should never happen since the map file is compared by CRC before being loaded
-            if (!(worldModel is BSPModel bspWorldModel))
-            {
-                throw new InvalidOperationException($"Model {_cachedMapName} is not a map");
-            }
-
-            MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(_cachedMapName), MapInfo?.Name, bspWorldModel);
-
-            _renderer.LoadModels(MapInfo.Model, _engine.ModelManager);
-
-            _game.MapLoadBegin(MapInfo.Model.BSPFile.Entities);
+            //Engine can handle map load stuff here if needed
 
             _game.MapLoadFinished();
         }
@@ -166,10 +154,6 @@ namespace SharpLife.Engine.Client.Host
 
             //TODO: refactor into separate method
             _game.MapShutdown();
-
-            _renderer.ClearBSP();
-
-            MapInfo = null;
 
             //TODO: reset client state
         }

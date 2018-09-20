@@ -13,28 +13,15 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
+using SharpLife.Engine.Shared.Game.Shared;
 
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Game.Shared.Bridge
 {
     /// <summary>
-    /// Provides access to map info
+    /// Represents the bridge between client and server
+    /// Used to share state and utility objects
     /// </summary>
-    public interface IMapInfo
+    public interface IGameBridge : IBridge
     {
-        /// <summary>
-        /// The name of the map, excluding directory and extension
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Name of the previous map that was loaded, or null if no previous map was loaded
-        /// </summary>
-        string PreviousMapName { get; }
-
-        /// <summary>
-        /// The map model
-        /// </summary>
-        BSPModel Model { get; }
     }
 }

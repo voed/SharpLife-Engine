@@ -17,6 +17,7 @@ using SDL2;
 using Serilog;
 using SharpLife.CommandSystem;
 using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.UI;
 using SharpLife.FileFormats.WAD;
 using SharpLife.FileSystem;
 using SharpLife.Input;
@@ -24,6 +25,10 @@ using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Models.BSP.Loading;
 using SharpLife.Models.BSP.Rendering;
+using SharpLife.Models.MDL.Loading;
+using SharpLife.Models.MDL.Rendering;
+using SharpLife.Models.SPR.Loading;
+using SharpLife.Models.SPR.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Objects;
@@ -34,7 +39,7 @@ using System.IO;
 using Veldrid;
 using Veldrid.OpenGL;
 
-namespace SharpLife.Engine.Client.Renderer
+namespace SharpLife.Game.Client.Renderer
 {
     /// <summary>
     /// The main renderer
@@ -42,12 +47,14 @@ namespace SharpLife.Engine.Client.Renderer
     /// </summary>
     public class Renderer : IRenderer
     {
-        private readonly IntPtr _window;
+        private readonly IWindow _window;
 
         private readonly ILogger _logger;
 
         private readonly GraphicsDevice _gd;
         private readonly IFileSystem _fileSystem;
+
+        private readonly ITime _engineTime;
 
         private readonly IRendererListener _rendererListener;
 
@@ -69,6 +76,8 @@ namespace SharpLife.Engine.Client.Renderer
 
         private event Action<int, int> _resizeHandled;
 
+        private readonly LightStyles _lightStyles = new LightStyles();
+
         public Scene Scene { get; }
 
         private readonly ModelResourcesManager _modelResourcesManager;
@@ -79,16 +88,19 @@ namespace SharpLife.Engine.Client.Renderer
         public event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderEnd;
 
         public Renderer(
-            IntPtr window,
+            IWindow window,
             ILogger logger,
-            IFileSystem fileSystem, ICommandContext commandContext, IInputSystem inputSystem, IRendererListener rendererListener,
+            IFileSystem fileSystem, ICommandContext commandContext, IInputSystem inputSystem,
+            ITime engineTime,
+            IRendererListener rendererListener,
             string envMapDirectory, string shadersDirectory)
         {
-            _window = window;
+            _window = window ?? throw new ArgumentNullException(nameof(window));
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
             _rendererListener = rendererListener ?? throw new ArgumentNullException(nameof(rendererListener));
             _envMapDirectory = envMapDirectory ?? throw new ArgumentNullException(nameof(envMapDirectory));
 
@@ -103,7 +115,7 @@ namespace SharpLife.Engine.Client.Renderer
 
             _gd.SyncToVerticalBlank = false;
 
-            SDL.SDL_GetWindowSize(_window, out var width, out var height);
+            _window.GetSize(out var width, out var height);
 
             Scene = new Scene(inputSystem, commandContext, _gd, width, height);
 
@@ -119,13 +131,18 @@ namespace SharpLife.Engine.Client.Renderer
             Scene.AddContainer(_finalPass);
             Scene.AddRenderable(_finalPass);
 
-            _modelResourcesManager = new ModelResourcesManager();
+            _modelResourcesManager = new ModelResourcesManager(GetModelResourceFactories());
             _modelRenderer = new ModelRenderer(
                 _modelResourcesManager,
                 (modelRenderer, viewState) => _rendererListener.OnRenderModels(modelRenderer, viewState)
                 );
 
             Scene.AddRenderable(_modelRenderer);
+
+            foreach (var factory in _modelResourcesManager.Factories)
+            {
+                Scene.AddContainer(factory);
+            }
 
             _frameCommands = _gd.ResourceFactory.CreateCommandList();
             _frameCommands.Name = "Frame Commands List";
@@ -139,20 +156,15 @@ namespace SharpLife.Engine.Client.Renderer
             initCL.Dispose();
         }
 
-        public void SetModelResourceFactories(IReadOnlyDictionary<Type, IModelResourceFactory> resourceFactories)
+        //TODO: this should be defined somewhere else
+        private IReadOnlyDictionary<Type, IModelResourceFactory> GetModelResourceFactories()
         {
-            //Remove existing containers first
-            foreach (var factory in _modelResourcesManager.Factories)
+            return new Dictionary<Type, IModelResourceFactory>
             {
-                Scene.RemoveContainer(factory);
-            }
-
-            _modelResourcesManager.SetResourceFactories(resourceFactories);
-
-            foreach (var factory in _modelResourcesManager.Factories)
-            {
-                Scene.AddContainer(factory);
-            }
+                {typeof(SpriteModel), new SpriteModelResourceFactory(_logger) },
+                { typeof(StudioModel), new StudioModelResourceFactory() },
+                { typeof(BSPModel), new BSPModelResourceFactory(this, _lightStyles) }
+            };
         }
 
         private static SwapchainSource GetSwapchainSource(IntPtr window)
@@ -181,9 +193,9 @@ namespace SharpLife.Engine.Client.Renderer
 
         private GraphicsDevice CreateOpenGLGraphicsDevice(GraphicsDeviceOptions options)
         {
-            SDL.SDL_GetWindowSize(_window, out var width, out var height);
+            _window.GetSize(out var width, out var height);
 
-            var glContextHandle = SDL.SDL_GL_CreateContext(_window);
+            var glContextHandle = SDL.SDL_GL_CreateContext(_window.WindowHandle);
 
             if (glContextHandle == IntPtr.Zero)
             {
@@ -230,11 +242,11 @@ namespace SharpLife.Engine.Client.Renderer
             var platformInfo = new OpenGLPlatformInfo(
                 glContextHandle,
                 SDL.SDL_GL_GetProcAddress,
-                context => SDL.SDL_GL_MakeCurrent(_window, context),
+                context => SDL.SDL_GL_MakeCurrent(_window.WindowHandle, context),
                 SDL.SDL_GL_GetCurrentContext,
                 () => SDL.SDL_GL_MakeCurrent(IntPtr.Zero, IntPtr.Zero),
                 SDL.SDL_GL_DeleteContext,
-                () => SDL.SDL_GL_SwapWindow(_window),
+                () => SDL.SDL_GL_SwapWindow(_window.WindowHandle),
                 sync => SDL.SDL_GL_SetSwapInterval(sync ? 1 : 0));
 
             return GraphicsDevice.CreateOpenGL(options, platformInfo, (uint)width, (uint)height);
@@ -242,10 +254,10 @@ namespace SharpLife.Engine.Client.Renderer
 
         private GraphicsDevice CreateVulkanGraphicsDevice(GraphicsDeviceOptions options)
         {
-            SDL.SDL_GetWindowSize(_window, out var width, out var height);
+            _window.GetSize(out var width, out var height);
 
             var swapChainDescription = new SwapchainDescription(
-                GetSwapchainSource(_window),
+                GetSwapchainSource(_window.WindowHandle),
                 (uint)width,
                 (uint)height,
                 options.SwapchainDepthFormat,
@@ -274,14 +286,15 @@ namespace SharpLife.Engine.Client.Renderer
             _windowResized = true;
         }
 
-        public void Update(ITime engineTime, float deltaSeconds)
+        public void Update(float deltaSeconds)
         {
+            _lightStyles.AnimateLights(_engineTime);
             Scene.Update(deltaSeconds);
         }
 
         public void Draw()
         {
-            SDL.SDL_GetWindowSize(_window, out var width, out var height);
+            _window.GetSize(out var width, out var height);
 
             if (_windowResized)
             {
@@ -359,6 +372,9 @@ namespace SharpLife.Engine.Client.Renderer
             }
 
             ClearBSP();
+
+            //Reset light styles
+            _lightStyles.Initialize();
 
             UploadWADTextures(worldModel);
 

@@ -13,10 +13,14 @@
 *
 ****/
 
+using Google.Protobuf;
 using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.API.Game.Server;
+using SharpLife.Game.Server.API;
 using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Shared.Networking;
+using SharpLife.Game.Shared.Networking.Messages.Server;
+using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using System;
@@ -26,12 +30,25 @@ namespace SharpLife.Game.Server.Networking
     internal sealed class ServerNetworking : IServerNetworking
     {
         private readonly IEngineModels _engineModels;
+        private readonly GameServer _gameServer;
         private readonly ServerEntities _entities;
 
-        public ServerNetworking(IEngineModels engineModels, ServerEntities entities)
+        public ServerNetworking(IEngineModels engineModels, GameServer gameServer, ServerEntities entities)
         {
             _engineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
+            _gameServer = gameServer ?? throw new ArgumentNullException(nameof(gameServer));
             _entities = entities ?? throw new ArgumentNullException(nameof(entities));
+        }
+
+        public IMessage CreateGameInfoMessage()
+        {
+            return new GameServerInfo
+            {
+                //In case the file format/directory ever changes, use the full file name
+                MapFileName = NetUtilities.ConvertToNetworkPath(_gameServer.MapInfo.Model.Name),
+                MapCrc = _gameServer.MapInfo.Model.CRC,
+                AllowCheats = false, //TODO: define cvar
+            };
         }
 
         public void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder)

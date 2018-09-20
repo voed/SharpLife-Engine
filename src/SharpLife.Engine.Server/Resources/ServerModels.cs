@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.Networking;
 using SharpLife.Models;
 using SharpLife.Networking.Shared;
@@ -24,7 +24,7 @@ using System;
 
 namespace SharpLife.Engine.Server.Resources
 {
-    internal sealed class ServerModels : IEngineModels
+    internal sealed class ServerModels : IServerModels
     {
         private readonly IModelManager _modelManager;
 
@@ -43,10 +43,10 @@ namespace SharpLife.Engine.Server.Resources
             _models = networkStringListBuilder.CreateList(EngineStringLists.Models);
         }
 
-        internal void LoadFallbackModel()
+        public void LoadFallbackModel()
         {
             //The manager needs to know that the fallback model is loaded, so this has to be called explicitly
-            _modelManager.LoadFallbackModel(_fallbackModelName);
+            _modelManager.LoadFallbackModel(NetUtilities.ConvertToPlatformPath(_fallbackModelName));
 
             //Add it to our list
             LoadModel(_fallbackModelName);

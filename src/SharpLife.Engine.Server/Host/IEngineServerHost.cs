@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Server.Host
@@ -32,8 +33,6 @@ namespace SharpLife.Engine.Server.Host
         /// The event system used by the server
         /// </summary>
         IEventSystem EventSystem { get; }
-
-        bool GameAssemblyLoaded { get; }
 
         /// <summary>
         /// Whether the server is running

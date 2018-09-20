@@ -14,22 +14,32 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Engine.Shared.Logging;
-using SharpLife.Engine.Shared.Maps;
+using SharpLife.Engine.Shared.UI;
+using SharpLife.FileSystem;
+using SharpLife.Models;
+using SharpLife.Utility;
 
 namespace SharpLife.Engine.Shared.API.Engine.Client
 {
     public interface IClientEngine
     {
+        IFileSystem FileSystem { get; }
+
         ICommandContext CommandContext { get; }
 
         ILogListener LogListener { get; set; }
 
-        /// <summary>
-        /// Gets the current map info instance
-        /// Don't cache this, it gets recreated every map
-        /// Null if not running any map
-        /// </summary>
-        IMapInfo MapInfo { get; }
+        IWindow GameWindow { get; }
+
+        IUserInterface UserInterface { get; }
+
+        ITime Time { get; }
+
+        //TODO: maybe let users access this through IEngineModels
+        IModelManager ModelManager { get; }
+
+        IEngineModels Models { get; }
     }
 }

@@ -15,7 +15,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using SharpLife.Models;
-using SharpLife.Renderer.Models;
 using System;
 using System.Collections.Generic;
 
@@ -39,18 +38,17 @@ namespace SharpLife.Engine.Shared.API.Game.Client
 
         IReadOnlyList<IModelLoader> GetModelLoaders();
 
-        IReadOnlyDictionary<Type, IModelResourceFactory> GetModelResourceFactories();
-
         /// <summary>
-        /// Called when the map has started loading
+        /// Begin loading the map
         /// </summary>
-        /// <param name="entityData">The map's entity data string. The client shouldn't instantiate any entities on its own</param>
-        void MapLoadBegin(string entityData);
+        void MapLoadBegin();
 
         void MapLoadFinished();
 
         void MapShutdown();
 
         void Update(float deltaSeconds);
+
+        void Draw();
     }
 }

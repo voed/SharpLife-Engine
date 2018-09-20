@@ -31,11 +31,26 @@ namespace SharpLife.Engine.Shared.API.Game.Server
         IReadOnlyList<IModelLoader> GetModelLoaders();
 
         /// <summary>
-        /// Called when map loading begins
+        /// Returns whether the given map name is valid
         /// </summary>
-        /// <param name="entityData">The map's entity data string</param>
+        /// <param name="mapName">The map name without directory or extension</param>
+        /// <returns></returns>
+        bool IsMapValid(string mapName);
+
+        /// <summary>
+        /// Begin loading the map
+        /// Check for existence of the file, load it and verify integrity
+        /// Load embedded models
+        /// </summary>
+        /// <param name="mapName"></param>
+        /// <param name="flags"></param>
+        bool TryMapLoadBegin(string mapName, ServerStartFlags flags);
+
+        /// <summary>
+        /// Continue loading the map
+        /// </summary>
         /// <param name="loadGame"></param>
-        void MapLoadBegin(string entityData, bool loadGame);
+        void MapLoadContinue(bool loadGame);
 
         /// <summary>
         /// Called when map loading has finished

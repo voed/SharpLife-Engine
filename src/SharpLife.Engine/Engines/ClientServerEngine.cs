@@ -23,6 +23,7 @@ using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.Client.Host;
 using SharpLife.Engine.Server.Host;
 using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.API.Game.Server;
 using SharpLife.Engine.Shared.CommandSystem;
 using SharpLife.Engine.Shared.Configuration;
 using SharpLife.Engine.Shared.Engines;
@@ -75,8 +76,6 @@ namespace SharpLife.Engine.Engines
         private StopwatchTime EngineTime { get; } = new StopwatchTime();
 
         ITime IEngine.EngineTime => EngineTime;
-
-        public BSPModelUtils ModelUtils { get; private set; }
 
         public IModelManager ModelManager { get; private set; }
 
@@ -303,8 +302,6 @@ namespace SharpLife.Engine.Engines
                 Logger.Information($"Exe: {BuildDate.ToString("HH:mm:ss MMM dd yyyy")}");
             }
 
-            ModelUtils = new BSPModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP);
-
             ModelManager = new ModelManager(FileSystem);
 
             //TODO: initialize subsystems
@@ -361,7 +358,7 @@ namespace SharpLife.Engine.Engines
         {
             if (_server == null)
             {
-                _server = new EngineServerHost(this, Logger);
+                _server = new EngineServerHost(this, Logger, _client?.GameBridge);
             }
         }
 

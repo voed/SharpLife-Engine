@@ -13,36 +13,28 @@
 *
 ****/
 
-using System;
+using SharpLife.Models.BSP.Loading;
 
-namespace SharpLife.Engine.Shared.UI
+namespace SharpLife.Game.Shared.Maps
 {
     /// <summary>
-    /// Provides access to an SDL2 window and its associated input system
+    /// Provides access to map info
     /// </summary>
-    public interface IWindow
+    public interface IMapInfo
     {
-        bool Exists { get; }
-
-        string Title { get; set; }
-
-        //TODO: maybe make this internal so only code that needs to access these handles can get them?
-        IntPtr WindowHandle { get; }
-
-        event Action Resized;
+        /// <summary>
+        /// The name of the map, excluding directory and extension
+        /// </summary>
+        string Name { get; }
 
         /// <summary>
-        /// Invoked when the window is about to be destroyed
+        /// Name of the previous map that was loaded, or null if no previous map was loaded
         /// </summary>
-        event Action Destroying;
+        string PreviousMapName { get; }
 
         /// <summary>
-        /// Invoked after the window has been destroyed
+        /// The map model
         /// </summary>
-        event Action Destroyed;
-
-        void Center();
-
-        void GetSize(out int width, out int height);
+        BSPModel Model { get; }
     }
 }

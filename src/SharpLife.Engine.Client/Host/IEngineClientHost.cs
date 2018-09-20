@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem;
+using SharpLife.Engine.Shared.Game.Shared;
 using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Client.Host
@@ -32,6 +33,11 @@ namespace SharpLife.Engine.Client.Host
         /// The event system used by the client
         /// </summary>
         IEventSystem EventSystem { get; }
+
+        /// <summary>
+        /// The game's bridge object
+        /// </summary>
+        IBridge GameBridge { get; }
 
         void Shutdown();
 

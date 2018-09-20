@@ -13,6 +13,7 @@
 *
 ****/
 
+using Google.Protobuf;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 
@@ -20,6 +21,12 @@ namespace SharpLife.Engine.Shared.API.Game.Server
 {
     public interface IServerNetworking
     {
+        /// <summary>
+        /// Create the game info message to send to a client
+        /// </summary>
+        /// <returns></returns>
+        IMessage CreateGameInfoMessage();
+
         void RegisterObjectListTypes(TypeRegistryBuilder typeRegistryBuilder);
 
         void CreateNetworkObjectLists(INetworkObjectListTransmitterBuilder networkObjectListBuilder);

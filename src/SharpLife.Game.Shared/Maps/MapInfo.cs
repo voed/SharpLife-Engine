@@ -13,17 +13,27 @@
 *
 ****/
 
-using SharpLife.Renderer;
+using SharpLife.Models.BSP.Loading;
+using System;
 
-namespace SharpLife.Engine.Shared.API.Game.Client
+namespace SharpLife.Game.Shared.Maps
 {
     /// <summary>
-    /// The client UI, used to inform the client of engine level changes and to allow drawing
+    /// Read-only map info
     /// </summary>
-    public interface IClientUI
+    public sealed class MapInfo : IMapInfo
     {
-        void Update(float deltaSeconds, IViewState viewState);
+        public string Name { get; }
 
-        void Draw(IViewState viewState);
+        public string PreviousMapName { get; }
+
+        public BSPModel Model { get; }
+
+        public MapInfo(string name, string previousMapName, BSPModel model)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            PreviousMapName = previousMapName;
+            Model = model ?? throw new ArgumentNullException(nameof(model));
+        }
     }
 }

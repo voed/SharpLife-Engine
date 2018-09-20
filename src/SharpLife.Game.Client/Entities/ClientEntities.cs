@@ -15,7 +15,6 @@
 
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Engine.Shared;
-using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Game.Client.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.MetaData;
@@ -31,7 +30,7 @@ using System.Reflection;
 
 namespace SharpLife.Game.Client.Entities
 {
-    public sealed class ClientEntities : IFrameListReceiverListener, IClientEntities
+    public sealed class ClientEntities : IFrameListReceiverListener
     {
         private readonly IClientEngine _clientEngine;
 

@@ -20,6 +20,7 @@ using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Game.Shared.Maps;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
@@ -129,10 +130,10 @@ namespace SharpLife.Game.Server.Entities
             _entitiesNetworkList = networkObjectListBuilder.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
         }
 
-        public void MapLoadBegin(string entityData, bool loadGame)
+        public void MapLoadBegin(IMapInfo mapInfo, string entityData, bool loadGame)
         {
             //TODO: the game needs a different time object that tracks game time
-            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _engineTime, _serverModels);
+            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _engineTime, _serverModels, mapInfo);
 
             if (loadGame)
             {

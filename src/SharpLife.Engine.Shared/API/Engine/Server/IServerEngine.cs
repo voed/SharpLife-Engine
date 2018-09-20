@@ -14,25 +14,19 @@
 ****/
 
 using SharpLife.CommandSystem;
-using SharpLife.Engine.Shared.Maps;
+using SharpLife.FileSystem;
+using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Shared.API.Engine.Server
 {
     public interface IServerEngine
     {
+        IFileSystem FileSystem { get; }
+
         ICommandContext CommandContext { get; }
 
-        /// <summary>
-        /// Gets the current map info instance
-        /// Don't cache this, it gets recreated every map
-        /// </summary>
-        IMapInfo MapInfo { get; }
+        IEventSystem EventSystem { get; }
 
-        /// <summary>
-        /// Returns whether the given map name is valid
-        /// </summary>
-        /// <param name="mapName">The map name without directory or extension</param>
-        /// <returns></returns>
-        bool IsMapValid(string mapName);
+        bool IsDedicatedServer { get; }
     }
 }

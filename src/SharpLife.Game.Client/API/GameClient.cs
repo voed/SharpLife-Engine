@@ -14,26 +14,51 @@
 ****/
 
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using SharpLife.Engine.Shared;
+using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Game.Client;
+using SharpLife.Engine.Shared.Game.Shared;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Client.Networking;
-using SharpLife.Game.Client.Renderer;
 using SharpLife.Game.Client.UI;
+using SharpLife.Game.Shared.Bridge;
+using SharpLife.Game.Shared.Maps;
 using SharpLife.Game.Shared.Models;
 using SharpLife.Models;
+using SharpLife.Models.BSP.Loading;
+using SharpLife.Networking.Shared;
+using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using System;
 using System.Collections.Generic;
 
 namespace SharpLife.Game.Client.API
 {
-    public sealed class GameClient : IGameClient
+    public sealed class GameClient : IGameClient, IRendererListener
     {
-        private GameRenderer _gameRenderer;
+        private ILogger _logger;
+
+        private IClientEngine _engine;
+
+        private GameBridge _gameBridge;
+
+        private Renderer.Renderer _renderer;
+
+        private IClientUI _clientUI;
 
         private ClientNetworking _networking;
 
         private ClientEntities _entities;
+
+        /// <summary>
+        /// Gets the current map info instance
+        /// Don't cache this, it gets recreated every map
+        /// Null if not running any map
+        /// </summary>
+        public IMapInfo MapInfo { get; private set; }
+
+        public string CachedMapName { get; set; }
 
         public void Initialize(IServiceCollection serviceCollection)
         {
@@ -42,14 +67,16 @@ namespace SharpLife.Game.Client.API
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
 
-            serviceCollection.AddSingleton<IClientUI, ImGuiInterface>();
+            _gameBridge = GameBridge.CreateBridge();
+
+            serviceCollection.AddSingleton<IBridge>(_gameBridge);
+
+            serviceCollection.AddSingleton(this);
 
             //Expose as both to get the implementation
-            serviceCollection.AddSingleton<GameRenderer>();
             serviceCollection.AddSingleton<ClientNetworking>();
             serviceCollection.AddSingleton<IClientNetworking>(provider => provider.GetRequiredService<ClientNetworking>());
             serviceCollection.AddSingleton<ClientEntities>();
-            serviceCollection.AddSingleton<IClientEntities>(provider => provider.GetRequiredService<ClientEntities>());
         }
 
         public void Startup(IServiceProvider serviceProvider)
@@ -59,11 +86,28 @@ namespace SharpLife.Game.Client.API
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            _gameRenderer = serviceProvider.GetRequiredService<GameRenderer>();
+            _logger = serviceProvider.GetRequiredService<ILogger>();
+
+            _engine = serviceProvider.GetRequiredService<IClientEngine>();
 
             _networking = serviceProvider.GetRequiredService<ClientNetworking>();
 
             _entities = serviceProvider.GetRequiredService<ClientEntities>();
+
+            _clientUI = new ImGuiInterface(_logger, _engine);
+
+            _renderer = new Renderer.Renderer(
+                _engine.GameWindow,
+                _logger,
+                _engine.FileSystem,
+                _engine.CommandContext,
+                _engine.UserInterface.WindowManager.InputSystem,
+                _engine.Time,
+                this,
+                Framework.Path.EnvironmentMaps,
+                Framework.Path.Shaders);
+
+            _engine.GameWindow.Resized += _renderer.WindowResized;
 
             _entities.Startup();
         }
@@ -74,11 +118,22 @@ namespace SharpLife.Game.Client.API
 
         public IReadOnlyList<IModelLoader> GetModelLoaders() => GameModelUtils.GetModelLoaders();
 
-        public IReadOnlyDictionary<Type, IModelResourceFactory> GetModelResourceFactories() => _gameRenderer.GetModelResourceFactories();
-
-        public void MapLoadBegin(string entityData)
+        public void MapLoadBegin()
         {
-            _gameRenderer.MapLoadBegin();
+            var mapName = CachedMapName;
+
+            var worldModel = _engine.Models.LoadModel(mapName);
+
+            //This should never happen since the map file is compared by CRC before being loaded
+            //TODO: use proper exception type that engine can catch
+            if (!(worldModel is BSPModel bspWorldModel))
+            {
+                throw new InvalidOperationException($"Model {mapName} is not a map");
+            }
+
+            MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(mapName), MapInfo?.Name, bspWorldModel);
+
+            _renderer.LoadModels(MapInfo.Model, _engine.ModelManager);
 
             _entities.MapLoadBegin();
         }
@@ -91,11 +146,29 @@ namespace SharpLife.Game.Client.API
         public void MapShutdown()
         {
             _entities.MapShutdown();
+
+            _renderer.ClearBSP();
+
+            MapInfo = null;
         }
 
         public void Update(float deltaSeconds)
         {
-            _gameRenderer.Update();
+            _renderer.Update(deltaSeconds);
+
+            _clientUI.Update(deltaSeconds, _renderer.Scene);
+        }
+
+        public void Draw()
+        {
+            _clientUI.Draw(_renderer.Scene);
+
+            _renderer.Draw();
+        }
+
+        public void OnRenderModels(IModelRenderer modelRenderer, IViewState viewState)
+        {
+            _entities.RenderEntities(modelRenderer, viewState);
         }
     }
 }

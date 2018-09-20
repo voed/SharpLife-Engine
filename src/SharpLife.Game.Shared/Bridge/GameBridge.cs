@@ -13,27 +13,24 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
+using SharpLife.Engine.Shared;
+using SharpLife.Models;
 using System;
 
-namespace SharpLife.Engine.Shared.Maps
+namespace SharpLife.Game.Shared.Bridge
 {
-    /// <summary>
-    /// Read-only map info
-    /// </summary>
-    public sealed class MapInfo : IMapInfo
+    public sealed class GameBridge : IGameBridge
     {
-        public string Name { get; }
+        public BSPModelUtils ModelUtils { get; }
 
-        public string PreviousMapName { get; }
-
-        public BSPModel Model { get; }
-
-        public MapInfo(string name, string previousMapName, BSPModel model)
+        public GameBridge(BSPModelUtils modelUtils)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            PreviousMapName = previousMapName;
-            Model = model ?? throw new ArgumentNullException(nameof(model));
+            ModelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
+        }
+
+        public static GameBridge CreateBridge()
+        {
+            return new GameBridge(new BSPModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP));
         }
     }
 }

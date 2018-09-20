@@ -13,13 +13,16 @@
 *
 ****/
 
-using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
+using System;
 
-namespace SharpLife.Engine.Shared.API.Game.Client
+namespace SharpLife.Engine.Shared.API.Game.Server
 {
-    public interface IClientEntities
+    [Flags]
+    public enum ServerStartFlags
     {
-        void RenderEntities(IModelRenderer modelRenderer, IViewState viewState);
+        None = 0,
+        IsDemo = 1 << 0,
+        LoadGame = 1 << 1,
+        ChangeLevel = 1 << 2
     }
 }

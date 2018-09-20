@@ -20,4 +20,8 @@
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File ../SharpLife.Networking.Shared/Messages/GenerateMessages.ps1 ." />
+  </Target>
+
 </Project>

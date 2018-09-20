@@ -14,7 +14,6 @@
 ****/
 
 using SharpLife.Models;
-using System;
 using System.Collections.Generic;
 
 namespace SharpLife.Renderer.Models
@@ -25,12 +24,6 @@ namespace SharpLife.Renderer.Models
     public interface IModelResourcesManager
     {
         IEnumerable<IModelResourceFactory> Factories { get; }
-
-        /// <summary>
-        /// Sets the resource factories to use
-        /// </summary>
-        /// <param name="resourceFactories"></param>
-        void SetResourceFactories(IReadOnlyDictionary<Type, IModelResourceFactory> resourceFactories);
 
         /// <summary>
         /// Returns whether the resources for a given model are loaded

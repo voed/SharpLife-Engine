@@ -61,8 +61,6 @@ namespace SharpLife.Engine.Shared.Engines
         /// </summary>
         ITime EngineTime { get; }
 
-        BSPModelUtils ModelUtils { get; }
-
         IModelManager ModelManager { get; }
 
         /// <summary>
