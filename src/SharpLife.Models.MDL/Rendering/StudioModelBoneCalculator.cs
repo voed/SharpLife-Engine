@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.Models.MDL.FileFormat;
-using SharpLife.Utility;
+using SharpLife.Utility.Mathematics;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;

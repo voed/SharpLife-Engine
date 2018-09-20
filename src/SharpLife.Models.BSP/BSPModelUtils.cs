@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Utility;
+using SharpLife.Utility.FileSystem;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;

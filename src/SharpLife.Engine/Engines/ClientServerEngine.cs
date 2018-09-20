@@ -36,6 +36,7 @@ using SharpLife.Models;
 using SharpLife.Networking.Shared;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
+using SharpLife.Utility.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

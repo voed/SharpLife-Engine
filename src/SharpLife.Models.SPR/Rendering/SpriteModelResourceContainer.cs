@@ -18,7 +18,7 @@ using SharpLife.Models.SPR.Loading;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
-using SharpLife.Utility;
+using SharpLife.Utility.Mathematics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;

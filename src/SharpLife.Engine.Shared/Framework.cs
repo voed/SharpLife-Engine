@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Utility;
+using SharpLife.Utility.FileSystem;
 
 namespace SharpLife.Engine.Shared
 {

@@ -17,7 +17,7 @@ using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Input;
-using SharpLife.Utility;
+using SharpLife.Utility.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

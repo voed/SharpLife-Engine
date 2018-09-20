@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.FileFormats.WAD;
-using SharpLife.Utility;
+using SharpLife.Utility.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;

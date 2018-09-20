@@ -16,7 +16,7 @@
 using System;
 using System.IO;
 
-namespace SharpLife.Utility
+namespace SharpLife.Utility.FileSystem
 {
     public static class FileExtensionUtils
     {

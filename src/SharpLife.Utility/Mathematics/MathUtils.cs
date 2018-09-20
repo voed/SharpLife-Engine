@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Utility
+namespace SharpLife.Utility.Mathematics
 {
     public static class MathUtils
     {

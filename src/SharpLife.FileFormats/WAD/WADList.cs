@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.FileSystem;
-using SharpLife.Utility;
+using SharpLife.Utility.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;

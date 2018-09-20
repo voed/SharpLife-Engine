@@ -15,7 +15,7 @@
 
 using System.Numerics;
 
-namespace SharpLife.Utility
+namespace SharpLife.Utility.Mathematics
 {
     /// <summary>
     /// Contains vectors representing directions in each axis

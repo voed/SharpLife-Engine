@@ -37,6 +37,7 @@ using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Utility;
 using SharpLife.Utility.Events;
+using SharpLife.Utility.FileSystem;
 using System;
 using System.IO;
 using System.Net;

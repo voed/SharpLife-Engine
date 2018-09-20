@@ -25,6 +25,7 @@ using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Transmission;
 using SharpLife.Utility;
+using SharpLife.Utility.Text;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

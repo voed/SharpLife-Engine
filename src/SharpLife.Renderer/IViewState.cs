@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Utility;
+using SharpLife.Utility.Mathematics;
 using System.Numerics;
 
 namespace SharpLife.Renderer

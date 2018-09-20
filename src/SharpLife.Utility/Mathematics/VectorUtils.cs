@@ -16,7 +16,7 @@
 using System;
 using System.Numerics;
 
-namespace SharpLife.Utility
+namespace SharpLife.Utility.Mathematics
 {
     public static class VectorUtils
     {

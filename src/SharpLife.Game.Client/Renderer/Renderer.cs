@@ -33,6 +33,7 @@ using SharpLife.Renderer;
 using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Objects;
 using SharpLife.Utility;
+using SharpLife.Utility.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;

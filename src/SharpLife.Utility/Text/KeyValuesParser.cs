@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SharpLife.Utility
+namespace SharpLife.Utility.Text
 {
     /// <summary>
     /// Can parse keyvalues data into data structures
