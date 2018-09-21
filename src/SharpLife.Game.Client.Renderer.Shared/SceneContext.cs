@@ -16,8 +16,10 @@
 using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
 using SharpLife.Renderer;
+using SharpLife.Renderer.Utility;
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Veldrid;
 
 namespace SharpLife.Game.Client.Renderer.Shared
@@ -32,6 +34,11 @@ namespace SharpLife.Game.Client.Renderer.Shared
         public DeviceBuffer ProjectionMatrixBuffer { get; private set; }
         public DeviceBuffer ViewMatrixBuffer { get; private set; }
         public DeviceBuffer CameraInfoBuffer { get; private set; }
+
+        /// <summary>
+        /// Since each render call updates this anyway, use a single shared world and inverse buffer for every object
+        /// </summary>
+        public DeviceBuffer WorldAndInverseBuffer { get; private set; }
 
         /// <summary>
         /// Contains lighting info for gamma correction and brightness adjustment
@@ -69,6 +76,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
             ProjectionMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             ViewMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             CameraInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            WorldAndInverseBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             LightingInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<LightingInfo>(), BufferUsage.UniformBuffer));
 
             //TODO: pull filter settings and anisotropy from config
@@ -103,6 +111,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
             ProjectionMatrixBuffer.Dispose();
             ViewMatrixBuffer.Dispose();
             CameraInfoBuffer.Dispose();
+            WorldAndInverseBuffer.Dispose();
             LightingInfoBuffer.Dispose();
             LightingInfoBuffer = null;
             MainSampler.Dispose();
@@ -126,6 +135,11 @@ namespace SharpLife.Game.Client.Renderer.Shared
             cl.UpdateBuffer(ProjectionMatrixBuffer, 0, Camera.ProjectionMatrix);
             cl.UpdateBuffer(ViewMatrixBuffer, 0, Camera.ViewMatrix);
             cl.UpdateBuffer(CameraInfoBuffer, 0, Camera.GetCameraInfo());
+        }
+
+        public void UpdateWorldAndInverseBuffer(CommandList cl, ref WorldAndInverse wai)
+        {
+            cl.UpdateBuffer(WorldAndInverseBuffer, 0, ref wai);
         }
 
         public void RecreateWindowSizedResources(GraphicsDevice gd, CommandList cl)

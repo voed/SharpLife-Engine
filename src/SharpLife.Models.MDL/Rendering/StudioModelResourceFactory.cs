@@ -17,7 +17,6 @@ using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Loading;
-using SharpLife.Renderer.Utility;
 using System;
 using System.IO;
 using System.Numerics;
@@ -33,8 +32,6 @@ namespace SharpLife.Models.MDL.Rendering
 
         public StudioModelBoneCalculator BoneCalculator { get; } = new StudioModelBoneCalculator();
 
-        public DeviceBuffer WorldAndInverseBuffer { get; private set; }
-
         public DeviceBuffer BonesBuffer { get; private set; }
 
         public ResourceLayout SharedLayout { get; private set; }
@@ -46,8 +43,6 @@ namespace SharpLife.Models.MDL.Rendering
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
             var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
-
-            WorldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             BonesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<Matrix4x4>() * MDLConstants.MaxBones), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 

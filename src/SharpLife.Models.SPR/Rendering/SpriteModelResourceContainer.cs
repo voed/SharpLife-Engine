@@ -45,7 +45,6 @@ namespace SharpLife.Models.SPR.Rendering
         private readonly List<DeviceBuffer> _frameBuffers = new List<DeviceBuffer>();
 
         private DeviceBuffer _ib;
-        private DeviceBuffer _worldAndInverseBuffer;
         private DeviceBuffer _renderColorBuffer;
         private ResourceSet _resourceSet;
 
@@ -236,7 +235,7 @@ namespace SharpLife.Models.SPR.Rendering
 
             //var wai = new WorldAndInverse(renderData.Origin, angles, renderData.Scale);
 
-            cl.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
+            sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
             var alpha = 255;
 
@@ -284,8 +283,6 @@ namespace SharpLife.Models.SPR.Rendering
 
             gd.UpdateBuffer(_ib, 0, Indices);
 
-            _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-
             _renderColorBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Vector4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             var view = sc.MapResourceCache.GetTextureView(gd.ResourceFactory, texture);
@@ -294,7 +291,7 @@ namespace SharpLife.Models.SPR.Rendering
                 _factory.Layout,
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
-                _worldAndInverseBuffer,
+                sc.WorldAndInverseBuffer,
                 view,
                 sc.MainSampler,
                 sc.LightingInfoBuffer,

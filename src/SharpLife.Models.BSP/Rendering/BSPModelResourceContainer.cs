@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 using static SharpLife.Models.BSP.Rendering.BSPModelResourceFactory;
@@ -43,8 +42,6 @@ namespace SharpLife.Models.BSP.Rendering
 
         private readonly BSPModelResourceFactory _factory;
         private readonly BSPModel _bspModel;
-
-        private DeviceBuffer _worldAndInverseBuffer;
 
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
@@ -88,7 +85,7 @@ namespace SharpLife.Models.BSP.Rendering
         {
             var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
 
-            cl.UpdateBuffer(_worldAndInverseBuffer, 0, ref wai);
+            sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
             var renderArguments = new RenderArguments
             {
@@ -131,8 +128,6 @@ namespace SharpLife.Models.BSP.Rendering
             }
 
             var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
-
-            _worldAndInverseBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
             //Build a list of buffers, each buffer containing all of the faces that have the same texture
             //This reduces the number of buffers we have to create from a set for each face to a set for each texture and all of the faces referencing it
@@ -194,7 +189,7 @@ namespace SharpLife.Models.BSP.Rendering
                 _factory.SharedLayout,
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
-                _worldAndInverseBuffer,
+                sc.WorldAndInverseBuffer,
                 sc.LightingInfoBuffer,
                 _factory.LightStylesBuffer,
                 _factory.RenderColorBuffer));

@@ -84,7 +84,7 @@ namespace SharpLife.Models.MDL.Rendering
         {
             var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
 
-            cl.UpdateBuffer(_factory.WorldAndInverseBuffer, 0, ref wai);
+            sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
             var studioRenderData = new StudioModelRenderData
             {
@@ -152,7 +152,7 @@ namespace SharpLife.Models.MDL.Rendering
                 _factory.SharedLayout,
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
-                _factory.WorldAndInverseBuffer,
+                sc.WorldAndInverseBuffer,
                 _factory.BonesBuffer,
                 sc.MainSampler
                 ));
