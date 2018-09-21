@@ -18,19 +18,11 @@ using System;
 
 namespace SharpLife.Models.MDL.Rendering
 {
-    public unsafe struct StudioModelRenderData
+    public unsafe struct BoneData
     {
         private fixed byte _controllers[MDLConstants.MaxControllers];
 
         private fixed byte _blenders[MDLConstants.MaxBlenders];
-
-        public int Sequence;
-
-        public float Frame;
-
-        public int Body;
-
-        public int Skin;
 
         public byte GetController(int index)
         {
@@ -51,8 +43,6 @@ namespace SharpLife.Models.MDL.Rendering
 
             _controllers[index] = value;
         }
-
-        public byte Mouth;
 
         public byte GetBlender(int index)
         {

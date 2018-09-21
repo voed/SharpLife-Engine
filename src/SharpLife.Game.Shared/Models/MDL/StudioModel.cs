@@ -13,18 +13,20 @@
 *
 ****/
 
-namespace SharpLife.Models.BSP.Loading
+using SharpLife.Models;
+using SharpLife.Models.MDL.FileFormat;
+using System;
+
+namespace SharpLife.Game.Shared.Models.MDL
 {
-    public class Hull
+    public sealed class StudioModel : BaseModel
     {
-        public int FirstClipNode { get; }
+        public StudioFile StudioFile { get; }
 
-        public int LastClipNode { get; }
-
-        public Hull(int firstClipNode, int lastClipNode)
+        public StudioModel(string name, uint crc, StudioFile studioFile)
+            : base(name, crc)
         {
-            FirstClipNode = firstClipNode;
-            LastClipNode = lastClipNode;
+            StudioFile = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
         }
     }
 }

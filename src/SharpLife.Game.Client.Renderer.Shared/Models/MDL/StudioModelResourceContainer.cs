@@ -13,9 +13,9 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
-using SharpLife.Game.Client.Renderer.Shared.Models;
-using SharpLife.Models.MDL.Loading;
+using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Models;
+using SharpLife.Models.MDL.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using System;
@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Models.MDL.Rendering
+namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
     public sealed class StudioModelResourceContainer : ModelResourceContainer
     {
@@ -58,12 +58,7 @@ namespace SharpLife.Models.MDL.Rendering
 
             sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
-            var studioRenderData = new StudioModelRenderData
-            {
-                Frame = renderData.Frame
-            };
-
-            var bones = _factory.BoneCalculator.SetUpBones(_studioModel.StudioFile, studioRenderData);
+            var bones = _factory.BoneCalculator.SetUpBones(_studioModel.StudioFile, 0, renderData.Frame, new BoneData());
 
             cl.UpdateBuffer(_factory.BonesBuffer, 0, bones);
 

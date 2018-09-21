@@ -15,8 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj" />
+    <ProjectReference Include="..\SharpLife.Models.BSP\SharpLife.Models.BSP.csproj" />
     <ProjectReference Include="..\SharpLife.Models.MDL\SharpLife.Models.MDL.csproj" />
     <ProjectReference Include="..\SharpLife.Models.SPR\SharpLife.Models.SPR.csproj" />
+    <ProjectReference Include="..\SharpLife.Models\SharpLife.Models.csproj" />
     <ProjectReference Include="..\SharpLife.Networking.Shared\SharpLife.Networking.Shared.csproj" />
   </ItemGroup>
 

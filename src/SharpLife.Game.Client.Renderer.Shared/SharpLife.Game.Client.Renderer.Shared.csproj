@@ -11,7 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SharpLife.Game.Shared\SharpLife.Game.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />
+    <ProjectReference Include="..\SharpLife.Models.MDL\SharpLife.Models.MDL.csproj" />
     <ProjectReference Include="..\SharpLife.Models\SharpLife.Models.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
   </ItemGroup>
@@ -22,6 +24,9 @@
     </Reference>
     <Reference Include="Veldrid">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
+    </Reference>
+    <Reference Include="Veldrid.ImageSharp">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.ImageSharp.dll</HintPath>
     </Reference>
     <Reference Include="Veldrid.ImGui">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.ImGui.dll</HintPath>

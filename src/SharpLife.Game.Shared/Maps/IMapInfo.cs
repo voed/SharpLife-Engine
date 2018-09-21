@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Models.BSP.Loading;
+using SharpLife.Game.Shared.Models.BSP;
 
 namespace SharpLife.Game.Shared.Maps
 {

@@ -14,10 +14,10 @@
 ****/
 
 using SharpLife.Engine.Shared;
+using SharpLife.Game.Shared.Models.BSP;
+using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Models;
-using SharpLife.Models.BSP.Loading;
-using SharpLife.Models.MDL.Loading;
-using SharpLife.Models.SPR.Loading;
 using System.Collections.Generic;
 
 namespace SharpLife.Game.Shared.Models

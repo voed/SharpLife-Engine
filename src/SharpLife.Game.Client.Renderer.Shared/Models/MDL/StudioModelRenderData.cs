@@ -13,19 +13,20 @@
 *
 ****/
 
-using SharpLife.Models.SPR.FileFormat;
-using System;
+using SharpLife.Models.MDL.Rendering;
 
-namespace SharpLife.Models.SPR.Loading
+namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
-    public sealed class SpriteModel : BaseModel
+    public unsafe struct StudioModelRenderData
     {
-        public SpriteFile SpriteFile { get; }
+        public int Sequence;
 
-        public SpriteModel(string name, uint crc, SpriteFile spriteFile)
-            : base(name, crc)
-        {
-            SpriteFile = spriteFile ?? throw new ArgumentNullException(nameof(spriteFile));
-        }
+        public float Frame;
+
+        public int Body;
+
+        public int Skin;
+
+        public BoneData BoneData;
     }
 }

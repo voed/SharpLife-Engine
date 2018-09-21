@@ -13,10 +13,10 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
-using SharpLife.Game.Client.Renderer.Shared.Models;
+using SharpLife.Game.Shared.Models.SPR;
+using SharpLife.Models;
 using SharpLife.Models.SPR.FileFormat;
-using SharpLife.Models.SPR.Loading;
+using SharpLife.Models.SPR.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using SharpLife.Utility.Mathematics;
@@ -27,7 +27,7 @@ using Veldrid;
 using Veldrid.ImageSharp;
 using Veldrid.Utilities;
 
-namespace SharpLife.Models.SPR.Rendering
+namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 {
     public class SpriteModelResourceContainer : ModelResourceContainer
     {

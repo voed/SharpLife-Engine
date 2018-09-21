@@ -13,10 +13,10 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
-using SharpLife.Game.Client.Renderer.Shared.Models;
+using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Models;
 using SharpLife.Models.MDL.FileFormat;
-using SharpLife.Models.MDL.Loading;
+using SharpLife.Models.MDL.Rendering;
 using System;
 using System.IO;
 using System.Numerics;
@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Models.MDL.Rendering
+namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
     public sealed class StudioModelResourceFactory : IModelResourceFactory
     {

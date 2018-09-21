@@ -14,11 +14,12 @@
 ****/
 
 using SharpLife.FileSystem;
+using SharpLife.Models;
 using SharpLife.Models.MDL.FileFormat;
 using System;
 using System.IO;
 
-namespace SharpLife.Models.MDL.Loading
+namespace SharpLife.Game.Shared.Models.MDL
 {
     public sealed class StudioModelLoader : IModelLoader
     {

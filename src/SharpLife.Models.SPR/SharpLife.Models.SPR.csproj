@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpLife.Game.Client.Renderer.Shared\SharpLife.Game.Client.Renderer.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>

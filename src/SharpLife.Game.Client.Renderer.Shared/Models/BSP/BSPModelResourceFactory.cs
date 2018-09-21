@@ -13,11 +13,11 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
-using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Client.Renderer.Shared.Utility;
+using SharpLife.Game.Shared.Models.BSP;
+using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
-using SharpLife.Models.BSP.Loading;
+using SharpLife.Models.BSP.Rendering;
 using SharpLife.Renderer;
 using System;
 using System.Numerics;
@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Models.BSP.Rendering
+namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
     public sealed class BSPModelResourceFactory : IModelResourceFactory
     {

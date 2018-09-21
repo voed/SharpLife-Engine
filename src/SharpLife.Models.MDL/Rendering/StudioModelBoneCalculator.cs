@@ -59,38 +59,38 @@ namespace SharpLife.Models.MDL.Rendering
             return controllerIndex != MDLConstants.MouthControllerIndex;
         }
 
-        public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, in StudioModelRenderData renderData)
+        public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, int sequenceIndex, float frame, in BoneData boneData)
         {
             _currentModel = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
 
-            if (renderData.Sequence < 0 || renderData.Sequence >= _currentModel.Sequences.Count)
+            if (sequenceIndex < 0 || sequenceIndex >= _currentModel.Sequences.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(renderData.Sequence));
+                throw new ArgumentOutOfRangeException(nameof(sequenceIndex));
             }
 
-            var sequence = _currentModel.Sequences[renderData.Sequence];
+            var sequence = _currentModel.Sequences[sequenceIndex];
 
             var animations = sequence.AnimationBlends;
 
-            CalcRotations(renderData, _pos1, _q1, sequence, animations[0], renderData.Frame);
+            CalcRotations(boneData, _pos1, _q1, sequence, animations[0], frame);
 
             if (sequence.AnimationBlends.Count > 1)
             {
-                CalcRotations(renderData, _pos2, _q2, sequence, animations[1], renderData.Frame);
-                var s = renderData.GetBlender(0) / 255.0f;
+                CalcRotations(boneData, _pos2, _q2, sequence, animations[1], frame);
+                var s = boneData.GetBlender(0) / 255.0f;
 
                 SlerpBones(_q1, _pos1, _q2, _pos2, s);
 
                 if (sequence.AnimationBlends.Count == 4)
                 {
-                    CalcRotations(renderData, _pos3, _q3, sequence, animations[2], renderData.Frame);
+                    CalcRotations(boneData, _pos3, _q3, sequence, animations[2], frame);
 
-                    CalcRotations(renderData, _pos4, _q4, sequence, animations[3], renderData.Frame);
+                    CalcRotations(boneData, _pos4, _q4, sequence, animations[3], frame);
 
-                    s = renderData.GetBlender(0) / 255.0f;
+                    s = boneData.GetBlender(0) / 255.0f;
                     SlerpBones(_q3, _pos3, _q4, _pos4, s);
 
-                    s = renderData.GetBlender(1) / 255.0f;
+                    s = boneData.GetBlender(1) / 255.0f;
                     SlerpBones(_q1, _pos1, _q3, _pos3, s);
                 }
             }
@@ -119,7 +119,7 @@ namespace SharpLife.Models.MDL.Rendering
             return _bones;
         }
 
-        private unsafe void CalcRotations(in StudioModelRenderData renderData,
+        private unsafe void CalcRotations(in BoneData boneData,
             Vector3[] pos, Quaternion[] q,
             SequenceDescriptor sequence, AnimationBlend animationBlend,
             float f)
@@ -128,7 +128,7 @@ namespace SharpLife.Models.MDL.Rendering
             var s = f - frame;
 
             // add in programatic controllers
-            CalcBoneAdjust(renderData);
+            CalcBoneAdjust(boneData);
 
             var pbone = _currentModel.Bones;
 
@@ -161,8 +161,8 @@ namespace SharpLife.Models.MDL.Rendering
         /// TODO: this is called multiple times per bone setup, but doesn't rely on data that changes between calls during setup
         /// Move call to reduce cost?
         /// </summary>
-        /// <param name="renderData"></param>
-        private void CalcBoneAdjust(in StudioModelRenderData renderData)
+        /// <param name="boneData"></param>
+        private void CalcBoneAdjust(in BoneData boneData)
         {
             for (var j = 0; j < _currentModel.BoneControllers.Count; ++j)
             {
@@ -174,11 +174,11 @@ namespace SharpLife.Models.MDL.Rendering
                 //TODO: this code does not match the game's code
                 if (ShouldCompensateForLoop(controller.Index) && (controller.Type & MotionTypes.RLoop) != 0)
                 {
-                    value = (renderData.GetController(controller.Index) * (360.0f / 256.0f)) + controller.Start;
+                    value = (boneData.GetController(controller.Index) * (360.0f / 256.0f)) + controller.Start;
                 }
                 else
                 {
-                    value = renderData.GetController(controller.Index) / _controllerNormalizers[controller.Index];
+                    value = boneData.GetController(controller.Index) / _controllerNormalizers[controller.Index];
 
                     value = Math.Clamp(value, 0.0f, 1.0f);
 

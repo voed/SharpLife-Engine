@@ -13,27 +13,20 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.BSP;
+using SharpLife.Models;
+using SharpLife.Models.SPR.FileFormat;
 using System;
 
-namespace SharpLife.Game.Shared.Maps
+namespace SharpLife.Game.Shared.Models.SPR
 {
-    /// <summary>
-    /// Read-only map info
-    /// </summary>
-    public sealed class MapInfo : IMapInfo
+    public sealed class SpriteModel : BaseModel
     {
-        public string Name { get; }
+        public SpriteFile SpriteFile { get; }
 
-        public string PreviousMapName { get; }
-
-        public BSPModel Model { get; }
-
-        public MapInfo(string name, string previousMapName, BSPModel model)
+        public SpriteModel(string name, uint crc, SpriteFile spriteFile)
+            : base(name, crc)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            PreviousMapName = previousMapName;
-            Model = model ?? throw new ArgumentNullException(nameof(model));
+            SpriteFile = spriteFile ?? throw new ArgumentNullException(nameof(spriteFile));
         }
     }
 }

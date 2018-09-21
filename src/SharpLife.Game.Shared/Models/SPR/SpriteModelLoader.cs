@@ -14,21 +14,15 @@
 ****/
 
 using SharpLife.FileSystem;
-using SharpLife.Models.BSP.FileFormat;
+using SharpLife.Models;
+using SharpLife.Models.SPR.FileFormat;
 using System;
 using System.IO;
 
-namespace SharpLife.Models.BSP.Loading
+namespace SharpLife.Game.Shared.Models.SPR
 {
-    public sealed class BSPModelLoader : IModelLoader
+    public sealed class SpriteModelLoader : IModelLoader
     {
-        private readonly string _bspModelNamePrefix;
-
-        public BSPModelLoader(string bspModelNamePrefix)
-        {
-            _bspModelNamePrefix = bspModelNamePrefix ?? throw new ArgumentNullException(nameof(bspModelNamePrefix));
-        }
-
         public IModel Load(string name, IFileSystem fileSystem, BinaryReader reader, Delegates.AddModel addModelCallback, bool computeCRC)
         {
             if (reader == null)
@@ -37,16 +31,14 @@ namespace SharpLife.Models.BSP.Loading
             }
 
             //Check if we can actually load this
-            //TODO: because BSP files don't have a separate identifier, this will fail on invalid BSP versions
-            //Should remove this once the other formats can be loaded
-            if (!BSPLoader.IsBSPFile(reader))
+            if (!SpriteLoader.IsSpriteFile(reader))
             {
                 return null;
             }
 
-            var loader = new BSPLoader(reader);
+            var loader = new SpriteLoader(reader);
 
-            var bspFile = loader.ReadBSPFile();
+            var spriteFile = loader.ReadSpriteFile();
 
             uint crc = 0;
 
@@ -55,15 +47,7 @@ namespace SharpLife.Models.BSP.Loading
                 crc = loader.ComputeCRC();
             }
 
-            //add all of its submodels
-            //First submodel (0) is the world
-            for (var i = 1; i < bspFile.Models.Count; ++i)
-            {
-                var subModelName = $"{_bspModelNamePrefix}{i}";
-                addModelCallback(subModelName, new BSPModel(subModelName, crc, bspFile, bspFile.Models[i]));
-            }
-
-            return new BSPModel(name, crc, bspFile, bspFile.Models[0]);
+            return new SpriteModel(name, crc, spriteFile);
         }
     }
 }

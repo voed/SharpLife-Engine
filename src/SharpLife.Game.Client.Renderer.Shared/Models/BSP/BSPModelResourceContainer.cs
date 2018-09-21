@@ -13,9 +13,9 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
-using SharpLife.Game.Client.Renderer.Shared.Models;
-using SharpLife.Models.BSP.Loading;
+using SharpLife.Game.Shared.Models.BSP;
+using SharpLife.Models;
+using SharpLife.Models.BSP.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp;
@@ -26,9 +26,9 @@ using System.Linq;
 using System.Numerics;
 using Veldrid;
 using Veldrid.Utilities;
-using static SharpLife.Models.BSP.Rendering.BSPModelResourceFactory;
+using static SharpLife.Game.Client.Renderer.Shared.Models.BSP.BSPModelResourceFactory;
 
-namespace SharpLife.Models.BSP.Rendering
+namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
     /// <summary>
     /// The BSP World model renderable

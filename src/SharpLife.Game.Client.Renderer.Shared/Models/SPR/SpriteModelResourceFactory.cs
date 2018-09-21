@@ -14,16 +14,15 @@
 ****/
 
 using Serilog;
-using SharpLife.Game.Client.Renderer.Shared;
-using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Client.Renderer.Shared.Utility;
-using SharpLife.Models.SPR.Loading;
+using SharpLife.Game.Shared.Models.SPR;
+using SharpLife.Models;
 using SharpLife.Renderer;
 using System;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Models.SPR.Rendering
+namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 {
     public sealed class SpriteModelResourceFactory : IModelResourceFactory
     {

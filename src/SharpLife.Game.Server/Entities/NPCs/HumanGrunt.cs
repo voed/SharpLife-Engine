@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Models.MDL.Loading;
+using SharpLife.Game.Shared.Models.MDL;
 
 namespace SharpLife.Game.Server.Entities.NPCs
 {

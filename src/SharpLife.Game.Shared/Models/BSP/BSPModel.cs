@@ -13,12 +13,13 @@
 *
 ****/
 
+using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace SharpLife.Models.BSP.Loading
+namespace SharpLife.Game.Shared.Models.BSP
 {
     public sealed class BSPModel : BaseModel
     {
