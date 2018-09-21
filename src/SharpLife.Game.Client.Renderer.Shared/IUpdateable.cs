@@ -13,16 +13,10 @@
 *
 ****/
 
-using SharpLife.Models;
-
-namespace SharpLife.Renderer.Models
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    /// <summary>
-    /// Factory to create model resource containers
-    /// Can manage model type-specific resources
-    /// </summary>
-    public interface IModelResourceFactory : IResourceContainer
+    public interface IUpdateable
     {
-        ModelResourceContainer CreateContainer(IModel model);
+        void Update(float deltaSeconds);
     }
 }

@@ -13,23 +13,16 @@
 *
 ****/
 
-using System;
+using SharpLife.Renderer;
+using Veldrid;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    [Flags]
-    public enum ResourceScope
+    public struct RenderContext
     {
-        /// <summary>
-        /// Resources allocated for use over the duration of the program's lifetime
-        /// </summary>
-        Global = 1 << 0,
-
-        /// <summary>
-        /// Resources allocated for one map. Freed when the map ends
-        /// </summary>
-        Map = 1 << 1,
-
-        All = Global | Map
+        public GraphicsDevice GraphicsDevice;
+        public CommandList CommandList;
+        public SceneContext SceneContext;
+        public RenderPasses RenderPass;
     }
 }

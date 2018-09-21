@@ -14,10 +14,11 @@
 ****/
 
 using Serilog;
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
+using SharpLife.Game.Client.Renderer.Shared.Utility;
 using SharpLife.Models.SPR.Loading;
 using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
-using SharpLife.Renderer.Utility;
 using System;
 using Veldrid;
 using Veldrid.Utilities;

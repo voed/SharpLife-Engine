@@ -14,16 +14,11 @@
 ****/
 
 using System.Numerics;
-using Veldrid;
 
 namespace SharpLife.Renderer
 {
     public interface IRenderable
     {
-        RenderPasses RenderPasses { get; }
-
         RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition);
-
-        void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass);
     }
 }

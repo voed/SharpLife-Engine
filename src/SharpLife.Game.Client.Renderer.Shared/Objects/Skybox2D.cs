@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.FileSystem;
+using SharpLife.Renderer;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
@@ -25,7 +26,7 @@ using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Renderer.Objects
+namespace SharpLife.Game.Client.Renderer.Shared.Objects
 {
     /// <summary>
     /// Draws the 2D skybox at the outer edges of the world

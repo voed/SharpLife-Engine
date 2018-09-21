@@ -17,6 +17,7 @@ using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Input;
+using SharpLife.Renderer;
 using SharpLife.Utility.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ using System.Numerics;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
     public class Scene : IViewState
     {
@@ -204,7 +205,7 @@ namespace SharpLife.Renderer
             RenderPasses pass,
             BoundingFrustum frustum,
             Vector3 viewPosition,
-            RenderQueue renderQueue,
+            RenderQueue<IRenderable> renderQueue,
             List<IRenderable> renderableList,
             Comparer<RenderItemIndex> comparer,
             bool threaded)
@@ -272,7 +273,7 @@ namespace SharpLife.Renderer
             }
         }
 
-        private readonly RenderQueue[] _renderQueues = Enumerable.Range(0, 4).Select(_ => new RenderQueue()).ToArray();
+        private readonly RenderQueue<IRenderable>[] _renderQueues = Enumerable.Range(0, 4).Select(_ => new RenderQueue<IRenderable>()).ToArray();
         private readonly List<IRenderable>[] _renderableStage = Enumerable.Range(0, 4).Select(_ => new List<IRenderable>()).ToArray();
 
         private void CollectFreeObjects(RenderPasses renderPass, List<IRenderable> renderables)

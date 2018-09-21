@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Renderer;
+using SharpLife.Game.Client.Renderer.Shared;
 
 namespace SharpLife.Game.Client.UI
 {

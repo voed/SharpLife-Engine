@@ -16,7 +16,7 @@
 using SharpLife.Models;
 using System.Collections.Generic;
 
-namespace SharpLife.Renderer.Models
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     /// <summary>
     /// Manages the model graphics resources

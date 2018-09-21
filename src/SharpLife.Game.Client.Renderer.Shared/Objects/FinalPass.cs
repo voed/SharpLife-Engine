@@ -13,11 +13,12 @@
 *
 ****/
 
+using SharpLife.Renderer;
 using System.Numerics;
 using Veldrid;
 using Veldrid.Utilities;
 
-namespace SharpLife.Renderer.Objects
+namespace SharpLife.Game.Client.Renderer.Shared.Objects
 {
     /// <summary>
     /// Takes the rendered scene and draws it into the swap chain buffer

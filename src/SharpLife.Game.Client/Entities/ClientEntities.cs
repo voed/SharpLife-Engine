@@ -16,13 +16,13 @@
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Game.Client.Entities.EntityList;
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.Reception;
-using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
 using SharpLife.Utility;
 using System;
 using System.Linq;

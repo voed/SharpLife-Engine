@@ -16,25 +16,12 @@
 using System;
 using Veldrid;
 
-namespace SharpLife.Renderer.Utility
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public sealed class RenderModePipelines
+    public interface IRenderer
     {
-        private readonly Pipeline[] _pipelines;
+        event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderBegin;
 
-        public Pipeline this[RenderMode renderMode]
-        {
-            get => _pipelines[(int)renderMode];
-        }
-
-        public RenderModePipelines(Pipeline[] pipelines)
-        {
-            _pipelines = pipelines ?? throw new ArgumentNullException(nameof(pipelines));
-
-            if (pipelines.Length != (int)RenderMode.Last + 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pipelines));
-            }
-        }
+        event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderEnd;
     }
 }

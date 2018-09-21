@@ -13,20 +13,23 @@
 *
 ****/
 
-namespace SharpLife.Renderer
+using System;
+
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public struct LightingInfo
+    [Flags]
+    public enum ResourceScope
     {
-        public float MainGamma;
-        public float TextureGamma;
-        public float LightingGamma;
-        public float Brightness;
-        public int LightScale;
+        /// <summary>
+        /// Resources allocated for use over the duration of the program's lifetime
+        /// </summary>
+        Global = 1 << 0,
 
-        //Booleans are handled as ints in code
-        public int OverbrightEnabled;
-        public int Fullbright;
+        /// <summary>
+        /// Resources allocated for one map. Freed when the map ends
+        /// </summary>
+        Map = 1 << 1,
 
-        private float padding0;
+        All = Global | Map
     }
 }

@@ -14,11 +14,12 @@
 ****/
 
 using SharpLife.Input;
+using SharpLife.Renderer;
 using System.Diagnostics;
 using System.Numerics;
 using Veldrid;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
     public class ImGuiRenderable : ResourceContainer, IUpdateable, IRenderable
     {

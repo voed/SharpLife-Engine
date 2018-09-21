@@ -16,7 +16,7 @@
 using SharpLife.Models;
 using Veldrid;
 
-namespace SharpLife.Renderer.Models
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     /// <summary>
     /// Resource container for a model

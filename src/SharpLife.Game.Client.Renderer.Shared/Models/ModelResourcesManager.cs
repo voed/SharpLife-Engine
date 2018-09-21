@@ -19,7 +19,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharpLife.Renderer.Models
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     public sealed class ModelResourcesManager : IModelResourcesManager, IEnumerable<ModelResourceContainer>
     {

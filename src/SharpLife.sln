@@ -47,6 +47,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Models.SPR", "Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpLife.Models.MDL", "SharpLife.Models.MDL\SharpLife.Models.MDL.csproj", "{A7FFE5F3-D225-4AFE-B665-AAAF755128EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpLife.Game.Client.Renderer.Shared", "SharpLife.Game.Client.Renderer.Shared\SharpLife.Game.Client.Renderer.Shared.csproj", "{3BA28229-0658-445E-90B1-241975B04D19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,10 @@ Global
 		{A7FFE5F3-D225-4AFE-B665-AAAF755128EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7FFE5F3-D225-4AFE-B665-AAAF755128EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7FFE5F3-D225-4AFE-B665-AAAF755128EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BA28229-0658-445E-90B1-241975B04D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BA28229-0658-445E-90B1-241975B04D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BA28229-0658-445E-90B1-241975B04D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BA28229-0658-445E-90B1-241975B04D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,6 +154,7 @@ Global
 		{0E8BC499-DADD-42AB-A502-10C454F9C477} = {D7520E74-0E3A-4ACA-A44D-D669C60A97C1}
 		{F1479E3D-F874-4F86-99AE-8A1B1FDB2A99} = {D7520E74-0E3A-4ACA-A44D-D669C60A97C1}
 		{A7FFE5F3-D225-4AFE-B665-AAAF755128EE} = {D7520E74-0E3A-4ACA-A44D-D669C60A97C1}
+		{3BA28229-0658-445E-90B1-241975B04D19} = {B532F313-592A-468A-83EB-7D9E250AB199}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91F9ACDE-7440-4689-8F79-5D5A360133A5}

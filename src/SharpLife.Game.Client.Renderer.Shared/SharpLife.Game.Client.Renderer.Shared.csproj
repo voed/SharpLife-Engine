@@ -5,26 +5,29 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SharpLife.Game.Client.Renderer.Shared\SharpLife.Game.Client.Renderer.Shared.csproj" />
+    <ProjectReference Include="..\SharpLife.Input\SharpLife.Input.csproj" />
+    <ProjectReference Include="..\SharpLife.Models\SharpLife.Models.csproj" />
     <ProjectReference Include="..\SharpLife.Renderer\SharpLife.Renderer.csproj" />
-    <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="SDL2-CS">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\SDL2-CS.dll</HintPath>
+    </Reference>
     <Reference Include="Veldrid">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.dll</HintPath>
     </Reference>
-    <Reference Include="Veldrid.ImageSharp">
-      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.ImageSharp.dll</HintPath>
+    <Reference Include="Veldrid.ImGui">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.ImGui.dll</HintPath>
+    </Reference>
+    <Reference Include="Veldrid.SDL2">
+      <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.SDL2.dll</HintPath>
     </Reference>
     <Reference Include="Veldrid.Utilities">
       <HintPath>$(STEAMCOMMON)\Half-Life\sharplife_full\assemblies\Veldrid.Utilities.dll</HintPath>

@@ -13,10 +13,23 @@
 *
 ****/
 
-namespace SharpLife.Renderer
+using SharpLife.Utility.Mathematics;
+using System.Numerics;
+
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public interface IUpdateable
+    /// <summary>
+    /// Provides read-only access to the renderer view state
+    /// </summary>
+    public interface IViewState
     {
-        void Update(float deltaSeconds);
+        Vector3 Origin { get; }
+
+        Vector3 Angles { get; }
+
+        /// <summary>
+        /// Gets the view angles as directional vectors
+        /// </summary>
+        DirectionalVectors ViewVectors { get; }
     }
 }

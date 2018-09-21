@@ -13,13 +13,14 @@
 *
 ****/
 
-namespace SharpLife.Renderer.Models
+using System;
+using Veldrid;
+
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    /// <summary>
-    /// Renders models
-    /// </summary>
-    public interface IModelRenderer
+    public interface IResourceContainer : IDisposable
     {
-        void Render(ref ModelRenderData renderData);
+        void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope);
+        void DestroyDeviceObjects(ResourceScope scope);
     }
 }

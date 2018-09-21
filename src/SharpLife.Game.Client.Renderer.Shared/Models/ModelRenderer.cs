@@ -13,11 +13,12 @@
 *
 ****/
 
+using SharpLife.Renderer;
 using System;
 using System.Numerics;
 using Veldrid;
 
-namespace SharpLife.Renderer.Models
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     /// <summary>
     /// Responsible for rendering models

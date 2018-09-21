@@ -13,15 +13,20 @@
 *
 ****/
 
-using Veldrid;
+using System;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public struct RenderContext
+    /// <summary>
+    /// A renderable object can specify which render passes to be part of with using these flags
+    /// </summary>
+    [Flags]
+    public enum RenderPasses : int
     {
-        public GraphicsDevice GraphicsDevice;
-        public CommandList CommandList;
-        public SceneContext SceneContext;
-        public RenderPasses RenderPass;
+        None = 0,
+        Standard = 1 << 0,
+        AlphaBlend = 1 << 1,
+        Overlay = 1 << 2,
+        SwapchainOutput = 1 << 3
     }
 }

@@ -13,18 +13,25 @@
 *
 ****/
 
-using Veldrid;
+using SharpLife.Models;
+using SharpLife.Renderer;
+using System.Numerics;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
-    public abstract class ResourceContainer : IResourceContainer
+    public struct ModelRenderData
     {
-        public abstract void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope);
-        public abstract void DestroyDeviceObjects(ResourceScope scope);
+        public IModel Model;
 
-        public void Dispose()
-        {
-            DestroyDeviceObjects(ResourceScope.All);
-        }
+        public Vector3 Origin;
+        public Vector3 Angles;
+        public Vector3 Scale;
+
+        public RenderFX RenderFX;
+        public RenderMode RenderMode;
+        public int RenderAmount;
+        public Vector3 RenderColor;
+
+        public float Frame;
     }
 }

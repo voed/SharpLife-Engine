@@ -13,10 +13,11 @@
 *
 ****/
 
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Models.SPR.FileFormat;
 using SharpLife.Models.SPR.Loading;
 using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
 using SharpLife.Utility.Mathematics;
 using SixLabors.ImageSharp;

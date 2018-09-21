@@ -15,11 +15,12 @@
 
 using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
+using SharpLife.Renderer;
 using System;
 using System.Runtime.CompilerServices;
 using Veldrid;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
     public class SceneContext
     {

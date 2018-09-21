@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SharpLife.CommandSystem\SharpLife.CommandSystem.csproj" />
     <ProjectReference Include="..\SharpLife.Engine.Shared\SharpLife.Engine.Shared.csproj" />
+    <ProjectReference Include="..\SharpLife.Game.Client.Renderer.Shared\SharpLife.Game.Client.Renderer.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.Game.Shared\SharpLife.Game.Shared.csproj" />
     <ProjectReference Include="..\SharpLife.Utility\SharpLife.Utility.csproj" />
   </ItemGroup>

@@ -13,17 +13,14 @@
 *
 ****/
 
-using SharpLife.Renderer.Models;
+using Veldrid;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public interface IRendererListener
+    public interface IRenderable : SharpLife.Renderer.IRenderable
     {
-        /// <summary>
-        /// Invoked when models should be rendered
-        /// </summary>
-        /// <param name="modelRenderer"></param>
-        /// <param name="viewState"></param>
-        void OnRenderModels(IModelRenderer modelRenderer, IViewState viewState);
+        RenderPasses RenderPasses { get; }
+
+        void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass);
     }
 }

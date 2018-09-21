@@ -13,10 +13,11 @@
 *
 ****/
 
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Loading;
 using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
 using SharpLife.Renderer.Utility;
 using System;
 using System.Collections.Generic;

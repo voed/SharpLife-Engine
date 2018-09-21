@@ -21,6 +21,9 @@ using SharpLife.Engine.Shared.API.Game.Client;
 using SharpLife.Engine.Shared.API.Game.Shared;
 using SharpLife.Game.Client.Entities;
 using SharpLife.Game.Client.Networking;
+using SharpLife.Game.Client.Renderer;
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Client.UI;
 using SharpLife.Game.Shared.Bridge;
 using SharpLife.Game.Shared.Maps;
@@ -28,8 +31,6 @@ using SharpLife.Game.Shared.Models;
 using SharpLife.Models;
 using SharpLife.Models.BSP.Loading;
 using SharpLife.Networking.Shared;
-using SharpLife.Renderer;
-using SharpLife.Renderer.Models;
 using System;
 using System.Collections.Generic;
 

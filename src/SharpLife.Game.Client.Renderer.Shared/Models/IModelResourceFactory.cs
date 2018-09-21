@@ -13,14 +13,16 @@
 *
 ****/
 
-using System;
-using Veldrid;
+using SharpLife.Models;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
-    public interface IResourceContainer : IDisposable
+    /// <summary>
+    /// Factory to create model resource containers
+    /// Can manage model type-specific resources
+    /// </summary>
+    public interface IModelResourceFactory : IResourceContainer
     {
-        void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope);
-        void DestroyDeviceObjects(ResourceScope scope);
+        ModelResourceContainer CreateContainer(IModel model);
     }
 }

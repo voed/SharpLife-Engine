@@ -13,15 +13,13 @@
 *
 ****/
 
-using System;
-using Veldrid;
-
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
-    public interface IRenderer
+    /// <summary>
+    /// Renders models
+    /// </summary>
+    public interface IModelRenderer
     {
-        event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderBegin;
-
-        event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderEnd;
+        void Render(ref ModelRenderData renderData);
     }
 }

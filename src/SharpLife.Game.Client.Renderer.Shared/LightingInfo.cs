@@ -13,20 +13,20 @@
 *
 ****/
 
-using System;
-
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    /// <summary>
-    /// A renderable object can specify which render passes to be part of with using these flags
-    /// </summary>
-    [Flags]
-    public enum RenderPasses : int
+    public struct LightingInfo
     {
-        None = 0,
-        Standard = 1 << 0,
-        AlphaBlend = 1 << 1,
-        Overlay = 1 << 2,
-        SwapchainOutput = 1 << 3
+        public float MainGamma;
+        public float TextureGamma;
+        public float LightingGamma;
+        public float Brightness;
+        public int LightScale;
+
+        //Booleans are handled as ints in code
+        public int OverbrightEnabled;
+        public int Fullbright;
+
+        private float padding0;
     }
 }

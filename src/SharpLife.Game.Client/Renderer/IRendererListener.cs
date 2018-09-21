@@ -13,23 +13,18 @@
 *
 ****/
 
-using SharpLife.Utility.Mathematics;
-using System.Numerics;
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
 
-namespace SharpLife.Renderer
+namespace SharpLife.Game.Client.Renderer
 {
-    /// <summary>
-    /// Provides read-only access to the renderer view state
-    /// </summary>
-    public interface IViewState
+    public interface IRendererListener
     {
-        Vector3 Origin { get; }
-
-        Vector3 Angles { get; }
-
         /// <summary>
-        /// Gets the view angles as directional vectors
+        /// Invoked when models should be rendered
         /// </summary>
-        DirectionalVectors ViewVectors { get; }
+        /// <param name="modelRenderer"></param>
+        /// <param name="viewState"></param>
+        void OnRenderModels(IModelRenderer modelRenderer, IViewState viewState);
     }
 }
