@@ -219,7 +219,12 @@ namespace SharpLife.Models.BSP.Rendering
 
             if (faces.Count == 0)
             {
-                throw new ArgumentException("Cannot create a face buffer when no faces are provided");
+                throw new ArgumentException("Cannot create a face buffer when no faces are provided", nameof(faces));
+            }
+
+            if (lightmapBuilders.Count == 0)
+            {
+                throw new ArgumentException("You must provide at least one lightmap builder", nameof(lightmapBuilders));
             }
 
             var lightmapBuilder = lightmapBuilders[lightmapBuilders.Count - 1];
