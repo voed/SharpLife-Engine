@@ -15,13 +15,11 @@
 
 using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Client.Renderer.Shared.Models;
-using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Loading;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Veldrid;
 using Veldrid.Utilities;
 
@@ -29,32 +27,6 @@ namespace SharpLife.Models.MDL.Rendering
 {
     public sealed class StudioModelResourceContainer : ModelResourceContainer
     {
-        private struct StudioVertex
-        {
-            public WorldTextureCoordinate WorldTexture;
-
-            public uint BoneIndex;
-        }
-
-        private class MeshData
-        {
-            public BodyMesh Mesh;
-
-            public uint StartIndex;
-
-            public uint IndicesCount;
-        }
-
-        private class SubModelData
-        {
-            public MeshData[] Meshes;
-        }
-
-        private class BodyPartData
-        {
-            public SubModelData[] SubModels;
-        }
-
         private readonly StudioModelResourceFactory _factory;
 
         private readonly StudioModel _studioModel;
@@ -132,7 +104,7 @@ namespace SharpLife.Models.MDL.Rendering
 
             foreach (var bodyPart in _studioModel.StudioFile.BodyParts)
             {
-                bodyParts.Add(CreateBodyPart(bodyPart, vertices, indices));
+                bodyParts.Add(StudioResourceUtils.CreateBodyPart(_studioModel.StudioFile, bodyPart, vertices, indices));
             }
 
             _bodyParts = bodyParts.ToArray();
@@ -157,7 +129,16 @@ namespace SharpLife.Models.MDL.Rendering
                 sc.MainSampler
                 ));
 
-            CreateTextures(gd, disposeFactory, sc, sc.MapResourceCache);
+            var uploadedTextures = StudioResourceUtils.CreateTextures(_studioModel.Name, _studioModel.StudioFile, gd, sc.TextureLoader, sc.MapResourceCache);
+
+            _textures = new ResourceSet[uploadedTextures.Count];
+
+            for (var i = 0; i < uploadedTextures.Count; ++i)
+            {
+                var view = sc.MapResourceCache.GetTextureView(gd.ResourceFactory, uploadedTextures[i]);
+
+                _textures[i] = disposeFactory.CreateResourceSet(new ResourceSetDescription(_factory.TextureLayout, view));
+            }
         }
 
         public override void DestroyDeviceObjects(ResourceScope scope)
@@ -168,145 +149,6 @@ namespace SharpLife.Models.MDL.Rendering
             }
 
             _disposeCollector.DisposeAll();
-        }
-
-        private SubModelData CreateSubModel(BodyModel subModel, List<StudioVertex> vertices, List<uint> indices)
-        {
-            var meshes = new List<MeshData>(subModel.Meshes.Count);
-
-            //Add all vertices to the list
-            foreach (var mesh in subModel.Meshes)
-            {
-                //Use the first skin family for reference
-                //The compiler also uses this to calculate the s and t values
-                var texture = _studioModel.StudioFile.Textures[_studioModel.StudioFile.Skins[0][mesh.Skin]];
-
-                var firstIndex = indices.Count;
-
-                var i = 0;
-
-                for (int command = mesh.TriangleCommands[i]; command != 0; command = mesh.TriangleCommands[i])
-                {
-                    ++i;
-
-                    //Commands come in sets of 4 values:
-                    //Vertex index
-                    //Light index, also chrome index for chrome textures
-                    //Texture s coord
-                    //Texture t coord
-
-                    //Negative values are fans, positive values are strips
-                    //TODO: handle chrome
-                    var isFan = command < 0;
-
-                    if (isFan)
-                    {
-                        command = -command;
-                    }
-
-                    var firstVertex = vertices.Count;
-
-                    for (var verticesLeft = command; verticesLeft > 0; --verticesLeft, i += 4)
-                    {
-                        var vertexIndex = mesh.TriangleCommands[i];
-                        var lightIndex = mesh.TriangleCommands[i + 1];
-                        var sCoord = mesh.TriangleCommands[i + 2];
-                        var tCoord = mesh.TriangleCommands[i + 3];
-
-                        vertices.Add(new StudioVertex
-                        {
-                            WorldTexture = new WorldTextureCoordinate
-                            {
-                                Vertex = subModel.Vertices[vertexIndex].Vertex,
-                                Texture = new Vector2((float)(sCoord / (double)texture.Width), (float)(tCoord / (double)texture.Height))
-                            },
-                            BoneIndex = (uint)subModel.Vertices[vertexIndex].Bone
-                        });
-                    }
-
-                    var trianglesToAdd = command - 2;
-
-                    if (isFan)
-                    {
-                        for (var triangle = 0; triangle < trianglesToAdd; ++triangle)
-                        {
-                            indices.Add((uint)firstVertex);
-                            indices.Add((uint)(firstVertex + triangle + 1));
-                            indices.Add((uint)(firstVertex + triangle + 2));
-                        }
-                    }
-                    else
-                    {
-                        for (var triangle = 0; triangle < trianglesToAdd; ++triangle)
-                        {
-                            //Every other triangle is inverted because strips normally do that internally
-                            if ((triangle % 2) == 0)
-                            {
-                                indices.Add((uint)firstVertex);
-                                indices.Add((uint)(firstVertex + 1));
-                                indices.Add((uint)(firstVertex + 2));
-                            }
-                            else
-                            {
-                                indices.Add((uint)(firstVertex + 2));
-                                indices.Add((uint)(firstVertex + 1));
-                                indices.Add((uint)firstVertex);
-                            }
-
-                            ++firstVertex;
-                        }
-                    }
-                }
-
-                meshes.Add(new MeshData
-                {
-                    Mesh = mesh,
-                    StartIndex = (uint)firstIndex,
-                    IndicesCount = (uint)(indices.Count - firstIndex)
-                });
-            }
-
-            return new SubModelData
-            {
-                Meshes = meshes.ToArray()
-            };
-        }
-
-        private BodyPartData CreateBodyPart(BodyPart bodyPart, List<StudioVertex> vertices, List<uint> indices)
-        {
-            var subModels = new List<SubModelData>(bodyPart.Models.Count);
-
-            foreach (var subModel in bodyPart.Models)
-            {
-                subModels.Add(CreateSubModel(subModel, vertices, indices));
-            }
-
-            return new BodyPartData
-            {
-                SubModels = subModels.ToArray()
-            };
-        }
-
-        private void CreateTextures(GraphicsDevice gd, ResourceFactory factory, SceneContext sc, ResourceCache cache)
-        {
-            var textures = new List<ResourceSet>(_studioModel.StudioFile.Textures.Count);
-
-            foreach (var texture in _studioModel.StudioFile.Textures)
-            {
-                //TODO: disable mipmaps when NoMips is provided
-                var uploadedTexture = sc.TextureLoader.LoadTexture(
-                        new IndexedColor256Image(texture.Palette, texture.Pixels, texture.Width, texture.Height),
-                        (texture.Flags & TextureFlags.Alpha) != 0 ? TextureFormat.AlphaTest : TextureFormat.Normal,
-                        _studioModel.Name + texture.Name,
-                        gd,
-                        cache);
-
-                var view = cache.GetTextureView(gd.ResourceFactory, uploadedTexture);
-
-                textures.Add(factory.CreateResourceSet(new ResourceSetDescription(_factory.TextureLayout, view)));
-            }
-
-            _textures = textures.ToArray();
         }
     }
 }
