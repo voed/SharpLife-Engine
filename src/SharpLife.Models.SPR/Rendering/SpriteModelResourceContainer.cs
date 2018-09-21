@@ -20,12 +20,7 @@ using SharpLife.Models.SPR.Loading;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using SharpLife.Utility.Mathematics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
@@ -42,8 +37,7 @@ namespace SharpLife.Models.SPR.Rendering
 
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
-        private readonly List<DeviceBuffer> _frameBuffers = new List<DeviceBuffer>();
-
+        private DeviceBuffer[] _frameBuffers;
         private DeviceBuffer _ib;
         private DeviceBuffer _renderColorBuffer;
         private ResourceSet _resourceSet;
@@ -252,7 +246,7 @@ namespace SharpLife.Models.SPR.Rendering
 
             cl.UpdateBuffer(_renderColorBuffer, 0, ref renderColor);
 
-            renderData.Frame = Math.Clamp((int)renderData.Frame, 0, _frameBuffers.Count - 1);
+            renderData.Frame = Math.Clamp((int)renderData.Frame, 0, _frameBuffers.Length - 1);
 
             var frameBuffer = _frameBuffers[(int)renderData.Frame];
 
@@ -262,7 +256,7 @@ namespace SharpLife.Models.SPR.Rendering
             cl.SetIndexBuffer(_ib, IndexFormat.UInt16);
             cl.SetPipeline(pipeline);
             cl.SetGraphicsResourceSet(0, _resourceSet);
-            cl.DrawIndexed((uint)Indices.Length, 1, 0, 0, 0);
+            cl.DrawIndexed((uint)SPRResourceUtils.Indices.Length, 1, 0, 0, 0);
         }
 
         public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
@@ -274,14 +268,14 @@ namespace SharpLife.Models.SPR.Rendering
 
             var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
-            var atlasImage = CreateSpriteAtlas(gd, disposeFactory, sc);
+            (var atlasImage, var frameBuffers) = SPRResourceUtils.CreateSpriteAtlas(_spriteModel.SpriteFile, gd, disposeFactory, sc.TextureLoader);
 
             //TODO: disable mipmapping for certain sprites?
             var texture = sc.MapResourceCache.AddTexture2D(gd, disposeFactory, new ImageSharpTexture(atlasImage, true), $"{_spriteModel.Name}_atlas");
 
-            _ib = disposeFactory.CreateBuffer(new BufferDescription(Indices.SizeInBytes(), BufferUsage.IndexBuffer));
+            _frameBuffers = frameBuffers;
 
-            gd.UpdateBuffer(_ib, 0, Indices);
+            _ib = SPRResourceUtils.CreateIndexBuffer(gd, disposeFactory);
 
             _renderColorBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<Vector4>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
@@ -298,119 +292,6 @@ namespace SharpLife.Models.SPR.Rendering
                 _renderColorBuffer));
         }
 
-        private Image<Rgba32> CreateSpriteAtlas(GraphicsDevice gd, DisposeCollectorResourceFactory disposeFactory, SceneContext sc)
-        {
-            //Merge all of the sprite frames together into one texture
-            //The sprite's bounds are the maximum size that a frame can be
-            //Since most sprites have identical frame sizes, this lets us optimize pretty well
-
-            //Determine how many frames to put on one line
-            //This helps optimize texture size
-            var framesPerLine = (int)Math.Ceiling(Math.Sqrt(_spriteModel.SpriteFile.Frames.Count));
-
-            //Account for the change in size when converting textures
-            (var maximumWith, var maximumHeight) = sc.TextureLoader.ComputeScaledSize(_spriteModel.SpriteFile.MaximumWidth, _spriteModel.SpriteFile.MaximumHeight);
-
-            var totalWidth = maximumWith * framesPerLine;
-            var totalHeight = maximumHeight * framesPerLine;
-
-            var atlasImage = new Image<Rgba32>(totalWidth, totalHeight);
-
-            var graphicsOptions = GraphicsOptions.Default;
-
-            graphicsOptions.BlenderMode = PixelBlenderMode.Src;
-
-            var nextFramePosition = new Point();
-
-            //Determine which texture format it is
-            TextureFormat textureFormat;
-
-            switch (_spriteModel.SpriteFile.TextureFormat)
-            {
-                case SpriteTextureFormat.Normal:
-                case SpriteTextureFormat.Additive:
-                    textureFormat = TextureFormat.Normal;
-                    break;
-                case SpriteTextureFormat.AlphaTest:
-                    textureFormat = TextureFormat.AlphaTest;
-                    break;
-                default:
-                    textureFormat = TextureFormat.IndexAlpha;
-                    break;
-            }
-
-            foreach (var frame in _spriteModel.SpriteFile.Frames)
-            {
-                //Each individual texture is converted before being added to the atlas to avoid bleeding effects between frames
-                var frameImage = sc.TextureLoader.ConvertTexture(
-                    new IndexedColor256Image(_spriteModel.SpriteFile.Palette, frame.TextureData, frame.Area.Width, frame.Area.Height),
-                    textureFormat);
-
-                atlasImage.Mutate(context => context.DrawImage(graphicsOptions, frameImage, nextFramePosition));
-
-                //Note: The frame origin does not apply to texture coordinates, only to vertex offsets
-                //Important! these are float types
-                PointF frameOrigin = nextFramePosition;
-
-                var frameSize = new SizeF(frameImage.Width, frameImage.Height);
-
-                //Convert to texture coordinates
-                frameOrigin.X /= totalWidth;
-                frameOrigin.Y /= totalHeight;
-
-                frameSize.Width /= totalWidth;
-                frameSize.Height /= totalHeight;
-
-                //The vertices should be scaled to match the frame size
-                //These don't need to be modified to account for texture scale!
-                var scale = new Vector3(0, frame.Area.Width, frame.Area.Height);
-                var translation = new Vector3(0, frame.Area.X, frame.Area.Y);
-
-                //Construct the vertices
-                var vertices = new WorldTextureCoordinate[]
-                {
-                    new WorldTextureCoordinate
-                    {
-                        Vertex = (Vertices[0] * scale) + translation,
-                        Texture = new Vector2(frameOrigin.X, frameOrigin.Y)
-                    },
-                    new WorldTextureCoordinate
-                    {
-                        Vertex = (Vertices[1] * scale) + translation,
-                        Texture = new Vector2(frameOrigin.X + frameSize.Width, frameOrigin.Y)
-                    },
-                    new WorldTextureCoordinate
-                    {
-                        Vertex = (Vertices[2] * scale) + translation,
-                        Texture = new Vector2(frameOrigin.X + frameSize.Width, frameOrigin.Y + frameSize.Height)
-                    }
-                    ,
-                    new WorldTextureCoordinate
-                    {
-                        Vertex = (Vertices[3] * scale) + translation,
-                        Texture = new Vector2(frameOrigin.X, frameOrigin.Y + frameSize.Height)
-                    }
-                };
-
-                var vb = disposeFactory.CreateBuffer(new BufferDescription(vertices.SizeInBytes(), BufferUsage.VertexBuffer));
-
-                gd.UpdateBuffer(vb, 0, vertices);
-
-                _frameBuffers.Add(vb);
-
-                nextFramePosition.X += maximumWith;
-
-                //Wrap to next line
-                if (nextFramePosition.X >= totalWidth)
-                {
-                    nextFramePosition.X = 0;
-                    nextFramePosition.Y += maximumHeight;
-                }
-            }
-
-            return atlasImage;
-        }
-
         public override void DestroyDeviceObjects(ResourceScope scope)
         {
             if ((scope & ResourceScope.Map) == 0)
@@ -419,26 +300,7 @@ namespace SharpLife.Models.SPR.Rendering
             }
 
             _disposeCollector.DisposeAll();
-            _frameBuffers.Clear();
+            _frameBuffers = null;
         }
-
-        private static readonly Vector3[] Vertices = new Vector3[]
-        {
-            //TODO: verify that these are correct
-            //Upper left
-            new Vector3(0, 1, 1),
-            //Upper right
-            new Vector3(0, 0, 1),
-            //Lower right
-            new Vector3(0, 0, 0),
-            //Lower left
-            new Vector3(0, 1, 0),
-        };
-
-        private static readonly ushort[] Indices = new ushort[]
-        {
-            0, 1, 2,
-            2, 3, 0
-        };
     }
 }
