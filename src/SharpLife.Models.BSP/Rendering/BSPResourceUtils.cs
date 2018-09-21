@@ -13,9 +13,8 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.FileFormats.WAD;
 using SharpLife.Models.BSP.FileFormat;
-using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -123,7 +122,6 @@ namespace SharpLife.Models.BSP.Rendering
         /// </summary>
         /// <param name="bspFile"></param>
         /// <param name="face"></param>
-        /// <param name="resourceCache"></param>
         /// <param name="numLightmaps"></param>
         /// <param name="smax"></param>
         /// <param name="tmax"></param>
@@ -163,23 +161,19 @@ namespace SharpLife.Models.BSP.Rendering
         /// </summary>
         /// <param name="bspFile"></param>
         /// <param name="faces"></param>
-        /// <param name="resourceCache"></param>
-        /// <param name="gd"></param>
-        /// <param name="sc"></param>
-        /// <param name="textureLayout"></param>
-        /// <param name="lightmapBuilders"></param>
+        /// <param name="texture"></param>
+        /// <param name="textureResourceSet"></param>
         /// <param name="defaultLightmapTexture"></param>
+        /// <param name="lightmapBuilders"></param>
         /// <param name="vertices"></param>
         /// <param name="indices"></param>
         public static void BuildFacesBuffer(
             BSPFile bspFile,
             IReadOnlyList<Face> faces,
-            ResourceCache resourceCache,
-            GraphicsDevice gd,
-            SceneContext sc,
-            ResourceLayout textureLayout,
-            List<LightmapBuilder> lightmapBuilders,
+            MipTexture texture,
+            ResourceSet textureResourceSet,
             Image<Rgba32> defaultLightmapTexture,
+            List<LightmapBuilder> lightmapBuilders,
             List<BSPSurfaceData> vertices,
             List<uint> indices)
         {
@@ -193,34 +187,24 @@ namespace SharpLife.Models.BSP.Rendering
                 throw new ArgumentNullException(nameof(faces));
             }
 
-            if (resourceCache == null)
+            if (texture == null)
             {
-                throw new ArgumentNullException(nameof(resourceCache));
+                throw new ArgumentNullException(nameof(texture));
             }
 
-            if (gd == null)
+            if (textureResourceSet == null)
             {
-                throw new ArgumentNullException(nameof(gd));
-            }
-
-            if (sc == null)
-            {
-                throw new ArgumentNullException(nameof(sc));
-            }
-
-            if (textureLayout == null)
-            {
-                throw new ArgumentNullException(nameof(textureLayout));
-            }
-
-            if (lightmapBuilders == null)
-            {
-                throw new ArgumentNullException(nameof(lightmapBuilders));
+                throw new ArgumentNullException(nameof(textureResourceSet));
             }
 
             if (defaultLightmapTexture == null)
             {
                 throw new ArgumentNullException(nameof(defaultLightmapTexture));
+            }
+
+            if (lightmapBuilders == null)
+            {
+                throw new ArgumentNullException(nameof(lightmapBuilders));
             }
 
             if (vertices == null)
@@ -238,17 +222,6 @@ namespace SharpLife.Models.BSP.Rendering
                 throw new ArgumentException("Cannot create a face buffer when no faces are provided");
             }
 
-            var factory = gd.ResourceFactory;
-
-            var mipTexture = faces[0].TextureInfo.MipTexture;
-
-            var texture = resourceCache.GetTexture2D(mipTexture.Name);
-
-            //If not found, fallback to have a valid texture
-            texture = texture ?? resourceCache.GetPinkTexture(gd, factory);
-
-            var view = resourceCache.GetTextureView(factory, texture);
-
             var lightmapBuilder = lightmapBuilders[lightmapBuilders.Count - 1];
 
             var firstVertex = vertices.Count;
@@ -258,10 +231,7 @@ namespace SharpLife.Models.BSP.Rendering
             {
                 lightmapBuilder.AddTextureData(new SingleTextureData
                 {
-                    Texture = factory.CreateResourceSet(new ResourceSetDescription(
-                            textureLayout,
-                            view,
-                            sc.MainSampler)),
+                    Texture = textureResourceSet,
                     FirstIndex = (uint)firstIndex,
                     IndicesCount = (uint)(indices.Count - firstIndex)
                 });
@@ -311,10 +281,10 @@ namespace SharpLife.Models.BSP.Rendering
                     foreach (var point in face.Points)
                     {
                         var s = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
-                        s /= mipTexture.Width;
+                        s /= texture.Width;
 
                         var t = Vector3.Dot(point, textureInfo.TNormal) + textureInfo.TValue;
-                        t /= mipTexture.Height;
+                        t /= texture.Height;
 
                         var lightmapS = Vector3.Dot(point, textureInfo.SNormal) + textureInfo.SValue;
                         lightmapS -= face.TextureMins[0];

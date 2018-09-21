@@ -152,16 +152,26 @@ namespace SharpLife.Models.BSP.Rendering
                 {
                     if (faces.Key != "sky")
                     {
-                        //Don't use the dispose factory because some of the created resources are already managed elsewhere
+                        var facesList = faces.ToList();
+
+                        var mipTexture = facesList[0].TextureInfo.MipTexture;
+
+                        var texture = sc.MapResourceCache.GetTexture2D(mipTexture.Name);
+
+                        //If not found, fallback to have a valid texture
+                        texture = texture ?? sc.MapResourceCache.GetPinkTexture(gd, gd.ResourceFactory);
+
+                        var view = sc.MapResourceCache.GetTextureView(gd.ResourceFactory, texture);
+
+                        var textureResourceSet = gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(_factory.TextureLayout, view, sc.MainSampler));
+
                         BSPResourceUtils.BuildFacesBuffer(
                             _bspModel.BSPFile,
-                            faces.ToList(),
-                            sc.MapResourceCache,
-                            gd,
-                            sc,
-                            _factory.TextureLayout,
-                            lightmapBuilders,
+                            facesList,
+                            mipTexture,
+                            textureResourceSet,
                             defaultLightmapTexture,
+                            lightmapBuilders,
                             vertices,
                             indices);
                     }
