@@ -17,13 +17,17 @@ using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Input;
+using SharpLife.Models.BSP.FileFormat;
+using SharpLife.Models.BSP.Rendering;
 using SharpLife.Renderer;
+using SharpLife.Utility;
 using SharpLife.Utility.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
@@ -50,6 +54,10 @@ namespace SharpLife.Game.Client.Renderer.Shared
         private readonly IVariable _fullbright;
 
         private bool _lightingSettingChanged;
+
+        private readonly LightStyles _lightStyles = new LightStyles();
+
+        private readonly int[] _cachedLightStyles = new int[BSPConstants.MaxLightStyles];
 
         public Camera Camera { get; }
 
@@ -145,8 +153,10 @@ namespace SharpLife.Game.Client.Renderer.Shared
             _updateables.Add(updateable);
         }
 
-        public void Update(float deltaSeconds)
+        public void Update(ITime engineTime, float deltaSeconds)
         {
+            _lightStyles.AnimateLights(engineTime);
+
             VectorUtils.AngleToVectors(Angles, out _viewAngles);
 
             foreach (IUpdateable updateable in _updateables)
@@ -163,6 +173,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
         private void RenderAllSingleThread(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
             CheckLightingInfo(gd, sc);
+            UpdateLightStyles(gd, sc);
 
             float depthClear = gd.IsDepthRangeZeroToOne ? 0f : 1f;
 
@@ -270,6 +281,34 @@ namespace SharpLife.Game.Client.Renderer.Shared
             if (_lightingSettingChanged)
             {
                 UpdateLightingInfo(gd, sc);
+            }
+        }
+
+        public void InitializeLightStyles()
+        {
+            _lightStyles.Initialize();
+
+            //Reset the buffer so all styles will update in UpdateLightStyles
+            Array.Fill(_cachedLightStyles, LightStyles.InvalidLightValue);
+        }
+
+        public void UpdateLightStyles(GraphicsDevice gd, SceneContext sc)
+        {
+            if (sc.LightStylesBuffer != null)
+            {
+                //Update the style buffer now, before anything is drawn
+                for (var i = 0; i < BSPConstants.MaxLightStyles; ++i)
+                {
+                    var value = _lightStyles.GetStyleValue(i);
+
+                    if (_cachedLightStyles[i] != value)
+                    {
+                        _cachedLightStyles[i] = value;
+
+                        //Index is multiplied here because of padding. See buffer creation code
+                        gd.UpdateBuffer(sc.LightStylesBuffer, (uint)(i * Marshal.SizeOf<float>() * SceneContext.LightStylesElementMultiplier), ref value);
+                    }
+                }
             }
         }
 

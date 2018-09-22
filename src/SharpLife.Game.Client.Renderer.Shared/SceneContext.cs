@@ -15,9 +15,11 @@
 
 using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
+using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Veldrid;
@@ -26,6 +28,9 @@ namespace SharpLife.Game.Client.Renderer.Shared
 {
     public class SceneContext
     {
+        //Must be sizeof(vec4) / sizeof(float) so it matches the buffer padding
+        public static readonly int LightStylesElementMultiplier = Marshal.SizeOf<Vector4>() / Marshal.SizeOf<float>();
+
         public ResourceCache GlobalResourceCache { get; }
         public ResourceCache MapResourceCache { get; }
 
@@ -44,6 +49,8 @@ namespace SharpLife.Game.Client.Renderer.Shared
         /// Contains lighting info for gamma correction and brightness adjustment
         /// </summary>
         public DeviceBuffer LightingInfoBuffer { get; private set; }
+
+        public DeviceBuffer LightStylesBuffer { get; private set; }
 
         // MainSceneView resource set uses this.
         public ResourceLayout TextureSamplerResourceLayout { get; private set; }
@@ -72,12 +79,23 @@ namespace SharpLife.Game.Client.Renderer.Shared
 
         public virtual void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)
         {
-            ResourceFactory factory = gd.ResourceFactory;
+            var factory = gd.ResourceFactory;
             ProjectionMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             ViewMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             CameraInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<CameraInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             WorldAndInverseBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<WorldAndInverse>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             LightingInfoBuffer = factory.CreateBuffer(new BufferDescription((uint)Unsafe.SizeOf<LightingInfo>(), BufferUsage.UniformBuffer));
+
+            //Float arrays are handled by padding each element up to the size of a vec4,
+            //so we have to account for the padding in creating and initializing the buffer
+            var numLightStyleElements = BSPConstants.MaxLightStyles * LightStylesElementMultiplier;
+
+            LightStylesBuffer = factory.CreateBuffer(new BufferDescription((uint)(numLightStyleElements * Marshal.SizeOf<int>()), BufferUsage.UniformBuffer));
+
+            //Initialize the buffer to all zeroes
+            var lightStylesValues = new float[numLightStyleElements];
+            Array.Fill(lightStylesValues, 0.0f);
+            gd.UpdateBuffer(LightStylesBuffer, 0, lightStylesValues);
 
             //TODO: pull filter settings and anisotropy from config
             var mainSamplerDescription = new SamplerDescription
@@ -114,6 +132,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
             WorldAndInverseBuffer.Dispose();
             LightingInfoBuffer.Dispose();
             LightingInfoBuffer = null;
+            LightStylesBuffer.Dispose();
             MainSampler.Dispose();
             MainSceneColorTexture.Dispose();
             MainSceneResolvedColorTexture.Dispose();

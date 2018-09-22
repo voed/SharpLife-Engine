@@ -47,7 +47,7 @@ namespace SharpLife.Game.Client.Renderer
     /// The main renderer
     /// Manages current graphics state, devices, etc
     /// </summary>
-    public class Renderer : IRenderer
+    public class Renderer
     {
         private readonly IWindow _window;
 
@@ -78,16 +78,10 @@ namespace SharpLife.Game.Client.Renderer
 
         private event Action<int, int> _resizeHandled;
 
-        private readonly LightStyles _lightStyles = new LightStyles();
-
         public Scene Scene { get; }
 
         private readonly ModelResourcesManager _modelResourcesManager;
         private readonly ModelRenderer _modelRenderer;
-
-        public event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderBegin;
-
-        public event Action<IRenderer, GraphicsDevice, CommandList, SceneContext> OnRenderEnd;
 
         public Renderer(
             IWindow window,
@@ -165,7 +159,7 @@ namespace SharpLife.Game.Client.Renderer
             {
                 {typeof(SpriteModel), new SpriteModelResourceFactory(_logger) },
                 { typeof(StudioModel), new StudioModelResourceFactory() },
-                { typeof(BSPModel), new BSPModelResourceFactory(this, _lightStyles) }
+                { typeof(BSPModel), new BSPModelResourceFactory() }
             };
         }
 
@@ -290,8 +284,7 @@ namespace SharpLife.Game.Client.Renderer
 
         public void Update(float deltaSeconds)
         {
-            _lightStyles.AnimateLights(_engineTime);
-            Scene.Update(deltaSeconds);
+            Scene.Update(_engineTime, deltaSeconds);
         }
 
         public void Draw()
@@ -315,11 +308,7 @@ namespace SharpLife.Game.Client.Renderer
 
             _frameCommands.Begin();
 
-            OnRenderBegin?.Invoke(this, _gd, _frameCommands, _sc);
-
             Scene.RenderAllStages(_gd, _frameCommands, _sc);
-
-            OnRenderEnd?.Invoke(this, _gd, _frameCommands, _sc);
 
             _gd.SwapBuffers();
         }
@@ -376,7 +365,7 @@ namespace SharpLife.Game.Client.Renderer
             ClearBSP();
 
             //Reset light styles
-            _lightStyles.Initialize();
+            Scene.InitializeLightStyles();
 
             UploadWADTextures(worldModel);
 

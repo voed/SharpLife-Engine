@@ -201,7 +201,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
                 sc.ViewMatrixBuffer,
                 sc.WorldAndInverseBuffer,
                 sc.LightingInfoBuffer,
-                _factory.LightStylesBuffer,
+                sc.LightStylesBuffer,
                 _factory.RenderArgumentsBuffer));
         }
 

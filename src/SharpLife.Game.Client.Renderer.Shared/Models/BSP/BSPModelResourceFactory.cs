@@ -17,10 +17,7 @@ using SharpLife.Game.Client.Renderer.Shared.Utility;
 using SharpLife.Game.Shared.Models;
 using SharpLife.Game.Shared.Models.BSP;
 using SharpLife.Models;
-using SharpLife.Models.BSP.FileFormat;
-using SharpLife.Models.BSP.Rendering;
 using System;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
@@ -29,14 +26,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
     public sealed class BSPModelResourceFactory : IModelResourceFactory
     {
-        //Must be sizeof(vec4) / sizeof(float) so it matches the buffer padding
-        private static readonly int LightStylesElementMultiplier = Marshal.SizeOf<Vector4>() / Marshal.SizeOf<float>();
-
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
-
-        private readonly int[] _cachedLightStyles = new int[BSPConstants.MaxLightStyles];
-
-        public LightStyles LightStyles { get; }
 
         public ResourceLayout SharedLayout { get; private set; }
         public ResourceLayout TextureLayout { get; private set; }
@@ -44,21 +34,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
         public RenderModePipelines Pipelines { get; private set; }
 
-        public DeviceBuffer LightStylesBuffer { get; private set; }
-
         public DeviceBuffer RenderArgumentsBuffer { get; private set; }
-
-        public BSPModelResourceFactory(IRenderer renderer, LightStyles lightStyles)
-        {
-            if (renderer == null)
-            {
-                throw new ArgumentNullException(nameof(renderer));
-            }
-
-            renderer.OnRenderBegin += OnRenderBegin;
-
-            LightStyles = lightStyles ?? throw new ArgumentNullException(nameof(lightStyles));
-        }
 
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
@@ -174,20 +150,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
             Pipelines = new RenderModePipelines(pipelines);
 
-            //Reset the buffer so all styles will update in OnRenderBegin
-            Array.Fill(_cachedLightStyles, LightStyles.InvalidLightValue);
-
-            //Float arrays are handled by padding each element up to the size of a vec4,
-            //so we have to account for the padding in creating and initializing the buffer
-            var numLightStyleElements = BSPConstants.MaxLightStyles * LightStylesElementMultiplier;
-
-            LightStylesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(numLightStyleElements * Marshal.SizeOf<int>()), BufferUsage.UniformBuffer));
-
-            //Initialize the buffer to all zeroes
-            var lightStylesValues = new float[numLightStyleElements];
-            Array.Fill(lightStylesValues, 0.0f);
-            gd.UpdateBuffer(LightStylesBuffer, 0, lightStylesValues);
-
             RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<BSPRenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         }
 
@@ -200,7 +162,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
             _disposeCollector.DisposeAll();
 
-            LightStylesBuffer = null;
             RenderArgumentsBuffer = null;
         }
 
@@ -217,26 +178,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             }
 
             return new BSPModelResourceContainer(this, bspModel);
-        }
-
-        private void OnRenderBegin(IRenderer renderer, GraphicsDevice gd, CommandList cl, SceneContext sc)
-        {
-            if (LightStylesBuffer != null)
-            {
-                //Update the style buffer now, before anything is drawn
-                for (var i = 0; i < BSPConstants.MaxLightStyles; ++i)
-                {
-                    var value = LightStyles.GetStyleValue(i);
-
-                    if (_cachedLightStyles[i] != value)
-                    {
-                        _cachedLightStyles[i] = value;
-
-                        //Index is multiplied here because of padding. See buffer creation code
-                        gd.UpdateBuffer(LightStylesBuffer, (uint)(i * Marshal.SizeOf<float>() * LightStylesElementMultiplier), ref value);
-                    }
-                }
-            }
         }
     }
 }
