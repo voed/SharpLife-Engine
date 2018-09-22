@@ -71,7 +71,7 @@ namespace SharpLife.Game.Server.Entities.NPCs
                         dt = flMax;
                 }
 
-                var sequence = studioModel.StudioFile.Sequences[0];
+                var sequence = studioModel.StudioFile.Sequences[(int)Sequence];
 
                 var increment = (float)(FrameRate * sequence.FPS * dt);
 

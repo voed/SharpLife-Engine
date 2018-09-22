@@ -29,6 +29,9 @@ namespace SharpLife.Game.Client.Entities.Animation
     [Networkable]
     public class BaseAnimating : NetworkedEntity
     {
+        [Networked]
+        public uint Sequence { get; set; }
+
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
@@ -43,6 +46,7 @@ namespace SharpLife.Game.Client.Entities.Animation
                 {
                     Model = studioModel,
                     Shared = GetSharedModelRenderData(viewState),
+                    Sequence = Sequence,
                     Frame = Frame
                 };
 

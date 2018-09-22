@@ -59,16 +59,16 @@ namespace SharpLife.Models.MDL.Rendering
             return controllerIndex != MDLConstants.MouthControllerIndex;
         }
 
-        public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, int sequenceIndex, float frame, in BoneData boneData)
+        public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, uint sequenceIndex, float frame, in BoneData boneData)
         {
             _currentModel = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
 
-            if (sequenceIndex < 0 || sequenceIndex >= _currentModel.Sequences.Count)
+            if (sequenceIndex >= _currentModel.Sequences.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(sequenceIndex));
             }
 
-            var sequence = _currentModel.Sequences[sequenceIndex];
+            var sequence = _currentModel.Sequences[(int)sequenceIndex];
 
             var animations = sequence.AnimationBlends;
 

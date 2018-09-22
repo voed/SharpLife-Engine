@@ -65,9 +65,23 @@ namespace SharpLife.Game.Shared.Entities
         [Networked]
         public EntityFlags Flags { get; set; }
 
+        private IModel _model;
+
         //TODO: will need handlers to update size
         [Networked]
-        public IModel Model { get; set; }
+        public IModel Model
+        {
+            get => _model;
+
+            set
+            {
+                var oldModel = _model;
+
+                _model = value;
+
+                OnModelChanged(oldModel, _model);
+            }
+        }
 
         /// <summary>
         /// Convenience for checking and setting if an entity has been marked as needing destruction
@@ -95,6 +109,15 @@ namespace SharpLife.Game.Shared.Entities
         protected SharedBaseEntity(bool networked)
         {
             Networked = networked;
+        }
+
+        /// <summary>
+        /// Called whenever the model changes
+        /// </summary>
+        /// <param name="oldModel"></param>
+        /// <param name="newModel"></param>
+        protected virtual void OnModelChanged(IModel oldModel, IModel newModel)
+        {
         }
     }
 }

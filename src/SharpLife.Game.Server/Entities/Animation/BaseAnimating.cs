@@ -16,6 +16,8 @@
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
+using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Models;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 
 namespace SharpLife.Game.Server.Entities.Animation
@@ -26,11 +28,39 @@ namespace SharpLife.Game.Server.Entities.Animation
     [Networkable]
     public class BaseAnimating : NetworkedEntity
     {
+        public StudioModel StudioModel => Model as StudioModel;
+
+        private uint _sequence;
+
+        [Networked]
+        public uint Sequence
+        {
+            get => _sequence;
+            set
+            {
+                var studioModel = StudioModel;
+
+                if (studioModel != null && value < studioModel.StudioFile.Sequences.Count)
+                {
+                    _sequence = value;
+                    return;
+                }
+
+                _sequence = 0;
+            }
+        }
+
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
         [Networked]
         public float FrameRate { get; set; }
+
+        protected override void OnModelChanged(IModel oldModel, IModel newModel)
+        {
+            //Reset model specific info
+            Sequence = 0;
+        }
 
         public override bool KeyValue(string key, string value)
         {
