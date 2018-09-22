@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Models.MDL;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Rendering;
 using SharpLife.Renderer.Utility;
@@ -116,9 +117,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             cl.SetVertexBuffer(0, modelResource.VertexBuffer);
             cl.SetIndexBuffer(modelResource.IndexBuffer, IndexFormat.UInt32);
 
-            foreach (var bodyPart in modelResource.BodyParts)
+            for (var bodyPartIndex = 0; bodyPartIndex < modelResource.BodyParts.Length; ++bodyPartIndex)
             {
-                var subModel = bodyPart.SubModels[0];
+                var bodyPart = modelResource.BodyParts[bodyPartIndex];
+
+                var subModelIndex = StudioModelUtils.GetBodyGroupValue(renderData.Model.StudioFile, renderData.Body, (uint)bodyPartIndex);
+
+                var subModel = bodyPart.SubModels[subModelIndex];
 
                 foreach (var mesh in subModel.Meshes)
                 {

@@ -35,8 +35,15 @@ namespace SharpLife.Game.Client.Entities.Animation
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
+        //TODO: may not need to be networked for studio models
         [Networked]
         public float FrameRate { get; set; }
+
+        [Networked]
+        public uint Body { get; set; }
+
+        [Networked]
+        public int Skin { get; set; }
 
         public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
@@ -47,7 +54,9 @@ namespace SharpLife.Game.Client.Entities.Animation
                     Model = studioModel,
                     Shared = GetSharedModelRenderData(viewState),
                     Sequence = Sequence,
-                    Frame = Frame
+                    Frame = Frame,
+                    Body = Body,
+                    Skin = Skin,
                 };
 
                 modelRenderer.RenderStudioModel(ref renderData);

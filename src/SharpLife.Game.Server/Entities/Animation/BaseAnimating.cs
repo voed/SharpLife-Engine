@@ -18,6 +18,7 @@ using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Game.Shared.Models.MDL;
 using SharpLife.Models;
+using SharpLife.Models.MDL;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 
 namespace SharpLife.Game.Server.Entities.Animation
@@ -56,6 +57,12 @@ namespace SharpLife.Game.Server.Entities.Animation
         [Networked]
         public float FrameRate { get; set; }
 
+        [Networked]
+        public uint Body { get; set; }
+
+        [Networked]
+        public int Skin { get; set; }
+
         protected override void OnModelChanged(IModel oldModel, IModel newModel)
         {
             //Reset model specific info
@@ -71,6 +78,28 @@ namespace SharpLife.Game.Server.Entities.Animation
             }
 
             return base.KeyValue(key, value);
+        }
+
+        public uint GetBodyGroup(uint group)
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                return StudioModelUtils.GetBodyGroupValue(studioModel.StudioFile, Body, group);
+            }
+
+            return 0;
+        }
+
+        public void SetBodyGroup(uint group, uint value)
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                Body = StudioModelUtils.CalculateBodyGroupValue(studioModel.StudioFile, Body, group, value);
+            }
         }
     }
 }

@@ -28,7 +28,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public float Frame;
 
-        public int Body;
+        public uint Body;
 
         public int Skin;
 
