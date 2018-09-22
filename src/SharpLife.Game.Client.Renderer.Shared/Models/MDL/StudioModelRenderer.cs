@@ -101,6 +101,11 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, StudioModelResourceContainer modelResource, ref StudioModelRenderData renderData)
         {
+            if (renderData.Skin >= renderData.Model.StudioFile.Skins.Count)
+            {
+                renderData.Skin = 0;
+            }
+
             //TODO: implement
             var wai = new WorldAndInverse(renderData.Shared.Origin, renderData.Shared.Angles, renderData.Shared.Scale);
 
@@ -127,7 +132,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
                 foreach (var mesh in subModel.Meshes)
                 {
-                    cl.SetGraphicsResourceSet(1, modelResource.Textures[modelResource.StudioModel.StudioFile.Skins[0][mesh.Mesh.Skin]]);
+                    //TODO: consider possibility that there are no skins at all?
+                    cl.SetGraphicsResourceSet(1, modelResource.Textures[modelResource.StudioModel.StudioFile.Skins[(int)renderData.Skin][mesh.Mesh.Skin]]);
 
                     cl.DrawIndexed(mesh.IndicesCount, 1, mesh.StartIndex, 0, 0);
                 }

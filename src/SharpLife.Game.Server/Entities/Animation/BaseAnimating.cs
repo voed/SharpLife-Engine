@@ -61,7 +61,7 @@ namespace SharpLife.Game.Server.Entities.Animation
         public uint Body { get; set; }
 
         [Networked]
-        public int Skin { get; set; }
+        public uint Skin { get; set; }
 
         protected override void OnModelChanged(IModel oldModel, IModel newModel)
         {

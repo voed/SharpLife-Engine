@@ -43,7 +43,7 @@ namespace SharpLife.Game.Client.Entities.Animation
         public uint Body { get; set; }
 
         [Networked]
-        public int Skin { get; set; }
+        public uint Skin { get; set; }
 
         public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {

@@ -30,7 +30,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public uint Body;
 
-        public int Skin;
+        public uint Skin;
 
         public BoneData BoneData;
     }
