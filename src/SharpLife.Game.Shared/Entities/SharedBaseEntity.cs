@@ -63,9 +63,6 @@ namespace SharpLife.Game.Shared.Entities
         public Vector3 RenderColor { get; set; }
 
         [Networked]
-        public float FrameRate { get; set; }
-
-        [Networked]
         public EntityFlags Flags { get; set; }
 
         //TODO: will need handlers to update size

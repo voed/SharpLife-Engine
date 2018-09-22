@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
@@ -27,5 +28,19 @@ namespace SharpLife.Game.Server.Entities.Animation
     {
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
+
+        [Networked]
+        public float FrameRate { get; set; }
+
+        public override bool KeyValue(string key, string value)
+        {
+            if (key == "framerate")
+            {
+                FrameRate = KeyValueUtils.ParseFloat(value);
+                return true;
+            }
+
+            return base.KeyValue(key, value);
+        }
     }
 }

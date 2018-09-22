@@ -32,6 +32,9 @@ namespace SharpLife.Game.Client.Entities.Animation
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
+        [Networked]
+        public float FrameRate { get; set; }
+
         public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model is StudioModel studioModel)

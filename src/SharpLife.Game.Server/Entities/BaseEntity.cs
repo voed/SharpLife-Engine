@@ -106,12 +106,6 @@ namespace SharpLife.Game.Server.Entities
                 return true;
             }
 
-            if (key == "framerate")
-            {
-                FrameRate = KeyValueUtils.ParseFloat(value);
-                return true;
-            }
-
             return false;
         }
 
