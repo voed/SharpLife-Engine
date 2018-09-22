@@ -26,7 +26,6 @@ using System.Linq;
 using System.Numerics;
 using Veldrid;
 using Veldrid.Utilities;
-using static SharpLife.Game.Client.Renderer.Shared.Models.BSP.BSPModelResourceFactory;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
@@ -87,7 +86,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
             sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
-            var renderArguments = new RenderArguments
+            var renderArguments = new BSPRenderArguments
             {
                 RenderColor = GetBrushColor(ref renderData) / 255.0f,
                 RenderMode = renderData.RenderMode

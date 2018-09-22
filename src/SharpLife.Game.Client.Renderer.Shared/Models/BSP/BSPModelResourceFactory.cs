@@ -29,17 +29,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
     public sealed class BSPModelResourceFactory : IModelResourceFactory
     {
-        public struct RenderArguments
-        {
-            public Vector4 RenderColor;
-
-            public RenderMode RenderMode;
-
-            public int Padding0;
-            public int Padding1;
-            public int Padding2;
-        }
-
         //Must be sizeof(vec4) / sizeof(float) so it matches the buffer padding
         private static readonly int LightStylesElementMultiplier = Marshal.SizeOf<Vector4>() / Marshal.SizeOf<float>();
 
@@ -199,7 +188,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             Array.Fill(lightStylesValues, 0.0f);
             gd.UpdateBuffer(LightStylesBuffer, 0, lightStylesValues);
 
-            RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<RenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<BSPRenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
