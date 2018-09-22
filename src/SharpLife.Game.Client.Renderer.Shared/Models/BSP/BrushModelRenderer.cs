@@ -170,7 +170,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             DestroyDeviceObjects(ResourceScope.All);
         }
 
-        private static Vector4 GetBrushColor(ref ModelRenderData renderData)
+        private static Vector4 GetBrushColor(ref SharedModelRenderData renderData)
         {
             switch (renderData.RenderMode)
             {
@@ -192,21 +192,21 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             }
         }
 
-        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, BSPModelResourceContainer modelResource, ref ModelRenderData renderData)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, BSPModelResourceContainer modelResource, ref BrushModelRenderData renderData)
         {
-            var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
+            var wai = new WorldAndInverse(renderData.Shared.Origin, renderData.Shared.Angles, renderData.Shared.Scale);
 
             sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
             var renderArguments = new BSPRenderArguments
             {
-                RenderColor = GetBrushColor(ref renderData) / 255.0f,
-                RenderMode = renderData.RenderMode
+                RenderColor = GetBrushColor(ref renderData.Shared) / 255.0f,
+                RenderMode = renderData.Shared.RenderMode
             };
 
             cl.UpdateBuffer(RenderArgumentsBuffer, 0, ref renderArguments);
 
-            var pipeline = Pipelines[renderData.RenderMode];
+            var pipeline = Pipelines[renderData.Shared.RenderMode];
 
             cl.SetPipeline(pipeline);
             cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);

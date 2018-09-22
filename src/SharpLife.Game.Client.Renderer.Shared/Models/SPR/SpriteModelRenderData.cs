@@ -13,24 +13,15 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models;
-using SharpLife.Models;
-using System.Numerics;
+using SharpLife.Game.Shared.Models.SPR;
 
-namespace SharpLife.Game.Client.Renderer.Shared.Models
+namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 {
-    public struct ModelRenderData
+    public struct SpriteModelRenderData
     {
-        public IModel Model;
+        public SpriteModel Model;
 
-        public Vector3 Origin;
-        public Vector3 Angles;
-        public Vector3 Scale;
-
-        public RenderFX RenderFX;
-        public RenderMode RenderMode;
-        public int RenderAmount;
-        public Vector3 RenderColor;
+        public SharedModelRenderData Shared;
 
         public float Frame;
     }

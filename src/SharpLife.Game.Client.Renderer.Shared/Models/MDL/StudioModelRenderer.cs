@@ -98,10 +98,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             DestroyDeviceObjects(ResourceScope.All);
         }
 
-        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, StudioModelResourceContainer modelResource, ref ModelRenderData renderData)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, StudioModelResourceContainer modelResource, ref StudioModelRenderData renderData)
         {
             //TODO: implement
-            var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
+            var wai = new WorldAndInverse(renderData.Shared.Origin, renderData.Shared.Angles, renderData.Shared.Scale);
 
             sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 

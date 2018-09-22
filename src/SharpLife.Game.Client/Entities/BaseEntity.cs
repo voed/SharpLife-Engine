@@ -15,6 +15,9 @@
 
 using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Client.Renderer.Shared.Models;
+using SharpLife.Game.Client.Renderer.Shared.Models.BSP;
+using SharpLife.Game.Client.Renderer.Shared.Models.MDL;
+using SharpLife.Game.Client.Renderer.Shared.Models.SPR;
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Models;
@@ -181,9 +184,8 @@ namespace SharpLife.Game.Client.Entities
                 //Normal behaves as though render amount is always 255
                 var renderAmount = CalculateFXBlend(viewState, RenderMode != RenderMode.Normal ? RenderAmount : 255);
 
-                var renderData = new ModelRenderData
+                var sharedData = new SharedModelRenderData
                 {
-                    Model = Model,
                     Origin = Origin,
                     Angles = Angles,
                     Scale = new Vector3(scale),
@@ -192,27 +194,42 @@ namespace SharpLife.Game.Client.Entities
                     RenderMode = RenderMode,
                     RenderAmount = renderAmount,
                     RenderColor = RenderColor,
-
-                    Frame = Frame
                 };
 
                 switch (Model)
                 {
                     case SpriteModel spriteModel:
                         {
-                            modelRenderer.RenderSpriteModel(ref renderData);
+                            var spriteRenderData = new SpriteModelRenderData
+                            {
+                                Model = spriteModel,
+                                Shared = sharedData,
+                                Frame = Frame
+                            };
+                            modelRenderer.RenderSpriteModel(ref spriteRenderData);
                             break;
                         }
 
                     case StudioModel studioModel:
                         {
-                            modelRenderer.RenderStudioModel(ref renderData);
+                            var studioRenderData = new StudioModelRenderData
+                            {
+                                Model = studioModel,
+                                Shared = sharedData,
+                                Frame = Frame
+                            };
+                            modelRenderer.RenderStudioModel(ref studioRenderData);
                             break;
                         }
 
                     case BSPModel bspModel:
                         {
-                            modelRenderer.RenderBrushModel(ref renderData);
+                            var brushRenderData = new BrushModelRenderData
+                            {
+                                Model = bspModel,
+                                Shared = sharedData
+                            };
+                            modelRenderer.RenderBrushModel(ref brushRenderData);
                             break;
                         }
 

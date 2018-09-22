@@ -13,6 +13,10 @@
 *
 ****/
 
+using SharpLife.Game.Client.Renderer.Shared.Models.BSP;
+using SharpLife.Game.Client.Renderer.Shared.Models.MDL;
+using SharpLife.Game.Client.Renderer.Shared.Models.SPR;
+
 namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     /// <summary>
@@ -20,10 +24,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
     /// </summary>
     public interface IModelRenderer
     {
-        void RenderSpriteModel(ref ModelRenderData renderData);
+        void RenderSpriteModel(ref SpriteModelRenderData renderData);
 
-        void RenderStudioModel(ref ModelRenderData renderData);
+        void RenderStudioModel(ref StudioModelRenderData renderData);
 
-        void RenderBrushModel(ref ModelRenderData renderData);
+        void RenderBrushModel(ref BrushModelRenderData renderData);
     }
 }

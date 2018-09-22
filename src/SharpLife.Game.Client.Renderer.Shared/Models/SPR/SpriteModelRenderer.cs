@@ -166,7 +166,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
             DestroyDeviceObjects(ResourceScope.All);
         }
 
-        private Vector3 CalculateSpriteColor(ref ModelRenderData renderData, int alpha)
+        private Vector3 CalculateSpriteColor(ref SharedModelRenderData renderData, int alpha)
         {
             var colorMultiplier = renderData.RenderMode == RenderMode.Glow || renderData.RenderMode == RenderMode.TransAdd ? alpha : 256;
 
@@ -200,7 +200,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
             return color;
         }
 
-        private int GlowBlend(ref ModelRenderData renderData, IViewState viewState)
+        private int GlowBlend(ref SharedModelRenderData renderData, IViewState viewState)
         {
             var tmp = renderData.Origin - viewState.Origin;
 
@@ -237,7 +237,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
             }
         }
 
-        private Vector3 GetSpriteAngles(ref ModelRenderData renderData, SpriteType type, IViewState viewState)
+        private Vector3 GetSpriteAngles(ref SharedModelRenderData renderData, SpriteType type, IViewState viewState)
         {
             //Convert parallel sprites to parallel oriented if a roll was specified
             if (type == SpriteType.Parallel && renderData.Angles.Z != 0)
@@ -310,23 +310,23 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
             return new Vector3();
         }
 
-        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, SpriteModelResourceContainer modelResource, ref ModelRenderData renderData)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, SpriteModelResourceContainer modelResource, ref SpriteModelRenderData renderData)
         {
-            if (renderData.RenderMode == RenderMode.Glow)
+            if (renderData.Shared.RenderMode == RenderMode.Glow)
             {
-                renderData.RenderAmount = GlowBlend(ref renderData, sc.ViewState);
+                renderData.Shared.RenderAmount = GlowBlend(ref renderData.Shared, sc.ViewState);
             }
 
             //Don't render if blend is 0 (even if blend were ignored below)
-            if (renderData.RenderAmount == 0)
+            if (renderData.Shared.RenderAmount == 0)
             {
                 return;
             }
 
-            var blend = renderData.RenderMode != RenderMode.Normal ? renderData.RenderAmount : 255;
+            var blend = renderData.Shared.RenderMode != RenderMode.Normal ? renderData.Shared.RenderAmount : 255;
 
             //TODO: glow sprite visibility testing
-            var angles = GetSpriteAngles(ref renderData, modelResource.SpriteModel.SpriteFile.Type, sc.ViewState);
+            var angles = GetSpriteAngles(ref renderData.Shared, modelResource.SpriteModel.SpriteFile.Type, sc.ViewState);
 
             angles = VectorUtils.ToRadians(angles);
 
@@ -336,10 +336,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 
             anglesWithoutYaw.Y = 0;
 
-            wai.World = Matrix4x4.CreateScale(renderData.Scale)
+            wai.World = Matrix4x4.CreateScale(renderData.Shared.Scale)
                 * WorldAndInverse.CreateRotationMatrix(anglesWithoutYaw)
                 * WorldAndInverse.CreateRotationMatrix(new Vector3(0, angles.Y, 0))
-                * Matrix4x4.CreateTranslation(renderData.Origin);
+                * Matrix4x4.CreateTranslation(renderData.Shared.Origin);
 
             wai.InverseWorld = VdUtilities.CalculateInverseTranspose(ref wai.World);
 
@@ -349,7 +349,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 
             var alpha = 255;
 
-            switch (renderData.RenderMode)
+            switch (renderData.Shared.RenderMode)
             {
                 case RenderMode.Normal:
                 case RenderMode.TransTexture:
@@ -358,7 +358,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
                     break;
             }
 
-            var renderColor = new Vector4(CalculateSpriteColor(ref renderData, blend), alpha) / 255.0f;
+            var renderColor = new Vector4(CalculateSpriteColor(ref renderData.Shared, blend), alpha) / 255.0f;
 
             cl.UpdateBuffer(modelResource.RenderColorBuffer, 0, ref renderColor);
 
@@ -366,7 +366,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 
             var frameBuffer = modelResource.VertexBuffers[(int)renderData.Frame];
 
-            var pipeline = Pipelines[renderData.RenderMode];
+            var pipeline = Pipelines[renderData.Shared.RenderMode];
 
             cl.SetVertexBuffer(0, frameBuffer);
             cl.SetIndexBuffer(modelResource.IndexBuffer, IndexFormat.UInt16);

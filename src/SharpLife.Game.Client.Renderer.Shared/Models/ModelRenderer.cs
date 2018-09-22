@@ -16,9 +16,6 @@
 using SharpLife.Game.Client.Renderer.Shared.Models.BSP;
 using SharpLife.Game.Client.Renderer.Shared.Models.MDL;
 using SharpLife.Game.Client.Renderer.Shared.Models.SPR;
-using SharpLife.Game.Shared.Models.BSP;
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Renderer;
 using System;
 using System.Numerics;
@@ -61,73 +58,73 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
             BrushRenderer = brushRenderer ?? throw new ArgumentNullException(nameof(brushRenderer));
         }
 
-        public void RenderSpriteModel(ref ModelRenderData renderData)
+        public void RenderSpriteModel(ref SpriteModelRenderData renderData)
         {
             if (renderData.Model == null)
             {
                 throw new ArgumentNullException(nameof(renderData), $"{nameof(renderData.Model)} cannot be null");
             }
 
-            //TODO: each model type has its own render data struct, use proper type and remove this
-            if (!(renderData.Model is SpriteModel))
-            {
-                throw new ArgumentException($"Expected SPR model, got {renderData.Model.GetType().FullName}");
-            }
-
             if (!_active)
             {
-                throw new InvalidOperationException($"Cannot call {nameof(Render)} outside the render operation");
+                throw new InvalidOperationException($"Cannot call {nameof(RenderSpriteModel)} outside the render operation");
             }
 
             var resources = _resourcesManager.GetResources(renderData.Model);
 
-            SpriteRenderer.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, (SpriteModelResourceContainer)resources, ref renderData);
+            SpriteRenderer.Render(
+                _renderContext.GraphicsDevice,
+                _renderContext.CommandList,
+                _renderContext.SceneContext,
+                _renderContext.RenderPass,
+                (SpriteModelResourceContainer)resources,
+                ref renderData);
         }
 
-        public void RenderStudioModel(ref ModelRenderData renderData)
+        public void RenderStudioModel(ref StudioModelRenderData renderData)
         {
             if (renderData.Model == null)
             {
                 throw new ArgumentNullException(nameof(renderData), $"{nameof(renderData.Model)} cannot be null");
             }
 
-            //TODO: each model type has its own render data struct, use proper type and remove this
-            if (!(renderData.Model is StudioModel))
-            {
-                throw new ArgumentException($"Expected Studio model, got {renderData.Model.GetType().FullName}");
-            }
-
             if (!_active)
             {
-                throw new InvalidOperationException($"Cannot call {nameof(Render)} outside the render operation");
+                throw new InvalidOperationException($"Cannot call {nameof(RenderStudioModel)} outside the render operation");
             }
 
             var resources = _resourcesManager.GetResources(renderData.Model);
 
-            StudioRenderer.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, (StudioModelResourceContainer)resources, ref renderData);
+            StudioRenderer.Render(
+                _renderContext.GraphicsDevice,
+                _renderContext.CommandList,
+                _renderContext.SceneContext,
+                _renderContext.RenderPass,
+                (StudioModelResourceContainer)resources,
+                ref renderData);
         }
 
-        public void RenderBrushModel(ref ModelRenderData renderData)
+        public void RenderBrushModel(ref BrushModelRenderData renderData)
         {
             if (renderData.Model == null)
             {
                 throw new ArgumentNullException(nameof(renderData), $"{nameof(renderData.Model)} cannot be null");
             }
 
-            //TODO: each model type has its own render data struct, use proper type and remove this
-            if (!(renderData.Model is BSPModel))
-            {
-                throw new ArgumentException($"Expected BSP model, got {renderData.Model.GetType().FullName}");
-            }
-
             if (!_active)
             {
-                throw new InvalidOperationException($"Cannot call {nameof(Render)} outside the render operation");
+                throw new InvalidOperationException($"Cannot call {nameof(RenderBrushModel)} outside the render operation");
             }
 
             var resources = _resourcesManager.GetResources(renderData.Model);
 
-            BrushRenderer.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, (BSPModelResourceContainer)resources, ref renderData);
+            BrushRenderer.Render(
+                _renderContext.GraphicsDevice,
+                _renderContext.CommandList,
+                _renderContext.SceneContext,
+                _renderContext.RenderPass,
+                (BSPModelResourceContainer)resources,
+                ref renderData);
         }
 
         public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)

@@ -13,25 +13,14 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models.MDL.Rendering;
+using SharpLife.Game.Shared.Models.BSP;
 
-namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
+namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
-    public unsafe struct StudioModelRenderData
+    public struct BrushModelRenderData
     {
-        public StudioModel Model;
+        public BSPModel Model;
 
         public SharedModelRenderData Shared;
-
-        public int Sequence;
-
-        public float Frame;
-
-        public int Body;
-
-        public int Skin;
-
-        public BoneData BoneData;
     }
 }

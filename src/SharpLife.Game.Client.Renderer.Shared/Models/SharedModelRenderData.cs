@@ -13,25 +13,20 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models.MDL.Rendering;
+using SharpLife.Game.Shared.Models;
+using System.Numerics;
 
-namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
+namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
-    public unsafe struct StudioModelRenderData
+    public struct SharedModelRenderData
     {
-        public StudioModel Model;
+        public Vector3 Origin;
+        public Vector3 Angles;
+        public Vector3 Scale;
 
-        public SharedModelRenderData Shared;
-
-        public int Sequence;
-
-        public float Frame;
-
-        public int Body;
-
-        public int Skin;
-
-        public BoneData BoneData;
+        public RenderFX RenderFX;
+        public RenderMode RenderMode;
+        public int RenderAmount;
+        public Vector3 RenderColor;
     }
 }
