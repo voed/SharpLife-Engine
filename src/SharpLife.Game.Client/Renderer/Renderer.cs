@@ -100,8 +100,6 @@ namespace SharpLife.Game.Client.Renderer
             _rendererListener = rendererListener ?? throw new ArgumentNullException(nameof(rendererListener));
             _envMapDirectory = envMapDirectory ?? throw new ArgumentNullException(nameof(envMapDirectory));
 
-            _sc = new SceneContext(fileSystem, commandContext, shadersDirectory);
-
             //Configure Veldrid graphics device
             //Don't use a swap chain depth format, it won't render anything on Vulkan
             //It isn't needed right now so it should be disabled for the time being
@@ -115,8 +113,6 @@ namespace SharpLife.Game.Client.Renderer
 
             Scene = new Scene(inputSystem, commandContext, _gd, width, height);
 
-            _sc.SetCurrentScene(Scene);
-
             _imGuiRenderable = new ImGuiRenderable(inputSystem, width, height);
             _resizeHandled += _imGuiRenderable.WindowResized;
             Scene.AddContainer(_imGuiRenderable);
@@ -127,18 +123,34 @@ namespace SharpLife.Game.Client.Renderer
             Scene.AddContainer(_finalPass);
             Scene.AddRenderable(_finalPass);
 
-            _modelResourcesManager = new ModelResourcesManager(GetModelResourceFactories());
+            var spriteRenderer = new SpriteModelRenderer(_logger);
+            var studioRenderer = new StudioModelRenderer();
+            var brushRenderer = new BrushModelRenderer();
+
+            _modelResourcesManager = new ModelResourcesManager(new Dictionary<Type, ModelResourcesManager.ResourceFactory>
+            {
+                {typeof(SpriteModel), model => new SpriteModelResourceContainer((SpriteModel)model) },
+                { typeof(StudioModel), model => new StudioModelResourceContainer((StudioModel)model)  },
+                { typeof(BSPModel), model => new BSPModelResourceContainer((BSPModel)model)  }
+            });
+
             _modelRenderer = new ModelRenderer(
                 _modelResourcesManager,
-                (modelRenderer, viewState) => _rendererListener.OnRenderModels(modelRenderer, viewState)
+                (modelRenderer, viewState) => _rendererListener.OnRenderModels(modelRenderer, viewState),
+                spriteRenderer,
+                studioRenderer,
+                brushRenderer
                 );
 
             Scene.AddRenderable(_modelRenderer);
 
-            foreach (var factory in _modelResourcesManager.Factories)
-            {
-                Scene.AddContainer(factory);
-            }
+            Scene.AddContainer(spriteRenderer);
+            Scene.AddContainer(studioRenderer);
+            Scene.AddContainer(brushRenderer);
+
+            _sc = new SceneContext(fileSystem, commandContext, _modelRenderer, shadersDirectory);
+
+            _sc.SetCurrentScene(Scene);
 
             _frameCommands = _gd.ResourceFactory.CreateCommandList();
             _frameCommands.Name = "Frame Commands List";
@@ -150,17 +162,6 @@ namespace SharpLife.Game.Client.Renderer
             initCL.End();
             _gd.SubmitCommands(initCL);
             initCL.Dispose();
-        }
-
-        //TODO: this should be defined somewhere else
-        private IReadOnlyDictionary<Type, IModelResourceFactory> GetModelResourceFactories()
-        {
-            return new Dictionary<Type, IModelResourceFactory>
-            {
-                {typeof(SpriteModel), new SpriteModelResourceFactory(_logger) },
-                { typeof(StudioModel), new StudioModelResourceFactory() },
-                { typeof(BSPModel), new BSPModelResourceFactory() }
-            };
         }
 
         private static SwapchainSource GetSwapchainSource(IntPtr window)

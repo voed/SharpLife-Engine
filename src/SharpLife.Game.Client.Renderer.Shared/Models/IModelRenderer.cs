@@ -20,6 +20,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
     /// </summary>
     public interface IModelRenderer
     {
-        void Render(ref ModelRenderData renderData);
+        void RenderSpriteModel(ref ModelRenderData renderData);
+
+        void RenderStudioModel(ref ModelRenderData renderData);
+
+        void RenderBrushModel(ref ModelRenderData renderData);
     }
 }

@@ -18,6 +18,9 @@ using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Models;
+using SharpLife.Game.Shared.Models.BSP;
+using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Game.Shared.Models.SPR;
 using System;
 using System.Numerics;
 
@@ -193,7 +196,28 @@ namespace SharpLife.Game.Client.Entities
                     Frame = Frame
                 };
 
-                modelRenderer.Render(ref renderData);
+                switch (Model)
+                {
+                    case SpriteModel spriteModel:
+                        {
+                            modelRenderer.RenderSpriteModel(ref renderData);
+                            break;
+                        }
+
+                    case StudioModel studioModel:
+                        {
+                            modelRenderer.RenderStudioModel(ref renderData);
+                            break;
+                        }
+
+                    case BSPModel bspModel:
+                        {
+                            modelRenderer.RenderBrushModel(ref renderData);
+                            break;
+                        }
+
+                    default: throw new InvalidOperationException($"Unknown model type {Model.GetType().FullName}");
+                }
             }
         }
     }

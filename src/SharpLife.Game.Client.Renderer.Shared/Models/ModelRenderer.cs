@@ -13,6 +13,12 @@
 *
 ****/
 
+using SharpLife.Game.Client.Renderer.Shared.Models.BSP;
+using SharpLife.Game.Client.Renderer.Shared.Models.MDL;
+using SharpLife.Game.Client.Renderer.Shared.Models.SPR;
+using SharpLife.Game.Shared.Models.BSP;
+using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Renderer;
 using System;
 using System.Numerics;
@@ -30,22 +36,42 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
         private readonly IModelResourcesManager _resourcesManager;
 
         private readonly RenderModels _renderModels;
-
         private bool _active;
 
         private RenderContext _renderContext;
 
-        public ModelRenderer(IModelResourcesManager resourcesManager, RenderModels renderModelsCallback)
+        public RenderPasses RenderPasses => RenderPasses.Standard;
+
+        public SpriteModelRenderer SpriteRenderer { get; }
+
+        public StudioModelRenderer StudioRenderer { get; }
+
+        public BrushModelRenderer BrushRenderer { get; }
+
+        public ModelRenderer(IModelResourcesManager resourcesManager, RenderModels renderModelsCallback,
+            SpriteModelRenderer spriteRenderer,
+            StudioModelRenderer studioRenderer,
+            BrushModelRenderer brushRenderer)
         {
             _resourcesManager = resourcesManager ?? throw new ArgumentNullException(nameof(resourcesManager));
             _renderModels = renderModelsCallback ?? throw new ArgumentNullException(nameof(renderModelsCallback));
+
+            SpriteRenderer = spriteRenderer ?? throw new ArgumentNullException(nameof(spriteRenderer));
+            StudioRenderer = studioRenderer ?? throw new ArgumentNullException(nameof(studioRenderer));
+            BrushRenderer = brushRenderer ?? throw new ArgumentNullException(nameof(brushRenderer));
         }
 
-        public void Render(ref ModelRenderData renderData)
+        public void RenderSpriteModel(ref ModelRenderData renderData)
         {
             if (renderData.Model == null)
             {
                 throw new ArgumentNullException(nameof(renderData), $"{nameof(renderData.Model)} cannot be null");
+            }
+
+            //TODO: each model type has its own render data struct, use proper type and remove this
+            if (!(renderData.Model is SpriteModel))
+            {
+                throw new ArgumentException($"Expected SPR model, got {renderData.Model.GetType().FullName}");
             }
 
             if (!_active)
@@ -55,10 +81,54 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
 
             var resources = _resourcesManager.GetResources(renderData.Model);
 
-            resources.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, ref renderData);
+            SpriteRenderer.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, (SpriteModelResourceContainer)resources, ref renderData);
         }
 
-        public RenderPasses RenderPasses => RenderPasses.Standard;
+        public void RenderStudioModel(ref ModelRenderData renderData)
+        {
+            if (renderData.Model == null)
+            {
+                throw new ArgumentNullException(nameof(renderData), $"{nameof(renderData.Model)} cannot be null");
+            }
+
+            //TODO: each model type has its own render data struct, use proper type and remove this
+            if (!(renderData.Model is StudioModel))
+            {
+                throw new ArgumentException($"Expected Studio model, got {renderData.Model.GetType().FullName}");
+            }
+
+            if (!_active)
+            {
+                throw new InvalidOperationException($"Cannot call {nameof(Render)} outside the render operation");
+            }
+
+            var resources = _resourcesManager.GetResources(renderData.Model);
+
+            StudioRenderer.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, (StudioModelResourceContainer)resources, ref renderData);
+        }
+
+        public void RenderBrushModel(ref ModelRenderData renderData)
+        {
+            if (renderData.Model == null)
+            {
+                throw new ArgumentNullException(nameof(renderData), $"{nameof(renderData.Model)} cannot be null");
+            }
+
+            //TODO: each model type has its own render data struct, use proper type and remove this
+            if (!(renderData.Model is BSPModel))
+            {
+                throw new ArgumentException($"Expected BSP model, got {renderData.Model.GetType().FullName}");
+            }
+
+            if (!_active)
+            {
+                throw new InvalidOperationException($"Cannot call {nameof(Render)} outside the render operation");
+            }
+
+            var resources = _resourcesManager.GetResources(renderData.Model);
+
+            BrushRenderer.Render(_renderContext.GraphicsDevice, _renderContext.CommandList, _renderContext.SceneContext, _renderContext.RenderPass, (BSPModelResourceContainer)resources, ref renderData);
+        }
 
         public RenderOrderKey GetRenderOrderKey(Vector3 cameraPosition)
         {

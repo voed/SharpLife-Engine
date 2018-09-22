@@ -13,11 +13,9 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Rendering;
-using System;
+using SharpLife.Renderer.Utility;
 using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -26,7 +24,7 @@ using Veldrid.Utilities;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
-    public sealed class StudioModelResourceFactory : IModelResourceFactory
+    public sealed class StudioModelRenderer : IResourceContainer
     {
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
@@ -100,14 +98,35 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             DestroyDeviceObjects(ResourceScope.All);
         }
 
-        public ModelResourceContainer CreateContainer(IModel model)
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, StudioModelResourceContainer modelResource, ref ModelRenderData renderData)
         {
-            if (!(model is StudioModel studioModel))
-            {
-                throw new ArgumentException("Model must be a Studio model", nameof(model));
-            }
+            //TODO: implement
+            var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
 
-            return new StudioModelResourceContainer(this, studioModel);
+            sc.UpdateWorldAndInverseBuffer(cl, ref wai);
+
+            var bones = BoneCalculator.SetUpBones(modelResource.StudioModel.StudioFile, 0, renderData.Frame, new BoneData());
+
+            cl.UpdateBuffer(BonesBuffer, 0, bones);
+
+            cl.SetPipeline(Pipeline);
+
+            cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
+
+            cl.SetVertexBuffer(0, modelResource.VertexBuffer);
+            cl.SetIndexBuffer(modelResource.IndexBuffer, IndexFormat.UInt32);
+
+            foreach (var bodyPart in modelResource.BodyParts)
+            {
+                var subModel = bodyPart.SubModels[0];
+
+                foreach (var mesh in subModel.Meshes)
+                {
+                    cl.SetGraphicsResourceSet(1, modelResource.Textures[modelResource.StudioModel.StudioFile.Skins[0][mesh.Mesh.Skin]]);
+
+                    cl.DrawIndexed(mesh.IndicesCount, 1, mesh.StartIndex, 0, 0);
+                }
+            }
         }
     }
 }

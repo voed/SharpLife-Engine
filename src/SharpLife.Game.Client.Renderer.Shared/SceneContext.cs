@@ -15,6 +15,7 @@
 
 using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
+using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
@@ -35,6 +36,8 @@ namespace SharpLife.Game.Client.Renderer.Shared
         public ResourceCache MapResourceCache { get; }
 
         public TextureLoader TextureLoader { get; }
+
+        public ModelRenderer ModelRenderer { get; }
 
         public DeviceBuffer ProjectionMatrixBuffer { get; private set; }
         public DeviceBuffer ViewMatrixBuffer { get; private set; }
@@ -70,11 +73,12 @@ namespace SharpLife.Game.Client.Renderer.Shared
 
         public TextureSampleCount MainSceneSampleCount { get; internal set; }
 
-        public SceneContext(IFileSystem fileSystem, ICommandContext commandContext, string shadersDirectory)
+        public SceneContext(IFileSystem fileSystem, ICommandContext commandContext, ModelRenderer modelRenderer, string shadersDirectory)
         {
             GlobalResourceCache = new ResourceCache(fileSystem, shadersDirectory);
             MapResourceCache = new ResourceCache(fileSystem, shadersDirectory);
             TextureLoader = new TextureLoader(commandContext);
+            ModelRenderer = modelRenderer ?? throw new ArgumentNullException(nameof(modelRenderer));
         }
 
         public virtual void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc)

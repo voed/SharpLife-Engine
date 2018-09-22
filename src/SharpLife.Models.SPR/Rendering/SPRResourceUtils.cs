@@ -90,7 +90,7 @@ namespace SharpLife.Models.SPR.Rendering
                     break;
             }
 
-            var frameBuffers = new List<DeviceBuffer>();
+            var vertexBuffers = new List<DeviceBuffer>();
 
             foreach (var frame in spriteFile.Frames)
             {
@@ -150,7 +150,7 @@ namespace SharpLife.Models.SPR.Rendering
                 gd.UpdateBuffer(vb, 0, vertices);
 
                 //TODO: could refactor this by having one vertex and one index buffer, and returning the start & count of indices for each frame
-                frameBuffers.Add(vb);
+                vertexBuffers.Add(vb);
 
                 nextFramePosition.X += maximumWith;
 
@@ -162,7 +162,7 @@ namespace SharpLife.Models.SPR.Rendering
                 }
             }
 
-            return (atlasImage, frameBuffers.ToArray());
+            return (atlasImage, vertexBuffers.ToArray());
         }
 
         public static DeviceBuffer CreateIndexBuffer(GraphicsDevice gd, ResourceFactory factory)

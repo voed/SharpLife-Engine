@@ -17,7 +17,6 @@ using SharpLife.Game.Shared.Models.MDL;
 using SharpLife.Models;
 using SharpLife.Models.MDL.Rendering;
 using SharpLife.Renderer;
-using SharpLife.Renderer.Utility;
 using System;
 using System.Collections.Generic;
 using Veldrid;
@@ -27,59 +26,23 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
     public sealed class StudioModelResourceContainer : ModelResourceContainer
     {
-        private readonly StudioModelResourceFactory _factory;
-
-        private readonly StudioModel _studioModel;
-
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
-        private ResourceSet _sharedResourceSet;
+        public override IModel Model => StudioModel;
 
-        private DeviceBuffer _vertexBuffer;
-        private DeviceBuffer _indexBuffer;
+        public StudioModel StudioModel { get; }
 
-        private ResourceSet[] _textures;
+        public ResourceSet SharedResourceSet { get; set; }
 
-        private BodyPartData[] _bodyParts;
+        public DeviceBuffer VertexBuffer { get; set; }
+        public DeviceBuffer IndexBuffer { get; set; }
 
-        public override IModel Model => _studioModel;
+        public ResourceSet[] Textures { get; set; }
+        public BodyPartData[] BodyParts { get; set; }
 
-        public StudioModelResourceContainer(StudioModelResourceFactory factory, StudioModel studioModel)
+        public StudioModelResourceContainer(StudioModel studioModel)
         {
-            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
-            _studioModel = studioModel ?? throw new ArgumentNullException(nameof(studioModel));
-        }
-
-        //TODO: implement
-
-        public override void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData)
-        {
-            var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
-
-            sc.UpdateWorldAndInverseBuffer(cl, ref wai);
-
-            var bones = _factory.BoneCalculator.SetUpBones(_studioModel.StudioFile, 0, renderData.Frame, new BoneData());
-
-            cl.UpdateBuffer(_factory.BonesBuffer, 0, bones);
-
-            cl.SetPipeline(_factory.Pipeline);
-
-            cl.SetGraphicsResourceSet(0, _sharedResourceSet);
-
-            cl.SetVertexBuffer(0, _vertexBuffer);
-            cl.SetIndexBuffer(_indexBuffer, IndexFormat.UInt32);
-
-            foreach (var bodyPart in _bodyParts)
-            {
-                var subModel = bodyPart.SubModels[0];
-
-                foreach (var mesh in subModel.Meshes)
-                {
-                    cl.SetGraphicsResourceSet(1, _textures[_studioModel.StudioFile.Skins[0][mesh.Mesh.Skin]]);
-
-                    cl.DrawIndexed(mesh.IndicesCount, 1, mesh.StartIndex, 0, 0);
-                }
-            }
+            StudioModel = studioModel ?? throw new ArgumentNullException(nameof(studioModel));
         }
 
         public override void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
@@ -95,44 +58,44 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             var indices = new List<uint>();
 
             //Construct the meshes for each body part
-            var bodyParts = new List<BodyPartData>(_studioModel.StudioFile.BodyParts.Count);
+            var bodyParts = new List<BodyPartData>(StudioModel.StudioFile.BodyParts.Count);
 
-            foreach (var bodyPart in _studioModel.StudioFile.BodyParts)
+            foreach (var bodyPart in StudioModel.StudioFile.BodyParts)
             {
-                bodyParts.Add(StudioResourceUtils.CreateBodyPart(_studioModel.StudioFile, bodyPart, vertices, indices));
+                bodyParts.Add(StudioResourceUtils.CreateBodyPart(StudioModel.StudioFile, bodyPart, vertices, indices));
             }
 
-            _bodyParts = bodyParts.ToArray();
+            BodyParts = bodyParts.ToArray();
 
             var verticesArray = vertices.ToArray();
             var indicesArray = indices.ToArray();
 
-            _vertexBuffer = disposeFactory.CreateBuffer(new BufferDescription(verticesArray.SizeInBytes(), BufferUsage.VertexBuffer));
+            VertexBuffer = disposeFactory.CreateBuffer(new BufferDescription(verticesArray.SizeInBytes(), BufferUsage.VertexBuffer));
 
-            gd.UpdateBuffer(_vertexBuffer, 0, verticesArray);
+            gd.UpdateBuffer(VertexBuffer, 0, verticesArray);
 
-            _indexBuffer = disposeFactory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
+            IndexBuffer = disposeFactory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
 
-            gd.UpdateBuffer(_indexBuffer, 0, indicesArray);
+            gd.UpdateBuffer(IndexBuffer, 0, indicesArray);
 
-            _sharedResourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
-                _factory.SharedLayout,
+            SharedResourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
+                sc.ModelRenderer.StudioRenderer.SharedLayout,
                 sc.ProjectionMatrixBuffer,
                 sc.ViewMatrixBuffer,
                 sc.WorldAndInverseBuffer,
-                _factory.BonesBuffer,
+                sc.ModelRenderer.StudioRenderer.BonesBuffer,
                 sc.MainSampler
                 ));
 
-            var uploadedTextures = StudioResourceUtils.CreateTextures(_studioModel.Name, _studioModel.StudioFile, gd, sc.TextureLoader, sc.MapResourceCache);
+            var uploadedTextures = StudioResourceUtils.CreateTextures(StudioModel.Name, StudioModel.StudioFile, gd, sc.TextureLoader, sc.MapResourceCache);
 
-            _textures = new ResourceSet[uploadedTextures.Count];
+            Textures = new ResourceSet[uploadedTextures.Count];
 
             for (var i = 0; i < uploadedTextures.Count; ++i)
             {
                 var view = sc.MapResourceCache.GetTextureView(gd.ResourceFactory, uploadedTextures[i]);
 
-                _textures[i] = disposeFactory.CreateResourceSet(new ResourceSetDescription(_factory.TextureLayout, view));
+                Textures[i] = disposeFactory.CreateResourceSet(new ResourceSetDescription(sc.ModelRenderer.StudioRenderer.TextureLayout, view));
             }
         }
 

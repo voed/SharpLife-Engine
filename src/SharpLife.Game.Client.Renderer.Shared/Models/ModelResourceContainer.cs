@@ -14,7 +14,6 @@
 ****/
 
 using SharpLife.Models;
-using Veldrid;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
@@ -27,15 +26,5 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
         /// The model whose resources this container manages
         /// </summary>
         public abstract IModel Model { get; }
-
-        /// <summary>
-        /// Render this model with the given data
-        /// </summary>
-        /// <param name="gd"></param>
-        /// <param name="cl"></param>
-        /// <param name="sc"></param>
-        /// <param name="renderPass"></param>
-        /// <param name="renderData"></param>
-        public abstract void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, ref ModelRenderData renderData);
     }
 }

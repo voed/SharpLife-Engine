@@ -15,16 +15,16 @@
 
 using SharpLife.Game.Client.Renderer.Shared.Utility;
 using SharpLife.Game.Shared.Models;
-using SharpLife.Game.Shared.Models.BSP;
-using SharpLife.Models;
+using SharpLife.Renderer.Utility;
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Utilities;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 {
-    public sealed class BSPModelResourceFactory : IModelResourceFactory
+    public sealed class BrushModelRenderer : IResourceContainer
     {
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
@@ -170,14 +170,65 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             DestroyDeviceObjects(ResourceScope.All);
         }
 
-        public ModelResourceContainer CreateContainer(IModel model)
+        private static Vector4 GetBrushColor(ref ModelRenderData renderData)
         {
-            if (!(model is BSPModel bspModel))
+            switch (renderData.RenderMode)
             {
-                throw new ArgumentException("Model must be a BSP model", nameof(model));
-            }
+                case RenderMode.Normal:
+                case RenderMode.TransAlpha:
+                    return new Vector4(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
-            return new BSPModelResourceContainer(this, bspModel);
+                case RenderMode.TransColor:
+                    return new Vector4(renderData.RenderColor, renderData.RenderAmount);
+
+                case RenderMode.TransTexture:
+                case RenderMode.Glow:
+                    return new Vector4(byte.MaxValue, byte.MaxValue, byte.MaxValue, renderData.RenderAmount);
+
+                case RenderMode.TransAdd:
+                    return new Vector4(renderData.RenderAmount, renderData.RenderAmount, renderData.RenderAmount, byte.MaxValue);
+
+                default: throw new InvalidOperationException($"Render mode {renderData.RenderMode} not supported");
+            }
+        }
+
+        public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, BSPModelResourceContainer modelResource, ref ModelRenderData renderData)
+        {
+            var wai = new WorldAndInverse(renderData.Origin, renderData.Angles, renderData.Scale);
+
+            sc.UpdateWorldAndInverseBuffer(cl, ref wai);
+
+            var renderArguments = new BSPRenderArguments
+            {
+                RenderColor = GetBrushColor(ref renderData) / 255.0f,
+                RenderMode = renderData.RenderMode
+            };
+
+            cl.UpdateBuffer(RenderArgumentsBuffer, 0, ref renderArguments);
+
+            var pipeline = Pipelines[renderData.RenderMode];
+
+            cl.SetPipeline(pipeline);
+            cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
+
+            cl.SetVertexBuffer(0, modelResource.VertexBuffer);
+            cl.SetIndexBuffer(modelResource.IndexBuffer, IndexFormat.UInt32);
+
+            for (var lightmapIndex = 0; lightmapIndex < modelResource.Lightmaps.Length; ++lightmapIndex)
+            {
+                ref var lightmap = ref modelResource.Lightmaps[lightmapIndex];
+
+                cl.SetGraphicsResourceSet(2, lightmap.Lightmap);
+
+                for (var textureIndex = 0; textureIndex < lightmap.Textures.Length; ++textureIndex)
+                {
+                    ref var texture = ref lightmap.Textures[textureIndex];
+
+                    cl.SetGraphicsResourceSet(1, texture.Texture);
+
+                    cl.DrawIndexed(texture.IndicesCount, 1, texture.FirstIndex, 0, 0);
+                }
+            }
         }
     }
 }

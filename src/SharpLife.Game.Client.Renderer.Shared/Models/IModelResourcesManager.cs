@@ -14,7 +14,6 @@
 ****/
 
 using SharpLife.Models;
-using System.Collections.Generic;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
@@ -23,8 +22,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
     /// </summary>
     public interface IModelResourcesManager
     {
-        IEnumerable<IModelResourceFactory> Factories { get; }
-
         /// <summary>
         /// Returns whether the resources for a given model are loaded
         /// </summary>

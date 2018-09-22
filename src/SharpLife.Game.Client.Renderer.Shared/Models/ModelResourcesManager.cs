@@ -23,17 +23,17 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     public sealed class ModelResourcesManager : IModelResourcesManager, IEnumerable<ModelResourceContainer>
     {
-        private IReadOnlyDictionary<Type, IModelResourceFactory> _resourceFactories;
+        public delegate ModelResourceContainer ResourceFactory(IModel model);
+
+        private IReadOnlyDictionary<Type, ResourceFactory> _resourceFactories;
 
         private readonly Dictionary<IModel, ModelResourceContainer> _containers = new Dictionary<IModel, ModelResourceContainer>();
-
-        public IEnumerable<IModelResourceFactory> Factories => _resourceFactories.Values;
 
         /// <summary>
         /// Creates a new resources manager that can create resources
         /// </summary>
         /// <param name="resourceFactories"></param>
-        public ModelResourcesManager(IReadOnlyDictionary<Type, IModelResourceFactory> resourceFactories)
+        public ModelResourcesManager(IReadOnlyDictionary<Type, ResourceFactory> resourceFactories)
         {
             if (resourceFactories == null)
             {
@@ -70,7 +70,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
                 throw new InvalidOperationException($"Model type {model.GetType().FullName} is not supported");
             }
 
-            var container = factory.CreateContainer(model);
+            var container = factory(model);
 
             _containers.Add(model, container);
 
