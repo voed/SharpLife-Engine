@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Renderer;
+using SharpLife.Game.Shared.Models;
 using System;
 using Veldrid;
 

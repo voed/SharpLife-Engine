@@ -13,7 +13,7 @@
 *
 ****/
 
-using SharpLife.Renderer;
+using SharpLife.Game.Shared.Models;
 using System.Numerics;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP

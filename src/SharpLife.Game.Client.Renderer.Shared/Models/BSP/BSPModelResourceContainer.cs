@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Game.Shared.Models;
 using SharpLife.Game.Shared.Models.BSP;
 using SharpLife.Models;
 using SharpLife.Models.BSP.Rendering;

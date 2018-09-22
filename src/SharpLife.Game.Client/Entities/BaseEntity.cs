@@ -17,7 +17,7 @@ using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Renderer;
+using SharpLife.Game.Shared.Models;
 using System;
 using System.Numerics;
 

@@ -13,8 +13,8 @@
 *
 ****/
 
+using SharpLife.Game.Shared.Models;
 using SharpLife.Models;
-using SharpLife.Renderer;
 using System.Numerics;
 
 namespace SharpLife.Game.Client.Renderer.Shared.Models

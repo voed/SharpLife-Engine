@@ -15,7 +15,7 @@
 
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Renderer;
+using SharpLife.Game.Shared.Models;
 
 namespace SharpLife.Game.Server.Entities
 {

@@ -14,11 +14,11 @@
 ****/
 
 using SharpLife.Game.Client.Renderer.Shared.Utility;
+using SharpLife.Game.Shared.Models;
 using SharpLife.Game.Shared.Models.BSP;
 using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Models.BSP.Rendering;
-using SharpLife.Renderer;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;

@@ -15,9 +15,9 @@
 
 using Serilog;
 using SharpLife.Game.Client.Renderer.Shared.Utility;
+using SharpLife.Game.Shared.Models;
 using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Models;
-using SharpLife.Renderer;
 using System;
 using Veldrid;
 using Veldrid.Utilities;
