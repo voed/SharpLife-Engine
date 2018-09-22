@@ -13,36 +13,34 @@
 *
 ****/
 
+using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.Renderer.Shared.Models;
+using SharpLife.Game.Client.Renderer.Shared.Models.SPR;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 
-namespace SharpLife.Game.Server.Entities.Effects
+namespace SharpLife.Game.Client.Entities.Effects
 {
-    [LinkEntityToClass("env_sprite")]
     [Networkable]
     public class EnvSprite : NetworkedEntity
     {
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
-        private float _lastTime;
-
-        //TODO: implement
-
-        public override void Think()
+        public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model is SpriteModel spriteModel)
             {
-                Frame += (float)(FrameRate * (Context.Time.ElapsedTime - _lastTime));
-
-                if (Frame >= spriteModel.SpriteFile.Frames.Count)
+                var renderData = new SpriteModelRenderData
                 {
-                    Frame %= spriteModel.SpriteFile.Frames.Count;
-                }
+                    Model = spriteModel,
+                    Shared = GetSharedModelRenderData(viewState),
+                    Frame = Frame
+                };
 
-                _lastTime = (float)Context.Time.ElapsedTime;
+                modelRenderer.RenderSpriteModel(ref renderData);
             }
         }
     }

@@ -175,27 +175,33 @@ namespace SharpLife.Game.Client.Entities
             return Math.Clamp(result, 0, 255);
         }
 
+        protected SharedModelRenderData GetSharedModelRenderData(IViewState viewState)
+        {
+            var scale = Scale != 0 ? Scale : 1;
+
+            //Normal behaves as though render amount is always 255
+            var renderAmount = CalculateFXBlend(viewState, RenderMode != RenderMode.Normal ? RenderAmount : 255);
+
+            return new SharedModelRenderData
+            {
+                Origin = Origin,
+                Angles = Angles,
+                Scale = new Vector3(scale),
+
+                RenderFX = RenderFX,
+                RenderMode = RenderMode,
+                RenderAmount = renderAmount,
+                RenderColor = RenderColor,
+            };
+        }
+
         public virtual void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model != null)
             {
-                var scale = Scale != 0 ? Scale : 1;
+                var sharedData = GetSharedModelRenderData(viewState);
 
-                //Normal behaves as though render amount is always 255
-                var renderAmount = CalculateFXBlend(viewState, RenderMode != RenderMode.Normal ? RenderAmount : 255);
-
-                var sharedData = new SharedModelRenderData
-                {
-                    Origin = Origin,
-                    Angles = Angles,
-                    Scale = new Vector3(scale),
-
-                    RenderFX = RenderFX,
-                    RenderMode = RenderMode,
-                    RenderAmount = renderAmount,
-                    RenderColor = RenderColor,
-                };
-
+                //Try to render models with as much data as possible
                 switch (Model)
                 {
                     case SpriteModel spriteModel:
@@ -204,7 +210,6 @@ namespace SharpLife.Game.Client.Entities
                             {
                                 Model = spriteModel,
                                 Shared = sharedData,
-                                Frame = Frame
                             };
                             modelRenderer.RenderSpriteModel(ref spriteRenderData);
                             break;
@@ -216,7 +221,6 @@ namespace SharpLife.Game.Client.Entities
                             {
                                 Model = studioModel,
                                 Shared = sharedData,
-                                Frame = Frame
                             };
                             modelRenderer.RenderStudioModel(ref studioRenderData);
                             break;

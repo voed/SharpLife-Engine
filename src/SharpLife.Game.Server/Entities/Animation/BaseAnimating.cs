@@ -15,35 +15,17 @@
 
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
-using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 
-namespace SharpLife.Game.Server.Entities.Effects
+namespace SharpLife.Game.Server.Entities.Animation
 {
-    [LinkEntityToClass("env_sprite")]
+    /// <summary>
+    /// Base class for entities that use studio models
+    /// </summary>
     [Networkable]
-    public class EnvSprite : NetworkedEntity
+    public class BaseAnimating : NetworkedEntity
     {
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
-
-        private float _lastTime;
-
-        //TODO: implement
-
-        public override void Think()
-        {
-            if (Model is SpriteModel spriteModel)
-            {
-                Frame += (float)(FrameRate * (Context.Time.ElapsedTime - _lastTime));
-
-                if (Frame >= spriteModel.SpriteFile.Frames.Count)
-                {
-                    Frame %= spriteModel.SpriteFile.Frames.Count;
-                }
-
-                _lastTime = (float)Context.Time.ElapsedTime;
-            }
-        }
     }
 }

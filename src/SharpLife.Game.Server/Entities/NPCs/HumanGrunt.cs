@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Game.Server.Entities.Animation;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Models.MDL;
 
@@ -20,7 +21,7 @@ namespace SharpLife.Game.Server.Entities.NPCs
 {
     [LinkEntityToClass("monster_human_grunt")]
     [Networkable(UseBaseType = true)]
-    public class HumanGrunt : NetworkedEntity
+    public class HumanGrunt : BaseAnimating
     {
         public override void Precache()
         {
