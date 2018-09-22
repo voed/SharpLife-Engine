@@ -93,7 +93,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
                 RenderMode = renderData.RenderMode
             };
 
-            cl.UpdateBuffer(_factory.RenderColorBuffer, 0, ref renderArguments);
+            cl.UpdateBuffer(_factory.RenderArgumentsBuffer, 0, ref renderArguments);
 
             var pipeline = _factory.Pipelines[renderData.RenderMode];
 
@@ -202,7 +202,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
                 sc.WorldAndInverseBuffer,
                 sc.LightingInfoBuffer,
                 _factory.LightStylesBuffer,
-                _factory.RenderColorBuffer));
+                _factory.RenderArgumentsBuffer));
         }
 
         public override void DestroyDeviceObjects(ResourceScope scope)

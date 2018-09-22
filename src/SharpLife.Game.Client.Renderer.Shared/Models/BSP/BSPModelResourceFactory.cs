@@ -57,7 +57,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
         public DeviceBuffer LightStylesBuffer { get; private set; }
 
-        public DeviceBuffer RenderColorBuffer { get; private set; }
+        public DeviceBuffer RenderArgumentsBuffer { get; private set; }
 
         public BSPModelResourceFactory(IRenderer renderer, LightStyles lightStyles)
         {
@@ -199,7 +199,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             Array.Fill(lightStylesValues, 0.0f);
             gd.UpdateBuffer(LightStylesBuffer, 0, lightStylesValues);
 
-            RenderColorBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<RenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<RenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -212,7 +212,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             _disposeCollector.DisposeAll();
 
             LightStylesBuffer = null;
-            RenderColorBuffer = null;
+            RenderArgumentsBuffer = null;
         }
 
         public void Dispose()
