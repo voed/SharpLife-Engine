@@ -21,16 +21,19 @@ namespace SharpLife.Game.Shared.Bridge
 {
     public sealed class GameBridge : IGameBridge
     {
+        public IBridgeDataReceiver DataReceiver { get; }
+
         public BSPModelUtils ModelUtils { get; }
 
-        public GameBridge(BSPModelUtils modelUtils)
+        public GameBridge(IBridgeDataReceiver dataReceiver, BSPModelUtils modelUtils)
         {
+            DataReceiver = dataReceiver;
             ModelUtils = modelUtils ?? throw new ArgumentNullException(nameof(modelUtils));
         }
 
-        public static GameBridge CreateBridge()
+        public static GameBridge CreateBridge(IBridgeDataReceiver dataReceiver)
         {
-            return new GameBridge(new BSPModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP));
+            return new GameBridge(dataReceiver, new BSPModelUtils(Framework.BSPModelNamePrefix, Framework.Directory.Maps, Framework.Extension.BSP));
         }
     }
 }

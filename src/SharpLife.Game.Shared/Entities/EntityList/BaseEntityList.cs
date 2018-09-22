@@ -26,7 +26,7 @@ namespace SharpLife.Game.Shared.Entities.EntityList
     /// Base class for lists of entities deriving from <typeparamref name="TBaseEntity"/>
     /// </summary>
     /// <typeparam name="TBaseEntity"></typeparam>
-    public abstract class BaseEntityList<TBaseEntity> : IEnumerable<TBaseEntity>
+    public abstract class BaseEntityList<TBaseEntity> : IEnumerable<TBaseEntity>, IEntityList
         where TBaseEntity : class, IEntity
     {
         public const ushort InvalidId = ushort.MaxValue;
@@ -100,6 +100,8 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
             return null;
         }
+
+        IEntity IEntityList.GetEntity(in ObjectHandle handle) => GetEntity(handle);
 
         private ObjectHandle InternalGetNextEntity(int startIndex)
         {

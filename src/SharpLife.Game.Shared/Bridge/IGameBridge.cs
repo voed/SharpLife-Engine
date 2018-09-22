@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Engine.Shared.API.Game.Shared;
+using SharpLife.Models.BSP;
 
 namespace SharpLife.Game.Shared.Bridge
 {
@@ -23,5 +24,8 @@ namespace SharpLife.Game.Shared.Bridge
     /// </summary>
     public interface IGameBridge : IBridge
     {
+        IBridgeDataReceiver DataReceiver { get; }
+
+        BSPModelUtils ModelUtils { get; }
     }
 }

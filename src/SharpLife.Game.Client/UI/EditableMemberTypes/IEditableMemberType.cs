@@ -13,19 +13,15 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
+using FastMember;
+using System.Reflection;
 
-namespace SharpLife.Game.Client.UI
+namespace SharpLife.Game.Client.UI.EditableMemberTypes
 {
-    /// <summary>
-    /// The client UI, used to allow drawing
-    /// </summary>
-    public interface IClientUI
+    public interface IEditableMemberType
     {
-        void MapLoadBegin();
+        void Initialize(int index, object editObject, MemberInfo info, ObjectAccessor objectAccessor);
 
-        void Update(float deltaSeconds, IViewState viewState);
-
-        void Draw(IViewState viewState);
+        void Display(object editObject, ObjectAccessor objectAccessor);
     }
 }

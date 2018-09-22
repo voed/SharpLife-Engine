@@ -16,6 +16,7 @@
 using Serilog;
 using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Game.Server.API;
 using SharpLife.Game.Server.Entities.EntityList;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
@@ -42,18 +43,21 @@ namespace SharpLife.Game.Server.Entities
 
         private readonly IEngineModels _serverModels;
 
+        private readonly GameServer _gameServer;
+
         private ServerEntityList _entityList;
 
         private INetworkObjectList _entitiesNetworkList;
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
 
-        public ServerEntities(ILogger logger, IServerEngine serverEngine, ITime engineTime, IEngineModels serverModels)
+        public ServerEntities(ILogger logger, IServerEngine serverEngine, ITime engineTime, IEngineModels serverModels, GameServer gameServer)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serverEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
             _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
             _serverModels = serverModels ?? throw new ArgumentNullException(nameof(serverModels));
+            _gameServer = gameServer ?? throw new ArgumentNullException(nameof(gameServer));
         }
 
         public void Startup()
@@ -144,6 +148,14 @@ namespace SharpLife.Game.Server.Entities
             {
                 LoadEntities(entityData);
             }
+
+            _gameServer.GameBridge.DataReceiver?.ReceiveEntityList(_entityList);
+        }
+
+        public void Deactivate()
+        {
+            _gameServer.GameBridge.DataReceiver?.ReceiveEntityList(null);
+            _entityList = null;
         }
 
         public void StartFrame()

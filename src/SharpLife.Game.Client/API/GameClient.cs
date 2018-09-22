@@ -41,8 +41,7 @@ namespace SharpLife.Game.Client.API
         private ILogger _logger;
 
         private IClientEngine _engine;
-
-        private GameBridge _gameBridge;
+        private IGameBridge _gameBridge;
 
         private Renderer.Renderer _renderer;
 
@@ -59,6 +58,8 @@ namespace SharpLife.Game.Client.API
         /// </summary>
         public IMapInfo MapInfo { get; private set; }
 
+        public BridgeDataReceiver BridgeDataReceiver { get; } = new BridgeDataReceiver();
+
         public string CachedMapName { get; set; }
 
         public void Initialize(IServiceCollection serviceCollection)
@@ -68,7 +69,7 @@ namespace SharpLife.Game.Client.API
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
 
-            _gameBridge = GameBridge.CreateBridge();
+            _gameBridge = GameBridge.CreateBridge(BridgeDataReceiver);
 
             serviceCollection.AddSingleton<IBridge>(_gameBridge);
 
@@ -95,7 +96,7 @@ namespace SharpLife.Game.Client.API
 
             _entities = serviceProvider.GetRequiredService<ClientEntities>();
 
-            _clientUI = new ImGuiInterface(_logger, _engine);
+            _clientUI = new ImGuiInterface(_logger, _engine, this);
 
             _renderer = new Renderer.Renderer(
                 _engine.GameWindow,
@@ -133,6 +134,8 @@ namespace SharpLife.Game.Client.API
             }
 
             MapInfo = new MapInfo(NetUtilities.ConvertToPlatformPath(mapName), MapInfo?.Name, bspWorldModel);
+
+            _clientUI.MapLoadBegin();
 
             _renderer.LoadModels(MapInfo.Model, _engine.ModelManager);
 

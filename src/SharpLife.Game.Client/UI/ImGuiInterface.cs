@@ -13,17 +13,23 @@
 *
 ****/
 
+using FastMember;
 using ImGuiNET;
 using Serilog;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.Logging;
+using SharpLife.Game.Client.API;
 using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Client.UI.EditableMemberTypes;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Renderer.Utility;
 using SharpLife.Utility;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -48,9 +54,13 @@ namespace SharpLife.Game.Client.UI
 
         private readonly IClientEngine _engine;
 
+        private readonly GameClient _gameClient;
+
         private bool _consoleVisible;
 
         private bool _materialControlVisible;
+
+        private bool _objectEditorVisible;
 
         private string _consoleText = string.Empty;
 
@@ -74,10 +84,30 @@ namespace SharpLife.Game.Client.UI
         private IVariable _picMip;
         private IVariable _powerOf2Textures;
 
-        public ImGuiInterface(ILogger logger, IClientEngine engine)
+        private delegate IEditableMemberType EditableMemberFactory(int index, object editObject, MemberInfo info, Type type, ObjectAccessor objectAccessor);
+
+        private readonly EditableMemberFactory _enumEditableMemberTypeFactory = (index, editObject, info, type, objectAccessor) =>
+            new EditableEnum(index, editObject, info, type, objectAccessor);
+
+        private readonly IReadOnlyDictionary<Type, EditableMemberFactory> _editableMemberTypes = new Dictionary<Type, EditableMemberFactory>
+        {
+            { typeof(int), (index, editObject, info, type, objectAccessor) => new EditableInt32(index, editObject, info,type, objectAccessor) },
+            { typeof(uint), (index, editObject, info,type, objectAccessor) => new EditableUInt32(index, editObject, info,type, objectAccessor) },
+            { typeof(float), (index, editObject, info, type,objectAccessor) => new EditableFloat(index, editObject, info,type, objectAccessor) },
+            { typeof(string), (index, editObject, info, type,objectAccessor) => new EditableString(index, editObject, info,type, objectAccessor) }
+        };
+
+        private ObjectHandle _editObjectHandle;
+
+        private ObjectAccessor _editObjectAccessor;
+
+        private readonly List<IEditableMemberType> _currentEditableMembers = new List<IEditableMemberType>();
+
+        public ImGuiInterface(ILogger logger, IClientEngine engine, GameClient gameClient)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+            _gameClient = gameClient ?? throw new ArgumentNullException(nameof(gameClient));
 
             _engine.LogListener = this;
         }
@@ -85,6 +115,13 @@ namespace SharpLife.Game.Client.UI
         public void Update(float deltaSeconds, IViewState viewState)
         {
             _fta.AddTime(deltaSeconds);
+        }
+
+        public void MapLoadBegin()
+        {
+            SetupNewObject(null);
+
+            _editObjectHandle = new ObjectHandle();
         }
 
         public void Draw(IViewState viewState)
@@ -96,6 +133,8 @@ namespace SharpLife.Game.Client.UI
                     ImGui.Checkbox("Toggle Console", ref _consoleVisible);
 
                     ImGui.Checkbox("Toggle Material Control", ref _materialControlVisible);
+
+                    ImGui.Checkbox("Toggle Object Editor", ref _objectEditorVisible);
 
                     ImGui.EndMenu();
                 }
@@ -110,6 +149,8 @@ namespace SharpLife.Game.Client.UI
             DrawConsole();
 
             DrawMaterialControl();
+
+            DrawObjectEditor();
         }
 
         public void Write(char value)
@@ -314,6 +355,131 @@ namespace SharpLife.Game.Client.UI
                 DrawCheckbox(_overbright, "Enable overbright");
                 DrawCheckbox(_fullbright, "Enable fullbright");
                 DrawCheckbox(_powerOf2Textures, "Enable power of 2 texture rescaling");
+
+                ImGui.EndWindow();
+            }
+        }
+
+        private static (Type, bool) GetMemberData(MemberInfo info)
+        {
+            switch (info)
+            {
+                case FieldInfo fieldInfo: return (fieldInfo.FieldType, !fieldInfo.IsInitOnly);
+                case PropertyInfo propInfo: return (propInfo.PropertyType, propInfo.CanWrite);
+
+                default: return (null, false);
+            }
+        }
+
+        private void SetupNewObject(object editObject)
+        {
+            _currentEditableMembers.Clear();
+
+            if (editObject != null)
+            {
+                _editObjectAccessor = ObjectAccessor.Create(editObject);
+
+                var index = 0;
+
+                foreach (var info in editObject.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    (var memberType, var isWritable) = GetMemberData(info);
+
+                    if (memberType != null && isWritable)
+                    {
+                        EditableMemberFactory factory = null;
+
+                        if (memberType.IsEnum)
+                        {
+                            factory = _enumEditableMemberTypeFactory;
+                        }
+                        else
+                        {
+                            _editableMemberTypes.TryGetValue(memberType, out factory);
+                        }
+
+                        if (factory != null)
+                        {
+                            var editableMember = factory(index, editObject, info, memberType, _editObjectAccessor);
+                            editableMember.Initialize(index, editObject, info, _editObjectAccessor);
+
+                            _currentEditableMembers.Add(editableMember);
+                        }
+
+                        ++index;
+                    }
+                }
+            }
+            else
+            {
+                _editObjectAccessor = null;
+            }
+        }
+
+        private void DrawObjectEditor()
+        {
+            if (_objectEditorVisible && ImGui.BeginWindow("Object Editor", ref _objectEditorVisible, WindowFlags.NoCollapse))
+            {
+                var oldObjectHandle = _editObjectHandle;
+
+                var entityList = _gameClient.BridgeDataReceiver.EntityList;
+
+                var isValid = false;
+
+                if (entityList != null)
+                {
+                    if (ImGui.BeginCombo("Object", "Select object...", ComboFlags.HeightLargest))
+                    {
+                        for (var handle = entityList.GetFirstEntity(); handle.Valid; handle = entityList.GetNextEntity(handle))
+                        {
+                            var isSelected = _editObjectHandle == handle;
+
+                            var entity = entityList.GetEntity(handle);
+
+                            if (ImGui.Selectable($"{handle}:{entity.ClassName}", isSelected))
+                            {
+                                _editObjectHandle = handle;
+                            }
+
+                            if (isSelected)
+                            {
+                                ImGui.SetItemDefaultFocus();
+                            }
+                        }
+
+                        ImGui.EndCombo();
+                    }
+
+                    if (_editObjectHandle.Valid)
+                    {
+                        if (oldObjectHandle != _editObjectHandle)
+                        {
+                            SetupNewObject(entityList.GetEntity(_editObjectHandle));
+                        }
+
+                        var entity = entityList.GetEntity(_editObjectHandle);
+
+                        if (entity != null)
+                        {
+                            isValid = true;
+
+                            var accessor = ObjectAccessor.Create(entity);
+
+                            ImGui.Text($"{_editObjectHandle}:{entity.ClassName}");
+
+                            //Display all properties
+                            foreach (var member in _currentEditableMembers)
+                            {
+                                member.Display(entity, accessor);
+                            }
+                        }
+                    }
+                }
+
+                if (!isValid && _editObjectAccessor != null)
+                {
+                    SetupNewObject(null);
+                }
 
                 ImGui.EndWindow();
             }

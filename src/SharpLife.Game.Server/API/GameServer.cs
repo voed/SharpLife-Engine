@@ -44,8 +44,6 @@ namespace SharpLife.Game.Server.API
 
         private IServerModels _engineModels;
 
-        private GameBridge _gameBridge;
-
         private ServerNetworking _networking;
 
         private ServerEntities _entities;
@@ -57,6 +55,8 @@ namespace SharpLife.Game.Server.API
         /// Don't cache this, it gets recreated every map
         /// </summary>
         public IMapInfo MapInfo { get; private set; }
+
+        public IGameBridge GameBridge { get; set; }
 
         public void Initialize(IServiceCollection serviceCollection)
         {
@@ -83,11 +83,11 @@ namespace SharpLife.Game.Server.API
 
             if (_engine.IsDedicatedServer)
             {
-                _gameBridge = GameBridge.CreateBridge();
+                GameBridge = Shared.Bridge.GameBridge.CreateBridge(null);
             }
             else
             {
-                _gameBridge = (GameBridge)serviceProvider.GetRequiredService<IBridge>();
+                GameBridge = (GameBridge)serviceProvider.GetRequiredService<IBridge>();
             }
 
             _networking = serviceProvider.GetRequiredService<ServerNetworking>();
@@ -110,7 +110,7 @@ namespace SharpLife.Game.Server.API
         /// <returns></returns>
         public bool IsMapValid(string mapName)
         {
-            return _engine.FileSystem.Exists(_gameBridge.ModelUtils.FormatMapFileName(mapName));
+            return _engine.FileSystem.Exists(GameBridge.ModelUtils.FormatMapFileName(mapName));
         }
 
         public bool TryMapLoadBegin(string mapName, ServerStartFlags flags)
@@ -121,7 +121,7 @@ namespace SharpLife.Game.Server.API
                 (flags & ServerStartFlags.ChangeLevel) != 0,
                 (flags & ServerStartFlags.LoadGame) != 0));
 
-            var mapFileName = _gameBridge.ModelUtils.FormatMapFileName(mapName);
+            var mapFileName = GameBridge.ModelUtils.FormatMapFileName(mapName);
 
             IModel worldModel;
 
@@ -201,6 +201,8 @@ namespace SharpLife.Game.Server.API
             }
 
             _active = false;
+
+            _entities.Deactivate();
         }
 
         public void StartFrame()

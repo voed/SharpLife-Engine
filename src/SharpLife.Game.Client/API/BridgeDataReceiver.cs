@@ -13,19 +13,18 @@
 *
 ****/
 
-using SharpLife.Game.Client.Renderer.Shared;
+using SharpLife.Game.Shared.Bridge;
+using SharpLife.Game.Shared.Entities.EntityList;
 
-namespace SharpLife.Game.Client.UI
+namespace SharpLife.Game.Client.API
 {
-    /// <summary>
-    /// The client UI, used to allow drawing
-    /// </summary>
-    public interface IClientUI
+    public sealed class BridgeDataReceiver : IBridgeDataReceiver
     {
-        void MapLoadBegin();
+        public IEntityList EntityList { get; private set; }
 
-        void Update(float deltaSeconds, IViewState viewState);
-
-        void Draw(IViewState viewState);
+        public void ReceiveEntityList(IEntityList entityList)
+        {
+            EntityList = entityList;
+        }
     }
 }
