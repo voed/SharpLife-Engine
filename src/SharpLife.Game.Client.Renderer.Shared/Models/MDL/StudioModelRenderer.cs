@@ -111,7 +111,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             sc.UpdateWorldAndInverseBuffer(cl, ref wai);
 
-            var bones = BoneCalculator.SetUpBones(modelResource.StudioModel.StudioFile, renderData.Sequence, renderData.Frame, new BoneData());
+            var bones = BoneCalculator.SetUpBones(modelResource.StudioModel.StudioFile, renderData.Sequence, renderData.Frame, renderData.BoneData);
 
             cl.UpdateBuffer(BonesBuffer, 0, bones);
 

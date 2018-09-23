@@ -19,7 +19,9 @@ using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Game.Shared.Models.MDL;
 using SharpLife.Models;
 using SharpLife.Models.MDL;
+using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using System.Diagnostics;
 
 namespace SharpLife.Game.Server.Entities.Animation
 {
@@ -29,6 +31,7 @@ namespace SharpLife.Game.Server.Entities.Animation
     [Networkable]
     public class BaseAnimating : NetworkedEntity
     {
+        //TODO: it may be cheaper to just store a separate reference that updates whenever the model changes instead of casting
         public StudioModel StudioModel => Model as StudioModel;
 
         private uint _sequence;
@@ -62,6 +65,10 @@ namespace SharpLife.Game.Server.Entities.Animation
 
         [Networked]
         public uint Skin { get; set; }
+
+        //Must have a setter for networking purposes
+        [Networked]
+        public byte[] Controllers { get; set; } = new byte[MDLConstants.MaxControllers];
 
         protected override void OnModelChanged(IModel oldModel, IModel newModel)
         {
@@ -99,6 +106,45 @@ namespace SharpLife.Game.Server.Entities.Animation
             if (studioModel != null)
             {
                 Body = StudioModelUtils.CalculateBodyGroupValue(studioModel.StudioFile, Body, group, value);
+            }
+        }
+
+        private float InternalSetBoneController(StudioFile studioFile, int controllerIndex, float value)
+        {
+            Debug.Assert(0 <= controllerIndex && controllerIndex < MDLConstants.MaxControllers);
+
+            var result = StudioModelUtils.CalculateControllerValue(studioFile, controllerIndex, value, out value);
+
+            if (result.HasValue)
+            {
+                Controllers[controllerIndex] = result.Value;
+            }
+
+            return value;
+        }
+
+        public float SetBoneController(int controllerIndex, float value)
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                value = InternalSetBoneController(studioModel.StudioFile, controllerIndex, value);
+            }
+
+            return value;
+        }
+
+        public void InitBoneControllers()
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                for (var i = 0; i < MDLConstants.MaxControllers; ++i)
+                {
+                    InternalSetBoneController(studioModel.StudioFile, i, 0.0f);
+                }
             }
         }
     }

@@ -19,6 +19,8 @@ using SharpLife.Game.Client.Renderer.Shared.Models.MDL;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Game.Shared.Models.MDL;
+using SharpLife.Models.MDL.FileFormat;
+using SharpLife.Models.MDL.Rendering;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 
 namespace SharpLife.Game.Client.Entities.Animation
@@ -45,6 +47,10 @@ namespace SharpLife.Game.Client.Entities.Animation
         [Networked]
         public uint Skin { get; set; }
 
+        //Must have a setter for networking purposes
+        [Networked]
+        public byte[] Controllers { get; set; } = new byte[MDLConstants.MaxControllers];
+
         public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model is StudioModel studioModel)
@@ -58,6 +64,13 @@ namespace SharpLife.Game.Client.Entities.Animation
                     Body = Body,
                     Skin = Skin,
                 };
+
+                renderData.BoneData = new BoneData();
+
+                for (var i = 0; i < MDLConstants.MaxControllers; ++i)
+                {
+                    renderData.BoneData.SetController(i, Controllers[i]);
+                }
 
                 modelRenderer.RenderStudioModel(ref renderData);
             }

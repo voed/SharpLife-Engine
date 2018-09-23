@@ -80,5 +80,73 @@ namespace SharpLife.Models.MDL
 
             return (uint)(currentPackedValue - (current * bodyPart.Base) + (newValue * bodyPart.Base));
         }
+
+        /// <summary>
+        /// Calculates the new controller value for the given controller and value
+        /// </summary>
+        /// <param name="studioFile"></param>
+        /// <param name="controllerIndex"></param>
+        /// <param name="value"></param>
+        /// <param name="correctedValue">The corrected value</param>
+        /// <returns>If the given controller exists, the normalized value. Otherwise, returns null</returns>
+        public static byte? CalculateControllerValue(StudioFile studioFile, int controllerIndex, float value, out float correctedValue)
+        {
+            if (studioFile == null)
+            {
+                throw new ArgumentNullException(nameof(studioFile));
+            }
+
+            correctedValue = value;
+
+            // find first controller that matches the index
+            var controller = studioFile.BoneControllers.Find(candidate => candidate.Index == controllerIndex);
+
+            if (controller == null)
+            {
+                return null;
+            }
+
+            // wrap 0..360 if it's a rotational controller
+
+            if ((controller.Type & (MotionTypes.XR | MotionTypes.YR | MotionTypes.ZR)) != 0)
+            {
+                // ugly hack, invert value if end < start
+                if (controller.End < controller.Start)
+                {
+                    correctedValue = -correctedValue;
+                }
+
+                // does the controller not wrap?
+                if (controller.Start + 359.0 >= controller.End)
+                {
+                    if (correctedValue > ((controller.Start + controller.End) / 2.0) + 180)
+                    {
+                        correctedValue -= 360;
+                    }
+
+                    if (correctedValue < ((controller.Start + controller.End) / 2.0) - 180)
+                    {
+                        correctedValue += 360;
+                    }
+                }
+                else
+                {
+                    if (correctedValue > 360)
+                    {
+                        correctedValue -= (int)(correctedValue / 360.0f) * 360.0f;
+                    }
+                    else if (correctedValue < 0)
+                    {
+                        correctedValue += (int)((correctedValue / -360.0f) + 1) * 360.0f;
+                    }
+                }
+            }
+
+            int setting = (int)(255 * (correctedValue - controller.Start) / (controller.End - controller.Start));
+
+            setting = Math.Clamp(setting, 0, 255);
+
+            return (byte)setting;
+        }
     }
 }
