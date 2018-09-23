@@ -142,7 +142,51 @@ namespace SharpLife.Models.MDL
                 }
             }
 
-            int setting = (int)(255 * (correctedValue - controller.Start) / (controller.End - controller.Start));
+            var setting = (int)(255 * (correctedValue - controller.Start) / (controller.End - controller.Start));
+
+            setting = Math.Clamp(setting, 0, 255);
+
+            return (byte)setting;
+        }
+
+        public static byte? CalculateBlendingValue(StudioFile studioFile, uint sequenceIndex, int blender, float value, out float correctedValue)
+        {
+            if (studioFile == null)
+            {
+                throw new ArgumentNullException(nameof(studioFile));
+            }
+
+            correctedValue = value;
+
+            ref var blend = ref studioFile.Sequences[(int)sequenceIndex].Blends[blender];
+
+            if (blend.Type == MotionTypes.None)
+            {
+                return null;
+            }
+
+            if ((blend.Type & (MotionTypes.XR | MotionTypes.YR | MotionTypes.ZR)) != 0)
+            {
+                // ugly hack, invert value if end < start
+                if (blend.End < blend.Start)
+                    correctedValue = -correctedValue;
+
+                // does the controller not wrap?
+                if (blend.Start + 359.0 >= blend.End)
+                {
+                    if (correctedValue > ((blend.Start + blend.End) / 2.0) + 180)
+                    {
+                        correctedValue -= 360;
+                    }
+
+                    if (correctedValue < ((blend.Start + blend.End) / 2.0) - 180)
+                    {
+                        correctedValue += 360;
+                    }
+                }
+            }
+
+            var setting = (int)(255 * (correctedValue - blend.Start) / (blend.End - blend.Start));
 
             setting = Math.Clamp(setting, 0, 255);
 

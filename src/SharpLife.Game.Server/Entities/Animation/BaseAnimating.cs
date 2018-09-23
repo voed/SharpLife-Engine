@@ -70,6 +70,9 @@ namespace SharpLife.Game.Server.Entities.Animation
         [Networked]
         public byte[] Controllers { get; set; } = new byte[MDLConstants.MaxControllers];
 
+        [Networked]
+        public byte[] Blenders { get; set; } = new byte[MDLConstants.MaxBlenders];
+
         protected override void OnModelChanged(IModel oldModel, IModel newModel)
         {
             //Reset model specific info
@@ -146,6 +149,23 @@ namespace SharpLife.Game.Server.Entities.Animation
                     InternalSetBoneController(studioModel.StudioFile, i, 0.0f);
                 }
             }
+        }
+
+        public float SetBlending(int blenderIndex, float value)
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                var result = StudioModelUtils.CalculateBlendingValue(studioModel.StudioFile, Sequence, blenderIndex, value, out value);
+
+                if (result.HasValue)
+                {
+                    Blenders[blenderIndex] = result.Value;
+                }
+            }
+
+            return value;
         }
     }
 }

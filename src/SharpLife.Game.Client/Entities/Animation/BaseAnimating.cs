@@ -51,6 +51,9 @@ namespace SharpLife.Game.Client.Entities.Animation
         [Networked]
         public byte[] Controllers { get; set; } = new byte[MDLConstants.MaxControllers];
 
+        [Networked]
+        public byte[] Blenders { get; set; } = new byte[MDLConstants.MaxBlenders];
+
         public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model is StudioModel studioModel)
@@ -70,6 +73,11 @@ namespace SharpLife.Game.Client.Entities.Animation
                 for (var i = 0; i < MDLConstants.MaxControllers; ++i)
                 {
                     renderData.BoneData.SetController(i, Controllers[i]);
+                }
+
+                for (var i = 0; i < MDLConstants.MaxBlenders; ++i)
+                {
+                    renderData.BoneData.SetBlender(i, Blenders[i]);
                 }
 
                 modelRenderer.RenderStudioModel(ref renderData);
