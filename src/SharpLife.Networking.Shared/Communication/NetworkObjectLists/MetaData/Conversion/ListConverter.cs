@@ -85,6 +85,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
                 return list;
             }
 
+            if (targetType.IsArray)
+            {
+                return Copy(value);
+            }
+
             throw new InvalidOperationException();
         }
 
