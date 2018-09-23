@@ -20,6 +20,49 @@ namespace SharpLife.Models.MDL
 {
     public static class StudioModelUtils
     {
+        public static SequenceFlags GetSequenceFlags(StudioFile studioFile, uint sequenceIndex)
+        {
+            if (studioFile == null)
+            {
+                throw new ArgumentNullException(nameof(studioFile));
+            }
+
+            if (sequenceIndex >= studioFile.Sequences.Count)
+            {
+                return 0;
+            }
+
+            return studioFile.Sequences[(int)sequenceIndex].Flags;
+        }
+
+        public static void GetSequenceInfo(StudioFile studioFile, uint sequenceIndex, out float frameRate, out float groundSpeed)
+        {
+            if (studioFile == null)
+            {
+                throw new ArgumentNullException(nameof(studioFile));
+            }
+
+            if (sequenceIndex >= studioFile.Sequences.Count)
+            {
+                frameRate = 0.0f;
+                groundSpeed = 0.0f;
+                return;
+            }
+
+            var sequence = studioFile.Sequences[(int)sequenceIndex];
+
+            if (sequence.FrameCount > 1)
+            {
+                frameRate = 256 * sequence.FPS / (sequence.FrameCount - 1);
+                groundSpeed = sequence.LinearMovement.Length() * sequence.FPS / (sequence.FrameCount - 1);
+            }
+            else
+            {
+                frameRate = 256.0f;
+                groundSpeed = 0.0f;
+            }
+        }
+
         /// <summary>
         /// Gets the currently selected submodel for the given body group
         /// </summary>

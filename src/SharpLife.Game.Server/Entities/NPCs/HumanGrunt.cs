@@ -15,7 +15,6 @@
 
 using SharpLife.Game.Server.Entities.Animation;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Game.Shared.Models.MDL;
 
 namespace SharpLife.Game.Server.Entities.NPCs
 {
@@ -47,58 +46,7 @@ namespace SharpLife.Game.Server.Entities.NPCs
 
         public override void Think()
         {
-            if (Model is StudioModel studioModel)
-            {
-                float dt = 0;
-                float flMax = 0.1f;
-
-                if (dt == 0.0)
-                {
-                    dt = ((float)(Context.Time.ElapsedTime - m_flAnimTime));
-                    if (dt <= 0.001)
-                    {
-                        m_flAnimTime = (float)Context.Time.ElapsedTime;
-                        return;
-                    }
-                }
-
-                if (m_flAnimTime == 0)
-                    dt = 0.0f;
-
-                if (flMax != -1.0f)
-                {
-                    if (dt > flMax)
-                        dt = flMax;
-                }
-
-                var sequence = studioModel.StudioFile.Sequences[(int)Sequence];
-
-                var increment = (float)(FrameRate * sequence.FPS * dt);
-
-                Frame += increment;
-
-                _lastTime = (float)Context.Time.ElapsedTime;
-
-                if (sequence.FrameCount <= 1)
-                {
-                    Frame = 0;
-                }
-                else
-                {
-                    float flOldFrame = Frame;
-
-                    // wrap
-                    Frame -= (int)(Frame / (sequence.FrameCount - 1)) * (sequence.FrameCount - 1);
-
-                    //Wrapped
-                    if (flOldFrame > Frame)
-                    {
-                        m_flLastEventCheck = Frame - increment;
-                    }
-                }
-
-                m_flAnimTime = (float)Context.Time.ElapsedTime;
-            }
+            StudioFrameAdvance();
         }
     }
 }

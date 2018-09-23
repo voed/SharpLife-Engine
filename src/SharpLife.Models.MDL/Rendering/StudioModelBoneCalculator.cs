@@ -28,6 +28,10 @@ namespace SharpLife.Models.MDL.Rendering
     {
         private StudioFile _currentModel;
 
+        private double _currentTime;
+
+        private bool _doInterpolation = true;
+
         private readonly float[] _boneAdjust = new float[MDLConstants.MaxControllers];
 
         private readonly float[] _controllerNormalizers = new float[MDLConstants.MaxControllers]
@@ -59,9 +63,11 @@ namespace SharpLife.Models.MDL.Rendering
             return controllerIndex != MDLConstants.MouthControllerIndex;
         }
 
-        public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, uint sequenceIndex, float frame, in BoneData boneData)
+        public unsafe Matrix4x4[] SetUpBones(StudioFile studioFile, double currentTime, uint sequenceIndex, float lastTime, float frame, float frameRate, in BoneData boneData)
         {
             _currentModel = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
+
+            _currentTime = currentTime;
 
             if (sequenceIndex >= _currentModel.Sequences.Count)
             {
@@ -69,6 +75,8 @@ namespace SharpLife.Models.MDL.Rendering
             }
 
             var sequence = _currentModel.Sequences[(int)sequenceIndex];
+
+            frame = EstimateFrame(sequence, lastTime, frame, frameRate);
 
             var animations = sequence.AnimationBlends;
 
@@ -109,7 +117,6 @@ namespace SharpLife.Models.MDL.Rendering
                 }
                 else
                 {
-                    //TODO: verify that this is correct
                     _bones[i] = bonematrix * _bones[pbones[i].Parent];
                 }
             }
@@ -117,6 +124,67 @@ namespace SharpLife.Models.MDL.Rendering
             _currentModel = null;
 
             return _bones;
+        }
+
+        private float EstimateFrame(SequenceDescriptor sequence, float lastTime, float frame, float frameRate)
+        {
+            double dfdt;
+
+            if (_doInterpolation)
+            {
+                if (_currentTime < lastTime)
+                {
+                    dfdt = 0;
+                }
+                else
+                {
+                    dfdt = (_currentTime - lastTime) * frameRate * sequence.FPS;
+                }
+            }
+            else
+            {
+                dfdt = 0;
+            }
+
+            double f;
+
+            if (sequence.FrameCount <= 1)
+            {
+                f = 0;
+            }
+            else
+            {
+                f = (frame * (sequence.FrameCount - 1)) / 256.0;
+            }
+
+            f += dfdt;
+
+            if ((sequence.Flags & SequenceFlags.Looping) != 0)
+            {
+                if (sequence.FrameCount > 1)
+                {
+                    f -= (int)(f / (sequence.FrameCount - 1)) * (sequence.FrameCount - 1);
+                }
+
+                if (f < 0)
+                {
+                    f += (sequence.FrameCount - 1);
+                }
+            }
+            else
+            {
+                if (f >= sequence.FrameCount - 1.001)
+                {
+                    f = sequence.FrameCount - 1.001;
+                }
+
+                if (f < 0.0)
+                {
+                    f = 0.0;
+                }
+            }
+
+            return (float)f;
         }
 
         private unsafe void CalcRotations(in BoneData boneData,

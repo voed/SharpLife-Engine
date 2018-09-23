@@ -34,10 +34,13 @@ namespace SharpLife.Game.Client.Entities.Animation
         [Networked]
         public uint Sequence { get; set; }
 
+        //TODO: use a converter that transmits times relative to current time
+        [Networked]
+        public float LastTime { get; set; }
+
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
 
-        //TODO: may not need to be networked for studio models
         [Networked]
         public float FrameRate { get; set; }
 
@@ -62,13 +65,15 @@ namespace SharpLife.Game.Client.Entities.Animation
                 {
                     Model = studioModel,
                     Shared = GetSharedModelRenderData(viewState),
+                    CurrentTime = Context.Time.ElapsedTime,
                     Sequence = Sequence,
+                    LastTime = LastTime,
                     Frame = Frame,
+                    FrameRate = FrameRate,
                     Body = Body,
                     Skin = Skin,
+                    BoneData = new BoneData()
                 };
-
-                renderData.BoneData = new BoneData();
 
                 for (var i = 0; i < MDLConstants.MaxControllers; ++i)
                 {

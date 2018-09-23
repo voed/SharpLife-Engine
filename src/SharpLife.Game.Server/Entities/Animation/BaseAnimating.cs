@@ -47,12 +47,19 @@ namespace SharpLife.Game.Server.Entities.Animation
                 if (studioModel != null && value < studioModel.StudioFile.Sequences.Count)
                 {
                     _sequence = value;
-                    return;
+                }
+                else
+                {
+                    _sequence = 0;
                 }
 
-                _sequence = 0;
+                ResetSequenceInfo();
             }
         }
+
+        //TODO: use a converter that transmits times relative to current time
+        [Networked]
+        public float LastTime { get; set; }
 
         [Networked(TypeConverterType = typeof(FrameTypeConverter))]
         public float Frame { get; set; }
@@ -73,6 +80,16 @@ namespace SharpLife.Game.Server.Entities.Animation
         [Networked]
         public byte[] Blenders { get; set; } = new byte[MDLConstants.MaxBlenders];
 
+        private float _lastEventCheck;
+
+        public bool SequenceLoops { get; private set; }
+
+        public bool SequenceFinished { get; protected set; }
+
+        public float SequenceFrameRate { get; private set; }
+
+        public float SeqenceGroundSpeed { get; private set; }
+
         protected override void OnModelChanged(IModel oldModel, IModel newModel)
         {
             //Reset model specific info
@@ -88,6 +105,38 @@ namespace SharpLife.Game.Server.Entities.Animation
             }
 
             return base.KeyValue(key, value);
+        }
+
+        public SequenceFlags GetSequenceFlags()
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                return StudioModelUtils.GetSequenceFlags(studioModel.StudioFile, Sequence);
+            }
+
+            return SequenceFlags.None;
+        }
+
+        public void ResetSequenceInfo()
+        {
+            var studioModel = StudioModel;
+
+            if (studioModel != null)
+            {
+                StudioModelUtils.GetSequenceInfo(StudioModel.StudioFile, Sequence, out var sequenceFrameRate, out var groundSpeed);
+                SequenceFrameRate = sequenceFrameRate;
+                SeqenceGroundSpeed = groundSpeed;
+
+                SequenceLoops = (GetSequenceFlags() & SequenceFlags.Looping) != 0;
+
+                LastTime = (float)Context.Time.ElapsedTime;
+                _lastEventCheck = (float)Context.Time.ElapsedTime;
+
+                FrameRate = 1.0f;
+                SequenceFinished = false;
+            }
         }
 
         public uint GetBodyGroup(uint group)
@@ -166,6 +215,50 @@ namespace SharpLife.Game.Server.Entities.Animation
             }
 
             return value;
+        }
+
+        /// <summary>
+        /// advance the animation frame up to the current time
+        /// if an flInterval is passed in, only advance animation that number of seconds
+        /// </summary>
+        /// <param name="flInterval"></param>
+        /// <returns></returns>
+        public float StudioFrameAdvance(float flInterval = 0.0f)
+        {
+            if (flInterval == 0.0)
+            {
+                flInterval = (float)(Context.Time.ElapsedTime - LastTime);
+
+                if (flInterval <= 0.001)
+                {
+                    LastTime = (float)Context.Time.ElapsedTime;
+                    return 0.0f;
+                }
+            }
+
+            if (LastTime == 0)
+            {
+                flInterval = 0.0f;
+            }
+
+            Frame += flInterval * SequenceFrameRate * FrameRate;
+            LastTime = (float)Context.Time.ElapsedTime;
+
+            if (Frame < 0.0 || Frame >= 256.0)
+            {
+                if (SequenceLoops)
+                {
+                    Frame -= (int)(Frame / 256.0f) * 256.0f;
+                }
+                else
+                {
+                    Frame = (Frame < 0.0) ? 0 : 255;
+                }
+
+                SequenceFinished = true; // just in case it wasn't caught in GetEvents
+            }
+
+            return flInterval;
         }
     }
 }

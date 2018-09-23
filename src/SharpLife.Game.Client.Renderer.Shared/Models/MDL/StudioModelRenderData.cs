@@ -24,9 +24,15 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public SharedModelRenderData Shared;
 
+        public double CurrentTime;
+
         public uint Sequence;
 
+        public float LastTime;
+
         public float Frame;
+
+        public float FrameRate;
 
         public uint Body;
 
