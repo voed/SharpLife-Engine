@@ -17,18 +17,32 @@ using Google.Protobuf;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
-    public sealed class Int8Converter : BaseArithmeticConverter<sbyte>
+    public sealed class Int8Converter : BaseValueTypeConverter<sbyte>
     {
         public static Int8Converter Instance { get; } = new Int8Converter();
 
+        public override int MemberCount => 1;
+
         private Int8Converter()
         {
+        }
+
+        public override bool Encode(in sbyte value, in sbyte previousValue, out sbyte result)
+        {
+            result = (sbyte)(value - previousValue);
+
+            return result != default;
         }
 
         public override void Write(in sbyte value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
             stream.WriteInt32(value);
+        }
+
+        public override void Decode(in sbyte value, in sbyte previousValue, out sbyte result)
+        {
+            result = (sbyte)(value + previousValue);
         }
 
         public override bool Read(CodedInputStream stream, out sbyte result)
