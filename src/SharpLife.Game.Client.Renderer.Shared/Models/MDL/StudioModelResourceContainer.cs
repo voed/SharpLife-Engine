@@ -84,6 +84,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 sc.ViewMatrixBuffer,
                 sc.WorldAndInverseBuffer,
                 sc.ModelRenderer.StudioRenderer.BonesBuffer,
+                sc.ModelRenderer.StudioRenderer.RenderArgumentsBuffer,
                 sc.MainSampler
                 ));
 

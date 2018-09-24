@@ -13,6 +13,8 @@
 *
 ****/
 
+using SharpLife.Game.Client.Renderer.Shared.Utility;
+using SharpLife.Game.Shared.Models;
 using SharpLife.Models.MDL;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Rendering;
@@ -33,11 +35,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public DeviceBuffer BonesBuffer { get; private set; }
 
+        public DeviceBuffer RenderArgumentsBuffer { get; private set; }
+
         public ResourceLayout SharedLayout { get; private set; }
 
         public ResourceLayout TextureLayout { get; private set; }
 
-        public Pipeline Pipeline { get; private set; }
+        private RenderModePipelines _pipelines;
 
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
@@ -45,11 +49,14 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             BonesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<Matrix4x4>() * MDLConstants.MaxBones), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
+            RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<StudioRenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+
             SharedLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("Bones", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                new ResourceLayoutElementDescription("RenderArguments", ResourceKind.UniformBuffer, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
             TextureLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
@@ -72,6 +79,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             var resourceLayouts = new ResourceLayout[] { SharedLayout, TextureLayout };
             var outputDescription = sc.MainSceneFramebuffer.OutputDescription;
 
+            var pipelines = new Pipeline[(int)RenderMode.Last + 1];
+
             var pd = new GraphicsPipelineDescription(
                 BlendStateDescription.SingleDisabled,
                 gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
@@ -81,7 +90,54 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 resourceLayouts,
                 outputDescription);
 
-            Pipeline = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.Normal] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            pd = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleAlphaBlend,
+                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
+                rasterizerState,
+                primitiveTopology,
+                shaderSets,
+                resourceLayouts,
+                outputDescription);
+
+            pipelines[(int)RenderMode.TransTexture] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            //These all use the same settings as texture
+            pipelines[(int)RenderMode.TransColor] = pipelines[(int)RenderMode.TransTexture];
+            pipelines[(int)RenderMode.Glow] = pipelines[(int)RenderMode.TransTexture];
+            pipelines[(int)RenderMode.TransAlpha] = pipelines[(int)RenderMode.TransTexture];
+
+            //TODO: define this blend state somewhere
+            var additiveBlend = new BlendStateDescription
+            {
+                AttachmentStates = new[]
+                {
+                    new BlendAttachmentDescription
+                    {
+                        BlendEnabled = true,
+                        SourceColorFactor = BlendFactor.One,
+                        DestinationColorFactor = BlendFactor.One,
+                        ColorFunction = BlendFunction.Add,
+                        SourceAlphaFactor = BlendFactor.One,
+                        DestinationAlphaFactor = BlendFactor.One,
+                        AlphaFunction = BlendFunction.Add,
+                    }
+                }
+            };
+
+            pd = new GraphicsPipelineDescription(
+                additiveBlend,
+                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
+                rasterizerState,
+                primitiveTopology,
+                shaderSets,
+                resourceLayouts,
+                outputDescription);
+
+            pipelines[(int)RenderMode.TransAdd] = disposeFactory.CreateGraphicsPipeline(ref pd);
+
+            _pipelines = new RenderModePipelines(pipelines);
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -97,6 +153,20 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
         public void Dispose()
         {
             DestroyDeviceObjects(ResourceScope.All);
+        }
+
+        private Vector4 GetStudioColor(ref SharedModelRenderData renderData)
+        {
+            //TODO: seems that while the engine does set the color based on render mode, it will override it depending on texture flags
+            //TODO: so this is really inconsistent
+            //TODO: this is used only if we're doing glow shell
+            switch (renderData.RenderMode)
+            {
+                //case RenderMode.Normal:
+                //case RenderMode.TransColor: return Vector4.One;
+                //case RenderMode.TransAdd: return new Vector4(renderData.RenderAmount / 255.0f, renderData.RenderAmount / 255.0f, renderData.RenderAmount / 255.0f, 1.0f);
+                default: return new Vector4(1.0f, 1.0f, 1.0f, renderData.RenderAmount / 255.0f);
+            }
         }
 
         public void Render(GraphicsDevice gd, CommandList cl, SceneContext sc, RenderPasses renderPass, StudioModelResourceContainer modelResource, ref StudioModelRenderData renderData)
@@ -121,7 +191,16 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             cl.UpdateBuffer(BonesBuffer, 0, bones);
 
-            cl.SetPipeline(Pipeline);
+            var renderArguments = new StudioRenderArguments
+            {
+                RenderColor = GetStudioColor(ref renderData.Shared),
+            };
+
+            cl.UpdateBuffer(RenderArgumentsBuffer, 0, ref renderArguments);
+
+            var pipeline = _pipelines[renderData.Shared.RenderMode];
+
+            cl.SetPipeline(pipeline);
 
             cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
 
