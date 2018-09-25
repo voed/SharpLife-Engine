@@ -125,11 +125,11 @@ namespace SharpLife.Renderer
             return InternalConvertTexture(inputImage, textureFormat);
         }
 
-        private ImageSharpTexture InternalLoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat)
+        private ImageSharpTexture InternalLoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, bool mipmap)
         {
             var image = InternalConvertTexture(inputImage, textureFormat);
 
-            return new ImageSharpTexture(image, true);
+            return new ImageSharpTexture(image, mipmap);
         }
 
         /// <summary>
@@ -137,17 +137,18 @@ namespace SharpLife.Renderer
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="textureFormat"></param>
+        /// <param name="mipmap"></param>
         /// <param name="gd"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Texture LoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, GraphicsDevice gd, ResourceFactory factory)
+        public Texture LoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, bool mipmap, GraphicsDevice gd, ResourceFactory factory)
         {
             if (inputImage == null)
             {
                 throw new ArgumentNullException(nameof(inputImage));
             }
 
-            var imageSharpTexture = InternalLoadTexture(inputImage, textureFormat);
+            var imageSharpTexture = InternalLoadTexture(inputImage, textureFormat, mipmap);
 
             return imageSharpTexture.CreateDeviceTexture(gd, factory);
         }
@@ -158,11 +159,12 @@ namespace SharpLife.Renderer
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="textureFormat"></param>
+        /// <param name="mipmap"></param>
         /// <param name="name"></param>
         /// <param name="gd"></param>
         /// <param name="cache"></param>
         /// <returns></returns>
-        public Texture LoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, string name, GraphicsDevice gd, ResourceCache cache)
+        public Texture LoadTexture(IndexedColor256Image inputImage, TextureFormat textureFormat, bool mipmap, string name, GraphicsDevice gd, ResourceCache cache)
         {
             if (inputImage == null)
             {
@@ -174,7 +176,7 @@ namespace SharpLife.Renderer
                 throw new ArgumentNullException(nameof(name));
             }
 
-            var imageSharpTexture = InternalLoadTexture(inputImage, textureFormat);
+            var imageSharpTexture = InternalLoadTexture(inputImage, textureFormat, mipmap);
 
             return cache.AddTexture2D(gd, gd.ResourceFactory, imageSharpTexture, name);
         }

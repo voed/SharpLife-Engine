@@ -218,10 +218,11 @@ namespace SharpLife.Models.MDL.Rendering
 
             foreach (var texture in studioFile.Textures)
             {
-                //TODO: disable mipmaps when NoMips is provided
+                //TODO: is NoMips incorrectly named?
                 var uploadedTexture = textureLoader.LoadTexture(
                         new IndexedColor256Image(texture.Palette, texture.Pixels, texture.Width, texture.Height),
-                        (texture.Flags & TextureFlags.Alpha) != 0 ? TextureFormat.AlphaTest : TextureFormat.Normal,
+                        (texture.Flags & TextureFlags.Masked) != 0 ? TextureFormat.AlphaTest : TextureFormat.Normal,
+                        (texture.Flags & TextureFlags.NoMips) != 0,
                         baseName + texture.Name,
                         gd,
                         cache);

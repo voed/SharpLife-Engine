@@ -44,6 +44,7 @@ namespace SharpLife.Models.BSP.Rendering
                         (int)texture.Width,
                         (int)texture.Height),
                     textureFormat,
+                    true,
                     texture.Name,
                     gd,
                     cache);
