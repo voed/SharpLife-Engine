@@ -38,6 +38,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
         private const int MaskEnabled = 1;
         private const int MaskModeCount = 2;
 
+        private const int AdditiveDisabled = 0;
+        private const int AdditiveEnabled = 1;
+        private const int AdditiveModeCount = 2;
+
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
         public StudioModelBoneCalculator BoneCalculator { get; } = new StudioModelBoneCalculator();
@@ -50,7 +54,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public ResourceLayout TextureLayout { get; private set; }
 
-        private readonly RenderModePipelines[,] _pipelines = new RenderModePipelines[CullModeCount, MaskModeCount];
+        private readonly RenderModePipelines[,,] _pipelines = new RenderModePipelines[CullModeCount, MaskModeCount, AdditiveModeCount];
 
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
@@ -83,10 +87,14 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             {
                 for (var maskMode = MaskDisabled; maskMode < MaskModeCount; ++maskMode)
                 {
-                    _pipelines[cullMode, maskMode] = CreatePipelines(
-                        gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory,
-                        cullMode == CullBack,
-                        maskMode == MaskEnabled);
+                    for (var additiveMode = AdditiveDisabled; additiveMode < AdditiveModeCount; ++additiveMode)
+                    {
+                        _pipelines[cullMode, maskMode, additiveMode] = CreatePipelines(
+                            gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory,
+                            cullMode == CullBack,
+                            maskMode == MaskEnabled,
+                            additiveMode == AdditiveEnabled);
+                    }
                 }
             }
         }
@@ -99,7 +107,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             ResourceLayout textureLayout,
             ResourceFactory factory,
             bool cullBack,
-            bool masked)
+            bool masked,
+            bool additive)
         {
             (var vs, var fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, Path.Combine("studio", "StudioGeneric"));
 
@@ -111,9 +120,23 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             var pipelines = new Pipeline[(int)RenderMode.Last + 1];
 
+            BlendStateDescription normalBlendState;
+            DepthStencilStateDescription normalDepthStencilState;
+
+            if (additive)
+            {
+                normalBlendState = BlendStates.SingleAdditiveOneOneBlend;
+                normalDepthStencilState = gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead;
+            }
+            else
+            {
+                normalBlendState = BlendStateDescription.SingleDisabled;
+                normalDepthStencilState = gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual;
+            }
+
             var pd = new GraphicsPipelineDescription(
-                BlendStateDescription.SingleDisabled,
-                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual,
+                normalBlendState,
+                normalDepthStencilState,
                 rasterizerState,
                 primitiveTopology,
                 shaderSets,
@@ -163,13 +186,15 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             return new RenderModePipelines(pipelines);
         }
 
-        private RenderModePipelines GetPipelines(bool cullBack, bool masked)
+        private RenderModePipelines GetPipelines(bool cullBack, bool masked, bool additive)
         {
             var cullMode = cullBack ? CullBack : CullFront;
 
             var maskMode = masked ? MaskEnabled : MaskDisabled;
 
-            return _pipelines[cullMode, maskMode];
+            var additiveMode = additive ? AdditiveEnabled : AdditiveDisabled;
+
+            return _pipelines[cullMode, maskMode, additiveMode];
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -252,7 +277,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
                     var texture = renderData.Model.StudioFile.Textures[textureIndex];
 
-                    var pipelines = GetPipelines(isFrontCull, (texture.Flags & TextureFlags.Masked) != 0);
+                    var pipelines = GetPipelines(
+                        isFrontCull,
+                        (texture.Flags & TextureFlags.Masked) != 0,
+                        (texture.Flags & TextureFlags.Additive) != 0);
 
                     var pipeline = pipelines[renderData.Shared.RenderMode];
 
