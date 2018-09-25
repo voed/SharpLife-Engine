@@ -19,6 +19,7 @@ using SharpLife.Models.MDL;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Rendering;
 using SharpLife.Renderer.Utility;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -33,6 +34,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
         private const int CullFront = 1;
         private const int CullModeCount = 2;
 
+        private const int MaskDisabled = 0;
+        private const int MaskEnabled = 1;
+        private const int MaskModeCount = 2;
+
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
         public StudioModelBoneCalculator BoneCalculator { get; } = new StudioModelBoneCalculator();
@@ -45,7 +50,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public ResourceLayout TextureLayout { get; private set; }
 
-        private readonly RenderModePipelines[] _pipelines = new RenderModePipelines[CullModeCount];
+        private readonly RenderModePipelines[,] _pipelines = new RenderModePipelines[CullModeCount, MaskModeCount];
 
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
@@ -76,9 +81,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             for (var cullMode = CullBack; cullMode < CullModeCount; ++cullMode)
             {
-                _pipelines[cullMode] = CreatePipelines(
-                    gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory,
-                    cullMode == CullBack);
+                for (var maskMode = MaskDisabled; maskMode < MaskModeCount; ++maskMode)
+                {
+                    _pipelines[cullMode, maskMode] = CreatePipelines(
+                        gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory,
+                        cullMode == CullBack,
+                        maskMode == MaskEnabled);
+                }
             }
         }
 
@@ -89,7 +98,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             ResourceLayout sharedLayout,
             ResourceLayout textureLayout,
             ResourceFactory factory,
-            bool cullBack)
+            bool cullBack,
+            bool masked)
         {
             (var vs, var fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, Path.Combine("studio", "StudioGeneric"));
 
@@ -128,9 +138,20 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             pipelines[(int)RenderMode.Glow] = pipelines[(int)RenderMode.TransTexture];
             pipelines[(int)RenderMode.TransAlpha] = pipelines[(int)RenderMode.TransTexture];
 
+            DepthStencilStateDescription additiveDepthState;
+
+            if (masked)
+            {
+                additiveDepthState = gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqual : DepthStencilStateDescription.DepthOnlyLessEqual;
+            }
+            else
+            {
+                additiveDepthState = gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead;
+            }
+
             pd = new GraphicsPipelineDescription(
                 BlendStates.SingleAdditiveOneOneBlend,
-                gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
+                additiveDepthState,
                 rasterizerState,
                 primitiveTopology,
                 shaderSets,
@@ -142,11 +163,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             return new RenderModePipelines(pipelines);
         }
 
-        private RenderModePipelines GetPipelines(bool cullBack)
+        private RenderModePipelines GetPipelines(bool cullBack, bool masked)
         {
             var cullMode = cullBack ? CullBack : CullFront;
 
-            return _pipelines[cullMode];
+            var maskMode = cullBack ? MaskEnabled : MaskDisabled;
+
+            return _pipelines[cullMode, maskMode];
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -210,16 +233,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             //Determine which pipelines to use
             var isFrontCull = (renderData.Shared.Scale.X * renderData.Shared.Scale.Y * renderData.Shared.Scale.Z) >= 0;
 
-            var pipelines = GetPipelines(isFrontCull);
-
-            var pipeline = pipelines[renderData.Shared.RenderMode];
-
-            cl.SetPipeline(pipeline);
-
-            cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
-
             cl.SetVertexBuffer(0, modelResource.VertexBuffer);
             cl.SetIndexBuffer(modelResource.IndexBuffer, IndexFormat.UInt32);
+
+            IReadOnlyList<int> skinRef = modelResource.StudioModel.StudioFile.Skins[(int)renderData.Skin];
 
             for (var bodyPartIndex = 0; bodyPartIndex < modelResource.BodyParts.Length; ++bodyPartIndex)
             {
@@ -231,8 +248,18 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
                 foreach (var mesh in subModel.Meshes)
                 {
+                    var textureIndex = skinRef[mesh.Mesh.Skin];
+
+                    var texture = renderData.Model.StudioFile.Textures[textureIndex];
+
+                    var pipelines = GetPipelines(isFrontCull, (texture.Flags & TextureFlags.Masked) != 0);
+
+                    var pipeline = pipelines[renderData.Shared.RenderMode];
+
+                    cl.SetPipeline(pipeline);
+                    cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
                     //TODO: consider possibility that there are no skins at all?
-                    cl.SetGraphicsResourceSet(1, modelResource.Textures[modelResource.StudioModel.StudioFile.Skins[(int)renderData.Skin][mesh.Mesh.Skin]]);
+                    cl.SetGraphicsResourceSet(1, modelResource.Textures[textureIndex]);
 
                     cl.DrawIndexed(mesh.IndicesCount, 1, mesh.StartIndex, 0, 0);
                 }
