@@ -45,13 +45,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
-            var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
+            var factory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
-            BonesBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<Matrix4x4>() * MDLConstants.MaxBones), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            BonesBuffer = factory.CreateBuffer(new BufferDescription((uint)(Marshal.SizeOf<Matrix4x4>() * MDLConstants.MaxBones), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<StudioRenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            RenderArgumentsBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<StudioRenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            SharedLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
+            SharedLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -59,10 +59,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 new ResourceLayoutElementDescription("RenderArguments", ResourceKind.UniformBuffer, ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("Sampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
-            TextureLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
+            TextureLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment)));
 
-            var vertexLayouts = new VertexLayoutDescription[]
+            var vertexLayouts = new[]
             {
                 new VertexLayoutDescription(
                     new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
@@ -70,13 +70,23 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                     new VertexElementDescription("BoneIndex", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt1))
             };
 
+            _pipelines = CreatePipelines(gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory);
+        }
+
+        private static RenderModePipelines CreatePipelines(
+            GraphicsDevice gd,
+            SceneContext sc,
+            VertexLayoutDescription[] vertexLayouts,
+            ResourceLayout sharedLayout,
+            ResourceLayout textureLayout,
+            ResourceFactory factory)
+        {
             (var vs, var fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, Path.Combine("studio", "StudioGeneric"));
 
-            //Create render mode pipelines
             var rasterizerState = new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
             const PrimitiveTopology primitiveTopology = PrimitiveTopology.TriangleList;
             var shaderSets = new ShaderSetDescription(vertexLayouts, new[] { vs, fs });
-            var resourceLayouts = new ResourceLayout[] { SharedLayout, TextureLayout };
+            var resourceLayouts = new ResourceLayout[] { sharedLayout, textureLayout };
             var outputDescription = sc.MainSceneFramebuffer.OutputDescription;
 
             var pipelines = new Pipeline[(int)RenderMode.Last + 1];
@@ -90,7 +100,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 resourceLayouts,
                 outputDescription);
 
-            pipelines[(int)RenderMode.Normal] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.Normal] = factory.CreateGraphicsPipeline(ref pd);
 
             pd = new GraphicsPipelineDescription(
                 BlendStateDescription.SingleAlphaBlend,
@@ -101,7 +111,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 resourceLayouts,
                 outputDescription);
 
-            pipelines[(int)RenderMode.TransTexture] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.TransTexture] = factory.CreateGraphicsPipeline(ref pd);
 
             //These all use the same settings as texture
             pipelines[(int)RenderMode.TransColor] = pipelines[(int)RenderMode.TransTexture];
@@ -117,9 +127,9 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 resourceLayouts,
                 outputDescription);
 
-            pipelines[(int)RenderMode.TransAdd] = disposeFactory.CreateGraphicsPipeline(ref pd);
+            pipelines[(int)RenderMode.TransAdd] = factory.CreateGraphicsPipeline(ref pd);
 
-            _pipelines = new RenderModePipelines(pipelines);
+            return new RenderModePipelines(pipelines);
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
