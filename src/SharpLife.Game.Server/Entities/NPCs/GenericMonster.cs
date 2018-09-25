@@ -18,17 +18,10 @@ using SharpLife.Game.Shared.Entities.MetaData;
 
 namespace SharpLife.Game.Server.Entities.NPCs
 {
-    [LinkEntityToClass("monster_human_grunt")]
+    [LinkEntityToClass("monster_generic")]
     [Networkable(UseBaseType = true)]
-    public class HumanGrunt : BaseAnimating
+    public class GenericMonster : BaseAnimating
     {
-        public override void Precache()
-        {
-            Model = Context.EngineModels.LoadModel("models/hgrunt.mdl");
-
-            base.Precache();
-        }
-
         protected override void Spawn()
         {
             Precache();
