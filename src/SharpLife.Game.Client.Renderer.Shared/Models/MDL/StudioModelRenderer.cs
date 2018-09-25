@@ -167,7 +167,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
         {
             var cullMode = cullBack ? CullBack : CullFront;
 
-            var maskMode = cullBack ? MaskEnabled : MaskDisabled;
+            var maskMode = masked ? MaskEnabled : MaskDisabled;
 
             return _pipelines[cullMode, maskMode];
         }
