@@ -95,26 +95,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
             //Identical to Texture, vanilla GoldSource uses an invalid texture env mode that happens to use GL_MODULATE so for consistency this is required
             pipelines[(int)RenderMode.TransColor] = pipelines[(int)RenderMode.TransTexture];
 
-            //Additive blend that matches glBlendFunc(GL_ONE, GL_ONE)
-            var additiveBlend = new BlendStateDescription
-            {
-                AttachmentStates = new BlendAttachmentDescription[]
-                {
-                    new BlendAttachmentDescription
-                    {
-                        BlendEnabled = true,
-                        SourceColorFactor = BlendFactor.One,
-                        DestinationColorFactor = BlendFactor.One,
-                        ColorFunction = BlendFunction.Add,
-                        SourceAlphaFactor = BlendFactor.One,
-                        DestinationAlphaFactor = BlendFactor.One,
-                        AlphaFunction = BlendFunction.Add,
-                    }
-                }
-            };
-
             pd = new GraphicsPipelineDescription(
-                additiveBlend,
+                BlendStates.SingleAdditiveOneOneBlend,
                 DepthStencilStateDescription.Disabled,
                 new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
                 PrimitiveTopology.TriangleList,
@@ -138,7 +120,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.SPR
 
             //Identical to Glow, but still uses depth testing
             pd = new GraphicsPipelineDescription(
-                additiveBlend,
+                BlendStates.SingleAdditiveOneOneBlend,
                 gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
                 new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
                 PrimitiveTopology.TriangleList,

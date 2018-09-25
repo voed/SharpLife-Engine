@@ -120,25 +120,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
             pipelines[(int)RenderMode.TransAlpha] = disposeFactory.CreateGraphicsPipeline(ref pd);
 
-            var additiveBlend = new BlendStateDescription
-            {
-                AttachmentStates = new[]
-                {
-                    new BlendAttachmentDescription
-                    {
-                        BlendEnabled = true,
-                        SourceColorFactor = BlendFactor.One,
-                        DestinationColorFactor = BlendFactor.One,
-                        ColorFunction = BlendFunction.Add,
-                        SourceAlphaFactor = BlendFactor.One,
-                        DestinationAlphaFactor = BlendFactor.One,
-                        AlphaFunction = BlendFunction.Add,
-                    }
-                }
-            };
-
             pd = new GraphicsPipelineDescription(
-                additiveBlend,
+                BlendStates.SingleAdditiveOneOneBlend,
                 gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
                 rasterizerState,
                 primitiveTopology,

@@ -108,26 +108,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             pipelines[(int)RenderMode.Glow] = pipelines[(int)RenderMode.TransTexture];
             pipelines[(int)RenderMode.TransAlpha] = pipelines[(int)RenderMode.TransTexture];
 
-            //TODO: define this blend state somewhere
-            var additiveBlend = new BlendStateDescription
-            {
-                AttachmentStates = new[]
-                {
-                    new BlendAttachmentDescription
-                    {
-                        BlendEnabled = true,
-                        SourceColorFactor = BlendFactor.One,
-                        DestinationColorFactor = BlendFactor.One,
-                        ColorFunction = BlendFunction.Add,
-                        SourceAlphaFactor = BlendFactor.One,
-                        DestinationAlphaFactor = BlendFactor.One,
-                        AlphaFunction = BlendFunction.Add,
-                    }
-                }
-            };
-
             pd = new GraphicsPipelineDescription(
-                additiveBlend,
+                BlendStates.SingleAdditiveOneOneBlend,
                 gd.IsDepthRangeZeroToOne ? DepthStencilStateDescription.DepthOnlyGreaterEqualRead : DepthStencilStateDescription.DepthOnlyLessEqualRead,
                 rasterizerState,
                 primitiveTopology,
