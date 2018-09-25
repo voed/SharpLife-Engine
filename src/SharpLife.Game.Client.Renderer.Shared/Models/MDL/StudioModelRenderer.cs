@@ -29,6 +29,10 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
     public sealed class StudioModelRenderer : IResourceContainer
     {
+        private const int CullBack = 0;
+        private const int CullFront = 1;
+        private const int CullModeCount = 2;
+
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
         public StudioModelBoneCalculator BoneCalculator { get; } = new StudioModelBoneCalculator();
@@ -41,7 +45,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public ResourceLayout TextureLayout { get; private set; }
 
-        private RenderModePipelines _pipelines;
+        private readonly RenderModePipelines[] _pipelines = new RenderModePipelines[CullModeCount];
 
         public void CreateDeviceObjects(GraphicsDevice gd, CommandList cl, SceneContext sc, ResourceScope scope)
         {
@@ -70,7 +74,12 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                     new VertexElementDescription("BoneIndex", VertexElementSemantic.TextureCoordinate, VertexElementFormat.UInt1))
             };
 
-            _pipelines = CreatePipelines(gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory);
+            for (var cullMode = CullBack; cullMode < CullModeCount; ++cullMode)
+            {
+                _pipelines[cullMode] = CreatePipelines(
+                    gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory,
+                    cullMode == CullBack);
+            }
         }
 
         private static RenderModePipelines CreatePipelines(
@@ -79,11 +88,12 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             VertexLayoutDescription[] vertexLayouts,
             ResourceLayout sharedLayout,
             ResourceLayout textureLayout,
-            ResourceFactory factory)
+            ResourceFactory factory,
+            bool cullBack)
         {
             (var vs, var fs) = sc.MapResourceCache.GetShaders(gd, gd.ResourceFactory, Path.Combine("studio", "StudioGeneric"));
 
-            var rasterizerState = new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
+            var rasterizerState = new RasterizerStateDescription(cullBack ? FaceCullMode.Back : FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
             const PrimitiveTopology primitiveTopology = PrimitiveTopology.TriangleList;
             var shaderSets = new ShaderSetDescription(vertexLayouts, new[] { vs, fs });
             var resourceLayouts = new ResourceLayout[] { sharedLayout, textureLayout };
@@ -130,6 +140,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             pipelines[(int)RenderMode.TransAdd] = factory.CreateGraphicsPipeline(ref pd);
 
             return new RenderModePipelines(pipelines);
+        }
+
+        private RenderModePipelines GetPipelines(bool cullBack)
+        {
+            var cullMode = cullBack ? CullBack : CullFront;
+
+            return _pipelines[cullMode];
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -190,7 +207,12 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             cl.UpdateBuffer(RenderArgumentsBuffer, 0, ref renderArguments);
 
-            var pipeline = _pipelines[renderData.Shared.RenderMode];
+            //Determine which pipelines to use
+            var isFrontCull = (renderData.Shared.Scale.X * renderData.Shared.Scale.Y * renderData.Shared.Scale.Z) >= 0;
+
+            var pipelines = GetPipelines(isFrontCull);
+
+            var pipeline = pipelines[renderData.Shared.RenderMode];
 
             cl.SetPipeline(pipeline);
 
