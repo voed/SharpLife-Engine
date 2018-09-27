@@ -450,7 +450,11 @@ namespace SharpLife.Models.BSP.FileFormat
                 var planeNumber = _reader.ReadInt16();
 
                 face.Plane = planes[EndianConverter.Little(planeNumber)];
-                face.Side = EndianConverter.Little(_reader.ReadInt16()) != 0;
+
+                if (EndianConverter.Little(_reader.ReadInt16()) != 0)
+                {
+                    face.Flags |= FaceFlags.Back;
+                }
 
                 var firstEdge = EndianConverter.Little(_reader.ReadInt32());
                 var numEdges = EndianConverter.Little(_reader.ReadInt16());
@@ -484,6 +488,24 @@ namespace SharpLife.Models.BSP.FileFormat
                 if (face.LightOffset != -1)
                 {
                     face.LightOffset /= 3;
+                }
+
+                var name = face.TextureInfo.MipTexture.Name;
+
+                if (name.StartsWith("sky"))
+                {
+                    face.Flags |= FaceFlags.Sky | FaceFlags.Tiled;
+                }
+                else if (name.StartsWith('!')
+                    || name.StartsWith("laser")
+                    || name.StartsWith("water"))
+                {
+                    face.Flags |= FaceFlags.Water;
+                    //TODO: subdivide face
+                }
+                else if (name.StartsWith("scroll") || (face.TextureInfo.Flags & TextureFlags.Special) != 0)
+                {
+                    face.Flags |= FaceFlags.Tiled;
                 }
 
                 CalculateExtents(face);

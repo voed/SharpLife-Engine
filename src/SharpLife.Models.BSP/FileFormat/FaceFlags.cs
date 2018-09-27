@@ -13,29 +13,17 @@
 *
 ****/
 
-
-using System.Collections.Generic;
-using System.Numerics;
+using System;
 
 namespace SharpLife.Models.BSP.FileFormat
 {
-    public class Face
+    [Flags]
+    public enum FaceFlags
     {
-        public Plane Plane { get; set; }
-
-        public FaceFlags Flags { get; set; }
-
-        public List<Vector3> Points { get; set; }
-
-        public TextureInfo TextureInfo { get; set; }
-
-        // lighting info
-        public byte[] Styles { get; set; }
-        //TODO
-        public int LightOffset { get; set; }		// start of [numstyles*surfsize] samples
-
-        public int[] Extents { get; } = new int[2];
-
-        public int[] TextureMins { get; } = new int[2];
+        None = 0,
+        Back = 1 << 1,
+        Sky = 1 << 2,
+        Water = 1 << 4,
+        Tiled = 1 << 5
     }
 }
