@@ -13,19 +13,13 @@
 *
 ****/
 
-
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace SharpLife.Models.BSP.FileFormat
 {
-    public class Leaf
+    public class Leaf : BaseNode
     {
-        public Contents Contents { get; set; }
         public int VisOffset { get; set; }  // -1 = no visibility info
-
-        public Vector3 Mins { get; set; }   // for frustum culling
-        public Vector3 Maxs { get; set; }
 
         public List<Face> Faces { get; set; }
 

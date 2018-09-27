@@ -14,15 +14,14 @@
 ****/
 
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace SharpLife.Models.BSP.FileFormat
 {
     public class Node : BaseNode
     {
-        public Vector3 Mins { get; set; }      // for sphere culling
+        public Plane Plane { get; set; }
 
-        public Vector3 Maxs { get; set; }
+        public BaseNode[] Children { get; } = new BaseNode[2]; // negative numbers are -(leafs+1), not nodes
 
         public List<Face> Faces { get; set; }
     }

@@ -13,12 +13,18 @@
 *
 ****/
 
+using System.Numerics;
+
 namespace SharpLife.Models.BSP.FileFormat
 {
     public abstract class BaseNode
     {
-        public Plane Plane { get; set; }
+        public Contents Contents { get; set; }
 
-        public int[] Children { get; } = new int[2]; // negative numbers are -(leafs+1), not nodes
+        // for bounding box culling
+        public Vector3 Mins { get; set; }
+        public Vector3 Maxs { get; set; }
+
+        public BaseNode Parent { get; set; }
     }
 }

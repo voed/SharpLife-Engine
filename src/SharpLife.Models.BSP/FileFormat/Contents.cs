@@ -20,6 +20,11 @@ namespace SharpLife.Models.BSP.FileFormat
     /// </summary>
     public enum Contents
     {
+        /// <summary>
+        /// Indicates that this is a node
+        /// </summary>
+        Node = 0,
+
         Empty = -1,
         Solid = -2,
         Water = -3,

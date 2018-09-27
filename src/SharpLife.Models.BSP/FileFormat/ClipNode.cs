@@ -15,7 +15,10 @@
 
 namespace SharpLife.Models.BSP.FileFormat
 {
-    public class ClipNode : BaseNode
+    public class ClipNode
     {
+        public Plane Plane { get; set; }
+
+        public int[] Children { get; } = new int[2]; // negative numbers are -(leafs+1), not nodes
     }
 }

@@ -174,20 +174,28 @@ namespace SharpLife.Models.BSP.FileFormat
             return planes;
         }
 
-        private unsafe void ReadBaseNode(IReadOnlyList<Plane> planes, ref Disk.BaseNode input, BaseNode output)
+        private void SetupNodeParent(BaseNode node, BaseNode parent)
         {
-            output.Plane = planes[EndianConverter.Little(input.planenum)];
-            output.Children[0] = EndianConverter.Little(input.children[0]);
-            output.Children[1] = EndianConverter.Little(input.children[1]);
+            node.Parent = parent;
+
+            if (node.Contents >= Contents.Node)
+            {
+                var nodeWithChildren = (Node)node;
+
+                SetupNodeParent(nodeWithChildren.Children[0], node);
+                SetupNodeParent(nodeWithChildren.Children[1], node);
+            }
         }
 
-        private unsafe List<Node> ReadNodes(ref Lump lump, IReadOnlyList<Plane> planes, IReadOnlyList<Face> faces)
+        private unsafe List<Node> ReadNodes(ref Lump lump, IReadOnlyList<Plane> planes, IReadOnlyList<Face> faces, IReadOnlyList<Leaf> leaves)
         {
             _reader.BaseStream.Position = lump.fileofs;
 
             var count = lump.filelen / Marshal.SizeOf<Disk.Node>();
 
             var nodes = new List<Node>(count);
+
+            var diskNodes = new List<Disk.Node>(count);
 
             foreach (var i in Enumerable.Range(0, count))
             {
@@ -209,7 +217,10 @@ namespace SharpLife.Models.BSP.FileFormat
                         EndianConverter.Little(node.maxs[2])),
                 };
 
-                ReadBaseNode(planes, ref node.Data, result);
+                result.Plane = planes[EndianConverter.Little(node.Data.planenum)];
+
+                node.Data.children[0] = EndianConverter.Little(node.Data.children[0]);
+                node.Data.children[1] = EndianConverter.Little(node.Data.children[1]);
 
                 node.firstface = EndianConverter.Little(node.firstface);
                 node.numfaces = EndianConverter.Little(node.numfaces);
@@ -222,12 +233,38 @@ namespace SharpLife.Models.BSP.FileFormat
                 }
 
                 nodes.Add(result);
+                diskNodes.Add(node);
             }
+
+            //Fix up children
+            for (var i = 0; i < count; ++i)
+            {
+                var diskNode = diskNodes[i];
+
+                var node = nodes[i];
+
+                for (var child = 0; child < 2; ++child)
+                {
+                    var index = diskNode.Data.children[child];
+
+                    if (index >= 0)
+                    {
+                        node.Children[child] = nodes[index];
+                    }
+                    else
+                    {
+                        node.Children[child] = leaves[~index];
+                    }
+                }
+            }
+
+            //Fix up parents
+            SetupNodeParent(nodes[0], null);
 
             return nodes;
         }
 
-        private List<ClipNode> ReadClipNodes(ref Lump lump, IReadOnlyList<Plane> planes)
+        private unsafe List<ClipNode> ReadClipNodes(ref Lump lump, IReadOnlyList<Plane> planes)
         {
             _reader.BaseStream.Position = lump.fileofs;
 
@@ -243,9 +280,13 @@ namespace SharpLife.Models.BSP.FileFormat
                 var node = Marshal.PtrToStructure<Disk.ClipNode>(handle.AddrOfPinnedObject());
                 handle.Free();
 
-                var result = new ClipNode();
+                var result = new ClipNode
+                {
+                    Plane = planes[EndianConverter.Little(node.Data.planenum)],
+                };
 
-                ReadBaseNode(planes, ref node.Data, result);
+                result.Children[0] = EndianConverter.Little(node.Data.children[0]);
+                result.Children[1] = EndianConverter.Little(node.Data.children[1]);
 
                 nodes.Add(result);
             }
@@ -631,12 +672,13 @@ namespace SharpLife.Models.BSP.FileFormat
             var surfEdges = ReadSurfEdges(ref header.Lumps[(int)LumpId.SurfEdges]);
             var faces = ReadFaces(ref header.Lumps[(int)LumpId.Faces], planes, vertexes, edges, surfEdges, textureInfos);
 
-            var nodes = ReadNodes(ref header.Lumps[(int)LumpId.Nodes], planes, faces);
             var clipNodes = ReadClipNodes(ref header.Lumps[(int)LumpId.ClipNodes], planes);
 
             var markSurfaces = ReadMarkSurfaces(ref header.Lumps[(int)LumpId.MarkSurfaces]);
 
             var leaves = ReadLeafs(ref header.Lumps[(int)LumpId.Leafs], markSurfaces, faces);
+
+            var nodes = ReadNodes(ref header.Lumps[(int)LumpId.Nodes], planes, faces, leaves);
 
             var models = ReadModels(ref header.Lumps[(int)LumpId.Models], faces);
 
