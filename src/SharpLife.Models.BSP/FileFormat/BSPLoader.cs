@@ -164,11 +164,12 @@ namespace SharpLife.Models.BSP.FileFormat
                 var plane = Marshal.PtrToStructure<Disk.Plane>(handle.AddrOfPinnedObject());
                 handle.Free();
 
-                plane.Normal = EndianTypeConverter.Little(plane.Normal);
-                plane.Distance = EndianConverter.Little(plane.Distance);
-                plane.Type = (PlaneType)EndianConverter.Little((int)plane.Type);
-
-                planes.Add(new Plane { Data = plane });
+                planes.Add(new Plane
+                {
+                    Normal = EndianTypeConverter.Little(plane.Normal),
+                    Distance = EndianConverter.Little(plane.Distance),
+                    Type = (PlaneType)EndianConverter.Little((int)plane.Type)
+                });
             }
 
             return planes;

@@ -13,10 +13,14 @@
 *
 ****/
 
+using System.Numerics;
+
 namespace SharpLife.Models.BSP.FileFormat
 {
     public class Plane
     {
-        public Disk.Plane Data { get; set; }
+        public Vector3 Normal;
+        public float Distance;
+        public PlaneType Type;		// ?remove? trivial to regenerate
     }
 }
