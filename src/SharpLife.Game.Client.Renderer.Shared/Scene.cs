@@ -22,6 +22,7 @@ using SharpLife.Models.BSP.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Utility;
 using SharpLife.Utility.Mathematics;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -60,6 +61,10 @@ namespace SharpLife.Game.Client.Renderer.Shared
         private readonly int[] _cachedLightStyles = new int[BSPConstants.MaxLightStyles];
 
         public Camera Camera { get; }
+
+        public Rgb24 SkyColor { get; set; }
+
+        public Vector3 SkyNormal { get; set; }
 
         public Vector3 Origin => Camera.Position;
 
