@@ -15,18 +15,14 @@
 
 using System;
 
-namespace SharpLife.Models.MDL.FileFormat
+namespace SharpLife.Models.BSP.FileFormat
 {
     [Flags]
-    public enum TextureFlags
+    public enum BSPTextureFlags
     {
-        None = 0,
-        FlatShade = 1 << 0,
-        Chrome = 1 << 1,
-        Fullbright = 1 << 2,
-        NoMips = 1 << 3,
-        Alpha = 1 << 4,
-        Additive = 1 << 5,
-        Masked = 1 << 6
+        /// <summary>
+        /// sky or slime, no lightmap or 256 subdivision
+        /// </summary>
+        Special = 1,
     }
 }

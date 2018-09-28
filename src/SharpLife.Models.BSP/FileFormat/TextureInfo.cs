@@ -33,6 +33,6 @@ namespace SharpLife.Models.BSP.FileFormat
         public float TValue { get; set; }
 
         public MipTexture MipTexture { get; set; }
-        public TextureFlags Flags { get; set; }
+        public BSPTextureFlags Flags { get; set; }
     }
 }

@@ -408,7 +408,7 @@ namespace SharpLife.Models.MDL.FileFormat
                 var texture = new Texture
                 {
                     Name = StringUtils.GetStringFromNullTerminated(Encoding.UTF8, new ReadOnlySpan<byte>(rawTexture.Name, Disk.Texture.NameSize)),
-                    Flags = (TextureFlags)EndianConverter.Little(rawTexture.Flags),
+                    Flags = (MDLTextureFlags)EndianConverter.Little(rawTexture.Flags),
                     Width = EndianConverter.Little(rawTexture.Width),
                     Height = EndianConverter.Little(rawTexture.Height)
                 };

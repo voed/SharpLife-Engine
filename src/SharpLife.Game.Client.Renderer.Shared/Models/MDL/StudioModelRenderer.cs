@@ -279,8 +279,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
                     var pipelines = GetPipelines(
                         isFrontCull,
-                        (texture.Flags & TextureFlags.Masked) != 0,
-                        (texture.Flags & TextureFlags.Additive) != 0);
+                        (texture.Flags & MDLTextureFlags.Masked) != 0,
+                        (texture.Flags & MDLTextureFlags.Additive) != 0);
 
                     var pipeline = pipelines[renderData.Shared.RenderMode];
 

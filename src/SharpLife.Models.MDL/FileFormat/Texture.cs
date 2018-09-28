@@ -21,7 +21,7 @@ namespace SharpLife.Models.MDL.FileFormat
     public class Texture
     {
         public string Name { get; set; }
-        public TextureFlags Flags { get; set; }
+        public MDLTextureFlags Flags { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
 

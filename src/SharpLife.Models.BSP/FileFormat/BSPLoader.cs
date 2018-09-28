@@ -316,7 +316,7 @@ namespace SharpLife.Models.BSP.FileFormat
                     TNormal = EndianTypeConverter.Little(new Vector3(info.vecs[4], info.vecs[5], info.vecs[6])),
                     TValue = EndianConverter.Little(info.vecs[7]),
                     MipTexture = mipTextures[EndianConverter.Little(info.miptex)],
-                    Flags = (TextureFlags)EndianConverter.Little((int)info.flags)
+                    Flags = (BSPTextureFlags)EndianConverter.Little((int)info.flags)
                 });
                 handle.Free();
             }
@@ -503,7 +503,7 @@ namespace SharpLife.Models.BSP.FileFormat
                     face.Flags |= FaceFlags.Water;
                     //TODO: subdivide face
                 }
-                else if (name.StartsWith("scroll") || (face.TextureInfo.Flags & TextureFlags.Special) != 0)
+                else if (name.StartsWith("scroll") || (face.TextureInfo.Flags & BSPTextureFlags.Special) != 0)
                 {
                     face.Flags |= FaceFlags.Tiled;
                 }
