@@ -26,9 +26,17 @@ namespace SharpLife.Models.MDL.FileFormat
             public Vector3 Vertex;
         }
 
+        public class NormalInfo
+        {
+            public int Bone;
+            public Vector3 Normal;
+        }
+
         public string Name { get; set; }
 
         public List<VertexInfo> Vertices { get; set; }
+
+        public List<NormalInfo> Normals { get; set; }
 
         public List<BodyMesh> Meshes { get; set; }
     }

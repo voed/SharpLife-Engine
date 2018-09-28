@@ -22,6 +22,7 @@ namespace SharpLife.Models.MDL.FileFormat
     {
         None = 0,
         NoShadeLight = 1 << 8,
-        ComplexModelIntersection = 1 << 9
+        ComplexModelIntersection = 1 << 9,
+        ForceSkyLight = 1 << 10,
     }
 }

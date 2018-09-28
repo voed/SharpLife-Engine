@@ -503,9 +503,26 @@ namespace SharpLife.Models.MDL.FileFormat
                         });
                     }
 
-                    var meshes = new List<BodyMesh>(rawBodyModel.NumMesh);
+                    _reader.BaseStream.Position = rawBodyModel.NormIndex;
 
-                    var normalOffset = 0;
+                    var normalData = _reader.ReadStructureArray<Vector3>(rawBodyModel.NumNorms);
+
+                    _reader.BaseStream.Position = rawBodyModel.NormInfoIndex;
+
+                    var normalBones = _reader.ReadStructureArray<byte>(rawBodyModel.NumNorms);
+
+                    var normals = new List<BodyModel.NormalInfo>();
+
+                    for (var normal = 0; normal < rawBodyModel.NumNorms; ++normal)
+                    {
+                        normals.Add(new BodyModel.NormalInfo
+                        {
+                            Bone = normalBones[normal],
+                            Normal = normalData[normal]
+                        });
+                    }
+
+                    var meshes = new List<BodyMesh>(rawBodyModel.NumMesh);
 
                     for (var mesh = 0; mesh < rawBodyModel.NumMesh; ++mesh)
                     {
@@ -546,39 +563,19 @@ namespace SharpLife.Models.MDL.FileFormat
                         //TODO: Could be omitted since we know the total number of commands
                         triangleCommands.Add(0);
 
-                        _reader.BaseStream.Position = rawBodyModel.NormIndex + normalOffset;
-
-                        var normalData = _reader.ReadStructureArray<Vector3>(rawMesh.NumNorms);
-
-                        _reader.BaseStream.Position = rawBodyModel.NormInfoIndex + normalOffset;
-
-                        var normalBones = _reader.ReadStructureArray<byte>(rawMesh.NumNorms);
-
-                        var normals = new List<BodyMesh.NormalInfo>(rawMesh.NumNorms);
-
-                        for (var normal = 0; normal < rawMesh.NumNorms; ++normal)
-                        {
-                            normals.Add(new BodyMesh.NormalInfo
-                            {
-                                Bone = normalBones[normal],
-                                Normal = normalData[normal]
-                            });
-                        }
-
                         meshes.Add(new BodyMesh
                         {
                             TriangleCommands = triangleCommands,
-                            Normals = normals,
+                            NormalCount = rawMesh.NumNorms,
                             Skin = EndianConverter.Little(rawMesh.SkinRef)
                         });
-
-                        normalOffset += rawMesh.NumNorms;
                     }
 
                     models.Add(new BodyModel
                     {
                         Name = StringUtils.GetStringFromNullTerminated(Encoding.UTF8, new ReadOnlySpan<byte>(rawBodyModel.Name, Disk.BodyModel.NameSize)),
                         Vertices = vertices,
+                        Normals = normals,
                         Meshes = meshes
                     });
                 }

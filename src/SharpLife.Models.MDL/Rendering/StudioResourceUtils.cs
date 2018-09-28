@@ -46,7 +46,7 @@ namespace SharpLife.Models.MDL.Rendering
 
                     //Commands come in sets of 4 values:
                     //Vertex index
-                    //Light index, also chrome index for chrome textures
+                    //Normal index, also chrome index for chrome textures
                     //Texture s coord
                     //Texture t coord
 
@@ -64,7 +64,7 @@ namespace SharpLife.Models.MDL.Rendering
                     for (var verticesLeft = command; verticesLeft > 0; --verticesLeft, i += 4)
                     {
                         var vertexIndex = mesh.TriangleCommands[i];
-                        var lightIndex = mesh.TriangleCommands[i + 1];
+                        var normalIndex = mesh.TriangleCommands[i + 1];
                         var sCoord = mesh.TriangleCommands[i + 2];
                         var tCoord = mesh.TriangleCommands[i + 3];
 

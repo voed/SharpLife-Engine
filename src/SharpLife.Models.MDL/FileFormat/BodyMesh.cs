@@ -14,21 +14,14 @@
 ****/
 
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace SharpLife.Models.MDL.FileFormat
 {
     public class BodyMesh
     {
-        public class NormalInfo
-        {
-            public int Bone;
-            public Vector3 Normal;
-        }
-
         public List<short> TriangleCommands { get; set; }
 
-        public List<NormalInfo> Normals { get; set; }
+        public int NormalCount { get; set; }
 
         public int Skin { get; set; }
     }
