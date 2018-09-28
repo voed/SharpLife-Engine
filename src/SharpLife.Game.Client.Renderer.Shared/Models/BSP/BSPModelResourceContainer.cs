@@ -46,7 +46,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
         public DeviceBuffer VertexBuffer { get; set; }
         public DeviceBuffer IndexBuffer { get; set; }
         public SingleLightmapData[] Lightmaps { get; set; }
-        public ResourceSet SharedResourceSet { get; set; }
 
         public BSPModelResourceContainer(BSPModel bspModel)
         {
@@ -127,15 +126,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             IndexBuffer = disposeFactory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
 
             cl.UpdateBuffer(IndexBuffer, 0, indicesArray);
-
-            SharedResourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
-                sc.ModelRenderer.BrushRenderer.SharedLayout,
-                sc.ProjectionMatrixBuffer,
-                sc.ViewMatrixBuffer,
-                sc.WorldAndInverseBuffer,
-                sc.LightingInfoBuffer,
-                sc.LightStylesBuffer,
-                sc.ModelRenderer.BrushRenderer.RenderArgumentsBuffer));
         }
 
         public override void DestroyDeviceObjects(ResourceScope scope)

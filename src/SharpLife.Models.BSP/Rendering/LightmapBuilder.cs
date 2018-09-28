@@ -54,6 +54,7 @@ namespace SharpLife.Models.BSP.Rendering
 
             _pool.Dispose();
 
+            //TODO: cache resource sets for each texture
             return new SingleLightmapData
             {
                 Lightmap = factory.CreateResourceSet(new ResourceSetDescription(

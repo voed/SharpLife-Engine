@@ -28,7 +28,9 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
     {
         private readonly DisposeCollector _disposeCollector = new DisposeCollector();
 
-        public ResourceLayout SharedLayout { get; private set; }
+        private ResourceLayout _sharedLayout;
+        private ResourceSet _sharedResourceSet;
+
         public ResourceLayout TextureLayout { get; private set; }
         public ResourceLayout LightmapLayout { get; private set; }
 
@@ -45,7 +47,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
 
             var disposeFactory = new DisposeCollectorResourceFactory(gd.ResourceFactory, _disposeCollector);
 
-            SharedLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
+            _sharedLayout = disposeFactory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment),
@@ -77,7 +79,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             var rasterizerState = new RasterizerStateDescription(FaceCullMode.Back, PolygonFillMode.Solid, FrontFace.Clockwise, true, true);
             const PrimitiveTopology primitiveTopology = PrimitiveTopology.TriangleList;
             var shaderSets = new ShaderSetDescription(vertexLayouts, new[] { vs, fs });
-            var resourceLayouts = new ResourceLayout[] { SharedLayout, TextureLayout, LightmapLayout };
+            var resourceLayouts = new ResourceLayout[] { _sharedLayout, TextureLayout, LightmapLayout };
             var outputDescription = sc.MainSceneFramebuffer.OutputDescription;
 
             var pipelines = new Pipeline[(int)RenderMode.Last + 1];
@@ -134,6 +136,15 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             Pipelines = new RenderModePipelines(pipelines);
 
             RenderArgumentsBuffer = disposeFactory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<BSPRenderArguments>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+
+            _sharedResourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
+                _sharedLayout,
+                sc.ProjectionMatrixBuffer,
+                sc.ViewMatrixBuffer,
+                sc.WorldAndInverseBuffer,
+                sc.LightingInfoBuffer,
+                sc.LightStylesBuffer,
+                RenderArgumentsBuffer));
         }
 
         public void DestroyDeviceObjects(ResourceScope scope)
@@ -192,7 +203,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.BSP
             var pipeline = Pipelines[renderData.Shared.RenderMode];
 
             cl.SetPipeline(pipeline);
-            cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
+            cl.SetGraphicsResourceSet(0, _sharedResourceSet);
 
             cl.SetVertexBuffer(0, modelResource.VertexBuffer);
             cl.SetIndexBuffer(modelResource.IndexBuffer, IndexFormat.UInt32);
