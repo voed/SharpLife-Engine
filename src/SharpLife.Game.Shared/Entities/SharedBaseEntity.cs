@@ -65,6 +65,9 @@ namespace SharpLife.Game.Shared.Entities
         [Networked]
         public EntityFlags Flags { get; set; }
 
+        [Networked]
+        public EffectsFlags Effects { get; set; }
+
         private IModel _model;
 
         //TODO: will need handlers to update size
