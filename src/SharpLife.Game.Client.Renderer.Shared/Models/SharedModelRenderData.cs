@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Models;
 using System.Numerics;
 
@@ -20,6 +21,8 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
 {
     public struct SharedModelRenderData
     {
+        public uint Index;
+
         public Vector3 Origin;
         public Vector3 Angles;
         public Vector3 Scale;
@@ -28,5 +31,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models
         public RenderMode RenderMode;
         public int RenderAmount;
         public Vector3 RenderColor;
+
+        public EffectsFlags Effects;
     }
 }

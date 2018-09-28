@@ -195,6 +195,8 @@ namespace SharpLife.Game.Client.Entities
 
             return new SharedModelRenderData
             {
+                Index = (uint)Handle.Id,
+
                 Origin = Origin,
                 Angles = Angles,
                 Scale = new Vector3(scale),
@@ -203,6 +205,8 @@ namespace SharpLife.Game.Client.Entities
                 RenderMode = RenderMode,
                 RenderAmount = renderAmount,
                 RenderColor = RenderColor,
+
+                Effects = Effects,
             };
         }
 
