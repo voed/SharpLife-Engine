@@ -111,7 +111,7 @@ namespace SharpLife.Game.Client.API
 
             _engine.GameWindow.Resized += _renderer.WindowResized;
 
-            _entities.Startup();
+            _entities.Startup(_renderer);
         }
 
         public void Shutdown()

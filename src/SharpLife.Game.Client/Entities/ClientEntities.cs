@@ -38,6 +38,8 @@ namespace SharpLife.Game.Client.Entities
 
         private readonly IEngineModels _engineModels;
 
+        private IRenderer _renderer;
+
         private ClientEntityList _entityList;
 
         private INetworkObjectList _entitiesNetworkList;
@@ -51,8 +53,10 @@ namespace SharpLife.Game.Client.Entities
             _engineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
         }
 
-        public void Startup()
+        public void Startup(IRenderer renderer)
         {
+            _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
+
             EntityDictionary.AddTypesFromAssembly<BaseEntity>(typeof(ClientEntities).Assembly);
         }
 
@@ -90,7 +94,7 @@ namespace SharpLife.Game.Client.Entities
 
         public void MapLoadBegin()
         {
-            _entityList = new ClientEntityList(EntityDictionary, _clientEngine, _engineTime, _engineModels);
+            _entityList = new ClientEntityList(EntityDictionary, _clientEngine, _engineTime, _engineModels, _renderer);
         }
 
         public void MapShutdown()

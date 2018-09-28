@@ -15,6 +15,7 @@
 
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Utility;
 using System;
@@ -29,16 +30,19 @@ namespace SharpLife.Game.Client.Entities
 
         public IEngineModels EngineModels { get; }
 
+        public IRenderer Renderer { get; }
+
         //TODO: should use the same generator used by the original engine
         public Random Random { get; }
 
         public BaseEntityList<BaseEntity> EntityList { get; }
 
-        public EntityContext(IClientEngine clientEngine, ITime time, IEngineModels engineModels, BaseEntityList<BaseEntity> entityList)
+        public EntityContext(IClientEngine clientEngine, ITime time, IEngineModels engineModels, IRenderer renderer, BaseEntityList<BaseEntity> entityList)
         {
             ClientEngine = clientEngine ?? throw new ArgumentNullException(nameof(clientEngine));
             Time = time ?? throw new ArgumentNullException(nameof(time));
             EngineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
+            Renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
             Random = new Random();
             EntityList = entityList ?? throw new ArgumentNullException(nameof(entityList));
         }

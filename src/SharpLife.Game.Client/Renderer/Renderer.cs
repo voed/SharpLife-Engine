@@ -35,9 +35,11 @@ using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Models.BSP.Rendering;
 using SharpLife.Utility;
 using SharpLife.Utility.FileSystem;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using Veldrid;
 using Veldrid.OpenGL;
 
@@ -47,7 +49,7 @@ namespace SharpLife.Game.Client.Renderer
     /// The main renderer
     /// Manages current graphics state, devices, etc
     /// </summary>
-    public class Renderer
+    public class Renderer : IRenderer
     {
         private readonly IWindow _window;
 
@@ -77,6 +79,18 @@ namespace SharpLife.Game.Client.Renderer
         private bool _windowResized = false;
 
         private event Action<int, int> _resizeHandled;
+
+        public Rgb24 SkyColor
+        {
+            get => Scene.SkyColor;
+            set => Scene.SkyColor = value;
+        }
+
+        public Vector3 SkyNormal
+        {
+            get => Scene.SkyNormal;
+            set => Scene.SkyNormal = value;
+        }
 
         public Scene Scene { get; }
 

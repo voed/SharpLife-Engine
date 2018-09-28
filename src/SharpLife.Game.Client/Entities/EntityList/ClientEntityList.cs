@@ -15,6 +15,7 @@
 
 using SharpLife.Engine.Shared.API.Engine.Client;
 using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Utility;
@@ -26,10 +27,10 @@ namespace SharpLife.Game.Client.Entities.EntityList
     {
         private readonly EntityContext _entityContext;
 
-        public ClientEntityList(EntityDictionary entityDictionary, IClientEngine clientEngine, ITime time, IEngineModels engineModels)
+        public ClientEntityList(EntityDictionary entityDictionary, IClientEngine clientEngine, ITime time, IEngineModels engineModels, IRenderer renderer)
             : base(entityDictionary)
         {
-            _entityContext = new EntityContext(clientEngine, time, engineModels, this);
+            _entityContext = new EntityContext(clientEngine, time, engineModels, renderer, this);
         }
 
         public void AddEntityToList(BaseEntity instance)
