@@ -39,6 +39,17 @@ namespace SharpLife.Game.Client.Entities
         {
         }
 
+        //Always call base first when overriding these
+        public virtual void OnBeginUpdate()
+        {
+            //Nothing
+        }
+
+        public virtual void OnEndUpdate()
+        {
+            //Nothing
+        }
+
         protected int CalculateFXBlend(IViewState viewState, int renderAmount)
         {
             //Offset is random based on entity index

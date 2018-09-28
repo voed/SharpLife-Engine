@@ -145,10 +145,16 @@ namespace SharpLife.Game.Client.Entities
 
         public void OnBeginUpdateNetworkObject(INetworkObjectList networkObjectList, INetworkObject networkObject)
         {
+            var entity = (BaseEntity)networkObject.Instance;
+
+            entity.OnBeginUpdate();
         }
 
         public void OnEndUpdateNetworkObject(INetworkObjectList networkObjectList, INetworkObject networkObject)
         {
+            var entity = (BaseEntity)networkObject.Instance;
+
+            entity.OnEndUpdate();
         }
 
         public void RenderEntities(IModelRenderer modelRenderer, IViewState viewState)
