@@ -13,33 +13,14 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models.MDL.Rendering;
-
 namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
-    public unsafe struct StudioModelRenderData
+    public struct StudioTextureData
     {
-        public StudioModel Model;
+        public int FlatShade;
 
-        public SharedModelRenderData Shared;
-
-        public double CurrentTime;
-
-        public uint Sequence;
-
-        public float LastTime;
-
-        public float Frame;
-
-        public float FrameRate;
-
-        public uint Body;
-
-        public uint Skin;
-
-        public BoneData BoneData;
-
-        public int RenderFXLightMultiplier;
+        private int _padding0;
+        private int _padding1;
+        private int _padding2;
     }
 }

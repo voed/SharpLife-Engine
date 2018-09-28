@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Renderer.Utility;
+using System.Numerics;
 
 namespace SharpLife.Models.MDL.Rendering
 {
@@ -21,6 +22,9 @@ namespace SharpLife.Models.MDL.Rendering
     {
         public WorldTextureCoordinate WorldTexture;
 
-        public uint BoneIndex;
+        public Vector3 Normal;
+
+        public int VertexBoneIndex;
+        public int NormalBoneIndex;
     }
 }

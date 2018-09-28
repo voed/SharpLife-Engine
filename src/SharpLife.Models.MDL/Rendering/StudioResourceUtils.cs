@@ -75,7 +75,9 @@ namespace SharpLife.Models.MDL.Rendering
                                 Vertex = subModel.Vertices[vertexIndex].Vertex,
                                 Texture = new Vector2((float)(sCoord / (double)texture.Width), (float)(tCoord / (double)texture.Height))
                             },
-                            BoneIndex = (uint)subModel.Vertices[vertexIndex].Bone
+                            Normal = subModel.Normals[normalIndex].Normal,
+                            VertexBoneIndex = subModel.Vertices[vertexIndex].Bone,
+                            NormalBoneIndex = subModel.Normals[normalIndex].Bone,
                         });
                     }
 

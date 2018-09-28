@@ -13,33 +13,16 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models.MDL.Rendering;
+using SharpLife.Utility.Mathematics;
+using System.Numerics;
 
-namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public unsafe struct StudioModelRenderData
+    public static class RenderUtils
     {
-        public StudioModel Model;
-
-        public SharedModelRenderData Shared;
-
-        public double CurrentTime;
-
-        public uint Sequence;
-
-        public float LastTime;
-
-        public float Frame;
-
-        public float FrameRate;
-
-        public uint Body;
-
-        public uint Skin;
-
-        public BoneData BoneData;
-
-        public int RenderFXLightMultiplier;
+        /// <summary>
+        /// GoldSource identity matrix
+        /// </summary>
+        public static Matrix4x4 Identity => Matrix4x4.CreateRotationZ(MathUtils.ToRadians(-90)) * Matrix4x4.CreateRotationX(MathUtils.ToRadians(90)) * Matrix4x4.Identity;
     }
 }

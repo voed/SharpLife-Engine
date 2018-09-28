@@ -19,6 +19,18 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 {
     public struct StudioRenderArguments
     {
+        public struct AmbientLight
+        {
+            public Vector3 Color;
+            public int Ambient;
+            public Vector3 Normal;
+            public int Shade;
+        }
+
         public Vector4 RenderColor;
+
+        public AmbientLight GlobalLight;
+
+        private Vector4 _padding0;
     }
 }

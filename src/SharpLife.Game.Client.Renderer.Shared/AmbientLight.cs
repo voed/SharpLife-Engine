@@ -13,33 +13,18 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models.MDL.Rendering;
+using System.Numerics;
 
-namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public unsafe struct StudioModelRenderData
+    public struct AmbientLight
     {
-        public StudioModel Model;
+        public const int MaxAmbient = 128;
+        public const int MaxShade = 192;
 
-        public SharedModelRenderData Shared;
-
-        public double CurrentTime;
-
-        public uint Sequence;
-
-        public float LastTime;
-
-        public float Frame;
-
-        public float FrameRate;
-
-        public uint Body;
-
-        public uint Skin;
-
-        public BoneData BoneData;
-
-        public int RenderFXLightMultiplier;
+        public int Ambient;   // clip at 128
+        public int Shade;     // clip at 192 - ambientlight
+        public Vector3 Color;
+        public Vector3 Normal;
     }
 }

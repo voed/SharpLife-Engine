@@ -16,6 +16,7 @@
 using SharpLife.CommandSystem;
 using SharpLife.CommandSystem.Commands;
 using SharpLife.CommandSystem.Commands.VariableFilters;
+using SharpLife.Game.Shared.Models.BSP;
 using SharpLife.Input;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Models.BSP.Rendering;
@@ -37,6 +38,8 @@ namespace SharpLife.Game.Client.Renderer.Shared
     public class Scene : IViewState
     {
         private const int LightScaleRange = 256;
+        public const int MaxDLights = 32;
+        public const int MaxELights = 64;
 
         private readonly List<IResourceContainer> _resourceContainers = new List<IResourceContainer>();
         private readonly List<IUpdateable> _updateables = new List<IUpdateable>();
@@ -52,19 +55,26 @@ namespace SharpLife.Game.Client.Renderer.Shared
 
         private readonly IVariable _overbright;
 
-        private readonly IVariable _fullbright;
+        public IVariable Fullbright { get; }
 
         private bool _lightingSettingChanged;
-
-        private readonly LightStyles _lightStyles = new LightStyles();
 
         private readonly int[] _cachedLightStyles = new int[BSPConstants.MaxLightStyles];
 
         public Camera Camera { get; }
 
+        public BSPModel WorldModel { get; set; }
+
+        public LightStyles LightStyles { get; } = new LightStyles();
+
         public Rgb24 SkyColor { get; set; }
 
         public Vector3 SkyNormal { get; set; }
+
+        //TODO: initialize to zero on map start
+        public DynamicLight[] DynamicLights { get; } = new DynamicLight[MaxDLights];
+
+        public DynamicLight[] EntityLights { get; } = new DynamicLight[MaxELights];
 
         public Vector3 Origin => Camera.Position;
 
@@ -124,7 +134,8 @@ namespace SharpLife.Game.Client.Renderer.Shared
                 .WithChangeHandler((ref VariableChangeEvent _) => _lightingSettingChanged = true));
 
             //TODO: mark as cheat cvar
-            _fullbright = commandContext.RegisterVariable(
+            //TODO: needs to be an integer with settings 0, 1, 2
+            Fullbright = commandContext.RegisterVariable(
                 new VariableInfo("mat_fullbright")
                 .WithValue(false)
                 .WithHelpInfo("Enable or disable full brightness (debug)")
@@ -160,7 +171,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
 
         public void Update(ITime engineTime, float deltaSeconds)
         {
-            _lightStyles.AnimateLights(engineTime);
+            LightStyles.AnimateLights(engineTime);
 
             VectorUtils.AngleToVectors(Angles, out _viewAngles);
 
@@ -271,8 +282,8 @@ namespace SharpLife.Game.Client.Renderer.Shared
                     Brightness = _brightness.Float,
                     LightScale = lightScale,
                     //Only enable if fullbright is turned off
-                    OverbrightEnabled = (!_fullbright.Boolean && _overbright.Boolean) ? 1 : 0,
-                    Fullbright = _fullbright.Boolean ? 1 : 0,
+                    OverbrightEnabled = (!Fullbright.Boolean && _overbright.Boolean) ? 1 : 0,
+                    Fullbright = Fullbright.Boolean ? 1 : 0,
                 };
 
                 gd.UpdateBuffer(sc.LightingInfoBuffer, 0, ref info);
@@ -291,7 +302,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
 
         public void InitializeLightStyles()
         {
-            _lightStyles.Initialize();
+            LightStyles.Initialize();
 
             //Reset the buffer so all styles will update in UpdateLightStyles
             Array.Fill(_cachedLightStyles, LightStyles.InvalidLightValue);
@@ -304,7 +315,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
                 //Update the style buffer now, before anything is drawn
                 for (var i = 0; i < BSPConstants.MaxLightStyles; ++i)
                 {
-                    var value = _lightStyles.GetStyleValue(i);
+                    var value = LightStyles.GetStyleValue(i);
 
                     if (_cachedLightStyles[i] != value)
                     {

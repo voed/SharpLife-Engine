@@ -16,9 +16,11 @@
 using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
 using SharpLife.Game.Client.Renderer.Shared.Models;
+using SharpLife.Models.BSP;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Renderer;
 using SharpLife.Renderer.Utility;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -70,6 +72,8 @@ namespace SharpLife.Game.Client.Renderer.Shared
         public Camera Camera { get; set; }
 
         public IViewState ViewState { get; set; }
+
+        public Scene Scene { get; set; }
 
         public TextureSampleCount MainSceneSampleCount { get; internal set; }
 
@@ -151,6 +155,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
         {
             Camera = scene.Camera;
             ViewState = scene;
+            Scene = scene;
         }
 
         public unsafe void UpdateCameraBuffers(CommandList cl)
@@ -210,6 +215,41 @@ namespace SharpLife.Game.Client.Renderer.Shared
                 mainSceneSampleCountCapped));
             MainSceneFramebuffer = factory.CreateFramebuffer(new FramebufferDescription(MainSceneDepthTexture, MainSceneColorTexture));
             MainSceneViewResourceSet = factory.CreateResourceSet(new ResourceSetDescription(TextureSamplerResourceLayout, MainSceneResolvedColorView, gd.PointSampler));
+        }
+
+        public Face SurfaceAtPoint(in Vector3 start, in Vector3 end)
+        {
+            return BSPModelUtils.SurfaceAtPoint(Scene.WorldModel.SubModel, Scene.WorldModel.BSPFile.Nodes[0], start, end);
+        }
+
+        public Rgb24 LightFromTrace(in Vector3 start, in Vector3 end)
+        {
+            if (Scene.WorldModel.BSPFile.Lighting != null)
+            {
+                var color = BSPModelUtils.RecursiveLightPoint(
+                    Scene.WorldModel.SubModel,
+                    Scene.WorldModel.BSPFile.Lighting,
+                    Scene.LightStyles,
+                    Scene.WorldModel.BSPFile.Nodes[0],
+                    start, end);
+
+                return color;
+
+                //TODO: this is done in the original engine, but nothing ever sets ambientlight
+                /*
+                return new Rgba32
+                (
+                    Math.Min(byte.MaxValue, color.R + r_refdef.ambientlight.r),
+                    Math.Min(byte.MaxValue, color.G + r_refdef.ambientlight.g),
+                    Math.Min(byte.MaxValue, color.B + r_refdef.ambientlight.b),
+                    color.A
+                );
+                */
+            }
+            else
+            {
+                return new Rgb24(byte.MaxValue, byte.MaxValue, byte.MaxValue);
+            }
         }
     }
 }

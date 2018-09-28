@@ -13,33 +13,21 @@
 *
 ****/
 
-using SharpLife.Game.Shared.Models.MDL;
-using SharpLife.Models.MDL.Rendering;
+using SixLabors.ImageSharp.PixelFormats;
+using System.Numerics;
 
-namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
+namespace SharpLife.Game.Client.Renderer.Shared
 {
-    public unsafe struct StudioModelRenderData
+    public struct DynamicLight
     {
-        public StudioModel Model;
+        public Vector3 Origin;
+        public float Radius;
+        public Rgb24 Color;
 
-        public SharedModelRenderData Shared;
+        public float Die;              // stop lighting after this time
+        public float Decay;                // drop this each second
+        public float MinLight;         // don't add when contributing less
 
-        public double CurrentTime;
-
-        public uint Sequence;
-
-        public float LastTime;
-
-        public float Frame;
-
-        public float FrameRate;
-
-        public uint Body;
-
-        public uint Skin;
-
-        public BoneData BoneData;
-
-        public int RenderFXLightMultiplier;
+        public uint Key;
     }
 }

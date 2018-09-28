@@ -138,7 +138,7 @@ namespace SharpLife.Game.Client.Renderer
             Scene.AddRenderable(_finalPass);
 
             var spriteRenderer = new SpriteModelRenderer(_logger);
-            var studioRenderer = new StudioModelRenderer();
+            var studioRenderer = new StudioModelRenderer(commandContext);
             var brushRenderer = new BrushModelRenderer();
 
             _modelResourcesManager = new ModelResourcesManager(new Dictionary<Type, ModelResourcesManager.ResourceFactory>
@@ -379,6 +379,8 @@ namespace SharpLife.Game.Client.Renderer
 
             ClearBSP();
 
+            Scene.WorldModel = worldModel;
+
             //Reset light styles
             Scene.InitializeLightStyles();
 
@@ -441,6 +443,8 @@ namespace SharpLife.Game.Client.Renderer
 
             //Clear all graphics data
             _sc.MapResourceCache.DestroyAllDeviceObjects();
+
+            Scene.WorldModel = null;
         }
     }
 }

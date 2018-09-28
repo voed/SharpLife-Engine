@@ -80,6 +80,9 @@ namespace SharpLife.Game.Server.Entities.Animation
         [Networked]
         public byte[] Blenders { get; set; } = new byte[MDLConstants.MaxBlenders];
 
+        [Networked]
+        public int RenderFXLightMultiplier { get; set; }
+
         private float _lastEventCheck;
 
         public bool SequenceLoops { get; private set; }

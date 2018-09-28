@@ -57,6 +57,9 @@ namespace SharpLife.Game.Client.Entities.Animation
         [Networked]
         public byte[] Blenders { get; set; } = new byte[MDLConstants.MaxBlenders];
 
+        [Networked]
+        public int RenderFXLightMultiplier { get; set; }
+
         public override void Render(IModelRenderer modelRenderer, IViewState viewState)
         {
             if (Model is StudioModel studioModel)
@@ -72,7 +75,8 @@ namespace SharpLife.Game.Client.Entities.Animation
                     FrameRate = FrameRate,
                     Body = Body,
                     Skin = Skin,
-                    BoneData = new BoneData()
+                    BoneData = new BoneData(),
+                    RenderFXLightMultiplier = RenderFXLightMultiplier,
                 };
 
                 for (var i = 0; i < MDLConstants.MaxControllers; ++i)
