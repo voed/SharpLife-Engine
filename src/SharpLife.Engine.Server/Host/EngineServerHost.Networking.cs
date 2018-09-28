@@ -49,7 +49,7 @@ namespace SharpLife.Engine.Server.Host
 
                 var ipAddress = NetUtilities.StringToIPAddress(_ipname.String, port);
 
-                var receiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ClientToServerMessages, true);
+                var receiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ClientToServerMessages, _net_sv_log_messages.Boolean);
 
                 RegisterMessageHandlers(receiveHandler);
 

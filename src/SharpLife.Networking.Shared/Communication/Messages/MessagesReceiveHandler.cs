@@ -47,7 +47,8 @@ namespace SharpLife.Networking.Shared.Communication.Messages
 
         private readonly IReadOnlyList<MessageHandlerData> _messageHandlers;
 
-        private readonly bool _traceMessageLogging;
+        //TODO: make this atomic if accessed from another thread
+        public bool TraceMessageLogging { get; set; }
 
         /// <summary>
         /// Creates a new messages receive handler
@@ -66,7 +67,7 @@ namespace SharpLife.Networking.Shared.Communication.Messages
 
             _messageHandlers = messageDescriptors.Select(messageDescriptor => new MessageHandlerData { MessageDescriptor = messageDescriptor }).ToList();
 
-            _traceMessageLogging = traceMessageLogging;
+            TraceMessageLogging = traceMessageLogging;
         }
 
         private MessageHandlerData FindMessageData(Type type)
@@ -162,7 +163,7 @@ namespace SharpLife.Networking.Shared.Communication.Messages
 
                     var protobufMessage = ReadDelimitedMessage(stream, data.MessageDescriptor);
 
-                    if (_traceMessageLogging)
+                    if (TraceMessageLogging)
                     {
                         _logger.Verbose($"Received message {protobufMessage.GetType().Name} from {sender.RemoteEndPoint}");
                     }

@@ -85,6 +85,12 @@ namespace SharpLife.Engine.Client.Networking
 
         public ClientServer Server { get; private set; }
 
+        public bool TraceMessageLogging
+        {
+            get => _receiveHandler.TraceMessageLogging;
+            set => _receiveHandler.TraceMessageLogging = value;
+        }
+
         //Server specific
         private int _userId;
         private int _buildNumber;

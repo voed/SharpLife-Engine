@@ -84,6 +84,8 @@ namespace SharpLife.Engine.Client.Host
         private readonly IVariable _cl_resend;
         private readonly IVariable _cl_timeout;
 
+        private readonly IVariable _net_cl_log_messages;
+
         private readonly IVariable _cl_name;
 
         public EngineClientHost(IEngine engine, ILogger logger)
@@ -123,6 +125,18 @@ namespace SharpLife.Engine.Client.Host
                 .WithHelpInfo("Maximum time to wait before timing out server connections")
                 .WithValue(60)
                 .WithEngineFlags(EngineCommandFlags.Archive));
+
+            _net_cl_log_messages = CommandContext.RegisterVariable(new VariableInfo("net_cl_log_messages")
+                .WithHelpInfo("Whether to log received server-to-client network messages")
+                .WithValue(false)
+                .WithBooleanFilter()
+                .WithChangeHandler((ref VariableChangeEvent @event) =>
+                {
+                    if (_netClient != null)
+                    {
+                        _netClient.TraceMessageLogging = @event.Boolean;
+                    }
+                }));
 
             //TODO: add change handler to send update to server if connected
             _cl_name = CommandContext.RegisterVariable(new VariableInfo("name")

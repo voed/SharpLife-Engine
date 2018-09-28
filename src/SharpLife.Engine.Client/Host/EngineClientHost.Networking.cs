@@ -44,7 +44,7 @@ namespace SharpLife.Engine.Client.Host
         {
             if (_netClient == null)
             {
-                var receiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ServerToClientMessages, true);
+                var receiveHandler = new MessagesReceiveHandler(_logger, NetMessages.ServerToClientMessages, _net_cl_log_messages.Boolean);
 
                 RegisterMessageHandlers(receiveHandler);
 

@@ -63,6 +63,8 @@ namespace SharpLife.Engine.Server.Host
         private readonly IVariable _defport;
         private readonly IVariable _sv_timeout;
 
+        private readonly IVariable _net_sv_log_messages;
+
         private readonly IVariable _maxPlayers;
 
         private int _spawnCount = 0;
@@ -89,6 +91,18 @@ namespace SharpLife.Engine.Server.Host
             _sv_timeout = CommandContext.RegisterVariable(new VariableInfo("sv_timeout")
                 .WithHelpInfo("Maximum time to wait before timing out client connections")
                 .WithValue(60));
+
+            _net_sv_log_messages = CommandContext.RegisterVariable(new VariableInfo("net_sv_log_messages")
+                .WithHelpInfo("Whether to log received client-to-server network messages")
+                .WithValue(false)
+                .WithBooleanFilter()
+                .WithChangeHandler((ref VariableChangeEvent @event) =>
+                {
+                    if (_netServer != null)
+                    {
+                        _netServer.TraceMessageLogging = @event.Boolean;
+                    }
+                }));
 
             _maxPlayers = CommandContext.RegisterVariable(new VariableInfo("maxplayers")
                 .WithHelpInfo("The maximum number of players that can connect to this server")

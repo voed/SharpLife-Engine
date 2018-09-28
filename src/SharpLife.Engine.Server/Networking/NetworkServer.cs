@@ -62,6 +62,12 @@ namespace SharpLife.Engine.Server.Networking
 
         public ServerClientList ClientList { get; }
 
+        public bool TraceMessageLogging
+        {
+            get => _receiveHandler.TraceMessageLogging;
+            set => _receiveHandler.TraceMessageLogging = value;
+        }
+
         //Map specific instances
         private NetworkStringListTransmitter _stringListTransmitter;
 
