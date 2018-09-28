@@ -18,7 +18,7 @@ using Veldrid;
 
 namespace SharpLife.Models.BSP.Rendering
 {
-    public struct SingleLightmapData : IDisposable
+    public class SingleLightmapData : IDisposable
     {
         public ResourceSet Lightmap;
 
