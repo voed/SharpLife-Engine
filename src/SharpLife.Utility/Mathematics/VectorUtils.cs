@@ -114,6 +114,15 @@ namespace SharpLife.Utility.Mathematics
             AngleToVectors(angles, out vectors.Forward, out vectors.Right, out vectors.Up);
         }
 
+        public static DirectionalVectors AngleToAimVectors(Vector3 angles)
+        {
+            angles.X = -angles.X;
+
+            AngleToVectors(angles, out var vectors);
+
+            return vectors;
+        }
+
         public static float AngleBetweenVectors(in Vector3 v1, in Vector3 v2)
         {
             var l1 = v1.Length();
