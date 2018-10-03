@@ -45,13 +45,12 @@ namespace SharpLife.Models
 
         public bool Equals(ModelIndex other)
         {
-            return Index == other.Index
-                   && Valid == other.Valid;
+            return Index == other.Index;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Index, Valid);
+            return HashCode.Combine(Index);
         }
 
         public static bool operator ==(ModelIndex index1, ModelIndex index2)
