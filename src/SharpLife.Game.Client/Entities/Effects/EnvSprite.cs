@@ -17,16 +17,17 @@ using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Client.Renderer.Shared.Models;
 using SharpLife.Game.Client.Renderer.Shared.Models.SPR;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Game.Shared.Models.SPR;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives;
 
 namespace SharpLife.Game.Client.Entities.Effects
 {
     [Networkable]
     public class EnvSprite : NetworkedEntity
     {
-        [Networked(TypeConverterType = typeof(FrameTypeConverter))]
+        [Networked(TypeConverterType = typeof(FloatToIntConverter))]
+        [BitConverterOptions(10, 4)]
         public float Frame { get; set; }
 
         [Networked]

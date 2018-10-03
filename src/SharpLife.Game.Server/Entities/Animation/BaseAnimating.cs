@@ -15,12 +15,12 @@
 
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Game.Shared.Entities.MetaData.TypeConverters;
 using SharpLife.Game.Shared.Models.MDL;
 using SharpLife.Models;
 using SharpLife.Models.MDL;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives;
 using System.Diagnostics;
 
 namespace SharpLife.Game.Server.Entities.Animation
@@ -61,7 +61,8 @@ namespace SharpLife.Game.Server.Entities.Animation
         [Networked]
         public float LastTime { get; set; }
 
-        [Networked(TypeConverterType = typeof(FrameTypeConverter))]
+        [Networked(TypeConverterType = typeof(FloatToIntConverter))]
+        [BitConverterOptions(10, 4)]
         public float Frame { get; set; }
 
         [Networked]

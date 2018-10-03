@@ -24,13 +24,6 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
     /// </summary>
     public class FloatToIntConverter : BasePrimitiveConverter<float>
     {
-        public readonly BitConverterOptions Options;
-
-        public FloatToIntConverter(in BitConverterOptions options)
-        {
-            Options = options;
-        }
-
         public override void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
@@ -46,14 +39,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
                 result = -result;
             }
 
-            if (Options.ShouldMultiply)
+            if (options.ShouldMultiply)
             {
-                result *= Options.Multiplier;
+                result *= options.Multiplier;
             }
 
             stream.WriteInt32((int)result);
 
-            if ((Options.Flags & BitConverterFlags.Signed) != 0)
+            if ((options.Flags & BitConverterFlags.Signed) != 0)
             {
                 stream.WriteBool(isNegative);
             }
@@ -67,17 +60,17 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             {
                 var floatValue = (float)stream.ReadInt32();
 
-                if (Options.ShouldMultiply)
+                if (options.ShouldMultiply)
                 {
-                    floatValue /= Options.Multiplier;
+                    floatValue /= options.Multiplier;
                 }
 
-                if (Options.ShouldPostMultiply)
+                if (options.ShouldPostMultiply)
                 {
-                    floatValue *= Options.PostMultiplier;
+                    floatValue *= options.PostMultiplier;
                 }
 
-                if ((Options.Flags & BitConverterFlags.Signed) != 0)
+                if ((options.Flags & BitConverterFlags.Signed) != 0)
                 {
                     var isNegative = stream.ReadBool();
 
