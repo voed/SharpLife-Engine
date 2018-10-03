@@ -15,7 +15,7 @@
 
 using System;
 
-namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.BitConverters
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion
 {
     [Flags]
     public enum BitConverterFlags

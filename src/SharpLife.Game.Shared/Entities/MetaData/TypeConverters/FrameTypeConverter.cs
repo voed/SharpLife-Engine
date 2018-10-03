@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.BitConverters;
 
 namespace SharpLife.Game.Shared.Entities.MetaData.TypeConverters

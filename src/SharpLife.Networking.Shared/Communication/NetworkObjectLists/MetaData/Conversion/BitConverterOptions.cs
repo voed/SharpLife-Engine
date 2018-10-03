@@ -13,7 +13,7 @@
 *
 ****/
 
-namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.BitConverters
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion
 {
     /// <summary>
     /// Options for bit converter types
