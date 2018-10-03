@@ -14,7 +14,7 @@
 ****/
 
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion;
-using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.BitConverters;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives;
 
 namespace SharpLife.Game.Shared.Entities.MetaData.TypeConverters
 {

@@ -35,7 +35,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         /// null should always return null
         /// This need not return another instance of the same type,
         /// if the type contains a lot of non-networked variables it may return a different type,
-        /// or even an array of jbects
+        /// or even an array of objects
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -50,17 +50,15 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         object CreateInstance(Type targetType, object value);
 
         /// <summary>
-        /// Delta encode and write a value
+        /// Returns whether the value has changed compared to the previous value
         /// </summary>
         /// <param name="value"></param>
         /// <param name="previousValue"></param>
-        /// <param name="stream"></param>
-        /// <returns>Whether the value was written</returns>
-        bool EncodeAndWrite(object value, object previousValue, CodedOutputStream stream);
+        /// <returns></returns>
+        bool Changed(object value, object previousValue);
 
         /// <summary>
-        /// Write a full value
-        /// This does not use delta encoding and will always write the state of the value
+        /// Write a value to the stream
         /// </summary>
         /// <param name="value"></param>
         /// <param name="stream"></param>
@@ -68,20 +66,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         void Write(object value, CodedOutputStream stream);
 
         /// <summary>
-        /// Reads and delta decodes a value
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="previousValue"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        bool ReadAndDecode(CodedInputStream stream, object previousValue, out object result);
-
-        /// <summary>
-        /// Reads a value
+        /// Reads a value from the stream
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="result"></param>
-        /// <returns>Whether the stream contained a change or not</returns>
+        /// <returns>Whether the stream contained a value or not</returns>
         bool Read(CodedInputStream stream, out object result);
     }
 }

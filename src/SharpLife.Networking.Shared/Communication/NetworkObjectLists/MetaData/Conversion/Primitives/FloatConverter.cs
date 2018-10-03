@@ -17,7 +17,7 @@ using Google.Protobuf;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
-    public sealed class FloatConverter : BaseArithmeticConverter<float>
+    public sealed class FloatConverter : BasePrimitiveConverter<float>
     {
         public static FloatConverter Instance { get; } = new FloatConverter();
 
@@ -25,13 +25,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public override void Write(in float value, CodedOutputStream stream)
+        public void Write(float value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
-            stream.WriteFloat(value);
+            stream.WriteFloat((float)value);
         }
 
-        public override bool Read(CodedInputStream stream, out float result)
+        public override void Write(object value, CodedOutputStream stream)
+        {
+            Write((float)value, stream);
+        }
+
+        public bool Read(CodedInputStream stream, out float result)
         {
             var changed = stream.ReadBool();
 
@@ -43,6 +48,15 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             {
                 result = default;
             }
+
+            return changed;
+        }
+
+        public override bool Read(CodedInputStream stream, out object result)
+        {
+            var changed = Read(stream, out var floatValue);
+
+            result = floatValue;
 
             return changed;
         }

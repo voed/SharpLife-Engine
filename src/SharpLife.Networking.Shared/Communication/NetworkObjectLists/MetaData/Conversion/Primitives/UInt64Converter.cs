@@ -17,7 +17,7 @@ using Google.Protobuf;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
-    public sealed class UInt64Converter : BaseArithmeticConverter<ulong>
+    public sealed class UInt64Converter : BasePrimitiveConverter<ulong>
     {
         public static UInt64Converter Instance { get; } = new UInt64Converter();
 
@@ -25,13 +25,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public override void Write(in ulong value, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
-            stream.WriteUInt64(value);
+            stream.WriteUInt64((ulong)value);
         }
 
-        public override bool Read(CodedInputStream stream, out ulong result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var changed = stream.ReadBool();
 

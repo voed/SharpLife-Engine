@@ -15,39 +15,31 @@
 
 using Google.Protobuf;
 
-namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.BitConverters
+namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
     /// <summary>
-    /// Converts floats to integers for networking
-    /// No delta calculations between values is performed to avoid loss of accuracy due to precision issues
+    /// Converts doubles to integers for networking
     /// TODO: implement bit stream so that bit operations can be performed
     /// TODO: converters should be checked for compatibility so unmatched ones don't break
     /// </summary>
-    public class FloatToIntConverter : BaseValueTypeConverter<float>
+    public class DoubleToIntConverter : BasePrimitiveConverter<double>
     {
         public readonly BitConverterOptions Options;
 
-        public override int MemberCount => 1;
-
-        public FloatToIntConverter(in BitConverterOptions options)
+        public DoubleToIntConverter(in BitConverterOptions options)
         {
             Options = options;
         }
 
-        public override bool Encode(in float value, in float previousValue, out float result)
-        {
-            result = value;
-
-            return value != previousValue;
-        }
-
-        public override void Write(in float value, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
 
-            var isNegative = value < 0;
+            var floatValue = (double)value;
 
-            var result = value;
+            var isNegative = floatValue < 0;
+
+            var result = floatValue;
 
             if (isNegative)
             {
@@ -67,27 +59,22 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             }
         }
 
-        public override void Decode(in float value, in float previousValue, out float result)
-        {
-            result = value;
-        }
-
-        public override bool Read(CodedInputStream stream, out float result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var changed = stream.ReadBool();
 
             if (changed)
             {
-                result = stream.ReadInt32();
+                var floatValue = (double)stream.ReadInt32();
 
                 if (Options.ShouldMultiply)
                 {
-                    result /= Options.Multiplier;
+                    floatValue /= Options.Multiplier;
                 }
 
                 if (Options.ShouldPostMultiply)
                 {
-                    result *= Options.PostMultiplier;
+                    floatValue *= Options.PostMultiplier;
                 }
 
                 if ((Options.Flags & BitConverterFlags.Signed) != 0)
@@ -96,9 +83,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
                     if (isNegative)
                     {
-                        result = -result;
+                        floatValue = -floatValue;
                     }
                 }
+
+                result = floatValue;
             }
             else
             {

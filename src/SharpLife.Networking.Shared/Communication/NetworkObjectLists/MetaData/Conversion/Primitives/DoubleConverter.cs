@@ -17,7 +17,7 @@ using Google.Protobuf;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
-    public sealed class DoubleConverter : BaseArithmeticConverter<double>
+    public sealed class DoubleConverter : BasePrimitiveConverter<double>
     {
         public static DoubleConverter Instance { get; } = new DoubleConverter();
 
@@ -25,13 +25,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public override void Write(in double value, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
-            stream.WriteDouble(value);
+            stream.WriteDouble((double)value);
         }
 
-        public override bool Read(CodedInputStream stream, out double result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var changed = stream.ReadBool();
 

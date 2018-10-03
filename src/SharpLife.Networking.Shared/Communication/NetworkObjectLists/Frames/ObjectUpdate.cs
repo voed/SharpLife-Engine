@@ -83,9 +83,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             {
                 var member = MetaData.Members[i];
 
-                if (!member.ChangeNotificationIndex.HasValue || networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value])
+                if (member.ChangeNotificationIndex.HasValue ? networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value] : member.Converter.Changed(Snapshot[i].Value, previousSnapshot[i].Value))
                 {
-                    changes = member.Converter.EncodeAndWrite(Snapshot[i].Value, previousSnapshot[i].Value, stream) || changes;
+                    member.Converter.Write(Snapshot[i].Value, stream);
+
+                    changes = true;
                 }
                 else
                 {
@@ -145,7 +147,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 {
                     var member = metaData.Members[i];
 
-                    if (member.Converter.ReadAndDecode(stream, previousSnapshot[i].Value, out var result))
+                    if (member.Converter.Read(stream, out var result))
                     {
                         snapshot[i].Value = result;
                         snapshot[i].Changed = true;

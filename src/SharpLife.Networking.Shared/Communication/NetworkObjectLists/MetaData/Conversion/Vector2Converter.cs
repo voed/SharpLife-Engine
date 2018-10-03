@@ -29,55 +29,20 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public override bool Encode(in Vector2 value, in Vector2 previousValue, out Vector2 result)
+        public override bool Changed(object value, object previousValue)
         {
-            var xDiff = FloatConverter.Instance.Encode(value.X, previousValue.X, out var x);
-            var yDiff = FloatConverter.Instance.Encode(value.Y, previousValue.Y, out var y);
-
-            result = new Vector2(x, y);
-
-            return xDiff || yDiff;
+            return !value.Equals(previousValue);
         }
 
-        //Overridden because it is more efficient to ues FloatConverter's EncodeAndWrite directly
-        public override bool EncodeAndWrite(in Vector2 value, in Vector2 previousValue, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
-            var xDiff = FloatConverter.Instance.EncodeAndWrite(value.X, previousValue.X, stream);
-            var yDiff = FloatConverter.Instance.EncodeAndWrite(value.Y, previousValue.Y, stream);
+            var vector = (Vector2)value;
 
-            return xDiff || yDiff;
+            FloatConverter.Instance.Write(vector.X, stream);
+            FloatConverter.Instance.Write(vector.Y, stream);
         }
 
-        public override void Write(in Vector2 value, CodedOutputStream stream)
-        {
-            if (value.X != 0.0f)
-            {
-                FloatConverter.Instance.Write(value.X, stream);
-            }
-            else
-            {
-                ConversionUtils.AddUnchangedValue(stream);
-            }
-
-            if (value.Y != 0.0f)
-            {
-                FloatConverter.Instance.Write(value.Y, stream);
-            }
-            else
-            {
-                ConversionUtils.AddUnchangedValue(stream);
-            }
-        }
-
-        public override void Decode(in Vector2 value, in Vector2 previousValue, out Vector2 result)
-        {
-            FloatConverter.Instance.Decode(value.X, previousValue.X, out var x);
-            FloatConverter.Instance.Decode(value.Y, previousValue.Y, out var y);
-
-            result = new Vector2(x, y);
-        }
-
-        public override bool Read(CodedInputStream stream, out Vector2 result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var xDiff = FloatConverter.Instance.Read(stream, out float x);
             var yDiff = FloatConverter.Instance.Read(stream, out float y);

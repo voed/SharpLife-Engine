@@ -13,29 +13,19 @@
 *
 ****/
 
-using Generic.Math;
-
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
     /// <summary>
-    /// Provides behavior shared between arithmetic type converters
+    /// Base class for primitive type converters
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class BaseArithmeticConverter<T> : BaseValueTypeConverter<T>
-        where T : unmanaged
+    public abstract class BasePrimitiveConverter<T> : BaseValueTypeConverter<T>
     {
         public override int MemberCount => 1;
 
-        public override bool Encode(in T value, in T previousValue, out T result)
+        public override bool Changed(object value, object previousValue)
         {
-            result = GenericMath.Subtract(value, previousValue);
-
-            return GenericMath.NotEqual(result, default);
-        }
-
-        public override void Decode(in T value, in T previousValue, out T result)
-        {
-            result = GenericMath.Add(value, previousValue);
+            return !value.Equals(previousValue);
         }
     }
 }

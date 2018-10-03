@@ -51,23 +51,14 @@ namespace SharpLife.Game.Shared.Networking.Conversion
             return _engineModels.GetModel(index);
         }
 
-        public bool EncodeAndWrite(object value, object previousValue, CodedOutputStream stream)
+        public bool Changed(object value, object previousValue)
         {
-            return Int32Converter.Instance.EncodeAndWrite(((ModelIndex)value).Index, ((ModelIndex)previousValue).Index, stream);
+            return !value.Equals(previousValue);
         }
 
         public void Write(object value, CodedOutputStream stream)
         {
             Int32Converter.Instance.Write(((ModelIndex)value).Index, stream);
-        }
-
-        public bool ReadAndDecode(CodedInputStream stream, object previousValue, out object result)
-        {
-            var decodeResult = Int32Converter.Instance.ReadAndDecode(stream, ((ModelIndex)previousValue).Index, out var resultValue);
-
-            result = new ModelIndex(resultValue);
-
-            return decodeResult;
         }
 
         public bool Read(CodedInputStream stream, out object result)

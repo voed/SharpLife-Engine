@@ -29,67 +29,21 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public override bool Encode(in Vector3 value, in Vector3 previousValue, out Vector3 result)
+        public override bool Changed(object value, object previousValue)
         {
-            var xDiff = FloatConverter.Instance.Encode(value.X, previousValue.X, out var x);
-            var yDiff = FloatConverter.Instance.Encode(value.Y, previousValue.Y, out var y);
-            var zDiff = FloatConverter.Instance.Encode(value.Z, previousValue.Z, out var z);
-
-            result = new Vector3(x, y, z);
-
-            return xDiff || yDiff || zDiff;
+            return !value.Equals(previousValue);
         }
 
-        //Overridden because it is more efficient to ues FloatConverter's EncodeAndWrite directly
-        public override bool EncodeAndWrite(in Vector3 value, in Vector3 previousValue, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
-            var xDiff = FloatConverter.Instance.EncodeAndWrite(value.X, previousValue.X, stream);
-            var yDiff = FloatConverter.Instance.EncodeAndWrite(value.Y, previousValue.Y, stream);
-            var zDiff = FloatConverter.Instance.EncodeAndWrite(value.Z, previousValue.Z, stream);
+            var vector = (Vector3)value;
 
-            return xDiff || yDiff || zDiff;
+            FloatConverter.Instance.Write(vector.X, stream);
+            FloatConverter.Instance.Write(vector.Y, stream);
+            FloatConverter.Instance.Write(vector.Z, stream);
         }
 
-        public override void Write(in Vector3 value, CodedOutputStream stream)
-        {
-            if (value.X != 0.0f)
-            {
-                FloatConverter.Instance.Write(value.X, stream);
-            }
-            else
-            {
-                ConversionUtils.AddUnchangedValue(stream);
-            }
-
-            if (value.Y != 0.0f)
-            {
-                FloatConverter.Instance.Write(value.Y, stream);
-            }
-            else
-            {
-                ConversionUtils.AddUnchangedValue(stream);
-            }
-
-            if (value.Z != 0.0f)
-            {
-                FloatConverter.Instance.Write(value.Z, stream);
-            }
-            else
-            {
-                ConversionUtils.AddUnchangedValue(stream);
-            }
-        }
-
-        public override void Decode(in Vector3 value, in Vector3 previousValue, out Vector3 result)
-        {
-            FloatConverter.Instance.Decode(value.X, previousValue.X, out var x);
-            FloatConverter.Instance.Decode(value.Y, previousValue.Y, out var y);
-            FloatConverter.Instance.Decode(value.Z, previousValue.Z, out var z);
-
-            result = new Vector3(x, y, z);
-        }
-
-        public override bool Read(CodedInputStream stream, out Vector3 result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var xDiff = FloatConverter.Instance.Read(stream, out float x);
             var yDiff = FloatConverter.Instance.Read(stream, out float y);

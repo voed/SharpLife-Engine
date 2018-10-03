@@ -27,15 +27,17 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public override bool Encode(in string value, in string previousValue, out string result)
+        public override bool Changed(object value, object previousValue)
         {
-            //Strings cannot be delta encoded, so just write the whole string
-            result = value;
+            if (value == null)
+            {
+                return previousValue != null;
+            }
 
-            return value != previousValue;
+            return !value.Equals(previousValue);
         }
 
-        public override void Write(in string value, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
 
@@ -43,16 +45,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
             if (value != null)
             {
-                stream.WriteString(value);
+                stream.WriteString((string)value);
             }
         }
 
-        public override void Decode(in string value, in string previousValue, out string result)
-        {
-            result = value;
-        }
-
-        public override bool Read(CodedInputStream stream, out string result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var changed = stream.ReadBool();
 

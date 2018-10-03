@@ -17,35 +17,21 @@ using Google.Protobuf;
 
 namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.Conversion.Primitives
 {
-    public sealed class BooleanConverter : BaseValueTypeConverter<bool>
+    public sealed class BooleanConverter : BasePrimitiveConverter<bool>
     {
         public static BooleanConverter Instance { get; } = new BooleanConverter();
-
-        public override int MemberCount => 1;
 
         private BooleanConverter()
         {
         }
 
-        public override bool Encode(in bool value, in bool previousValue, out bool result)
-        {
-            result = value;
-
-            return value != previousValue;
-        }
-
-        public override void Write(in bool value, CodedOutputStream stream)
+        public override void Write(object value, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
-            stream.WriteBool(value);
+            stream.WriteBool((bool)value);
         }
 
-        public override void Decode(in bool value, in bool previousValue, out bool result)
-        {
-            result = value;
-        }
-
-        public override bool Read(CodedInputStream stream, out bool result)
+        public override bool Read(CodedInputStream stream, out object result)
         {
             var changed = stream.ReadBool();
 

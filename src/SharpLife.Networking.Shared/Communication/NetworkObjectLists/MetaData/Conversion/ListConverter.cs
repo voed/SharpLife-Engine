@@ -93,6 +93,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             throw new InvalidOperationException();
         }
 
+        public bool Changed(object value, object previousValue)
+        {
+            //In this case we can trivially assert that nothing has changed
+            if (value == null && previousValue == null)
+            {
+                return false;
+            }
+
+            //Always report as changed since it's not trivial to check
+            return true;
+        }
+
         public bool Write(T[] list, T[] previousList, bool isDelta, CodedOutputStream stream)
         {
             //null list to null list is no change
@@ -138,7 +150,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
                         stream.WriteBool(true);
 
                         /*var changedElement = */
-                        _typeConverter.EncodeAndWrite(list[i], previousList[i], stream);
+                        _typeConverter.Write(list[i], stream);
 
                         //changes = changes || changedElement;
                     }
@@ -217,7 +229,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
                 while (stream.ReadBool())
                 {
-                    if (_typeConverter.ReadAndDecode(stream, previousList != null ? previousList[index] : default, out var element))
+                    if (_typeConverter.Read(stream, out var element))
                     {
                         list.Add((T)element);
                     }

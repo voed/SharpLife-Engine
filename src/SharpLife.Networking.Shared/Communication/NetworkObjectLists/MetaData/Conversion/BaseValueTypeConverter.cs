@@ -33,77 +33,10 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         //Value types can just return the snapshot instance
         public object CreateInstance(Type targetType, object value) => value;
 
-        /// <summary>
-        /// Encodes a value
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="previousValue"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public abstract bool Encode(in T value, in T previousValue, out T result);
+        public abstract bool Changed(object value, object previousValue);
 
-        public virtual bool EncodeAndWrite(in T value, in T previousValue, CodedOutputStream stream)
-        {
-            if (Encode(value, previousValue, out var result))
-            {
-                Write(result, stream);
-                return true;
-            }
+        public abstract void Write(object value, CodedOutputStream stream);
 
-            ConversionUtils.AddUnchangedValue(stream);
-
-            return false;
-        }
-
-        public bool EncodeAndWrite(object value, object previousValue, CodedOutputStream stream)
-        {
-            return EncodeAndWrite((T)value, (T)previousValue, stream);
-        }
-
-        public abstract void Write(in T value, CodedOutputStream stream);
-
-        public void Write(object value, CodedOutputStream stream)
-        {
-            Write((T)value, stream);
-        }
-
-        public abstract void Decode(in T value, in T previousValue, out T result);
-
-        public bool ReadAndDecode(CodedInputStream stream, in T previousValue, out T result)
-        {
-            if (Read(stream, out result))
-            {
-                Decode(result, previousValue, out result);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool ReadAndDecode(CodedInputStream stream, object previousValue, out object result)
-        {
-            if (ReadAndDecode(stream, (T)previousValue, out T resultValue))
-            {
-                result = resultValue;
-
-                return true;
-            }
-
-            result = null;
-
-            return false;
-        }
-
-        public abstract bool Read(CodedInputStream stream, out T result);
-
-        public bool Read(CodedInputStream stream, out object result)
-        {
-            var returnValue = Read(stream, out T resultValue);
-
-            result = resultValue;
-
-            return returnValue;
-        }
+        public abstract bool Read(CodedInputStream stream, out object result);
     }
 }
