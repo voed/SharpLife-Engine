@@ -85,7 +85,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
                 if (member.ChangeNotificationIndex.HasValue ? networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value] : member.Converter.Changed(Snapshot[i].Value, previousSnapshot[i].Value))
                 {
-                    member.Converter.Write(Snapshot[i].Value, previousSnapshot[i].Value, stream);
+                    member.Converter.Write(Snapshot[i].Value, previousSnapshot[i].Value, member.ConverterOptions, stream);
 
                     changes = true;
                 }
@@ -108,7 +108,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             {
                 var member = MetaData.Members[i];
 
-                member.Converter.Write(Snapshot[i].Value, member.Converter.Default, stream);
+                member.Converter.Write(Snapshot[i].Value, member.Converter.Default, member.ConverterOptions, stream);
             }
 
             return true;
@@ -147,7 +147,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
                 {
                     var member = metaData.Members[i];
 
-                    if (member.Converter.Read(stream, previousSnapshot[i].Value, out var result))
+                    if (member.Converter.Read(stream, previousSnapshot[i].Value, member.ConverterOptions, out var result))
                     {
                         snapshot[i].Value = result;
                         snapshot[i].Changed = true;
@@ -169,7 +169,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
                     //Full updates can contain deltas, in which case we can just use the default value provided by the Read method
                     //So don't check the return value
-                    member.Converter.Read(stream, member.Converter.Default, out var result);
+                    member.Converter.Read(stream, member.Converter.Default, member.ConverterOptions, out var result);
 
                     snapshot[i].Value = result;
                     snapshot[i].Changed = true;

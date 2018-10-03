@@ -29,25 +29,27 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
+        public override BitConverterOptions OptimizeOptions(in BitConverterOptions options) => FloatConverter.Instance.OptimizeOptions(options);
+
         public override bool Changed(object value, object previousValue)
         {
             return !value.Equals(previousValue);
         }
 
-        public override void Write(object value, object previousValue, CodedOutputStream stream)
+        public override void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream)
         {
             var vector = (Vector3)value;
 
-            FloatConverter.Instance.Write(vector.X, stream);
-            FloatConverter.Instance.Write(vector.Y, stream);
-            FloatConverter.Instance.Write(vector.Z, stream);
+            FloatConverter.Instance.Write(vector.X, options, stream);
+            FloatConverter.Instance.Write(vector.Y, options, stream);
+            FloatConverter.Instance.Write(vector.Z, options, stream);
         }
 
-        public override bool Read(CodedInputStream stream, object previousValue, out object result)
+        public override bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result)
         {
-            var xDiff = FloatConverter.Instance.Read(stream, out float x);
-            var yDiff = FloatConverter.Instance.Read(stream, out float y);
-            var zDiff = FloatConverter.Instance.Read(stream, out float z);
+            var xDiff = FloatConverter.Instance.Read(stream, options, out float x);
+            var yDiff = FloatConverter.Instance.Read(stream, options, out float y);
+            var zDiff = FloatConverter.Instance.Read(stream, options, out float z);
 
             result = new Vector3(x, y, z);
 

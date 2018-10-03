@@ -50,11 +50,14 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
 
             public ITypeConverter Converter { get; }
 
-            public Member(MemberInfo info, TypeMetaData metaData, ITypeConverter typeConverter, int? changeNotificationIndex)
+            public BitConverterOptions ConverterOptions { get; }
+
+            public Member(MemberInfo info, TypeMetaData metaData, ITypeConverter typeConverter, in BitConverterOptions converterOptions, int? changeNotificationIndex)
             {
                 Info = info ?? throw new ArgumentNullException(nameof(info));
                 MetaData = metaData ?? throw new ArgumentNullException(nameof(metaData));
-                Converter = typeConverter ?? MetaData.Converter;
+                Converter = typeConverter;
+                ConverterOptions = converterOptions;
                 ChangeNotificationIndex = changeNotificationIndex;
             }
         }

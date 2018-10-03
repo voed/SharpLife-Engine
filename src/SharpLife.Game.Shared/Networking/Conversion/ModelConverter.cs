@@ -39,6 +39,8 @@ namespace SharpLife.Game.Shared.Networking.Conversion
             _engineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
         }
 
+        public BitConverterOptions OptimizeOptions(in BitConverterOptions options) => Int32Converter.Instance.OptimizeOptions(options);
+
         public object Copy(object value)
         {
             return value != null ? _engineModels.IndexOf((IModel)value) : new ModelIndex();
@@ -56,14 +58,14 @@ namespace SharpLife.Game.Shared.Networking.Conversion
             return !value.Equals(previousValue);
         }
 
-        public void Write(object value, object previousValue, CodedOutputStream stream)
+        public void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream)
         {
-            Int32Converter.Instance.Write(((ModelIndex)value).Index, stream);
+            Int32Converter.Instance.Write(((ModelIndex)value).Index, options, stream);
         }
 
-        public bool Read(CodedInputStream stream, object previousValue, out object result)
+        public bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result)
         {
-            var readResult = Int32Converter.Instance.Read(stream, out int resultValue);
+            var readResult = Int32Converter.Instance.Read(stream, options, out int resultValue);
 
             result = new ModelIndex(resultValue);
 

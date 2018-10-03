@@ -28,6 +28,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         public const float MultiplierEpsilon = 0.001f;
 
         /// <summary>
+        /// Default settings for bit converters
+        /// </summary>
+        public static readonly BitConverterOptions Default = new BitConverterOptions(0);
+
+        /// <summary>
         /// Number of bits to send, including sign bit if specified in <seealso cref="Flags"/>
         /// </summary>
         public readonly uint Bits;

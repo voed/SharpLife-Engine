@@ -25,18 +25,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public void Write(int value, CodedOutputStream stream)
+        public void Write(int value, in BitConverterOptions options, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
             stream.WriteInt32(value);
         }
 
-        public override void Write(object value, object previousValue, CodedOutputStream stream)
+        public override void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream)
         {
-            Write((int)value, stream);
+            Write((int)value, options, stream);
         }
 
-        public bool Read(CodedInputStream stream, out int result)
+        public bool Read(CodedInputStream stream, in BitConverterOptions options, out int result)
         {
             var changed = stream.ReadBool();
 
@@ -52,9 +52,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             return changed;
         }
 
-        public override bool Read(CodedInputStream stream, object previousValue, out object result)
+        public override bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result)
         {
-            var changed = Read(stream, out int intValue);
+            var changed = Read(stream, options, out int intValue);
 
             result = intValue;
 

@@ -28,6 +28,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public abstract int MemberCount { get; }
 
+        //Default to just returning the input
+        public virtual BitConverterOptions OptimizeOptions(in BitConverterOptions options) => options;
+
         public object Copy(object value) => value;
 
         //Value types can just return the snapshot instance
@@ -35,8 +38,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public abstract bool Changed(object value, object previousValue);
 
-        public abstract void Write(object value, object previousValue, CodedOutputStream stream);
+        public abstract void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream);
 
-        public abstract bool Read(CodedInputStream stream, object previousValue, out object result);
+        public abstract bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result);
     }
 }

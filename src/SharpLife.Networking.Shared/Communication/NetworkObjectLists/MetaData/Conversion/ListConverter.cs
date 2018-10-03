@@ -38,6 +38,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             _typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
         }
 
+        public BitConverterOptions OptimizeOptions(in BitConverterOptions options) => _typeConverter.OptimizeOptions(options);
+
         public object Copy(object value)
         {
             var list = (IList<T>)value;
@@ -105,72 +107,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             return true;
         }
 
-        public void Write(T[] list, T[] previousList, bool isDelta, CodedOutputStream stream)
-        {
-            //null list to null list is no change
-            //Full updates can end up here, so make sure we send a null explicitly
-            if (list == null && previousList == null && isDelta)
-            {
-                ConversionUtils.AddUnchangedValue(stream);
-                return;
-            }
-
-            ConversionUtils.AddChangedValue(stream);
-
-            //First boolean indicates whether the list is null or not
-            stream.WriteBool(list != null);
-
-            if (list != null)
-            {
-                //If the number of elements remains the same, only send changes between elements
-                //Otherwise, resend the entire list
-                var resendEntireList = previousList == null || list.Length != previousList.Length;
-
-                //Second boolean indicates whether the entire list is being sent
-                stream.WriteBool(resendEntireList);
-
-                //Count is number of values - 2
-                if (resendEntireList)
-                {
-                    stream.WriteInt32(list.Length);
-
-                    //The receiver will not know the capacity that the transmitter has, this shouldn't really matter unless the list changes size often
-                    foreach (var element in list)
-                    {
-                        _typeConverter.Write(element, _typeConverter.Default, stream);
-                    }
-                }
-                else
-                {
-                    //var changes = false;
-
-                    for (var i = 0; i < list.Length; ++i)
-                    {
-                        //TODO: rework this
-                        //Each element starts with a true
-                        stream.WriteBool(true);
-
-                        /*var changedElement = */
-                        _typeConverter.Write(list[i], previousList[i], stream);
-
-                        //changes = changes || changedElement;
-                    }
-
-                    //List ends with false to denote end of the list
-                    stream.WriteBool(false);
-
-                    //TODO: figure out if this can be done with coded streams
-                    //If we were sending a delta and nothing changed, ignore
-                    //if (!changes)
-                    //{
-                    //    ConversionUtils.AddUnchangedValue(stream);
-                    //    return false;
-                    //}
-                }
-            }
-        }
-
-        public void Write(object value, object previousValue, CodedOutputStream stream)
+        public void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream)
         {
             //This operates on the copied list, which is an array
             var list = (T[])value;
@@ -200,7 +137,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
                     //The receiver will not know the capacity that the transmitter has, this shouldn't really matter unless the list changes size often
                     foreach (var element in list)
                     {
-                        _typeConverter.Write(element, _typeConverter.Default, stream);
+                        _typeConverter.Write(element, _typeConverter.Default, options, stream);
                     }
                 }
                 else
@@ -214,7 +151,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
                         stream.WriteBool(true);
 
                         /*var changedElement = */
-                        _typeConverter.Write(list[i], previousList[i], stream);
+                        _typeConverter.Write(list[i], previousList[i], options, stream);
 
                         //changes = changes || changedElement;
                     }
@@ -233,7 +170,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             }
         }
 
-        public bool Read(CodedInputStream stream, object previousValue, out object result)
+        public bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result)
         {
             var previousList = (T[])previousValue;
 
@@ -259,7 +196,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
                 for (var index = 0; index < count; ++index)
                 {
-                    _typeConverter.Read(stream, _typeConverter.Default, out var element);
+                    _typeConverter.Read(stream, _typeConverter.Default, options, out var element);
 
                     list[index] = (T)element;
                 }
@@ -274,7 +211,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
                 while (stream.ReadBool())
                 {
-                    if (_typeConverter.Read(stream, previousList != null ? previousList[index] : _typeConverter.Default, out var element))
+                    if (_typeConverter.Read(stream, previousList != null ? previousList[index] : _typeConverter.Default, options, out var element))
                     {
                         list.Add((T)element);
                     }

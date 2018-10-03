@@ -31,6 +31,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         int MemberCount { get; }
 
         /// <summary>
+        /// Optimizes the converter options to avoid having to make adjustments during read/write
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        BitConverterOptions OptimizeOptions(in BitConverterOptions options);
+
+        /// <summary>
         /// Creates a copy of the given value
         /// null should always return null
         /// This need not return another instance of the same type,
@@ -62,17 +69,19 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="previousValue"></param>
+        /// <param name="options"></param>
         /// <param name="stream"></param>
         /// <returns></returns>
-        void Write(object value, object previousValue, CodedOutputStream stream);
+        void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream);
 
         /// <summary>
         /// Reads a value from the stream
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="previousValue"></param>
+        /// <param name="options"></param>
         /// <param name="result"></param>
         /// <returns>Whether the stream contained a value or not</returns>
-        bool Read(CodedInputStream stream, object previousValue, out object result);
+        bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result);
     }
 }

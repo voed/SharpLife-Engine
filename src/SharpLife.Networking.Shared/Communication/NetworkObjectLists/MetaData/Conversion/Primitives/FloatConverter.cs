@@ -25,18 +25,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         {
         }
 
-        public void Write(float value, CodedOutputStream stream)
+        public void Write(float value, in BitConverterOptions options, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
             stream.WriteFloat((float)value);
         }
 
-        public override void Write(object value, object previousValue, CodedOutputStream stream)
+        public override void Write(object value, object previousValue, in BitConverterOptions options, CodedOutputStream stream)
         {
-            Write((float)value, stream);
+            Write((float)value, options, stream);
         }
 
-        public bool Read(CodedInputStream stream, out float result)
+        public bool Read(CodedInputStream stream, in BitConverterOptions options, out float result)
         {
             var changed = stream.ReadBool();
 
@@ -52,9 +52,9 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             return changed;
         }
 
-        public override bool Read(CodedInputStream stream, object previousValue, out object result)
+        public override bool Read(CodedInputStream stream, object previousValue, in BitConverterOptions options, out object result)
         {
-            var changed = Read(stream, out var floatValue);
+            var changed = Read(stream, options, out var floatValue);
 
             result = floatValue;
 

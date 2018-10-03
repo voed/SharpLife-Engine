@@ -90,7 +90,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             return this;
         }
 
-        private void InternalAddMember(MemberInfo memberInfo, Type type, ITypeConverter typeConverter, bool usesChangeNotification)
+        private void InternalAddMember(MemberInfo memberInfo, Type type, ITypeConverter typeConverter, in BitConverterOptions converterOptions, bool usesChangeNotification)
         {
             var typeMetaData = _registryBuilder.LookupMemberType(type);
 
@@ -99,7 +99,16 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 throw new ArgumentException($"Type {type.FullName} has not been registered and is used as a networked member \"{memberInfo.Name}\" in {Type.FullName}", nameof(type));
             }
 
-            _members.Add(new TypeMetaData.Member(memberInfo, typeMetaData, typeConverter, usesChangeNotification ? _nextChangeNotificationIndex++ : (int?)null));
+            //Fall back to using the default converter for the type, if there is one
+            if (typeConverter == null)
+            {
+                typeConverter = typeMetaData.Converter;
+            }
+
+            //Convert the converter options to the most optimal format now
+            var optimizedConverterOptions = typeConverter?.OptimizeOptions(converterOptions) ?? converterOptions;
+
+            _members.Add(new TypeMetaData.Member(memberInfo, typeMetaData, typeConverter, optimizedConverterOptions, usesChangeNotification ? _nextChangeNotificationIndex++ : (int?)null));
         }
 
         /// <summary>
@@ -107,9 +116,13 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
         /// </summary>
         /// <param name="name"></param>
         /// <param name="typeConverter">If specified, this converter will be used instead of the default for the member type</param>
+        /// <param name="converterOptions"></param>
         /// <param name="usesChangeNotification"></param>
         /// <returns></returns>
-        public TypeMetaDataBuilder AddMember(string name, ITypeConverter typeConverter = null, bool usesChangeNotification = false)
+        public TypeMetaDataBuilder AddMember(string name,
+            ITypeConverter typeConverter,
+            BitConverterOptions converterOptions,
+            bool usesChangeNotification = false)
         {
             if (name == null)
             {
@@ -142,12 +155,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 type = ((PropertyInfo)memberInfo).PropertyType;
             }
 
-            InternalAddMember(memberInfo, type, typeConverter, usesChangeNotification);
+            InternalAddMember(memberInfo, type, typeConverter, converterOptions, usesChangeNotification);
 
             return this;
         }
 
-        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, ITypeConverter typeConverter, bool usesChangeNotification)
+        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, ITypeConverter typeConverter, in BitConverterOptions converterOptions, bool usesChangeNotification)
         {
             if (info == null)
             {
@@ -165,12 +178,12 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 throw new InvalidOperationException($"Member {info.Name} has already been added as a networked member for type {Type.FullName}");
             }
 
-            InternalAddMember(info, type, typeConverter, usesChangeNotification);
+            InternalAddMember(info, type, typeConverter, converterOptions, usesChangeNotification);
 
             return this;
         }
 
-        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, Type typeConverterType, bool usesChangeNotification)
+        private TypeMetaDataBuilder InternalAddMemberInfo(MemberInfo info, Type type, Type typeConverterType, in BitConverterOptions converterOptions, bool usesChangeNotification)
         {
             ITypeConverter typeConverter = null;
 
@@ -180,17 +193,28 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 typeConverter = (ITypeConverter)Activator.CreateInstance(typeConverterType);
             }
 
-            return InternalAddMemberInfo(info, type, typeConverter, usesChangeNotification);
+            return InternalAddMemberInfo(info, type, typeConverter, converterOptions, usesChangeNotification);
         }
 
-        public TypeMetaDataBuilder AddMember(PropertyInfo propInfo, ITypeConverter typeConverter = null, bool usesChangeNotification = false)
+        public TypeMetaDataBuilder AddMember(PropertyInfo propInfo, ITypeConverter typeConverter, in BitConverterOptions converterOptions, bool usesChangeNotification = false)
         {
-            return InternalAddMemberInfo(propInfo, propInfo.PropertyType, typeConverter, usesChangeNotification);
+            return InternalAddMemberInfo(propInfo, propInfo.PropertyType, typeConverter, converterOptions, usesChangeNotification);
         }
 
-        public TypeMetaDataBuilder AddMember(FieldInfo fieldInfo, ITypeConverter typeConverter = null, bool usesChangeNotification = false)
+        public TypeMetaDataBuilder AddMember(FieldInfo fieldInfo, ITypeConverter typeConverter, in BitConverterOptions converterOptions, bool usesChangeNotification = false)
         {
-            return InternalAddMemberInfo(fieldInfo, fieldInfo.FieldType, typeConverter, usesChangeNotification);
+            return InternalAddMemberInfo(fieldInfo, fieldInfo.FieldType, typeConverter, converterOptions, usesChangeNotification);
+        }
+
+        private void InternalAddNetworkedMember(MemberInfo info, Type type)
+        {
+            var networkedAttr = info.GetCustomAttribute<NetworkedAttribute>();
+
+            var bitConverterAttr = info.GetCustomAttribute<BitConverterOptionsAttribute>();
+
+            var converterOptions = bitConverterAttr?.Options ?? BitConverterOptions.Default;
+
+            InternalAddMemberInfo(info, type, networkedAttr.TypeConverterType, converterOptions, networkedAttr.UsesChangeNotification);
         }
 
         /// <summary>
@@ -203,9 +227,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 .GetFields(BindingFlags.Public | BindingFlags.Instance)
                 .Where(member => member.GetCustomAttribute<NetworkedAttribute>() != null))
             {
-                var attr = member.GetCustomAttribute<NetworkedAttribute>();
-
-                InternalAddMemberInfo(member, member.FieldType, attr.TypeConverterType, attr.UsesChangeNotification);
+                InternalAddNetworkedMember(member, member.FieldType);
             }
 
             return this;
@@ -221,9 +243,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
                 .GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
                 .Where(member => member.GetCustomAttribute<NetworkedAttribute>() != null))
             {
-                var attr = member.GetCustomAttribute<NetworkedAttribute>();
-
-                InternalAddMemberInfo(member, member.PropertyType, attr.TypeConverterType, attr.UsesChangeNotification);
+                InternalAddNetworkedMember(member, member.PropertyType);
             }
 
             return this;
@@ -238,7 +258,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             //TODO: check for NetworkedAttribute?
             foreach (var member in Type.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
-                AddMember(member, null, false);
+                AddMember(member, null, BitConverterOptions.Default, false);
             }
 
             return this;
@@ -261,7 +281,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData
             //TODO: check for NetworkedAttribute?
             foreach (var member in Type.GetProperties(flags))
             {
-                AddMember(member, null, false);
+                AddMember(member, null, BitConverterOptions.Default, false);
             }
 
             return this;
