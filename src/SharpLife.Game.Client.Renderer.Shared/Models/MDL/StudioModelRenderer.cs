@@ -73,7 +73,9 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public DeviceBuffer TextureDataBuffer { get; private set; }
 
-        public ResourceLayout SharedLayout { get; private set; }
+        private ResourceLayout _sharedLayout;
+
+        public ResourceSet SharedResourceSet { get; private set; }
 
         public ResourceLayout TextureLayout { get; private set; }
 
@@ -97,7 +99,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
             TextureDataBuffer = factory.CreateBuffer(new BufferDescription((uint)Marshal.SizeOf<StudioTextureData>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
 
-            SharedLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+            _sharedLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("View", ResourceKind.UniformBuffer, ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("WorldAndInverse", ResourceKind.UniformBuffer, ShaderStages.Vertex),
@@ -127,13 +129,25 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                     for (var additiveMode = AdditiveDisabled; additiveMode < AdditiveModeCount; ++additiveMode)
                     {
                         _pipelines[cullMode, maskMode, additiveMode] = CreatePipelines(
-                            gd, sc, vertexLayouts, SharedLayout, TextureLayout, factory,
+                            gd, sc, vertexLayouts, _sharedLayout, TextureLayout, factory,
                             cullMode == CullBack,
                             maskMode == MaskEnabled,
                             additiveMode == AdditiveEnabled);
                     }
                 }
             }
+
+            SharedResourceSet = factory.CreateResourceSet(new ResourceSetDescription(
+                _sharedLayout,
+                sc.ProjectionMatrixBuffer,
+                sc.ViewMatrixBuffer,
+                sc.WorldAndInverseBuffer,
+                BonesBuffer,
+                RenderArgumentsBuffer,
+                TextureDataBuffer,
+                sc.MainSampler,
+                sc.LightingInfoBuffer
+                ));
         }
 
         private static RenderModePipelines CreatePipelines(
@@ -601,7 +615,7 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                     var pipeline = pipelines[renderData.Shared.RenderMode];
 
                     cl.SetPipeline(pipeline);
-                    cl.SetGraphicsResourceSet(0, modelResource.SharedResourceSet);
+                    cl.SetGraphicsResourceSet(0, SharedResourceSet);
                     //TODO: consider possibility that there are no skins at all?
                     cl.SetGraphicsResourceSet(1, modelResource.Textures[textureIndex]);
 

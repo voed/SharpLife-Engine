@@ -32,8 +32,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
 
         public StudioModel StudioModel { get; }
 
-        public ResourceSet SharedResourceSet { get; set; }
-
         public DeviceBuffer VertexBuffer { get; set; }
         public DeviceBuffer IndexBuffer { get; set; }
 
@@ -77,19 +75,6 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             IndexBuffer = disposeFactory.CreateBuffer(new BufferDescription(indicesArray.SizeInBytes(), BufferUsage.IndexBuffer));
 
             gd.UpdateBuffer(IndexBuffer, 0, indicesArray);
-
-            //TODO: we can create this once in the renderer itself
-            SharedResourceSet = disposeFactory.CreateResourceSet(new ResourceSetDescription(
-                sc.ModelRenderer.StudioRenderer.SharedLayout,
-                sc.ProjectionMatrixBuffer,
-                sc.ViewMatrixBuffer,
-                sc.WorldAndInverseBuffer,
-                sc.ModelRenderer.StudioRenderer.BonesBuffer,
-                sc.ModelRenderer.StudioRenderer.RenderArgumentsBuffer,
-                sc.ModelRenderer.StudioRenderer.TextureDataBuffer,
-                sc.MainSampler,
-                sc.LightingInfoBuffer
-                ));
 
             var uploadedTextures = StudioResourceUtils.CreateTextures(StudioModel.Name, StudioModel.StudioFile, gd, sc.TextureLoader, sc.MapResourceCache);
 
