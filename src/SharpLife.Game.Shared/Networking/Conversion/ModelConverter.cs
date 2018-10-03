@@ -56,12 +56,12 @@ namespace SharpLife.Game.Shared.Networking.Conversion
             return !value.Equals(previousValue);
         }
 
-        public void Write(object value, CodedOutputStream stream)
+        public void Write(object value, object previousValue, CodedOutputStream stream)
         {
             Int32Converter.Instance.Write(((ModelIndex)value).Index, stream);
         }
 
-        public bool Read(CodedInputStream stream, out object result)
+        public bool Read(CodedInputStream stream, object previousValue, out object result)
         {
             var readResult = Int32Converter.Instance.Read(stream, out int resultValue);
 

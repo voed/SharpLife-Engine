@@ -37,7 +37,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             return !value.Equals(previousValue);
         }
 
-        public override void Write(object value, CodedOutputStream stream)
+        public override void Write(object value, object previousValue, CodedOutputStream stream)
         {
             ConversionUtils.AddChangedValue(stream);
 
@@ -49,7 +49,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             }
         }
 
-        public override bool Read(CodedInputStream stream, out object result)
+        public override bool Read(CodedInputStream stream, object previousValue, out object result)
         {
             var changed = stream.ReadBool();
 

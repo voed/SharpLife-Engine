@@ -34,7 +34,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             return !value.Equals(previousValue);
         }
 
-        public override void Write(object value, CodedOutputStream stream)
+        public override void Write(object value, object previousValue, CodedOutputStream stream)
         {
             var vector = (Vector3)value;
 
@@ -43,7 +43,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             FloatConverter.Instance.Write(vector.Z, stream);
         }
 
-        public override bool Read(CodedInputStream stream, out object result)
+        public override bool Read(CodedInputStream stream, object previousValue, out object result)
         {
             var xDiff = FloatConverter.Instance.Read(stream, out float x);
             var yDiff = FloatConverter.Instance.Read(stream, out float y);

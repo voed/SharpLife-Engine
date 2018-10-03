@@ -35,8 +35,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
 
         public abstract bool Changed(object value, object previousValue);
 
-        public abstract void Write(object value, CodedOutputStream stream);
+        public abstract void Write(object value, object previousValue, CodedOutputStream stream);
 
-        public abstract bool Read(CodedInputStream stream, out object result);
+        public abstract bool Read(CodedInputStream stream, object previousValue, out object result);
     }
 }

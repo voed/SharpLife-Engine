@@ -61,16 +61,18 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
         /// Write a value to the stream
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="previousValue"></param>
         /// <param name="stream"></param>
         /// <returns></returns>
-        void Write(object value, CodedOutputStream stream);
+        void Write(object value, object previousValue, CodedOutputStream stream);
 
         /// <summary>
         /// Reads a value from the stream
         /// </summary>
         /// <param name="stream"></param>
+        /// <param name="previousValue"></param>
         /// <param name="result"></param>
         /// <returns>Whether the stream contained a value or not</returns>
-        bool Read(CodedInputStream stream, out object result);
+        bool Read(CodedInputStream stream, object previousValue, out object result);
     }
 }

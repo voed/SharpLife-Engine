@@ -31,7 +31,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             stream.WriteFloat((float)value);
         }
 
-        public override void Write(object value, CodedOutputStream stream)
+        public override void Write(object value, object previousValue, CodedOutputStream stream)
         {
             Write((float)value, stream);
         }
@@ -52,7 +52,7 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData.
             return changed;
         }
 
-        public override bool Read(CodedInputStream stream, out object result)
+        public override bool Read(CodedInputStream stream, object previousValue, out object result)
         {
             var changed = Read(stream, out var floatValue);
 
