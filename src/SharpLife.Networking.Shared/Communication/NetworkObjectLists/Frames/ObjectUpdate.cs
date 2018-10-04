@@ -85,6 +85,11 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
 
                 if (member.ChangeNotificationIndex.HasValue ? networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value] : member.Converter.Changed(Snapshot[i].Value, previousSnapshot[i].Value))
                 {
+                    if (member.ChangeNotificationIndex.HasValue)
+                    {
+                        networkObject.ChangeNotifications[member.ChangeNotificationIndex.Value] = false;
+                    }
+
                     member.Converter.Write(Snapshot[i].Value, previousSnapshot[i].Value, member.ConverterOptions, stream);
 
                     changes = true;
