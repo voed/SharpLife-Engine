@@ -123,6 +123,8 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes
             {
                 if (ImGui.CollapsingHeader(_label, TreeNodeFlags.NoTreePushOnOpen))
                 {
+                    _currentValue = objectAccessor[_info.Name];
+
                     UpdateCurrentValue();
 
                     var value = _currentValue;
