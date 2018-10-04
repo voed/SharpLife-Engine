@@ -56,6 +56,8 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes.Vector3DisplayFormats
 
         public unsafe void Display(object editObject, ObjectAccessor objectAccessor)
         {
+            //TODO: use InputFloat3 when it's fixed
+
             var pVector = (float*)Unsafe.AsPointer(ref _value);
 
             var changed = false;

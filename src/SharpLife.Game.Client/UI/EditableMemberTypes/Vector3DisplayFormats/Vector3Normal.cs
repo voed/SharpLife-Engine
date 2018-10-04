@@ -18,13 +18,12 @@ using ImGuiNET;
 using System;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace SharpLife.Game.Client.UI.EditableMemberTypes.Vector3DisplayFormats
 {
     public sealed class Vector3Normal : IVector3Display
     {
-        private readonly string[] _labels;
+        private readonly string _label;
 
         private readonly MemberInfo _info;
 
@@ -32,11 +31,7 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes.Vector3DisplayFormats
 
         public Vector3Normal(int index, object editObject, MemberInfo info, Type type, ObjectAccessor objectAccessor)
         {
-            _labels = new string[] {
-                $"{index}: {info.Name}.X",
-                $"{index}: {info.Name}.Y",
-                $"{index}: {info.Name}.Z"
-            };
+            _label = $"{index}: {info.Name}";
 
             _info = info;
 
@@ -47,21 +42,9 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes.Vector3DisplayFormats
         {
         }
 
-        public unsafe void Display(object editObject, ObjectAccessor objectAccessor)
+        public void Display(object editObject, ObjectAccessor objectAccessor)
         {
-            var pVector = (float*)Unsafe.AsPointer(ref _value);
-
-            var changed = false;
-
-            for (var i = 0; i < 3; ++i)
-            {
-                if (ImGui.SliderFloat(_labels[i], ref pVector[i], -1, 1, "%.3f", 1))
-                {
-                    changed = true;
-                }
-            }
-
-            if (changed)
+            if (ImGui.SliderVector3(_label, ref _value, -1, 1, "%.3f", 1))
             {
                 objectAccessor[_info.Name] = _value;
             }

@@ -46,6 +46,7 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes
 
         public void Display(object editObject, ObjectAccessor objectAccessor)
         {
+            //TODO: detect Flags type enums and provide a bit vector editor
             if (ImGui.BeginCombo(_label, _value, ComboFlags.HeightRegular))
             {
                 foreach (var enumValue in _type.GetEnumNames())
