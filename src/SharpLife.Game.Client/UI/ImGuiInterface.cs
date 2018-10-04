@@ -94,7 +94,8 @@ namespace SharpLife.Game.Client.UI
             { typeof(int), (index, editObject, info, type, objectAccessor) => new EditableInt32(index, editObject, info,type, objectAccessor) },
             { typeof(uint), (index, editObject, info,type, objectAccessor) => new EditableUInt32(index, editObject, info,type, objectAccessor) },
             { typeof(float), (index, editObject, info, type,objectAccessor) => new EditableFloat(index, editObject, info,type, objectAccessor) },
-            { typeof(string), (index, editObject, info, type,objectAccessor) => new EditableString(index, editObject, info,type, objectAccessor) }
+            { typeof(string), (index, editObject, info, type,objectAccessor) => new EditableString(index, editObject, info,type, objectAccessor) },
+            { typeof(Vector3), (index, editObject, info, type,objectAccessor) => new EditableVector3(index, editObject, info,type, objectAccessor) }
         };
 
         private ObjectHandle _editObjectHandle;
