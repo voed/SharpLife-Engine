@@ -105,7 +105,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists.Frames
             {
                 var data = update.Serialize(objectList.InternalGetNetworkObjectById(update.ObjectHandle.Id), previousFrame?.FindUpdateByObjectId(update.ObjectHandle.Id));
 
-                if (data.ContainsChanges)
+                //TODO: figure out if there's a better way to handle change detection during serialization
+                //if (data.ContainsChanges)
                 {
                     data.Memory.Position = 0;
                     updateList.Add(data.Memory);
