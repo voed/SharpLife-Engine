@@ -46,6 +46,7 @@ namespace SharpLife.Game.Shared.Entities
         public Vector3 Origin { get; set; }
 
         [Networked]
+        [ObjectEditorVector3(DisplayFormat = Vector3DisplayFormat.AnglesDegrees)]
         public Vector3 Angles { get; set; }
 
         [Networked]

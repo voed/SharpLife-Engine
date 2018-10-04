@@ -31,6 +31,15 @@ namespace SharpLife.Utility.Mathematics
                 );
         }
 
+        public static Vector3 ToDegrees(in Vector3 anglesInRadians)
+        {
+            return new Vector3(
+                MathUtils.ToDegrees(anglesInRadians.X),
+                MathUtils.ToDegrees(anglesInRadians.Y),
+                MathUtils.ToDegrees(anglesInRadians.Z)
+                );
+        }
+
         /// <summary>
         /// Converts a directional vector to angles
         /// </summary>

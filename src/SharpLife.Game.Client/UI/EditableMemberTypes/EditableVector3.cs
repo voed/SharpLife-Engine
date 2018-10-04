@@ -47,6 +47,14 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes
                     _display = new Vector3Normal(index, editObject, info, type, objectAccessor);
                     break;
 
+                case Vector3DisplayFormat.AnglesDegrees:
+                    _display = new Vector3AnglesDegrees(index, editObject, info, type, objectAccessor);
+                    break;
+
+                case Vector3DisplayFormat.AnglesRadians:
+                    _display = new Vector3AnglesRadians(index, editObject, info, type, objectAccessor);
+                    break;
+
                 default: throw new InvalidOperationException("Unknown Vector3 display format");
             }
         }

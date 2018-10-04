@@ -39,5 +39,15 @@ namespace SharpLife.Game.Shared.UI.EditableMemberTypes
         /// Display as a normal vector (unit vector constrained to [-1, 1])
         /// </summary>
         Normal,
+
+        /// <summary>
+        /// Display as angles in degrees with values in degrees
+        /// </summary>
+        AnglesDegrees,
+
+        /// <summary>
+        /// Display as angles in degrees with values in radians
+        /// </summary>
+        AnglesRadians,
     }
 }
