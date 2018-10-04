@@ -26,8 +26,18 @@ namespace SharpLife.Game.Shared.UI.EditableMemberTypes
         Floats = 0,
 
         /// <summary>
-        /// Display as a 24 bit color value ([0, 255])
+        /// Display as a 24 bit color value (values in range [0, 255])
         /// </summary>
         Color24,
+
+        /// <summary>
+        /// Display as a 24 bit color value (values in range [0, 1])
+        /// </summary>
+        ColorFloat,
+
+        /// <summary>
+        /// Display as a normal vector (unit vector constrained to [-1, 1])
+        /// </summary>
+        Normal,
     }
 }

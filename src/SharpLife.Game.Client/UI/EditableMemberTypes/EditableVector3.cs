@@ -36,7 +36,15 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes
                     break;
 
                 case Vector3DisplayFormat.Color24:
-                    _display = new Vector3Color24(index, editObject, info, type, objectAccessor);
+                    _display = new Vector3Color24(index, editObject, info, type, objectAccessor, true);
+                    break;
+
+                case Vector3DisplayFormat.ColorFloat:
+                    _display = new Vector3Color24(index, editObject, info, type, objectAccessor, false);
+                    break;
+
+                case Vector3DisplayFormat.Normal:
+                    _display = new Vector3Normal(index, editObject, info, type, objectAccessor);
                     break;
 
                 default: throw new InvalidOperationException("Unknown Vector3 display format");

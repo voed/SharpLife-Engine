@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.Game.Shared.Entities.MetaData;
+using SharpLife.Game.Shared.UI.EditableMemberTypes;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using SharpLife.Utility.Mathematics;
 using System;
@@ -26,9 +27,11 @@ namespace SharpLife.Game.Server.Entities.Lighting
     public class LightEnvironment : Light
     {
         [Networked]
+        [ObjectEditorVector3(DisplayFormat = Vector3DisplayFormat.Color24)]
         public Vector3 SkyColor { get; set; }
 
         [Networked]
+        [ObjectEditorVector3(DisplayFormat = Vector3DisplayFormat.Normal)]
         public Vector3 SkyNormal { get; set; }
 
         public override bool KeyValue(string key, string value)

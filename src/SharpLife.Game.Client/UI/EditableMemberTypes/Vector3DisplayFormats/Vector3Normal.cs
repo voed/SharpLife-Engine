@@ -18,53 +18,52 @@ using ImGuiNET;
 using System;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace SharpLife.Game.Client.UI.EditableMemberTypes.Vector3DisplayFormats
 {
-    public sealed class Vector3Color24 : IVector3Display
+    public sealed class Vector3Normal : IVector3Display
     {
-        private readonly string _label;
+        private readonly string[] _labels;
 
         private readonly MemberInfo _info;
 
-        private readonly bool _scaleRange;
-
         private Vector3 _value;
 
-        public Vector3Color24(int index, object editObject, MemberInfo info, Type type, ObjectAccessor objectAccessor, bool scaleRange)
+        public Vector3Normal(int index, object editObject, MemberInfo info, Type type, ObjectAccessor objectAccessor)
         {
-            _label = $"{index}: {info.Name}";
+            _labels = new string[] {
+                $"{index}: {info.Name}.X",
+                $"{index}: {info.Name}.Y",
+                $"{index}: {info.Name}.Z"
+            };
 
             _info = info;
 
-            _scaleRange = scaleRange;
-
             _value = (Vector3)objectAccessor[info.Name];
-
-            //Rescale to [0, 1] range
-            if (_scaleRange)
-            {
-                _value /= 255.0f;
-            }
         }
 
         public void Initialize(int index, object editObject, MemberInfo info, ObjectAccessor objectAccessor)
         {
         }
 
-        public void Display(object editObject, ObjectAccessor objectAccessor)
+        public unsafe void Display(object editObject, ObjectAccessor objectAccessor)
         {
-            if (ImGui.ColorEdit3(_label, ref _value, ColorEditFlags.Default | ColorEditFlags.Uint8))
+            var pVector = (float*)Unsafe.AsPointer(ref _value);
+
+            var changed = false;
+
+            for (var i = 0; i < 3; ++i)
             {
-                var newValue = _value;
-
-                //Rescale to [0, 255] range
-                if (_scaleRange)
+                if (ImGui.SliderFloat(_labels[i], ref pVector[i], -1, 1, "%.3f", 1))
                 {
-                    newValue *= 255.0f;
+                    changed = true;
                 }
+            }
 
-                objectAccessor[_info.Name] = newValue;
+            if (changed)
+            {
+                objectAccessor[_info.Name] = _value;
             }
         }
     }
