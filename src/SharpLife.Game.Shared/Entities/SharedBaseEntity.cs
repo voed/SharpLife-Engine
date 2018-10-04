@@ -15,6 +15,7 @@
 
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Models;
+using SharpLife.Game.Shared.UI.EditableMemberTypes;
 using SharpLife.Models;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
@@ -60,6 +61,7 @@ namespace SharpLife.Game.Shared.Entities
         public int RenderAmount { get; set; }
 
         [Networked]
+        [ObjectEditorVector3(DisplayFormat = Vector3DisplayFormat.Color24)]
         public Vector3 RenderColor { get; set; }
 
         [Networked]
