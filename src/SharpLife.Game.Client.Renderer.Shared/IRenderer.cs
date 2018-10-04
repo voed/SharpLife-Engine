@@ -13,14 +13,13 @@
 *
 ****/
 
-using SixLabors.ImageSharp.PixelFormats;
 using System.Numerics;
 
 namespace SharpLife.Game.Client.Renderer.Shared
 {
     public interface IRenderer
     {
-        Rgb24 SkyColor { get; set; }
+        Vector3 SkyColor { get; set; }
 
         Vector3 SkyNormal { get; set; }
     }

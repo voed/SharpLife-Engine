@@ -23,7 +23,6 @@ using SharpLife.Models.BSP.Rendering;
 using SharpLife.Renderer;
 using SharpLife.Utility;
 using SharpLife.Utility.Mathematics;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,7 +66,7 @@ namespace SharpLife.Game.Client.Renderer.Shared
 
         public LightStyles LightStyles { get; } = new LightStyles();
 
-        public Rgb24 SkyColor { get; set; }
+        public Vector3 SkyColor { get; set; }
 
         public Vector3 SkyNormal { get; set; }
 

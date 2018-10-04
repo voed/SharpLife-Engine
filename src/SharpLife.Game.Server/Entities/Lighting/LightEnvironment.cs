@@ -67,7 +67,7 @@ namespace SharpLife.Game.Server.Entities.Lighting
                 g = (int)(Math.Pow(g / 114.0, 0.6) * 264);
                 b = (int)(Math.Pow(b / 114.0, 0.6) * 264);
 
-                SkyColor = new Vector3(r / 255.0f, g / 255.0f, b / 255.0f);
+                SkyColor = new Vector3(r, g, b);
 
                 return true;
             }

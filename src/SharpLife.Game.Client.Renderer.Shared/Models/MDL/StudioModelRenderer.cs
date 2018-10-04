@@ -24,7 +24,6 @@ using SharpLife.Models.MDL;
 using SharpLife.Models.MDL.FileFormat;
 using SharpLife.Models.MDL.Rendering;
 using SharpLife.Renderer.Utility;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -285,13 +284,13 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 renderData.Shared.Origin.Y,
                 renderData.Shared.Origin.Z - (invertLightSource ? 8 : -8));
 
-            var color = new Rgb24();
+            var color = new Vector3();
 
             var useSkyColor = false;
 
             var skyColor = sc.Scene.SkyColor;
 
-            if ((skyColor.R + skyColor.G + skyColor.B) != 0)
+            if ((skyColor.X + skyColor.Y + skyColor.Z) != 0)
             {
                 var end = renderData.Shared.Origin - (sc.Scene.SkyNormal * 8192.0f);
 
@@ -311,7 +310,11 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
             {
                 var upend = uporigin + (light * 2048.0f);
 
-                color = sc.LightFromTrace(uporigin, upend);
+                var lightColor = sc.LightFromTrace(uporigin, upend);
+
+                color.X = lightColor.R;
+                color.Y = lightColor.G;
+                color.Z = lightColor.B;
 
                 uporigin.X -= 16.0f;
                 uporigin.Y -= 16.0f;
@@ -351,20 +354,21 @@ namespace SharpLife.Game.Client.Renderer.Shared.Models.MDL
                 if (renderData.RenderFXLightMultiplier != 10)
                 {
                     var lightMultiplier = (int)(renderData.RenderFXLightMultiplier / 10.0);
-                    color.R = (byte)(color.R * lightMultiplier);
-                    color.G = (byte)(color.G * lightMultiplier);
-                    color.B = (byte)(color.B * lightMultiplier);
+
+                    color.X *= lightMultiplier;
+                    color.Y *= lightMultiplier;
+                    color.Z *= lightMultiplier;
                 }
             }
 
             //TODO: figure out how to store this off
             //currententity->cvFloorColor = color;
 
-            var red = (float)color.R;
-            var green = (float)color.G;
-            var blue = (float)color.B;
+            var red = color.X;
+            var green = color.Y;
+            var blue = color.Z;
 
-            var brightestComponent = Math.Max(color.R, Math.Max(color.G, color.B));
+            var brightestComponent = Math.Max(color.X, Math.Max(color.Y, color.Z));
 
             var floor = brightestComponent != 0 ? brightestComponent : 1.0f;
 

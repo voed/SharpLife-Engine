@@ -15,7 +15,6 @@
 
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
-using SharpLife.Utility;
 using System.Numerics;
 
 namespace SharpLife.Game.Client.Entities.Lighting
@@ -35,9 +34,9 @@ namespace SharpLife.Game.Client.Entities.Lighting
             base.OnEndUpdate();
 
             //Update sky values if they have changed
-            if (SkyColor != ColorUtils.ToVector3(Context.Renderer.SkyColor))
+            if (SkyColor != Context.Renderer.SkyColor)
             {
-                Context.Renderer.SkyColor = ColorUtils.ToRgb24(SkyColor);
+                Context.Renderer.SkyColor = SkyColor;
             }
 
             if (SkyNormal != Context.Renderer.SkyNormal)
