@@ -91,6 +91,7 @@ namespace SharpLife.Game.Client.UI
 
         private readonly IReadOnlyDictionary<Type, EditableMemberFactory> _editableMemberTypes = new Dictionary<Type, EditableMemberFactory>
         {
+            { typeof(bool), (index, editObject, info, type, objectAccessor) => new EditableBoolean(index, editObject, info,type, objectAccessor) },
             { typeof(int), (index, editObject, info, type, objectAccessor) => new EditableInt32(index, editObject, info,type, objectAccessor) },
             { typeof(uint), (index, editObject, info,type, objectAccessor) => new EditableUInt32(index, editObject, info,type, objectAccessor) },
             { typeof(float), (index, editObject, info, type,objectAccessor) => new EditableFloat(index, editObject, info,type, objectAccessor) },
