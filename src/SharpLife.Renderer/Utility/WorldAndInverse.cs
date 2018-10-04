@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Utility.Mathematics;
 using System.Numerics;
 using Veldrid.Utilities;
 
@@ -41,7 +42,10 @@ namespace SharpLife.Renderer.Utility
         public static Matrix4x4 CreateRotationMatrix(in Vector3 angles)
         {
             //TODO: verify that the angles are correctly used here
-            return Matrix4x4.CreateFromYawPitchRoll(angles.X, angles.Z, angles.Y);
+            return Matrix4x4.CreateFromYawPitchRoll(
+                MathUtils.ToRadians(angles.X),
+                MathUtils.ToRadians(angles.Z),
+                MathUtils.ToRadians(angles.Y));
         }
     }
 }
