@@ -23,6 +23,7 @@ using SharpLife.Engine.Shared.Logging;
 using SharpLife.Game.Client.API;
 using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Client.UI.EditableMemberTypes;
+using SharpLife.Game.Shared.UI.EditableMemberTypes;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 using SharpLife.Renderer.Utility;
 using SharpLife.Utility;
@@ -47,6 +48,8 @@ namespace SharpLife.Game.Client.UI
             Yes,
             ApplyScroll
         }
+
+        private const bool DefaultObjectEditorMemberVisibility = true;
 
         private readonly FrameTimeAverager _fta = new FrameTimeAverager(0.666);
 
@@ -381,6 +384,8 @@ namespace SharpLife.Game.Client.UI
             {
                 _editObjectAccessor = ObjectAccessor.Create(editObject);
 
+                var defaultVisibility = editObject.GetType().GetCustomAttribute<ObjectEditorVisibleAttribute>()?.Visible ?? DefaultObjectEditorMemberVisibility;
+
                 var index = 0;
 
                 foreach (var info in editObject.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance))
@@ -389,26 +394,31 @@ namespace SharpLife.Game.Client.UI
 
                     if (memberType != null && isWritable)
                     {
-                        EditableMemberFactory factory = null;
+                        var visible = info.GetCustomAttribute<ObjectEditorVisibleAttribute>()?.Visible ?? defaultVisibility;
 
-                        if (memberType.IsEnum)
+                        if (visible)
                         {
-                            factory = _enumEditableMemberTypeFactory;
-                        }
-                        else
-                        {
-                            _editableMemberTypes.TryGetValue(memberType, out factory);
-                        }
+                            EditableMemberFactory factory = null;
 
-                        if (factory != null)
-                        {
-                            var editableMember = factory(index, editObject, info, memberType, _editObjectAccessor);
-                            editableMember.Initialize(index, editObject, info, _editObjectAccessor);
+                            if (memberType.IsEnum)
+                            {
+                                factory = _enumEditableMemberTypeFactory;
+                            }
+                            else
+                            {
+                                _editableMemberTypes.TryGetValue(memberType, out factory);
+                            }
 
-                            _currentEditableMembers.Add(editableMember);
+                            if (factory != null)
+                            {
+                                var editableMember = factory(index, editObject, info, memberType, _editObjectAccessor);
+                                editableMember.Initialize(index, editObject, info, _editObjectAccessor);
+
+                                _currentEditableMembers.Add(editableMember);
+                            }
+
+                            ++index;
                         }
-
-                        ++index;
                     }
                 }
             }

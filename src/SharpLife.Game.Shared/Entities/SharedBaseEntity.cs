@@ -27,6 +27,7 @@ namespace SharpLife.Game.Shared.Entities
     /// Base class shared between client and server
     /// </summary>
     [Networkable]
+    [ObjectEditorVisible(Visible = true)]
     public abstract class SharedBaseEntity : IEntity
     {
         public ObjectHandle Handle { get; set; }
@@ -92,6 +93,7 @@ namespace SharpLife.Game.Shared.Entities
         /// <summary>
         /// Convenience for checking and setting if an entity has been marked as needing destruction
         /// </summary>
+        [ObjectEditorVisible(Visible = false)]
         public bool PendingDestruction
         {
             get => (Flags & EntityFlags.PendingDestruction) != 0;
