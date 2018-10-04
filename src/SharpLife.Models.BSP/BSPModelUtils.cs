@@ -137,26 +137,23 @@ namespace SharpLife.Models.BSP
 
             foreach (var surface in node.Faces)
             {
-                if ((surface.Flags & FaceFlags.Tiled) == 0)
+                var xPos = (int)(Vector3.Dot(surface.TextureInfo.SNormal, mid) + surface.TextureInfo.SValue);
+
+                if (xPos >= surface.TextureMins[0])
                 {
-                    var xPos = (int)(Vector3.Dot(surface.TextureInfo.SNormal, mid) + surface.TextureInfo.SValue);
+                    var yPos = (int)(Vector3.Dot(surface.TextureInfo.TNormal, mid) + surface.TextureInfo.TValue);
 
-                    if (xPos >= surface.TextureMins[0])
+                    if (yPos >= surface.TextureMins[1])
                     {
-                        var yPos = (int)(Vector3.Dot(surface.TextureInfo.TNormal, mid) + surface.TextureInfo.TValue);
+                        var width = xPos - surface.TextureMins[0];
 
-                        if (yPos >= surface.TextureMins[1])
+                        if (width <= surface.Extents[0])
                         {
-                            var width = xPos - surface.TextureMins[0];
+                            var height = yPos - surface.TextureMins[1];
 
-                            if (width <= surface.Extents[0])
+                            if (height <= surface.Extents[1])
                             {
-                                var height = yPos - surface.TextureMins[1];
-
-                                if (height <= surface.Extents[1])
-                                {
-                                    return surface;
-                                }
+                                return surface;
                             }
                         }
                     }
