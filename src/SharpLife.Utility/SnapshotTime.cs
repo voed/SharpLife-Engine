@@ -17,23 +17,14 @@ using System;
 
 namespace SharpLife.Utility
 {
-    /// <summary>
-    /// Provides a means to query time
-    /// </summary>
-    public interface ITime
+    public sealed class SnapshotTime : ITime
     {
-        TimeSpan Elapsed { get; }
+        public TimeSpan Elapsed => TimeSpan.FromMilliseconds(ElapsedTime * 1000.0);
 
-        long ElapsedMilliseconds { get; }
+        public long ElapsedMilliseconds => (long)(ElapsedTime * 1000.0);
 
-        /// <summary>
-        /// Time in seconds
-        /// </summary>
-        double ElapsedTime { get; }
+        public double ElapsedTime { get; set; }
 
-        /// <summary>
-        /// Time between the previous and current frame
-        /// </summary>
-        double FrameTime { get; }
+        public double FrameTime { get; set; }
     }
 }

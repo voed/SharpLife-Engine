@@ -74,7 +74,9 @@ namespace SharpLife.Engine.Engines
 
         public IUserInterface UserInterface { get; private set; }
 
-        private StopwatchTime EngineTime { get; } = new StopwatchTime();
+        private readonly Stopwatch _engineTimeStopwatch = new Stopwatch();
+
+        private SnapshotTime EngineTime { get; } = new SnapshotTime();
 
         ITime IEngine.EngineTime => EngineTime;
 
@@ -151,20 +153,28 @@ namespace SharpLife.Engine.Engines
 
             Initialize(GameDirectory, hostType);
 
-            long previousFrameTicks = 0;
+            double previousFrameSeconds = 0;
 
             while (!_exiting)
             {
-                var currentFrameTicks = EngineTime.ElapsedTicks;
-                double deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
+                var currentFrameSeconds = _engineTimeStopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+                double deltaSeconds = currentFrameSeconds - previousFrameSeconds;
 
                 while (deltaSeconds < _desiredFrameLengthSeconds)
                 {
-                    currentFrameTicks = EngineTime.ElapsedTicks;
-                    deltaSeconds = (currentFrameTicks - previousFrameTicks) / (double)Stopwatch.Frequency;
+                    currentFrameSeconds = _engineTimeStopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+                    deltaSeconds = currentFrameSeconds - previousFrameSeconds;
                 }
 
-                previousFrameTicks = currentFrameTicks;
+                //TODO: need to provide a way to query real time
+                //TODO: need to properly handle frame time calculation
+                //TODO: engine time is advanced after physics in the original engine
+                EngineTime.FrameTime = currentFrameSeconds - previousFrameSeconds;
+
+                //Engine time is relative, so advance by frame time
+                EngineTime.ElapsedTime += EngineTime.FrameTime;
+
+                previousFrameSeconds = currentFrameSeconds;
 
                 UserInterface?.SleepUntilInput(0);
 
@@ -259,7 +269,7 @@ namespace SharpLife.Engine.Engines
 
         private void Initialize(string gameDirectory, HostType hostType)
         {
-            EngineTime.Start();
+            _engineTimeStopwatch.Start();
 
             EventUtils.RegisterEvents(EventSystem, new EngineEvents());
 
@@ -400,6 +410,11 @@ namespace SharpLife.Engine.Engines
             _server.Stop();
 
             EventSystem.DispatchEvent(EngineEvents.EngineStartingServer);
+
+            //Reset time
+            //TODO: define constant for initial time
+            EngineTime.ElapsedTime = 1;
+            EngineTime.FrameTime = 0;
 
             const ServerStartFlags flags = ServerStartFlags.None;
 
