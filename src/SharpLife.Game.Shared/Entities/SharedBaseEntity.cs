@@ -119,6 +119,16 @@ namespace SharpLife.Game.Shared.Entities
             Networked = networked;
         }
 
+        public virtual void OnConstruct()
+        {
+            //Nothing
+        }
+
+        public virtual void OnDestruct()
+        {
+            //Nothing
+        }
+
         /// <summary>
         /// Called whenever the model changes
         /// </summary>

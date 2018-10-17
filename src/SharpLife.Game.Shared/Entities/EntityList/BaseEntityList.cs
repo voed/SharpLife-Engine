@@ -192,9 +192,13 @@ namespace SharpLife.Game.Shared.Entities.EntityList
             entry.Entity = instance;
             entry.SerialNumber = (ushort)handle.SerialNumber;
 
+            instance.Handle = handle;
+
             //It is not an error to not set the classname here, the caller is responsible for it
 
             OnEntityCreated(entry);
+
+            instance.OnConstruct();
 
             ++EntityCount;
 
@@ -229,38 +233,23 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
             try
             {
-                var instance = (IEntity)Activator.CreateInstance(metaData.Type);
-
-                var entry = _entities[index];
-
-                if (entry.Valid)
-                {
-                    throw new InvalidOperationException($"Entity index {index} already has an entity associated with it");
-                }
-
-                entry.Entity = (TBaseEntity)instance;
-                //The serial number is not incremented on creation because no valid handles can exist for it at this time
-                //++entry.serialNumber;
-
-                instance.Handle = new ObjectHandle(index, entry.SerialNumber);
+                var instance = (TBaseEntity)Activator.CreateInstance(metaData.Type);
 
                 instance.ClassName = metaData.Name;
 
-                OnEntityCreated(entry);
+                var entry = _entities[index];
 
-                ++EntityCount;
+                //The serial number is not incremented on creation because no valid handles can exist for it at this time
+                //++entry.serialNumber;
 
-                if (index > HighestIndex)
-                {
-                    HighestIndex = index;
-                }
+                InternalAddEntityToList(new ObjectHandle(index, entry.SerialNumber), instance);
 
-                return entry.Entity;
+                return instance;
             }
             catch (MissingMethodException e)
             {
                 //This is already handled in EntityDictionary, but in the event that it somehow doesn't get caught there (e.g. custom metadata) it'll still be handled
-                //This shouldn't be a EntityInstantiationException because it's a programmer error and should be immediately visible
+                //This shouldn't be an EntityInstantiationException because it's a programmer error and should be immediately visible
                 throw new InvalidOperationException($"Entity class \"{metaData.Name}\" does not have a parameterless constructor", e);
             }
         }
@@ -286,6 +275,8 @@ namespace SharpLife.Game.Shared.Entities.EntityList
         private void InternalDestroyEntity(int id, bool updateHighestIndex)
         {
             var entry = _entities[id];
+
+            entry.Entity.OnDestruct();
 
             OnEntityDestroyed(entry);
 

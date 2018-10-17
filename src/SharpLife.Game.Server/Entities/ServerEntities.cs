@@ -45,11 +45,16 @@ namespace SharpLife.Game.Server.Entities
 
         private readonly GameServer _gameServer;
 
-        private ServerEntityList _entityList;
+        public ServerEntityList EntityList { get; private set; }
 
         private INetworkObjectList _entitiesNetworkList;
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
+
+        /// <summary>
+        /// The current world instance
+        /// </summary>
+        public World World { get; set; }
 
         public ServerEntities(ILogger logger, IServerEngine serverEngine, ITime engineTime, IEngineModels serverModels, GameServer gameServer)
         {
@@ -138,7 +143,7 @@ namespace SharpLife.Game.Server.Entities
         public void MapLoadBegin(IMapInfo mapInfo, string entityData, bool loadGame)
         {
             //TODO: the game needs a different time object that tracks game time
-            _entityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _engineTime, _serverModels, mapInfo);
+            EntityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _engineTime, _serverModels, mapInfo, this);
 
             if (loadGame)
             {
@@ -149,13 +154,13 @@ namespace SharpLife.Game.Server.Entities
                 LoadEntities(entityData);
             }
 
-            _gameServer.GameBridge.DataReceiver?.ReceiveEntityList(_entityList);
+            _gameServer.GameBridge.DataReceiver?.ReceiveEntityList(EntityList);
         }
 
         public void Deactivate()
         {
             _gameServer.GameBridge.DataReceiver?.ReceiveEntityList(null);
-            _entityList = null;
+            EntityList = null;
         }
 
         public void StartFrame()
@@ -165,7 +170,7 @@ namespace SharpLife.Game.Server.Entities
             //TODO: need to implement physics
 
             //TODO: implement this properly
-            foreach (var entity in _entityList)
+            foreach (var entity in EntityList)
             {
                 entity.Think();
             }
@@ -223,11 +228,11 @@ namespace SharpLife.Game.Server.Entities
             //The world always has index 0
             if (index == 0)
             {
-                entity = _entityList.CreateEntity(metaData, 0);
+                entity = EntityList.CreateEntity(metaData, 0);
             }
             else
             {
-                entity = _entityList.CreateEntity(metaData);
+                entity = EntityList.CreateEntity(metaData);
             }
 
             var initialized = false;
@@ -266,7 +271,7 @@ namespace SharpLife.Game.Server.Entities
                 //On failure always free the entity
                 if (!initialized || entity.PendingDestruction)
                 {
-                    _entityList.DestroyEntity(entity);
+                    EntityList.DestroyEntity(entity);
                 }
             }
         }

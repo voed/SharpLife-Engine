@@ -32,14 +32,17 @@ namespace SharpLife.Game.Server.Entities
 
         public IMapInfo MapInfo { get; }
 
+        public ServerEntities Entities { get; }
+
         public BaseEntityList<BaseEntity> EntityList { get; }
 
-        public EntityContext(IServerEngine serverEngine, ITime time, IEngineModels engineModels, IMapInfo mapInfo, BaseEntityList<BaseEntity> entityList)
+        public EntityContext(IServerEngine serverEngine, ITime time, IEngineModels engineModels, IMapInfo mapInfo, ServerEntities entities, BaseEntityList<BaseEntity> entityList)
         {
             ServerEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
             Time = time ?? throw new ArgumentNullException(nameof(time));
             EngineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
             MapInfo = mapInfo ?? throw new ArgumentNullException(nameof(mapInfo));
+            Entities = entities ?? throw new ArgumentNullException(nameof(entities));
             EntityList = entityList ?? throw new ArgumentNullException(nameof(entityList));
         }
     }

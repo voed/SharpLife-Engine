@@ -36,11 +36,12 @@ namespace SharpLife.Game.Server.Entities.EntityList
             IServerEngine serverEngine,
             ITime time,
             IEngineModels engineModels,
-            IMapInfo mapInfo)
+            IMapInfo mapInfo,
+            ServerEntities entities)
             : base(entityDictionary)
         {
             _entitiesNetworkList = entitiesNetworkList ?? throw new ArgumentNullException(nameof(entitiesNetworkList));
-            _entityContext = new EntityContext(serverEngine, time, engineModels, mapInfo, this);
+            _entityContext = new EntityContext(serverEngine, time, engineModels, mapInfo, entities, this);
         }
 
         protected override void OnEntityCreated(EntityEntry entry)

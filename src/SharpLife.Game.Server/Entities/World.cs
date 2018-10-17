@@ -21,6 +21,20 @@ namespace SharpLife.Game.Server.Entities
     [Networkable]
     public sealed class World : NetworkedEntity
     {
+        public override void OnConstruct()
+        {
+            base.OnConstruct();
+
+            Context.Entities.World = this;
+        }
+
+        public override void OnDestruct()
+        {
+            Context.Entities.World = null;
+
+            base.OnDestruct();
+        }
+
         public override void Precache()
         {
             base.Precache();
