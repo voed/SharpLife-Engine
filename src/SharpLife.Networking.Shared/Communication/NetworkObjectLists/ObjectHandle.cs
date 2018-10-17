@@ -33,6 +33,8 @@ namespace SharpLife.Networking.Shared.Communication.NetworkObjectLists
         /// </summary>
         public const ushort MaxSupportedObjects = ushort.MaxValue - 1;
 
+        public static readonly ObjectHandle Invalid = new ObjectHandle();
+
         //In a handle, the id is stored as id + 1 because 0 is the default value
         //This results in 0 becoming ushort.MaxValue, also used as the invalid id
         //This also results in invalid handles being serialized with fewer bits
