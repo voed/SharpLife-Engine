@@ -44,6 +44,9 @@ namespace SharpLife.Engine.Server.Host
 
         public IEventSystem EventSystem => _engine.EventSystem;
 
+        //TODO: make sure the client list is always valid for game code
+        public IServerClients Clients => _netServer.ClientList;
+
         public bool IsDedicatedServer => _engine.IsDedicatedServer;
 
         public bool Active { get; private set; }

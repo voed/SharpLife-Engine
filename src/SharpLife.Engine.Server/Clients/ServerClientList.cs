@@ -14,6 +14,7 @@
 ****/
 
 using SharpLife.CommandSystem.Commands;
+using SharpLife.Engine.Shared.API.Engine.Server;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,9 +27,11 @@ namespace SharpLife.Engine.Server.Clients
     /// Maintains the list of clients and provides common operations on them
     /// Enumerable enumerates all active clients
     /// </summary>
-    public sealed class ServerClientList : IEnumerable<ServerClient>
+    public sealed class ServerClientList : IEnumerable<ServerClient>, IServerClients
     {
         private readonly List<ServerClient> _clients;
+
+        public int MaxClients => _clients.Capacity;
 
         /// <summary>
         /// The number of clients on the server

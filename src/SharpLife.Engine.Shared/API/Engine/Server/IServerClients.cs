@@ -13,22 +13,18 @@
 *
 ****/
 
-using SharpLife.CommandSystem;
-using SharpLife.FileSystem;
-using SharpLife.Utility.Events;
-
 namespace SharpLife.Engine.Shared.API.Engine.Server
 {
-    public interface IServerEngine
+    public interface IServerClients
     {
-        IFileSystem FileSystem { get; }
+        /// <summary>
+        /// The maximum number of clients that can be connected at the same time
+        /// </summary>
+        int MaxClients { get; }
 
-        ICommandContext CommandContext { get; }
-
-        IEventSystem EventSystem { get; }
-
-        IServerClients Clients { get; }
-
-        bool IsDedicatedServer { get; }
+        /// <summary>
+        /// The number of clients on the server
+        /// </summary>
+        int Count { get; }
     }
 }
