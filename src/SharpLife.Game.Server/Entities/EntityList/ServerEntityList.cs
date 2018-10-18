@@ -13,14 +13,9 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.API.Engine.Server;
-using SharpLife.Engine.Shared.API.Engine.Shared;
-using SharpLife.Game.Server.API;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Game.Shared.Maps;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
-using SharpLife.Utility;
 using System;
 
 namespace SharpLife.Game.Server.Entities.EntityList
@@ -29,27 +24,22 @@ namespace SharpLife.Game.Server.Entities.EntityList
     {
         private readonly INetworkObjectList _entitiesNetworkList;
 
-        private readonly EntityContext _entityContext;
+        private readonly ServerEntities _entities;
 
         public ServerEntityList(
             EntityDictionary entityDictionary,
             int maxClients,
             INetworkObjectList entitiesNetworkList,
-            IServerEngine serverEngine,
-            ITime time,
-            IEngineModels engineModels,
-            IMapInfo mapInfo,
-            GameServer gameServer,
             ServerEntities entities)
             : base(entityDictionary, maxClients)
         {
             _entitiesNetworkList = entitiesNetworkList ?? throw new ArgumentNullException(nameof(entitiesNetworkList));
-            _entityContext = new EntityContext(serverEngine, time, engineModels, mapInfo, gameServer, entities, this);
+            _entities = entities ?? throw new ArgumentNullException(nameof(entities));
         }
 
         protected override void OnEntityCreated(EntityEntry entry)
         {
-            entry.Entity.Context = _entityContext;
+            entry.Entity.Context = _entities.Context;
 
             if (entry.Entity.Networked)
             {

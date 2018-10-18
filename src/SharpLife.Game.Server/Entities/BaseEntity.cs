@@ -57,7 +57,7 @@ namespace SharpLife.Game.Server.Entities
             {
                 _origin = value;
 
-                Context.Server.Physics.LinkEdict(this, false);
+                Context.Physics.LinkEdict(this, false);
             }
         }
 
@@ -313,7 +313,7 @@ namespace SharpLife.Game.Server.Entities
             Maxs = maxs;
             Size = maxs - mins;
 
-            Context.Server.Physics.LinkEdict(this, false);
+            Context.Physics.LinkEdict(this, false);
         }
 
         protected override void OnModelChanged(IModel oldModel, IModel newModel)

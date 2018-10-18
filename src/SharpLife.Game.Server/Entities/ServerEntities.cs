@@ -18,6 +18,7 @@ using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Game.Server.API;
 using SharpLife.Game.Server.Entities.EntityList;
+using SharpLife.Game.Server.Physics;
 using SharpLife.Game.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
@@ -50,6 +51,8 @@ namespace SharpLife.Game.Server.Entities
         private INetworkObjectList _entitiesNetworkList;
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
+
+        public EntityContext Context { get; private set; }
 
         /// <summary>
         /// The current world instance
@@ -144,23 +147,20 @@ namespace SharpLife.Game.Server.Entities
             _entitiesNetworkList = networkObjectListBuilder.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
         }
 
-        public void CreateEntityList(IMapInfo mapInfo)
+        public void CreateEntityList()
         {
-            //TODO: the game needs a different time object that tracks game time
             EntityList = new ServerEntityList(
                 EntityDictionary,
                 _serverEngine.Clients.MaxClients,
                 _entitiesNetworkList,
-                _serverEngine,
-                _engineTime,
-                _serverModels,
-                mapInfo,
-                _gameServer,
                 this);
         }
 
-        public void MapLoadBegin(IMapInfo mapInfo, string entityData, bool loadGame)
+        public void MapLoadBegin(IMapInfo mapInfo, GamePhysics gamePhysics, string entityData, bool loadGame)
         {
+            //TODO: the game needs a different time object that tracks game time
+            Context = new EntityContext(_serverEngine, _engineTime, _serverModels, mapInfo, _gameServer, this, gamePhysics, EntityList);
+
             if (loadGame)
             {
                 //TODO: load game
@@ -176,6 +176,7 @@ namespace SharpLife.Game.Server.Entities
         public void Deactivate()
         {
             _gameServer.GameBridge.DataReceiver?.ReceiveEntityList(null);
+            Context = null;
             EntityList = null;
         }
 

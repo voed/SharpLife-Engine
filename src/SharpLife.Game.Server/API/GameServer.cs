@@ -60,7 +60,7 @@ namespace SharpLife.Game.Server.API
         /// </summary>
         private readonly Random _random = new Random();
 
-        public GamePhysics Physics { get; private set; }
+        private GamePhysics _physics;
 
         private GameMovement _movement;
 
@@ -198,14 +198,13 @@ namespace SharpLife.Game.Server.API
 
         public void MapLoadContinue(bool loadGame)
         {
-            _entities.CreateEntityList(MapInfo);
+            _entities.CreateEntityList();
 
-            //TODO: need to figure out how to handle physics being created after the entity list
-            Physics = new GamePhysics(_logger, _entities, _entities.EntityList, MapInfo.Model, _engine.CommandContext);
+            _physics = new GamePhysics(_logger, _entities, _entities.EntityList, MapInfo.Model, _engine.CommandContext);
 
-            _movement = new GameMovement(_logger, _engine.EngineTime, _gameTime, _engine.Clients, _entities, _entities.EntityList, _random, Physics, _engine.CommandContext);
+            _movement = new GameMovement(_logger, _engine.EngineTime, _gameTime, _engine.Clients, _entities, _entities.EntityList, _random, _physics, _engine.CommandContext);
 
-            _entities.MapLoadBegin(MapInfo, MapInfo.Model.BSPFile.Entities, loadGame);
+            _entities.MapLoadBegin(MapInfo, _physics, MapInfo.Model.BSPFile.Entities, loadGame);
         }
 
         public void MapLoadFinished()
@@ -245,7 +244,7 @@ namespace SharpLife.Game.Server.API
 
             //Reset these so the memory referenced by them can be reclaimed
             _movement = null;
-            Physics = null;
+            _physics = null;
         }
 
         private void InternalRunFrame(double frameTime)

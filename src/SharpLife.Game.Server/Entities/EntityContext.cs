@@ -16,6 +16,7 @@
 using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
 using SharpLife.Game.Server.API;
+using SharpLife.Game.Server.Physics;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Maps;
 using SharpLife.Utility;
@@ -37,6 +38,8 @@ namespace SharpLife.Game.Server.Entities
 
         public ServerEntities Entities { get; }
 
+        public GamePhysics Physics { get; }
+
         public BaseEntityList<BaseEntity> EntityList { get; }
 
         public EntityContext(
@@ -46,6 +49,7 @@ namespace SharpLife.Game.Server.Entities
             IMapInfo mapInfo,
             GameServer gameServer,
             ServerEntities entities,
+            GamePhysics gamePhysics,
             BaseEntityList<BaseEntity> entityList)
         {
             ServerEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
@@ -54,6 +58,7 @@ namespace SharpLife.Game.Server.Entities
             MapInfo = mapInfo ?? throw new ArgumentNullException(nameof(mapInfo));
             Server = gameServer ?? throw new ArgumentNullException(nameof(gameServer));
             Entities = entities ?? throw new ArgumentNullException(nameof(entities));
+            Physics = gamePhysics ?? throw new ArgumentNullException(nameof(gamePhysics));
             EntityList = entityList ?? throw new ArgumentNullException(nameof(entityList));
         }
     }

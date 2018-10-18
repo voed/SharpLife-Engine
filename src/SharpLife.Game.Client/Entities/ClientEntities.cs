@@ -46,6 +46,8 @@ namespace SharpLife.Game.Client.Entities
 
         public EntityDictionary EntityDictionary { get; } = new EntityDictionary();
 
+        public EntityContext Context { get; private set; }
+
         public ClientEntities(IClientEngine clientEngine, ITime engineTime, IEngineModels engineModels)
         {
             _clientEngine = clientEngine ?? throw new ArgumentNullException(nameof(clientEngine));
@@ -94,11 +96,14 @@ namespace SharpLife.Game.Client.Entities
 
         public void MapLoadBegin()
         {
-            _entityList = new ClientEntityList(EntityDictionary, _clientEngine.MaxClients, _clientEngine, _engineTime, _engineModels, _renderer);
+            _entityList = new ClientEntityList(EntityDictionary, _clientEngine.MaxClients, this);
+
+            Context = new EntityContext(_clientEngine, _engineTime, _engineModels, _renderer, _entityList);
         }
 
         public void MapShutdown()
         {
+            Context = null;
             _entityList = null;
         }
 

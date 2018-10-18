@@ -13,26 +13,20 @@
 *
 ****/
 
-using SharpLife.Engine.Shared.API.Engine.Client;
-using SharpLife.Engine.Shared.API.Engine.Shared;
-using SharpLife.Game.Client.Renderer.Shared;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
-using SharpLife.Utility;
 using System;
 
 namespace SharpLife.Game.Client.Entities.EntityList
 {
     public sealed class ClientEntityList : BaseEntityList<BaseEntity>
     {
-        private readonly EntityContext _entityContext;
+        private readonly ClientEntities _entities;
 
-        public ClientEntityList(EntityDictionary entityDictionary,
-            int maxClients,
-            IClientEngine clientEngine, ITime time, IEngineModels engineModels, IRenderer renderer)
+        public ClientEntityList(EntityDictionary entityDictionary, int maxClients, ClientEntities entities)
             : base(entityDictionary, maxClients)
         {
-            _entityContext = new EntityContext(clientEngine, time, engineModels, renderer, this);
+            _entities = entities ?? throw new ArgumentNullException(nameof(entities));
         }
 
         public void AddEntityToList(BaseEntity instance)
@@ -47,7 +41,7 @@ namespace SharpLife.Game.Client.Entities.EntityList
 
         protected override void OnEntityCreated(EntityEntry entry)
         {
-            entry.Entity.Context = _entityContext;
+            entry.Entity.Context = _entities.Context;
         }
 
         protected override void OnEntityDestroyed(EntityEntry entry)
