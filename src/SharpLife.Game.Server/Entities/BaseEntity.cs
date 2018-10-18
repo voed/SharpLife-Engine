@@ -147,9 +147,72 @@ namespace SharpLife.Game.Server.Entities
             }
         }
 
-        //TODO: implement proper think logic
+        public delegate void ThinkFunction();
+
+        public delegate void TouchFunction(BaseEntity other);
+
+        public delegate void BlockedFunction(BaseEntity other);
+
+        private ThinkFunction _thinkFunction;
+
+        private TouchFunction _touchFunction;
+
+        private BlockedFunction _blockedFunction;
+
+        protected void ValidateFunction(Delegate function)
+        {
+            if (function != null && function.Target != this)
+            {
+                throw new InvalidOperationException(
+                    $"Function {function.Method.DeclaringType.FullName}.{function.Method.Name} is not a part of this class instance {GetType().FullName} ({ClassName})");
+            }
+        }
+
+        public void SetThink(ThinkFunction function)
+        {
+            ValidateFunction(function);
+
+            _thinkFunction = function;
+        }
+
+        public void SetTouch(TouchFunction function)
+        {
+            ValidateFunction(function);
+
+            _touchFunction = function;
+        }
+
+        public void SetBlocked(BlockedFunction function)
+        {
+            ValidateFunction(function);
+
+            _blockedFunction = function;
+        }
+
         public virtual void Think()
         {
+            _thinkFunction?.Invoke();
+        }
+
+        /// <summary>
+        /// Called when the engine believes two entities are about to collide.
+        /// Return 0 if you want the two entities to just pass through each other without colliding or calling the touch function.
+        /// </summary>
+        /// <param name="other">Entity being collided with. Can be null</param>
+        /// <returns></returns>
+        public virtual bool ShouldCollide(BaseEntity other)
+        {
+            return true;
+        }
+
+        public virtual void Touch(BaseEntity other)
+        {
+            _touchFunction?.Invoke(other);
+        }
+
+        public virtual void Blocked(BaseEntity other)
+        {
+            _blockedFunction?.Invoke(other);
         }
     }
 }
