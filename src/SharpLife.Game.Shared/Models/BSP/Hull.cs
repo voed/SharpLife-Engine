@@ -13,18 +13,39 @@
 *
 ****/
 
+using SharpLife.Models.BSP.FileFormat;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+
 namespace SharpLife.Game.Shared.Models.BSP
 {
     public class Hull
     {
-        public int FirstClipNode { get; }
+        public int FirstClipNode;
 
-        public int LastClipNode { get; }
+        public int LastClipNode;
 
-        public Hull(int firstClipNode, int lastClipNode)
+        public Vector3 ClipMins;
+
+        public Vector3 ClipMaxs;
+
+        public IReadOnlyList<ClipNode> ClipNodes;
+
+        public Memory<SharpLife.Models.BSP.FileFormat.Plane> Planes;
+
+        public Hull(
+            int firstClipNode, int lastClipNode,
+            in Vector3 clipMins, in Vector3 clipMaxs,
+            IReadOnlyList<ClipNode> clipNodes,
+            Memory<SharpLife.Models.BSP.FileFormat.Plane> planes)
         {
             FirstClipNode = firstClipNode;
             LastClipNode = lastClipNode;
+            ClipMins = clipMins;
+            ClipMaxs = clipMaxs;
+            ClipNodes = clipNodes ?? throw new ArgumentNullException(nameof(clipNodes));
+            Planes = planes;
         }
     }
 }

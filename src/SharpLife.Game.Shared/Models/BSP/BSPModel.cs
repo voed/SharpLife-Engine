@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Game.Shared.Physics;
 using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
 using System;
@@ -31,7 +32,7 @@ namespace SharpLife.Game.Shared.Models.BSP
 
         public float Radius { get; }
 
-        public BSPModel(string name, uint crc, BSPFile bspFile, Model subModel)
+        public BSPModel(string name, uint crc, BSPFile bspFile, Model subModel, Hull hull0)
             : base(name, crc)
         {
             BSPFile = bspFile ?? throw new ArgumentNullException(nameof(bspFile));
@@ -39,10 +40,10 @@ namespace SharpLife.Game.Shared.Models.BSP
 
             var hulls = new Hull[BSPConstants.MaxHulls];
 
-            for (var i = 0; i < BSPConstants.MaxHulls; ++i)
-            {
-                hulls[i] = new Hull(subModel.HeadNodes[i], bspFile.ClipNodes.Count - 1);
-            }
+            hulls[0] = new Hull(subModel.HeadNodes[0], bspFile.ClipNodes.Count - 1, hull0.ClipMins, hull0.ClipMaxs, hull0.ClipNodes, hull0.Planes);
+            hulls[1] = new Hull(subModel.HeadNodes[1], bspFile.ClipNodes.Count - 1, PhysicsConstants.Hull1.ClipMins, PhysicsConstants.Hull1.ClipMaxs, hull0.ClipNodes, new Memory<SharpLife.Models.BSP.FileFormat.Plane>(BSPFile.Planes));
+            hulls[2] = new Hull(subModel.HeadNodes[2], bspFile.ClipNodes.Count - 1, PhysicsConstants.Hull2.ClipMins, PhysicsConstants.Hull2.ClipMaxs, hull0.ClipNodes, new Memory<SharpLife.Models.BSP.FileFormat.Plane>(BSPFile.Planes));
+            hulls[3] = new Hull(subModel.HeadNodes[3], bspFile.ClipNodes.Count - 1, PhysicsConstants.Hull3.ClipMins, PhysicsConstants.Hull3.ClipMaxs, hull0.ClipNodes, new Memory<SharpLife.Models.BSP.FileFormat.Plane>(BSPFile.Planes));
 
             Hulls = hulls;
 

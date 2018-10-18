@@ -18,6 +18,7 @@ using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
 using System;
 using System.IO;
+using System.Numerics;
 
 namespace SharpLife.Game.Shared.Models.BSP
 {
@@ -56,15 +57,55 @@ namespace SharpLife.Game.Shared.Models.BSP
                 crc = loader.ComputeCRC();
             }
 
+            var hull0 = MakeHull0(bspFile);
+
             //add all of its submodels
             //First submodel (0) is the world
             for (var i = 1; i < bspFile.Models.Count; ++i)
             {
                 var subModelName = $"{_bspModelNamePrefix}{i}";
-                addModelCallback(subModelName, new BSPModel(subModelName, crc, bspFile, bspFile.Models[i]));
+                addModelCallback(subModelName, new BSPModel(subModelName, crc, bspFile, bspFile.Models[i], hull0));
             }
 
-            return new BSPModel(name, crc, bspFile, bspFile.Models[0]);
+            return new BSPModel(name, crc, bspFile, bspFile.Models[0], hull0);
+        }
+
+        /// <summary>
+        /// Create a clipping hull out of the visible hull
+        /// </summary>
+        /// <param name="bspFile"></param>
+        /// <returns></returns>
+        private Hull MakeHull0(BSPFile bspFile)
+        {
+            var clipNodes = new ClipNode[bspFile.Nodes.Count];
+
+            for (var i = 0; i < bspFile.Nodes.Count; ++i)
+            {
+                var node = bspFile.Nodes[i];
+
+                var clipNode = new ClipNode
+                {
+                    PlaneIndex = Array.FindIndex(bspFile.Planes, plane => ReferenceEquals(plane, node.Plane))
+                };
+
+                for (var j = 0; j < 2; ++j)
+                {
+                    var child = node.Children[j];
+
+                    if (child.Contents >= Contents.Node)
+                    {
+                        clipNode.Children[j] = bspFile.Nodes.FindIndex(test => ReferenceEquals(test, child));
+                    }
+                    else
+                    {
+                        clipNode.Children[j] = (int)child.Contents;
+                    }
+                }
+
+                clipNodes[i] = clipNode;
+            }
+
+            return new Hull(0, bspFile.Nodes.Count - 1, Vector3.Zero, Vector3.Zero, clipNodes, bspFile.Planes);
         }
     }
 }
