@@ -156,10 +156,10 @@ namespace SharpLife.Game.Server.Entities
                 this);
         }
 
-        public void MapLoadBegin(IMapInfo mapInfo, GamePhysics gamePhysics, string entityData, bool loadGame)
+        public void MapLoadBegin(ITime gameTime, IMapInfo mapInfo, GamePhysics gamePhysics, string entityData, bool loadGame)
         {
             //TODO: the game needs a different time object that tracks game time
-            Context = new EntityContext(_serverEngine, _engineTime, _serverModels, mapInfo, _gameServer, this, gamePhysics, EntityList);
+            Context = new EntityContext(_serverEngine, gameTime, _serverModels, mapInfo, _gameServer, this, gamePhysics, EntityList);
 
             if (loadGame)
             {

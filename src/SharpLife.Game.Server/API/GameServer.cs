@@ -204,7 +204,7 @@ namespace SharpLife.Game.Server.API
 
             _movement = new GameMovement(_logger, _engine.EngineTime, _gameTime, _engine.Clients, _entities, _entities.EntityList, _random, _physics, _engine.CommandContext);
 
-            _entities.MapLoadBegin(MapInfo, _physics, MapInfo.Model.BSPFile.Entities, loadGame);
+            _entities.MapLoadBegin(_gameTime, MapInfo, _physics, MapInfo.Model.BSPFile.Entities, loadGame);
         }
 
         public void MapLoadFinished()
