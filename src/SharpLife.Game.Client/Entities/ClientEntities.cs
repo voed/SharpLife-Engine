@@ -94,7 +94,7 @@ namespace SharpLife.Game.Client.Entities
 
         public void MapLoadBegin()
         {
-            _entityList = new ClientEntityList(EntityDictionary, _clientEngine, _engineTime, _engineModels, _renderer);
+            _entityList = new ClientEntityList(EntityDictionary, _clientEngine.MaxClients, _clientEngine, _engineTime, _engineModels, _renderer);
         }
 
         public void MapShutdown()

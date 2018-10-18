@@ -149,6 +149,7 @@ namespace SharpLife.Game.Server.Entities
             //TODO: the game needs a different time object that tracks game time
             EntityList = new ServerEntityList(
                 EntityDictionary,
+                _serverEngine.Clients.MaxClients,
                 _entitiesNetworkList,
                 _serverEngine,
                 _engineTime,

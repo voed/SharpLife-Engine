@@ -33,6 +33,7 @@ namespace SharpLife.Game.Server.Entities.EntityList
 
         public ServerEntityList(
             EntityDictionary entityDictionary,
+            int maxClients,
             INetworkObjectList entitiesNetworkList,
             IServerEngine serverEngine,
             ITime time,
@@ -40,7 +41,7 @@ namespace SharpLife.Game.Server.Entities.EntityList
             IMapInfo mapInfo,
             GameServer gameServer,
             ServerEntities entities)
-            : base(entityDictionary)
+            : base(entityDictionary, maxClients)
         {
             _entitiesNetworkList = entitiesNetworkList ?? throw new ArgumentNullException(nameof(entitiesNetworkList));
             _entityContext = new EntityContext(serverEngine, time, engineModels, mapInfo, gameServer, entities, this);

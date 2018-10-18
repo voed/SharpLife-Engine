@@ -60,6 +60,8 @@ namespace SharpLife.Game.Shared.Entities.EntityList
 
         private readonly List<EntityEntry> _entities = new List<EntityEntry>();
 
+        private readonly int _maxClients;
+
         /// <summary>
         /// The number of entities that are currently in existence
         /// </summary>
@@ -72,9 +74,23 @@ namespace SharpLife.Game.Shared.Entities.EntityList
         public int HighestIndex { get; private set; } = NoHighestIndex;
 
         //TODO: need to know maxplayers value to reserve entries
-        protected BaseEntityList(EntityDictionary entityDictionary)
+        protected BaseEntityList(EntityDictionary entityDictionary, int maxClients)
         {
             _entityDictionary = entityDictionary ?? throw new ArgumentNullException(nameof(entityDictionary));
+
+            if (maxClients < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxClients));
+            }
+
+            _maxClients = maxClients;
+
+            //Preallocate entries for the world and all clients
+            //This also ensures that FindFreeEntry doesn't need to check the created entries for client indices
+            for (var i = 0; i <= _maxClients; ++i)
+            {
+                AllocateEntry();
+            }
         }
 
         public TBaseEntity GetEntity(in ObjectHandle handle)
@@ -149,6 +165,12 @@ namespace SharpLife.Game.Shared.Entities.EntityList
         {
             for (int i = 0; i < _entities.Count; ++i)
             {
+                //Never assign client indices to entities automatically
+                if (i != 0 && i <= _maxClients)
+                {
+                    continue;
+                }
+
                 if (_entities[i].Entity == null)
                 {
                     return i;

@@ -27,8 +27,10 @@ namespace SharpLife.Game.Client.Entities.EntityList
     {
         private readonly EntityContext _entityContext;
 
-        public ClientEntityList(EntityDictionary entityDictionary, IClientEngine clientEngine, ITime time, IEngineModels engineModels, IRenderer renderer)
-            : base(entityDictionary)
+        public ClientEntityList(EntityDictionary entityDictionary,
+            int maxClients,
+            IClientEngine clientEngine, ITime time, IEngineModels engineModels, IRenderer renderer)
+            : base(entityDictionary, maxClients)
         {
             _entityContext = new EntityContext(clientEngine, time, engineModels, renderer, this);
         }
