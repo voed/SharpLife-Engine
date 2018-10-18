@@ -84,6 +84,34 @@ namespace SharpLife.CommandSystem
             return null;
         }
 
+        /// <summary>
+        /// Checks if a command with the given name exists
+        /// If so, and the type matches, the command is returned in <paramref name="existingCommand"/>
+        /// If the type does not match, an exception is thrown
+        /// </summary>
+        /// <typeparam name="TCommand"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="existingCommand"></param>
+        /// <returns></returns>
+        private bool CheckForCommandExistence<TCommand>(string name, out TCommand existingCommand)
+            where TCommand : class
+        {
+            if (_commands.TryGetValue(name, out var existing))
+            {
+                if (existing is TCommand existingVar)
+                {
+                    existingCommand = existingVar;
+                    return true;
+                }
+
+                throw new ArgumentException($"A command \"{name}\" with a type \"{existing.GetType().Name}\" different from \"{typeof(TCommand).Name}\" has already been registered");
+            }
+
+            existingCommand = null;
+
+            return false;
+        }
+
         public virtual ICommand RegisterCommand(CommandInfo info)
         {
             if (info == null)
@@ -91,9 +119,9 @@ namespace SharpLife.CommandSystem
                 throw new ArgumentNullException(nameof(info));
             }
 
-            if (_commands.ContainsKey(info.Name))
+            if (CheckForCommandExistence<ICommand>(info.Name, out var existingCommand))
             {
-                throw new ArgumentException($"Cannot add duplicate command \"{info.Name}\"");
+                return existingCommand;
             }
 
             var command = new Command(this, info.Name, info.Executors, info.Flags, info.HelpInfo, info.Tag);
@@ -110,9 +138,9 @@ namespace SharpLife.CommandSystem
                 throw new ArgumentNullException(nameof(info));
             }
 
-            if (_commands.ContainsKey(info.Name))
+            if (CheckForCommandExistence<IVariable>(info.Name, out var existingCommand))
             {
-                throw new ArgumentException($"Cannot add duplicate command \"{info.Name}\"");
+                return existingCommand;
             }
 
             Variable variable = null;
