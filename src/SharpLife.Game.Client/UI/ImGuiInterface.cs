@@ -87,6 +87,8 @@ namespace SharpLife.Game.Client.UI
         private IVariable _picMip;
         private IVariable _powerOf2Textures;
 
+        private readonly byte[] _objectEditorMethodInvokeBuffer = new byte[1024];
+
         private delegate IEditableMemberType EditableMemberFactory(int index, object editObject, MemberInfo info, Type type, ObjectAccessor objectAccessor);
 
         private readonly EditableMemberFactory _enumEditableMemberTypeFactory = (index, editObject, info, type, objectAccessor) =>
@@ -475,14 +477,44 @@ namespace SharpLife.Game.Client.UI
                         {
                             isValid = true;
 
-                            var accessor = ObjectAccessor.Create(entity);
-
                             ImGui.Text($"{_editObjectHandle}:{entity.ClassName}");
+
+                            ImGui.InputText("Invoke method", _objectEditorMethodInvokeBuffer, (uint)_objectEditorMethodInvokeBuffer.Length, InputTextFlags.Default, null);
+
+                            ImGui.SameLine();
+
+                            if (ImGui.Button("Invoke"))
+                            {
+                                var stringLength = StringUtils.NullTerminatedByteLength(_objectEditorMethodInvokeBuffer);
+
+                                if (stringLength > 0)
+                                {
+                                    var methodName = Encoding.UTF8.GetString(_objectEditorMethodInvokeBuffer, 0, stringLength);
+
+                                    var method = entity.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                                    if (method != null)
+                                    {
+                                        if (method.GetParameters().Length == 0)
+                                        {
+                                            method.Invoke(entity, null);
+                                        }
+                                        else
+                                        {
+                                            _logger.Information("ObjectEditor Invoke: method has parameters");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _logger.Information("ObjectEditor Invoke: No such method");
+                                    }
+                                }
+                            }
 
                             //Display all properties
                             foreach (var member in _currentEditableMembers)
                             {
-                                member.Display(entity, accessor);
+                                member.Display(entity, _editObjectAccessor);
                             }
                         }
                     }
