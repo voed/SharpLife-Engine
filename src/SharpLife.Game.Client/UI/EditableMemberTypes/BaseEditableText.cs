@@ -54,12 +54,14 @@ namespace SharpLife.Game.Client.UI.EditableMemberTypes
 
         protected void SetValue(string value)
         {
-            if (value == null)
+            if (value != null)
             {
-                throw new ArgumentNullException(nameof(value));
+                Encoding.UTF8.GetBytes(value, new Span<byte>(_buffer));
             }
-
-            Encoding.UTF8.GetBytes(value, new Span<byte>(_buffer));
+            else
+            {
+                Array.Clear(_buffer, 0, _buffer.Length);
+            }
         }
 
         protected abstract void OnValueChanged(ObjectAccessor objectAccessor, string newValue);
