@@ -31,7 +31,7 @@ namespace SharpLife.Engine.Server.Clients
     {
         private readonly List<ServerClient> _clients;
 
-        public int MaxClients => _clients.Capacity;
+        public int MaxClients => _maxPlayers.Integer;
 
         /// <summary>
         /// The number of clients on the server
