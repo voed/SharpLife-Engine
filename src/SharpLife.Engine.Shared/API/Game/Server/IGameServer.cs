@@ -59,16 +59,13 @@ namespace SharpLife.Engine.Shared.API.Game.Server
 
         void Activate();
 
+        void PostActivate();
+
         void Deactivate();
 
         /// <summary>
-        /// Called at the start of a game frame
+        /// Run a single game frame
         /// </summary>
-        void StartFrame();
-
-        /// <summary>
-        /// Called at the end of a game frame
-        /// </summary>
-        void EndFrame();
+        void RunFrame();
     }
 }

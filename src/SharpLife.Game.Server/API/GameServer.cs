@@ -22,12 +22,14 @@ using SharpLife.Engine.Shared.API.Game.Shared;
 using SharpLife.Engine.Shared.Events;
 using SharpLife.Game.Server.Entities;
 using SharpLife.Game.Server.Networking;
+using SharpLife.Game.Server.Physics;
 using SharpLife.Game.Shared.Bridge;
 using SharpLife.Game.Shared.Maps;
 using SharpLife.Game.Shared.Models;
 using SharpLife.Game.Shared.Models.BSP;
 using SharpLife.Models;
 using SharpLife.Models.BSP.FileFormat;
+using SharpLife.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,9 +46,23 @@ namespace SharpLife.Game.Server.API
 
         private IServerModels _engineModels;
 
+        /// <summary>
+        /// Current time for the game. Can differ from engine time
+        /// </summary>
+        private readonly SnapshotTime _gameTime = new SnapshotTime();
+
         private ServerNetworking _networking;
 
         private ServerEntities _entities;
+
+        /// <summary>
+        /// Shared random number generator for the server
+        /// </summary>
+        private readonly Random _random = new Random();
+
+        public GamePhysics Physics { get; private set; }
+
+        private GameMovement _movement;
 
         private bool _active;
 
@@ -115,6 +131,10 @@ namespace SharpLife.Game.Server.API
 
         public bool TryMapLoadBegin(string mapName, ServerStartFlags flags)
         {
+            //Reset timers
+            _gameTime.ElapsedTime = _engine.EngineTime.ElapsedTime;
+            _gameTime.FrameTime = 0;
+
             _engine.EventSystem.DispatchEvent(new MapStartedLoading(
                 mapName,
                 MapInfo?.Name,
@@ -179,6 +199,12 @@ namespace SharpLife.Game.Server.API
         public void MapLoadContinue(bool loadGame)
         {
             _entities.CreateEntityList(MapInfo);
+
+            //TODO: need to figure out how to handle physics being created after the entity list
+            Physics = new GamePhysics(_logger, _entities, _entities.EntityList, MapInfo.Model, _engine.CommandContext);
+
+            _movement = new GameMovement(_logger, _engine.EngineTime, _gameTime, _engine.Clients, _entities, _entities.EntityList, _random, Physics, _engine.CommandContext);
+
             _entities.MapLoadBegin(MapInfo, MapInfo.Model.BSPFile.Entities, loadGame);
         }
 
@@ -194,6 +220,18 @@ namespace SharpLife.Game.Server.API
             _active = true;
         }
 
+        public void PostActivate()
+        {
+            //TODO: handle load game (frame time is 1 for that)
+            //TODO: only run physics when needed
+            const double frameTime = 8;
+
+            for (var i = 0; i < 16; ++i)
+            {
+                InternalRunFrame(frameTime);
+            }
+        }
+
         public void Deactivate()
         {
             if (!_active)
@@ -204,16 +242,24 @@ namespace SharpLife.Game.Server.API
             _active = false;
 
             _entities.Deactivate();
+
+            //Reset these so the memory referenced by them can be reclaimed
+            _movement = null;
+            Physics = null;
         }
 
-        public void StartFrame()
+        private void InternalRunFrame(double frameTime)
         {
+            _gameTime.ElapsedTime = _engine.EngineTime.ElapsedTime;
+
             _entities.StartFrame();
+
+            _movement.RunPhysics(frameTime);
         }
 
-        public void EndFrame()
+        public void RunFrame()
         {
-
+            InternalRunFrame(_engine.EngineTime.FrameTime);
         }
     }
 }

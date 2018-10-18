@@ -181,15 +181,7 @@ namespace SharpLife.Game.Server.Entities
 
         public void StartFrame()
         {
-            //Run entity think methods
-
-            //TODO: need to implement physics
-
-            //TODO: implement this properly
-            foreach (var entity in EntityList)
-            {
-                entity.Think();
-            }
+            //Nothing
         }
 
         private void LoadEntities(string entityData)

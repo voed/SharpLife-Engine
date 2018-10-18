@@ -250,6 +250,8 @@ namespace SharpLife.Engine.Server.Host
 
             //TODO: implement
             Active = true;
+
+            _game.PostActivate();
         }
 
         public void Deactivate()
@@ -292,9 +294,7 @@ namespace SharpLife.Engine.Server.Host
                 return;
             }
 
-            _game.StartFrame();
-
-            _game.EndFrame();
+            _game.RunFrame();
 
             _netServer.RunFrame();
         }

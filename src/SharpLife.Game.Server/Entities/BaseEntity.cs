@@ -13,6 +13,7 @@
 *
 ****/
 
+using SharpLife.Game.Server.Physics;
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Models;
@@ -32,6 +33,8 @@ namespace SharpLife.Game.Server.Entities
     public abstract class BaseEntity : SharedBaseEntity
     {
         public EntityContext Context { get; set; }
+
+        public PhysicsState PhysicsState { get; } = new PhysicsState();
 
         public string TargetName { get; set; }
 
@@ -290,6 +293,47 @@ namespace SharpLife.Game.Server.Entities
             {
                 InitializeGlobalState();
             }
+        }
+
+        /// <summary>
+        /// Sets the size of the entity's bounds
+        /// </summary>
+        /// <param name="mins"></param>
+        /// <param name="maxs"></param>
+        public void SetSize(in Vector3 mins, in Vector3 maxs)
+        {
+            if (mins.X > maxs.X
+                || mins.Y > maxs.Y
+                || mins.Z > maxs.Z)
+            {
+                throw new InvalidOperationException("backwards mins/maxs");
+            }
+
+            Mins = mins;
+            Maxs = maxs;
+            Size = maxs - mins;
+
+            Context.Server.Physics.LinkEdict(this, false);
+        }
+
+        protected override void OnModelChanged(IModel oldModel, IModel newModel)
+        {
+            base.OnModelChanged(oldModel, newModel);
+
+            //Set up the size members
+            if (newModel != null)
+            {
+                SetSize(newModel.Mins, newModel.Maxs);
+            }
+            else
+            {
+                SetSize(Vector3.Zero, Vector3.Zero);
+            }
+        }
+
+        public void SetAbsBox()
+        {
+            //TODO: implement
         }
 
         public delegate void ThinkFunction();
