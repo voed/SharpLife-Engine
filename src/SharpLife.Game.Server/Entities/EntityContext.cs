@@ -15,6 +15,7 @@
 
 using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Game.Server.API;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Maps;
 using SharpLife.Utility;
@@ -32,16 +33,26 @@ namespace SharpLife.Game.Server.Entities
 
         public IMapInfo MapInfo { get; }
 
+        public GameServer Server { get; }
+
         public ServerEntities Entities { get; }
 
         public BaseEntityList<BaseEntity> EntityList { get; }
 
-        public EntityContext(IServerEngine serverEngine, ITime time, IEngineModels engineModels, IMapInfo mapInfo, ServerEntities entities, BaseEntityList<BaseEntity> entityList)
+        public EntityContext(
+            IServerEngine serverEngine,
+            ITime time,
+            IEngineModels engineModels,
+            IMapInfo mapInfo,
+            GameServer gameServer,
+            ServerEntities entities,
+            BaseEntityList<BaseEntity> entityList)
         {
             ServerEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
             Time = time ?? throw new ArgumentNullException(nameof(time));
             EngineModels = engineModels ?? throw new ArgumentNullException(nameof(engineModels));
             MapInfo = mapInfo ?? throw new ArgumentNullException(nameof(mapInfo));
+            Server = gameServer ?? throw new ArgumentNullException(nameof(gameServer));
             Entities = entities ?? throw new ArgumentNullException(nameof(entities));
             EntityList = entityList ?? throw new ArgumentNullException(nameof(entityList));
         }

@@ -15,6 +15,7 @@
 
 using SharpLife.Engine.Shared.API.Engine.Server;
 using SharpLife.Engine.Shared.API.Engine.Shared;
+using SharpLife.Game.Server.API;
 using SharpLife.Game.Shared.Entities.EntityList;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Maps;
@@ -37,11 +38,12 @@ namespace SharpLife.Game.Server.Entities.EntityList
             ITime time,
             IEngineModels engineModels,
             IMapInfo mapInfo,
+            GameServer gameServer,
             ServerEntities entities)
             : base(entityDictionary)
         {
             _entitiesNetworkList = entitiesNetworkList ?? throw new ArgumentNullException(nameof(entitiesNetworkList));
-            _entityContext = new EntityContext(serverEngine, time, engineModels, mapInfo, entities, this);
+            _entityContext = new EntityContext(serverEngine, time, engineModels, mapInfo, gameServer, entities, this);
         }
 
         protected override void OnEntityCreated(EntityEntry entry)

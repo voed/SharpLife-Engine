@@ -56,7 +56,11 @@ namespace SharpLife.Game.Server.Entities
         /// </summary>
         public World World { get; set; }
 
-        public ServerEntities(ILogger logger, IServerEngine serverEngine, ITime engineTime, IEngineModels serverModels, GameServer gameServer)
+        public ServerEntities(ILogger logger,
+            IServerEngine serverEngine,
+            ITime engineTime,
+            IEngineModels serverModels,
+            GameServer gameServer)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serverEngine = serverEngine ?? throw new ArgumentNullException(nameof(serverEngine));
@@ -140,11 +144,22 @@ namespace SharpLife.Game.Server.Entities
             _entitiesNetworkList = networkObjectListBuilder.CreateList(GameConstants.NetworkObjectLists.EntitiesListName);
         }
 
-        public void MapLoadBegin(IMapInfo mapInfo, string entityData, bool loadGame)
+        public void CreateEntityList(IMapInfo mapInfo)
         {
             //TODO: the game needs a different time object that tracks game time
-            EntityList = new ServerEntityList(EntityDictionary, _entitiesNetworkList, _serverEngine, _engineTime, _serverModels, mapInfo, this);
+            EntityList = new ServerEntityList(
+                EntityDictionary,
+                _entitiesNetworkList,
+                _serverEngine,
+                _engineTime,
+                _serverModels,
+                mapInfo,
+                _gameServer,
+                this);
+        }
 
+        public void MapLoadBegin(IMapInfo mapInfo, string entityData, bool loadGame)
+        {
             if (loadGame)
             {
                 //TODO: load game

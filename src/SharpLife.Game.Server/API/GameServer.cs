@@ -178,6 +178,7 @@ namespace SharpLife.Game.Server.API
 
         public void MapLoadContinue(bool loadGame)
         {
+            _entities.CreateEntityList(MapInfo);
             _entities.MapLoadBegin(MapInfo, MapInfo.Model.BSPFile.Entities, loadGame);
         }
 
