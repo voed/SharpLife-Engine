@@ -14,6 +14,7 @@
 ****/
 
 using System;
+using System.Numerics;
 
 namespace SharpLife.Models
 {
@@ -23,11 +24,18 @@ namespace SharpLife.Models
 
         public uint CRC { get; }
 
-        protected BaseModel(string name, uint crc)
+        public Vector3 Mins { get; }
+
+        public Vector3 Maxs { get; }
+
+        protected BaseModel(string name, uint crc, in Vector3 mins, in Vector3 maxs)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
 
             CRC = crc;
+
+            Mins = mins;
+            Maxs = maxs;
         }
     }
 }

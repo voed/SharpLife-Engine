@@ -16,6 +16,7 @@
 using SharpLife.Models;
 using SharpLife.Models.SPR.FileFormat;
 using System;
+using System.Numerics;
 
 namespace SharpLife.Game.Shared.Models.SPR
 {
@@ -24,7 +25,10 @@ namespace SharpLife.Game.Shared.Models.SPR
         public SpriteFile SpriteFile { get; }
 
         public SpriteModel(string name, uint crc, SpriteFile spriteFile)
-            : base(name, crc)
+            : base(name,
+                  crc,
+                  new Vector3(spriteFile.MaximumWidth / -2, spriteFile.MaximumWidth / -2, spriteFile.MaximumHeight / -2),
+                  new Vector3(spriteFile.MaximumWidth / 2, spriteFile.MaximumWidth / 2, spriteFile.MaximumHeight / 2))
         {
             SpriteFile = spriteFile ?? throw new ArgumentNullException(nameof(spriteFile));
         }

@@ -33,7 +33,7 @@ namespace SharpLife.Game.Shared.Models.BSP
         public float Radius { get; }
 
         public BSPModel(string name, uint crc, BSPFile bspFile, Model subModel, Hull hull0)
-            : base(name, crc)
+            : base(name, crc, subModel.Mins, subModel.Maxs)
         {
             BSPFile = bspFile ?? throw new ArgumentNullException(nameof(bspFile));
             SubModel = subModel ?? throw new ArgumentNullException(nameof(subModel));

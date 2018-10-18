@@ -20,11 +20,11 @@ namespace SharpLife.Models.BSP.FileFormat
 {
     public class Model
     {
-        public Vector3 Mins { get; set; }
+        public Vector3 Mins;
 
-        public Vector3 Maxs { get; set; }
+        public Vector3 Maxs;
 
-        public Vector3 Origin { get; set; }
+        public Vector3 Origin;
 
         public int[] HeadNodes { get; } = new int[BSPConstants.MaxHulls];
 

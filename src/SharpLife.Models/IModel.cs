@@ -13,6 +13,8 @@
 *
 ****/
 
+using System.Numerics;
+
 namespace SharpLife.Models
 {
     /// <summary>
@@ -23,5 +25,9 @@ namespace SharpLife.Models
         string Name { get; }
 
         uint CRC { get; }
+
+        Vector3 Mins { get; }
+
+        Vector3 Maxs { get; }
     }
 }

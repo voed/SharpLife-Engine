@@ -16,6 +16,7 @@
 using SharpLife.Models;
 using SharpLife.Models.MDL.FileFormat;
 using System;
+using System.Numerics;
 
 namespace SharpLife.Game.Shared.Models.MDL
 {
@@ -24,7 +25,8 @@ namespace SharpLife.Game.Shared.Models.MDL
         public StudioFile StudioFile { get; }
 
         public StudioModel(string name, uint crc, StudioFile studioFile)
-            : base(name, crc)
+            //TODO: figure out if models have a preset size
+            : base(name, crc, Vector3.Zero, Vector3.Zero)
         {
             StudioFile = studioFile ?? throw new ArgumentNullException(nameof(studioFile));
         }
