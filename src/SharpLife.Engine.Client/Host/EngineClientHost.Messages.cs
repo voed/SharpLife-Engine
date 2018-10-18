@@ -23,6 +23,8 @@ namespace SharpLife.Engine.Client.Host
         IMessageReceiveHandler<ServerInfo>,
         IMessageReceiveHandler<Print>
     {
+        public int MaxClients { get; private set; }
+
         private void RegisterMessageHandlers(MessagesReceiveHandler receiveHandler)
         {
             receiveHandler.RegisterHandler<ServerInfo>(this);
@@ -33,6 +35,8 @@ namespace SharpLife.Engine.Client.Host
         {
             //TODO: implement
             //TODO: when finished, move this into NetworkClient if possible
+
+            MaxClients = (int)message.MaxClients;
 
             _clientNetworking.ProcessGameInfoMessage(message.GameInfo);
 
