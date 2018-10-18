@@ -13,12 +13,16 @@
 *
 ****/
 
+using System;
+
 namespace SharpLife.Models.BSP.FileFormat
 {
-    public class ClipNode
+    [Flags]
+    public enum PlaneSignBit : byte
     {
-        public int PlaneIndex { get; set; }
-
-        public int[] Children { get; } = new int[2]; // negative numbers are -(leafs+1), not nodes
+        None = 0,
+        X = 1 << 0,
+        Y = 1 << 1,
+        Z = 1 << 2
     }
 }

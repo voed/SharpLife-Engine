@@ -21,6 +21,7 @@ namespace SharpLife.Models.BSP.FileFormat
     {
         public Vector3 Normal;
         public float Distance;
-        public PlaneType Type;		// ?remove? trivial to regenerate
+        public PlaneType Type;		        // ?remove? trivial to regenerate
+        public PlaneSignBit SignBits;		// signx + signy<<1 + signz<<1
     }
 }

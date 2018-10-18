@@ -25,7 +25,7 @@ namespace SharpLife.Models.BSP.FileFormat
 
         public List<MipTexture> MipTextures { get; set; }
 
-        public List<Plane> Planes { get; set; }
+        public Plane[] Planes { get; set; }
 
         public List<Face> Faces { get; set; }
 

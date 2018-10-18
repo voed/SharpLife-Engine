@@ -164,11 +164,31 @@ namespace SharpLife.Models.BSP.FileFormat
                 var plane = Marshal.PtrToStructure<Disk.Plane>(handle.AddrOfPinnedObject());
                 handle.Free();
 
+                var normal = EndianTypeConverter.Little(plane.Normal);
+
+                PlaneSignBit signBits = PlaneSignBit.None;
+
+                if (normal.X < 0.0)
+                {
+                    signBits |= PlaneSignBit.X;
+                }
+
+                if (normal.Y < 0.0)
+                {
+                    signBits |= PlaneSignBit.Y;
+                }
+
+                if (normal.Z < 0.0)
+                {
+                    signBits |= PlaneSignBit.Z;
+                }
+
                 planes.Add(new Plane
                 {
-                    Normal = EndianTypeConverter.Little(plane.Normal),
+                    Normal = normal,
                     Distance = EndianConverter.Little(plane.Distance),
-                    Type = (PlaneType)EndianConverter.Little((int)plane.Type)
+                    Type = (PlaneType)EndianConverter.Little((int)plane.Type),
+                    SignBits = signBits,
                 });
             }
 
@@ -265,7 +285,7 @@ namespace SharpLife.Models.BSP.FileFormat
             return nodes;
         }
 
-        private unsafe List<ClipNode> ReadClipNodes(ref Lump lump, IReadOnlyList<Plane> planes)
+        private unsafe List<ClipNode> ReadClipNodes(ref Lump lump)
         {
             _reader.BaseStream.Position = lump.fileofs;
 
@@ -283,7 +303,7 @@ namespace SharpLife.Models.BSP.FileFormat
 
                 var result = new ClipNode
                 {
-                    Plane = planes[EndianConverter.Little(node.Data.planenum)],
+                    PlaneIndex = EndianConverter.Little(node.Data.planenum),
                 };
 
                 result.Children[0] = EndianConverter.Little(node.Data.children[0]);
@@ -695,7 +715,7 @@ namespace SharpLife.Models.BSP.FileFormat
             var surfEdges = ReadSurfEdges(ref header.Lumps[(int)LumpId.SurfEdges]);
             var faces = ReadFaces(ref header.Lumps[(int)LumpId.Faces], planes, vertexes, edges, surfEdges, textureInfos);
 
-            var clipNodes = ReadClipNodes(ref header.Lumps[(int)LumpId.ClipNodes], planes);
+            var clipNodes = ReadClipNodes(ref header.Lumps[(int)LumpId.ClipNodes]);
 
             var markSurfaces = ReadMarkSurfaces(ref header.Lumps[(int)LumpId.MarkSurfaces]);
 
@@ -715,7 +735,7 @@ namespace SharpLife.Models.BSP.FileFormat
             {
                 Version = header.Version,
                 MipTextures = mipTextures,
-                Planes = planes,
+                Planes = planes.ToArray(),
                 Faces = faces,
                 Leaves = leaves,
                 Models = models,
