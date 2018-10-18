@@ -15,12 +15,27 @@
 
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace SharpLife.Utility.Mathematics
 {
     public static class VectorUtils
     {
         public const float EqualEpsilon = 0.001f;
+
+        public static unsafe float Index(this ref Vector3 vector, int index)
+        {
+            var pVector = (float*)Unsafe.AsPointer(ref vector);
+
+            return pVector[index];
+        }
+
+        public static unsafe void Index(this ref Vector3 vector, int index, float value)
+        {
+            var pVector = (float*)Unsafe.AsPointer(ref vector);
+
+            pVector[index] = value;
+        }
 
         public static Vector3 ToRadians(in Vector3 anglesInDegrees)
         {
