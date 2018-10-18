@@ -138,6 +138,31 @@ namespace SharpLife.Utility.Mathematics
             AngleToVectors(angles, out vectors.Forward, out vectors.Right, out vectors.Up);
         }
 
+        public static void AngleToVectorsTranspose(in Vector3 angles, out Vector3 forward, out Vector3 right, out Vector3 up)
+        {
+            var angle = MathUtils.ToRadians(angles.Y);
+            var sy = (float)Math.Sin(angle);
+            var cy = (float)Math.Cos(angle);
+            angle = MathUtils.ToRadians(angles.X);
+            var sp = (float)Math.Sin(angle);
+            var cp = (float)Math.Cos(angle);
+            angle = MathUtils.ToRadians(angles.Z);
+            var sr = (float)Math.Sin(angle);
+            var cr = (float)Math.Cos(angle);
+
+            forward.X = cp * cy;
+            forward.Y = (sr * sp * cy) + (cr * -sy);
+            forward.Z = (cr * sp * cy) + (-sr * -sy);
+
+            right.X = cp * sy;
+            right.Y = (sr * sp * sy) + (cr * cy);
+            right.Z = (cr * sp * sy) + (-sr * cy);
+
+            up.X = -sp;
+            up.Y = sr * cp;
+            up.Z = cr * cp;
+        }
+
         public static DirectionalVectors AngleToAimVectors(Vector3 angles)
         {
             angles.X = -angles.X;
