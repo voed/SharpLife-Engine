@@ -31,6 +31,7 @@ using SharpLife.Game.Server.API;
 using SharpLife.Networking.Shared;
 using SharpLife.Networking.Shared.Communication.BinaryData;
 using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using SharpLife.Utility;
 using SharpLife.Utility.Events;
 using System;
 
@@ -41,6 +42,8 @@ namespace SharpLife.Engine.Server.Host
         public IFileSystem FileSystem => _engine.FileSystem;
 
         public ICommandContext CommandContext { get; }
+
+        public ITime EngineTime => _engine.EngineTime;
 
         public IEventSystem EventSystem => _engine.EventSystem;
 

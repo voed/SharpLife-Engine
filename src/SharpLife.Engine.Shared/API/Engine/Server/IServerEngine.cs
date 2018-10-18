@@ -15,6 +15,7 @@
 
 using SharpLife.CommandSystem;
 using SharpLife.FileSystem;
+using SharpLife.Utility;
 using SharpLife.Utility.Events;
 
 namespace SharpLife.Engine.Shared.API.Engine.Server
@@ -24,6 +25,8 @@ namespace SharpLife.Engine.Shared.API.Engine.Server
         IFileSystem FileSystem { get; }
 
         ICommandContext CommandContext { get; }
+
+        ITime EngineTime { get; }
 
         IEventSystem EventSystem { get; }
 
