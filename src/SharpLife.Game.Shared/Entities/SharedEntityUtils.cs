@@ -17,7 +17,7 @@ using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
 
 namespace SharpLife.Game.Shared.Entities
 {
-    public static class EntityUtils
+    public static class SharedEntityUtils
     {
         /// <summary>
         /// Returns whether the given handle points to the given entity
