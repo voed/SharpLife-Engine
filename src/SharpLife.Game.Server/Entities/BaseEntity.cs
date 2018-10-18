@@ -16,6 +16,12 @@
 using SharpLife.Game.Shared.Entities;
 using SharpLife.Game.Shared.Entities.MetaData;
 using SharpLife.Game.Shared.Models;
+using SharpLife.Models;
+using SharpLife.Models.BSP.FileFormat;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
+using System;
+using System.Numerics;
 
 namespace SharpLife.Game.Server.Entities
 {
@@ -26,6 +32,145 @@ namespace SharpLife.Game.Server.Entities
     public abstract class BaseEntity : SharedBaseEntity
     {
         public EntityContext Context { get; set; }
+
+        public string TargetName { get; set; }
+
+        public uint SpawnFlags { get; set; }
+
+        private Vector3 _origin;
+
+        /// <summary>
+        /// Gets the origin by reference
+        /// Avoid using this
+        /// </summary>
+        public ref Vector3 RefOrigin => ref _origin;
+
+        [Networked]
+        public Vector3 Origin
+        {
+            get => _origin;
+
+            set
+            {
+                _origin = value;
+
+                Context.Server.Physics.LinkEdict(this, false);
+            }
+        }
+
+        public Vector3 _absMin;
+        public Vector3 _absMax;
+
+        public Vector3 AbsMin
+        {
+            get => _absMin;
+            set => _absMin = value;
+        }
+
+        public Vector3 AbsMax
+        {
+            get => _absMax;
+            set => _absMax = value;
+        }
+
+        public Vector3 AngularVelocity { get; set; }
+
+        public float Friction { get; set; }
+
+        public float Gravity { get; set; }
+
+        public FixAngleMode FixAngle { get; set; }
+
+        public Vector3 Mins { get; set; }
+
+        public Vector3 Maxs { get; set; }
+
+        public Vector3 Size { get; set; }
+
+        private Vector3 _baseVelocity;
+
+        public ref Vector3 RefBaseVelocity => ref _baseVelocity;
+
+        /// <summary>
+        /// Gets the base velocity by reference
+        /// Avoid using this
+        /// </summary>
+        public Vector3 BaseVelocity
+        {
+            get => _baseVelocity;
+            set => _baseVelocity = value;
+        }
+
+        private Vector3 _moveDirection;
+
+        /// <summary>
+        /// Gets the move direction by reference
+        /// Avoid using this
+        /// </summary>
+        public ref Vector3 RefMoveDirection => ref _moveDirection;
+
+        public Vector3 MoveDirection
+        {
+            get => _moveDirection;
+            set => _moveDirection = value;
+        }
+
+        public float Speed { get; set; }
+
+        public Vector3 ViewOffset { get; set; }
+
+        public Vector3 ViewAngle { get; set; }
+
+        public Solid Solid { get; set; }
+
+        public MoveType MoveType { get; set; }
+
+        public ObjectHandle AimEntity { get; set; }
+
+        public ObjectHandle Owner { get; set; }
+
+        public ObjectHandle GroundEntity { get; set; }
+
+        //TODO: figure out if this is needed for all entities
+        public Contents Contents { get; set; }
+
+        //TODO: figure out if this is needed for all entities
+        public int Buoyancy { get; set; }
+
+        public WaterLevel WaterLevel { get; set; }
+
+        public Contents WaterType { get; set; }
+
+        public float Damage { get; set; }
+
+        public float DamageTime { get; set; }
+
+        public float AirFinished { get; set; }
+
+        public float RadSuitFinished { get; set; }
+
+        public float PainFinished { get; set; }
+
+        public DeadFlag DeadFlag { get; set; }
+
+        public float NextThink { get; set; }
+
+        /// <summary>
+        /// TODO: BSP specific
+        /// </summary>
+        public float LastThinkTime { get; set; }
+
+        /// <summary>
+        /// Hack for CS: indicates whether the player has a shield
+        /// Used to ignore the shield hitbox in traces
+        /// TODO: replace with hitbox filter of some kind
+        /// </summary>
+        public bool HasShield { get; set; }
+
+        /// <summary>
+        /// Indicates whether this entity is a player
+        /// </summary>
+        public virtual bool IsPlayer => false;
 
         /// <summary>
         /// Call this if you have a networked member with change notifications enabled

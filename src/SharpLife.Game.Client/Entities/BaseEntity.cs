@@ -24,6 +24,7 @@ using SharpLife.Game.Shared.Models;
 using SharpLife.Game.Shared.Models.BSP;
 using SharpLife.Game.Shared.Models.MDL;
 using SharpLife.Game.Shared.Models.SPR;
+using SharpLife.Networking.Shared.Communication.NetworkObjectLists.MetaData;
 using System;
 using System.Numerics;
 
@@ -33,6 +34,21 @@ namespace SharpLife.Game.Client.Entities
     public abstract class BaseEntity : SharedBaseEntity, IRenderableEntity
     {
         public EntityContext Context { get; set; }
+
+        private Vector3 _origin;
+
+        /// <summary>
+        /// Gets the origin by reference
+        /// Avoid using this
+        /// </summary>
+        public ref Vector3 RefOrigin => ref _origin;
+
+        [Networked]
+        public Vector3 Origin
+        {
+            get => _origin;
+            set => _origin = value;
+        }
 
         protected BaseEntity(bool networked)
             : base(networked)

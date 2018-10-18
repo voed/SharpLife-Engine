@@ -44,11 +44,23 @@ namespace SharpLife.Game.Shared.Entities
         public string ClassName { get; set; }
 
         [Networked]
-        public Vector3 Origin { get; set; }
-
-        [Networked]
         [ObjectEditorVector3(DisplayFormat = Vector3DisplayFormat.AnglesDegrees)]
         public Vector3 Angles { get; set; }
+
+        private Vector3 _velocity;
+
+        /// <summary>
+        /// Gets the velocity by reference
+        /// Avoid using this
+        /// </summary>
+        public ref Vector3 RefVelocity => ref _velocity;
+
+        [Networked]
+        public Vector3 Velocity
+        {
+            get => _velocity;
+            set => _velocity = value;
+        }
 
         [Networked]
         public float Scale { get; set; }
@@ -71,6 +83,9 @@ namespace SharpLife.Game.Shared.Entities
 
         [Networked]
         public EffectsFlags Effects { get; set; }
+
+        [Networked]
+        public float Health { get; set; }
 
         private IModel _model;
 
