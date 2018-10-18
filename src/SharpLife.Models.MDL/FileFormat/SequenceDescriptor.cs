@@ -47,9 +47,9 @@ namespace SharpLife.Models.MDL.FileFormat
 
         public Vector3 LinearMovement { get; set; }
 
-        public Vector3 BBMin { get; set; }
+        public Vector3 BBMin;
 
-        public Vector3 BBMax { get; set; }
+        public Vector3 BBMax;
 
         public List<AnimationBlend> AnimationBlends { get; set; }
 

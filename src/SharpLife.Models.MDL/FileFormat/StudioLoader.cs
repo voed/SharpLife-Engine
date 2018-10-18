@@ -255,7 +255,8 @@ namespace SharpLife.Models.MDL.FileFormat
 
                 list.Add(new BoundingBox
                 {
-                    Bone = bones[EndianConverter.Little(rawHitbox.Bone)],
+                    BoneIndex = EndianConverter.Little(rawHitbox.Bone),
+                    Group = EndianConverter.Little(rawHitbox.Group),
                     Min = EndianTypeConverter.Little(rawHitbox.BBMin),
                     Max = EndianTypeConverter.Little(rawHitbox.BBMax)
                 });

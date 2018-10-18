@@ -19,7 +19,9 @@ namespace SharpLife.Models.MDL.FileFormat
 {
     public class BoundingBox
     {
-        public Bone Bone { get; set; }
+        public int BoneIndex { get; set; }
+
+        public int Group { get; set; }
 
         public Vector3 Min { get; set; }
 
