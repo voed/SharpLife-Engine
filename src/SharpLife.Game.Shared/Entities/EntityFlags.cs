@@ -21,6 +21,43 @@ namespace SharpLife.Game.Shared.Entities
     public enum EntityFlags
     {
         None = 0,
-        PendingDestruction = 1 << 0
+        PendingDestruction = 1 << 0,
+
+        /// <summary>
+        /// This entity is a client
+        /// </summary>
+        Client = 1 << 1,
+
+        Monster = 1 << 2,
+
+        MonsterClip = 1 << 3,
+
+        WorldBrush = 1 << 4,
+
+        OnGround = 1 << 5,
+
+        AlwaysThink = 1 << 6,
+
+        Float = 1 << 7,
+
+        Fly = 1 << 8,
+
+        Swim = 1 << 9,
+
+        Conveyor = 1 << 10,
+
+        BaseVelocity = 1 << 11,
+
+        ImmuneWater = 1 << 12,
+
+        GodMode = 1 << 13,
+
+        InWater = 1 << 14,
+
+        ImmuneLava = 1 << 15,
+
+        ImmuneSlime = 1 << 16,
+
+        WaterJump = 1 << 17,
     }
 }
