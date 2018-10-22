@@ -200,7 +200,7 @@ namespace SharpLife.Game.Server.API
         {
             _entities.CreateEntityList();
 
-            _physics = new GamePhysics(_logger, _entities, _entities.EntityList, MapInfo.Model, _engine.CommandContext);
+            _physics = new GamePhysics(_logger, _engine.EngineTime, _gameTime, _entities, _entities.EntityList, MapInfo.Model, _engine.CommandContext);
 
             _movement = new GameMovement(_logger, _engine.EngineTime, _gameTime, _engine.Clients, _entities, _entities.EntityList, _random, _physics, _engine.CommandContext);
 

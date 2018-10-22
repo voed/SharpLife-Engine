@@ -27,6 +27,7 @@ using SharpLife.Game.Shared.Models.MDL;
 using SharpLife.Game.Shared.Physics;
 using SharpLife.Models.BSP.FileFormat;
 using SharpLife.Models.MDL.FileFormat;
+using SharpLife.Utility;
 using SharpLife.Utility.Mathematics;
 using System;
 using System.Numerics;
@@ -39,6 +40,10 @@ namespace SharpLife.Game.Server.Physics
     public sealed class GamePhysics
     {
         private readonly ILogger _logger;
+
+        private readonly ITime _engineTime;
+
+        private readonly SnapshotTime _gameTime;
 
         private readonly ServerEntities _entities;
 
@@ -94,11 +99,14 @@ namespace SharpLife.Game.Server.Physics
         };
 
         public GamePhysics(ILogger logger,
+            ITime engineTime, SnapshotTime gameTime,
             ServerEntities entities, ServerEntityList entityList,
             BSPModel worldModel,
             ICommandContext commandContext)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _engineTime = engineTime ?? throw new ArgumentNullException(nameof(engineTime));
+            _gameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
             _entities = entities ?? throw new ArgumentNullException(nameof(entities));
             _entityList = entityList ?? throw new ArgumentNullException(nameof(entityList));
             _worldModel = worldModel ?? throw new ArgumentNullException(nameof(worldModel));
@@ -427,8 +435,7 @@ namespace SharpLife.Game.Server.Physics
                     }
                 }
 
-                //TODO: figure out if time needs setting
-                //gGlobalVariables.time = sv.time;
+                _gameTime.ElapsedTime = _engineTime.ElapsedTime;
                 touched.Touch(ent);
             }
 
