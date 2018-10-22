@@ -69,8 +69,11 @@ namespace SharpLife.Game.Server.Physics
         //TODO: get rid of the global flags state and pass it into trace functions
         public TraceFlags TraceFlags { get; set; }
 
+        private readonly ClipNode[] box_clipnodes = new ClipNode[PhysicsConstants.MaxBoxSides];
+
         private readonly Models.BSP.FileFormat.Plane[] box_planes = new Models.BSP.FileFormat.Plane[PhysicsConstants.MaxBoxSides];
-        private readonly Hull[] box_hull = new Hull[1];//TODO: initialize
+
+        private readonly Hull[] box_hull;
 
         private static readonly byte[] _studioHullControllers = new byte[MDLConstants.MaxControllers]
         {
@@ -108,6 +111,13 @@ namespace SharpLife.Game.Server.Physics
                 .WithValue(1)
                 .WithNumberFilter());
 
+            InitBoxHull();
+
+            box_hull = new Hull[1]
+            {
+                new Hull(0, PhysicsConstants.MaxBoxSides, Vector3.Zero, Vector3.Zero, box_clipnodes, new Memory<Models.BSP.FileFormat.Plane>(box_planes))
+            };
+
             CreateAreaNode(0, ref _worldModel.SubModel.Mins, ref _worldModel.SubModel.Maxs);
         }
 
@@ -119,6 +129,32 @@ namespace SharpLife.Game.Server.Physics
                 case GroupOperation.Nand: return (lhsMask & rhsMask) == 0;
 
                 default: throw new InvalidOperationException("Unknown group operation type");
+            }
+        }
+
+        private void InitBoxHull()
+        {
+            for (var i = 0; i < box_clipnodes.Length; ++i)
+            {
+                box_clipnodes[i] = new ClipNode
+                {
+                    PlaneIndex = i
+                };
+
+                var baseIndex = (i % 2) == 0 ? 0 : 1;
+
+                box_clipnodes[i].Children[baseIndex] = (int)Contents.Empty;
+                box_clipnodes[i].Children[1 - baseIndex] = i + 1;
+            }
+
+            for (var i = 0; i < box_planes.Length; ++i)
+            {
+                box_planes[i] = new Models.BSP.FileFormat.Plane
+                {
+                    Type = (PlaneType)(i / 2)
+                };
+
+                box_planes[i].Normal.Index(i / 2, 1);
             }
         }
 
