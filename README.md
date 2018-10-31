@@ -1,6 +1,6 @@
 # SharpLife Engine
 
-This contains the C# based version of the Half-Life 1 engine, derived from the Half-Life 1 SDK and Quake 1 and 2 source code releases.
+This contains the C# based version of the Half-Life 1 engine, derived from the Half-Life 1 SDK source code releases.
 
 Half Life 1 SDK LICENSE
 ======================
