@@ -378,6 +378,21 @@ namespace SharpLife.Utility.Text
         /// <summary>
         /// Gets all of the tokens from the given text
         /// </summary>
+        /// <param name="text"></param>
+        /// <param name="configureTokenizer">Optional callback to configure the tokenizer</param>
+        /// <returns></returns>
+        public static List<string> GetTokens(string text, Action<Tokenizer> configureTokenizer)
+        {
+            var tokenizer = new Tokenizer(text);
+
+            configureTokenizer?.Invoke(tokenizer);
+
+            return tokenizer.GetTokens();
+        }
+
+        /// <summary>
+        /// Gets all of the tokens from the given text
+        /// </summary>
         /// <returns></returns>
         public List<string> GetTokens()
         {
