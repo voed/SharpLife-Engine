@@ -36,9 +36,9 @@ namespace SharpLife.Utility.Text
             public readonly string EndingDelimiter;
 
             /// <summary>
-            /// Invoked when this comment is encountered, passing this CommentDefinition and the comment string excluding delimiters
+            /// Invoked when this comment is encountered, passing the current Tokenizer, this CommentDefinition and the comment string excluding delimiters
             /// </summary>
-            public readonly Action<CommentDefinition, string> Callback;
+            public readonly Action<Tokenizer, CommentDefinition, string> Callback;
 
             /// <summary>
             /// Creates a new comment definition
@@ -46,7 +46,7 @@ namespace SharpLife.Utility.Text
             /// <param name="startingDelimiter">The starting delimiter of the comment. Must contain valid characters</param>
             /// <param name="endingDelimiter">The ending delimiter of the comment. Must contain valid characters. If null, the comment ends after the newline</param>
             /// <param name="callback">Optional callback to invoke when this comment is encountered</param>
-            public CommentDefinition(string startingDelimiter, string endingDelimiter = null, Action<CommentDefinition, string> callback = null)
+            public CommentDefinition(string startingDelimiter, string endingDelimiter = null, Action<Tokenizer, CommentDefinition, string> callback = null)
             {
                 if (startingDelimiter == null)
                 {

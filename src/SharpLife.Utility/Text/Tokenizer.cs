@@ -111,7 +111,7 @@ namespace SharpLife.Utility.Text
 
                         var commentData = _data.Substring(commentStartIndex, endIndex - commentStartIndex);
 
-                        definition.Callback(definition, commentData);
+                        definition.Callback(this, definition, commentData);
                     }
 
                     //Comment didn't end, treat rest of input as comment
