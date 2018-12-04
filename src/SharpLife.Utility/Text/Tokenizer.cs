@@ -372,11 +372,20 @@ namespace SharpLife.Utility.Text
         /// <returns></returns>
         public static List<string> GetTokens(string text, IEnumerable<string> words, bool leaveNewLines = false)
         {
+            return new Tokenizer(text) { Words = words, LeaveNewLines = leaveNewLines }.GetTokens();
+        }
+
+        /// <summary>
+        /// Gets all of the tokens from the given text
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetTokens()
+        {
             var list = new List<string>();
 
-            for (var tokenizer = new Tokenizer(text) { Words = words, LeaveNewLines = leaveNewLines }; tokenizer.Next();)
+            for (; Next();)
             {
-                list.Add(tokenizer.Token);
+                list.Add(Token);
             }
 
             return list;
