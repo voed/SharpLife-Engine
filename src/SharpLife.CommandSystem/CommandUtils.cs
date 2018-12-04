@@ -27,7 +27,7 @@ namespace SharpLife.CommandSystem
         /// The list of single characters to use as delimiters for command parsing
         /// </summary>
         public static readonly IReadOnlyList<char> SingleCharacters = Tokenizer
-            .SingleCharacters
+            .DefaultSingleCharacters
             .ToList()
             .Concat(
             new[]

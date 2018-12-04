@@ -26,7 +26,13 @@ namespace SharpLife.Utility.Text
     {
         private readonly string _data;
 
-        private readonly IReadOnlyList<char> _singleCharacters;
+        private IReadOnlyList<char> _singleCharacters = DefaultSingleCharacters;
+
+        public IReadOnlyList<char> SingleCharacters
+        {
+            get => _singleCharacters;
+            set => _singleCharacters = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// If true, newlines will be left as separate tokens
@@ -68,7 +74,7 @@ namespace SharpLife.Utility.Text
         /// <summary>
         /// Characters to treat as their own tokens
         /// </summary>
-        public static readonly IReadOnlyList<char> SingleCharacters =
+        public static readonly IReadOnlyList<char> DefaultSingleCharacters =
         new[]{
             '{',
             '}',
@@ -83,19 +89,8 @@ namespace SharpLife.Utility.Text
         /// </summary>
         /// <param name="data"></param>
         public Tokenizer(string data)
-            : this(data, SingleCharacters)
-        {
-        }
-
-        /// <summary>
-        /// Creates a tokenizer that uses the given list of single characters
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="singleCharacters"></param>
-        public Tokenizer(string data, IReadOnlyList<char> singleCharacters)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
-            _singleCharacters = singleCharacters ?? throw new ArgumentNullException(nameof(singleCharacters));
 
             //Preprocess to leave only \n as newlines
             _data = _data.NormalizeNewlines();
@@ -259,7 +254,7 @@ namespace SharpLife.Utility.Text
         /// <returns></returns>
         public static List<string> GetTokens(string text, bool leaveNewLines = false)
         {
-            return GetTokens(text, SingleCharacters, leaveNewLines);
+            return GetTokens(text, DefaultSingleCharacters, leaveNewLines);
         }
 
         /// <summary>
@@ -274,7 +269,7 @@ namespace SharpLife.Utility.Text
         {
             var list = new List<string>();
 
-            for (var tokenizer = new Tokenizer(text, singleCharacters) { LeaveNewLines = leaveNewLines }; tokenizer.Next();)
+            for (var tokenizer = new Tokenizer(text) { SingleCharacters = singleCharacters, LeaveNewLines = leaveNewLines }; tokenizer.Next();)
             {
                 list.Add(tokenizer.Token);
             }
