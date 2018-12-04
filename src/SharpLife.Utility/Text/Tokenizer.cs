@@ -28,6 +28,11 @@ namespace SharpLife.Utility.Text
 
         private readonly IReadOnlyList<char> _singleCharacters;
 
+        /// <summary>
+        /// If true, newlines will be left as separate tokens
+        /// </summary>
+        public bool LeaveNewLines { get; set; }
+
         public string Token { get; private set; } = string.Empty;
 
         public int Index { get; private set; }
@@ -100,7 +105,7 @@ namespace SharpLife.Utility.Text
         {
             while (Index < _data.Length)
             {
-                if (!char.IsWhiteSpace(_data[Index]))
+                if ((LeaveNewLines && _data[Index] == '\n') || !char.IsWhiteSpace(_data[Index]))
                 {
                     break;
                 }
@@ -113,7 +118,7 @@ namespace SharpLife.Utility.Text
         {
             if (Index + 1 < _data.Length && _data[Index] == '/' && _data[Index + 1] == '/')
             {
-                var index = _data.IndexOf('\n');
+                var index = _data.IndexOf('\n', Index + 2);
 
                 if (index == -1)
                 {
@@ -121,7 +126,15 @@ namespace SharpLife.Utility.Text
                     return false;
                 }
 
-                Index = index + 1;
+                //Leave the newline as the next token
+                if (LeaveNewLines)
+                {
+                    Index = index;
+                }
+                else
+                {
+                    Index = index + 1;
+                }
 
                 return true;
             }
@@ -145,6 +158,14 @@ namespace SharpLife.Utility.Text
                 checkComments = false;
 
                 SkipWhitespace();
+
+                //Leave newlines as separate tokens
+                if (LeaveNewLines && _data[Index] == '\n')
+                {
+                    Token = "\n";
+                    ++Index;
+                    return true;
+                }
 
                 if (!HasNext)
                 {
@@ -234,17 +255,11 @@ namespace SharpLife.Utility.Text
         /// Gets all of the tokens from the given text
         /// </summary>
         /// <param name="text"></param>
+        /// <param name="leaveNewLines"></param>
         /// <returns></returns>
-        public static IList<string> GetTokens(string text)
+        public static List<string> GetTokens(string text, bool leaveNewLines = false)
         {
-            var list = new List<string>();
-
-            for (var tokenizer = new Tokenizer(text); tokenizer.Next();)
-            {
-                list.Add(tokenizer.Token);
-            }
-
-            return list;
+            return GetTokens(text, SingleCharacters, leaveNewLines);
         }
 
         /// <summary>
@@ -253,12 +268,13 @@ namespace SharpLife.Utility.Text
         /// </summary>
         /// <param name="text"></param>
         /// <param name="singleCharacters"></param>
+        /// <param name="leaveNewLines"></param>
         /// <returns></returns>
-        public static IList<string> GetTokens(string text, IReadOnlyList<char> singleCharacters)
+        public static List<string> GetTokens(string text, IReadOnlyList<char> singleCharacters, bool leaveNewLines = false)
         {
             var list = new List<string>();
 
-            for (var tokenizer = new Tokenizer(text, singleCharacters); tokenizer.Next();)
+            for (var tokenizer = new Tokenizer(text, singleCharacters) { LeaveNewLines = leaveNewLines }; tokenizer.Next();)
             {
                 list.Add(tokenizer.Token);
             }
