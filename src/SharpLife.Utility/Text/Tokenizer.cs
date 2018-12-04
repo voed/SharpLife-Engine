@@ -26,9 +26,9 @@ namespace SharpLife.Utility.Text
     {
         private readonly string _data;
 
-        private IReadOnlyList<char> _singleCharacters = DefaultSingleCharacters;
+        private IEnumerable<char> _singleCharacters = DefaultSingleCharacters;
 
-        public IReadOnlyList<char> SingleCharacters
+        public IEnumerable<char> SingleCharacters
         {
             get => _singleCharacters;
             set => _singleCharacters = value ?? throw new ArgumentNullException(nameof(value));
@@ -265,7 +265,7 @@ namespace SharpLife.Utility.Text
         /// <param name="singleCharacters"></param>
         /// <param name="leaveNewLines"></param>
         /// <returns></returns>
-        public static List<string> GetTokens(string text, IReadOnlyList<char> singleCharacters, bool leaveNewLines = false)
+        public static List<string> GetTokens(string text, IEnumerable<char> singleCharacters, bool leaveNewLines = false)
         {
             var list = new List<string>();
 
