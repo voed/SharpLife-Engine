@@ -274,6 +274,42 @@ namespace SharpLife.Utility.Text
         }
 
         /// <summary>
+        /// Gets the file position of the given index
+        /// Both values are zero based
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException">If the index is out of range of the data</exception>
+        public void GetFilePosition(int index, out int line, out int column)
+        {
+            if (index < 0 || index >= _data.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            var currentLine = 0;
+            var currentColumn = 0;
+
+            for (var i = 0; i < index; ++i)
+            {
+                if (StringUtils.NewlineFormat.Unix.Equals(_data, i))
+                {
+                    ++currentLine;
+                    currentColumn = 0;
+                }
+                else
+                {
+                    ++currentColumn;
+                }
+            }
+
+            line = currentLine;
+            column = currentColumn;
+        }
+
+        /// <summary>
         /// Gets all of the tokens from the given text
         /// </summary>
         /// <returns></returns>

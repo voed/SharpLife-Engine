@@ -37,6 +37,7 @@ namespace SharpLife.Utility.Text
 
             /// <summary>
             /// Invoked when this comment is encountered, passing the current Tokenizer, this CommentDefinition and the comment string excluding delimiters
+            /// The tokenizer's <see cref="Tokenizer.Index"/> member points to the start of the comment starting delimiter
             /// </summary>
             public readonly Action<Tokenizer, CommentDefinition, string> Callback;
 
