@@ -26,7 +26,7 @@ namespace SharpLife.CommandSystem
         /// <summary>
         /// The list of words to use as delimiters for command parsing
         /// </summary>
-        public static readonly IReadOnlyList<string> Words = Tokenizer
+        public static readonly IReadOnlyList<string> Words = TokenizerConfiguration
             .DefaultWords
             .ToList()
             .Concat(
@@ -36,6 +36,10 @@ namespace SharpLife.CommandSystem
             }
             )
             .ToList();
+
+        public static readonly TokenizerConfiguration TokenizerConfiguration = TokenizerConfiguration.Default
+            .WithCStyleComments()
+            .WithWords(Words);
 
         /// <summary>
         /// Parses a string into the commands that it contains
@@ -57,7 +61,7 @@ namespace SharpLife.CommandSystem
             //A command is delimited by either newlines, semicolons or the end of the string, quoted semicolons don't delimit
             var tokensList = commands
                 .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                .Select(command => Tokenizer.GetTokens(command, tokenizer => tokenizer.WithCStyleComments().WithWords(Words)))
+                .Select(command => Tokenizer.GetTokens(command, TokenizerConfiguration))
                 .ToList();
 
             var list = new List<ICommandArgs>();

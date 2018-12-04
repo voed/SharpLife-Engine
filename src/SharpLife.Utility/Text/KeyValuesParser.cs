@@ -24,22 +24,9 @@ namespace SharpLife.Utility.Text
     public static class KeyValuesParser
     {
         /// <summary>
-        /// Configures a tokenizer for keyvalues parsing
+        /// Tokenizer configuration to use for KeyValues parsing
         /// </summary>
-        /// <param name="tokenizer"></param>
-        /// <returns>The tokenizer, configured for keyvalues parsing</returns>
-        public static Tokenizer ConfigureTokenizer(Tokenizer tokenizer)
-        {
-            if (tokenizer == null)
-            {
-                throw new ArgumentNullException(nameof(tokenizer));
-            }
-
-            tokenizer.WithCStyleComments();
-            tokenizer.WithWords(Tokenizer.DefaultWords);
-
-            return tokenizer;
-        }
+        public static readonly TokenizerConfiguration TokenizerConfiguration = TokenizerConfiguration.Default.WithCStyleComments().WithWords(TokenizerConfiguration.DefaultWords);
 
         public static List<KeyValuePair<string, string>> InternalParse(Tokenizer tokenizer)
         {
@@ -116,9 +103,12 @@ namespace SharpLife.Utility.Text
                 throw new ArgumentNullException(nameof(tokenizer));
             }
 
-            ConfigureTokenizer(tokenizer);
-
             return InternalParse(tokenizer);
+        }
+
+        public static List<KeyValuePair<string, string>> Parse(string input)
+        {
+            return InternalParse(new Tokenizer(input, TokenizerConfiguration));
         }
 
         /// <summary>
@@ -133,14 +123,12 @@ namespace SharpLife.Utility.Text
                 throw new ArgumentNullException(nameof(data));
             }
 
-            var tokenizer = new Tokenizer(data);
-
-            ConfigureTokenizer(tokenizer);
+            var tokenizer = new Tokenizer(data, TokenizerConfiguration);
 
             var list = new List<List<KeyValuePair<string, string>>>();
 
             //If it's empty we've ran out of data to parse
-            for (var block = InternalParse(tokenizer); block.Count > 0; block = Parse(tokenizer))
+            for (var block = InternalParse(tokenizer); block.Count > 0; block = InternalParse(tokenizer))
             {
                 list.Add(block);
             }

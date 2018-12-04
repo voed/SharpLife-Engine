@@ -96,7 +96,7 @@ namespace SharpLife.Models.BSP.FileFormat
             }
 
             //Scan the worldspawn entity for the wad keyvalue
-            var worldspawnData = KeyValuesParser.Parse(new Tokenizer(entities));
+            var worldspawnData = KeyValuesParser.Parse(entities);
 
             var wadPathIndex = worldspawnData.FindIndex(kp => kp.Key == "wad");
 

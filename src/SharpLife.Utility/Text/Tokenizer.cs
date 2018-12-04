@@ -15,7 +15,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SharpLife.Utility.Text
 {
@@ -24,104 +23,9 @@ namespace SharpLife.Utility.Text
     /// </summary>
     public sealed class Tokenizer
     {
-        public sealed class CommentDefinition
-        {
-            public readonly string StartingDelimiter;
-
-            public readonly string EndingDelimiter;
-
-            /// <summary>
-            /// Invoked when this comment is encountered, passing this CommentDefinition and the comment string excluding delimiters
-            /// </summary>
-            public readonly Action<CommentDefinition, string> Callback;
-
-            /// <summary>
-            /// Creates a new comment definition
-            /// </summary>
-            /// <param name="startingDelimiter">The starting delimiter of the comment. Must contain valid characters</param>
-            /// <param name="endingDelimiter">The ending delimiter of the comment. Must contain valid characters. If null, the comment ends after the newline</param>
-            /// <param name="callback">Optional callback to invoke when this comment is encountered</param>
-            public CommentDefinition(string startingDelimiter, string endingDelimiter = null, Action<CommentDefinition, string> callback = null)
-            {
-                if (startingDelimiter == null)
-                {
-                    throw new ArgumentNullException(nameof(startingDelimiter));
-                }
-
-                if (string.IsNullOrWhiteSpace(startingDelimiter))
-                {
-                    throw new ArgumentException("Starting delimiter must be valid and contain valid characters", nameof(startingDelimiter));
-                }
-
-                if (endingDelimiter != null && string.IsNullOrWhiteSpace(endingDelimiter))
-                {
-                    throw new ArgumentException("Ending delimiter must be valid and contain valid characters", nameof(endingDelimiter));
-                }
-
-                StartingDelimiter = startingDelimiter;
-
-                //The end is either as specified or the end of the line
-                EndingDelimiter = endingDelimiter ?? StringUtils.NewlineFormat.Unix;
-
-                Callback = callback;
-            }
-        }
-
-        /// <summary>
-        /// Strings to treat as their own tokens
-        /// </summary>
-        public static readonly IReadOnlyList<string> DefaultWords =
-        new[]{
-            "{",
-            "}",
-            "(",
-            ")",
-            "\'",
-            ","
-        };
-
-        public static readonly IEnumerable<CommentDefinition> NoCommentDefinitions = Enumerable.Empty<CommentDefinition>();
-
-        public static readonly CommentDefinition CStyleComment = new CommentDefinition("//");
-
-        public static readonly CommentDefinition CPPStyleComment = new CommentDefinition("/*", "*/");
-
         private readonly string _data;
 
-        private IEnumerable<string> _words = DefaultWords;
-
-        public IEnumerable<string> Words
-        {
-            get => _words;
-
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                if (value.Any(string.IsNullOrEmpty))
-                {
-                    throw new ArgumentException("A word must be non-null and contain at least one character", nameof(value));
-                }
-
-                _words = value;
-            }
-        }
-
-        private IEnumerable<CommentDefinition> _commentDefinitions = NoCommentDefinitions;
-
-        public IEnumerable<CommentDefinition> CommentDefinitions
-        {
-            get => _commentDefinitions;
-            set => _commentDefinitions = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        /// <summary>
-        /// If true, newlines will be left as separate tokens
-        /// </summary>
-        public bool LeaveNewLines { get; set; }
+        private readonly TokenizerConfiguration _configuration;
 
         public string Token { get; private set; } = string.Empty;
 
@@ -156,22 +60,34 @@ namespace SharpLife.Utility.Text
         }
 
         /// <summary>
-        /// Creates a tokenizer that uses the default words
+        /// Creates a tokenizer that can parse tokens out of the given string
         /// </summary>
         /// <param name="data"></param>
-        public Tokenizer(string data)
+        /// <param name="configuration"></param>
+        public Tokenizer(string data, TokenizerConfiguration configuration)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
             //Preprocess to leave only \n as newlines
             _data = _data.NormalizeNewlines();
+        }
+
+        /// <summary>
+        /// Creates a tokenizer that uses the default configuration
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="configuration"></param>
+        public Tokenizer(string data)
+            : this(data, TokenizerConfiguration.Default)
+        {
         }
 
         private void SkipWhitespace()
         {
             while (Index < _data.Length)
             {
-                if ((LeaveNewLines && StringUtils.NewlineFormat.Unix.Equals(_data, Index)) || !char.IsWhiteSpace(_data[Index]))
+                if ((_configuration.LeaveNewlines && StringUtils.NewlineFormat.Unix.Equals(_data, Index)) || !char.IsWhiteSpace(_data[Index]))
                 {
                     break;
                 }
@@ -182,7 +98,7 @@ namespace SharpLife.Utility.Text
 
         private bool SkipCommentLine()
         {
-            foreach (var definition in _commentDefinitions)
+            foreach (var definition in _configuration.CommentDefinitions)
             {
                 if (definition.StartingDelimiter.Equals(_data, Index))
                 {
@@ -210,7 +126,7 @@ namespace SharpLife.Utility.Text
 
                     //Leave the last newline as the next token
                     //This can happen when comment end delimiters end with a newline, or consists only out of a newline
-                    if (LeaveNewLines && definition.EndingDelimiter.EndsWith(StringUtils.NewlineFormat.Unix))
+                    if (_configuration.LeaveNewlines && definition.EndingDelimiter.EndsWith(StringUtils.NewlineFormat.Unix))
                     {
                         --Index;
                     }
@@ -240,7 +156,7 @@ namespace SharpLife.Utility.Text
                 SkipWhitespace();
 
                 //Leave newlines as separate tokens
-                if (LeaveNewLines && StringUtils.NewlineFormat.Unix.Equals(_data, Index))
+                if (_configuration.LeaveNewlines && StringUtils.NewlineFormat.Unix.Equals(_data, Index))
                 {
                     Token = StringUtils.NewlineFormat.Unix;
                     ++Index;
@@ -340,7 +256,7 @@ namespace SharpLife.Utility.Text
         /// <returns>If the string is a word, returns the length, otherwise returns -1</returns>
         private int TestForWord(int index)
         {
-            foreach (var word in _words)
+            foreach (var word in _configuration.Words)
             {
                 if (string.CompareOrdinal(word, 0, _data, index, word.Length) == 0)
                 {
@@ -371,13 +287,22 @@ namespace SharpLife.Utility.Text
         /// Gets all of the tokens from the given text
         /// </summary>
         /// <param name="text"></param>
-        /// <param name="configureTokenizer">Optional callback to configure the tokenizer</param>
         /// <returns></returns>
-        public static List<string> GetTokens(string text, Action<Tokenizer> configureTokenizer = null)
+        public static List<string> GetTokens(string text)
         {
             var tokenizer = new Tokenizer(text);
 
-            configureTokenizer?.Invoke(tokenizer);
+            return tokenizer.GetTokens();
+        }
+
+        /// <summary>
+        /// Gets all of the tokens from the given text
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static List<string> GetTokens(string text, TokenizerConfiguration configuration)
+        {
+            var tokenizer = new Tokenizer(text, configuration);
 
             return tokenizer.GetTokens();
         }
