@@ -133,5 +133,22 @@ namespace SharpLife.Utility
 
             return Regex.Replace(input, @"\r\n|\n\r|\n|\r", format);
         }
+
+        /// <summary>
+        /// Returns whether this string equals the substring in the given string
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="compareTo"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static bool Equals(this string input, string compareTo, int index)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            return string.CompareOrdinal(input, 0, compareTo, index, input.Length) == 0;
+        }
     }
 }

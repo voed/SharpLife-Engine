@@ -71,7 +71,7 @@ namespace SharpLife.Utility.Text
             {
                 var index = Index;
 
-                while (index < Token.Length && Token[index] != '\n')
+                while (index < Token.Length && StringUtils.NewlineFormat.Unix.Equals(Token, index))
                 {
                     if (!char.IsWhiteSpace(Token[index]) || char.IsLetterOrDigit(Token[index]))
                     {
@@ -114,7 +114,7 @@ namespace SharpLife.Utility.Text
         {
             while (Index < _data.Length)
             {
-                if ((LeaveNewLines && _data[Index] == '\n') || !char.IsWhiteSpace(_data[Index]))
+                if ((LeaveNewLines && StringUtils.NewlineFormat.Unix.Equals(_data, Index)) || !char.IsWhiteSpace(_data[Index]))
                 {
                     break;
                 }
@@ -169,9 +169,9 @@ namespace SharpLife.Utility.Text
                 SkipWhitespace();
 
                 //Leave newlines as separate tokens
-                if (LeaveNewLines && _data[Index] == '\n')
+                if (LeaveNewLines && StringUtils.NewlineFormat.Unix.Equals(_data, Index))
                 {
-                    Token = "\n";
+                    Token = StringUtils.NewlineFormat.Unix;
                     ++Index;
                     return true;
                 }
