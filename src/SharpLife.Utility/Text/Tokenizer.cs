@@ -25,7 +25,13 @@ namespace SharpLife.Utility.Text
     {
         private readonly string _data;
 
-        private readonly TokenizerConfiguration _configuration;
+        private TokenizerConfiguration _configuration;
+
+        public TokenizerConfiguration Configuration
+        {
+            get => _configuration;
+            set => _configuration = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         public string Token { get; private set; } = string.Empty;
 
