@@ -33,6 +33,11 @@ namespace SharpLife.Utility.Text
             set => _configuration = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        /// <summary>
+        /// User data associated with this tokenizer
+        /// </summary>
+        public object UserData { get; set; }
+
         public string Token { get; private set; } = string.Empty;
 
         public int Index { get; private set; }
