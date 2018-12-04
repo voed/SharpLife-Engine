@@ -26,13 +26,13 @@ namespace SharpLife.CommandSystem
         /// <summary>
         /// The list of single characters to use as delimiters for command parsing
         /// </summary>
-        public static readonly IReadOnlyList<char> SingleCharacters = Tokenizer
-            .DefaultSingleCharacters
+        public static readonly IReadOnlyList<string> SingleCharacters = Tokenizer
+            .DefaultWords
             .ToList()
             .Concat(
             new[]
             {
-                ';'
+                ";"
             }
             )
             .ToList();

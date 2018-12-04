@@ -26,12 +26,26 @@ namespace SharpLife.Utility.Text
     {
         private readonly string _data;
 
-        private IEnumerable<char> _singleCharacters = DefaultSingleCharacters;
+        private IEnumerable<string> _words = DefaultWords;
 
-        public IEnumerable<char> SingleCharacters
+        public IEnumerable<string> Words
         {
-            get => _singleCharacters;
-            set => _singleCharacters = value ?? throw new ArgumentNullException(nameof(value));
+            get => _words;
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                if (value.Any(string.IsNullOrEmpty))
+                {
+                    throw new ArgumentException("A word must be non-null and contain at least one character", nameof(value));
+                }
+
+                _words = value;
+            }
         }
 
         /// <summary>
@@ -72,20 +86,20 @@ namespace SharpLife.Utility.Text
         }
 
         /// <summary>
-        /// Characters to treat as their own tokens
+        /// Strings to treat as their own tokens
         /// </summary>
-        public static readonly IReadOnlyList<char> DefaultSingleCharacters =
+        public static readonly IReadOnlyList<string> DefaultWords =
         new[]{
-            '{',
-            '}',
-            '(',
-            ')',
-            '\'',
-            ','
+            "{",
+            "}",
+            "(",
+            ")",
+            "\'",
+            ","
         };
 
         /// <summary>
-        /// Creates a tokenizer that uses the default single characters list
+        /// Creates a tokenizer that uses the default words
         /// </summary>
         /// <param name="data"></param>
         public Tokenizer(string data)
@@ -205,13 +219,15 @@ namespace SharpLife.Utility.Text
                 return true;
             }
 
-            // parse single characters
+            // parse words
             {
-                var c = _data[Index];
+                var wordLength = TestForWord(Index);
 
-                if (_singleCharacters.Contains(c))
+                if (wordLength != -1)
                 {
-                    Token = new string(_data[Index++], 1);
+                    Token = _data.Substring(Index, wordLength);
+
+                    Index += wordLength;
 
                     return true;
                 }
@@ -237,13 +253,31 @@ namespace SharpLife.Utility.Text
 
                     c = _data[Index];
                 }
-                while (!char.IsWhiteSpace(c) && !_singleCharacters.Contains(c));
+                while (!char.IsWhiteSpace(c) && TestForWord(Index) == -1);
 
-                //Either we're out of data, or we hit whitespace or a single character
+                //Either we're out of data, or we hit whitespace or a word
                 Token = _data.Substring(startIndex, (endIndex - startIndex) + 1);
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Tests if the string starting at index is a word
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>If the string is a word, returns the length, otherwise returns -1</returns>
+        private int TestForWord(int index)
+        {
+            foreach (var word in _words)
+            {
+                if (string.CompareOrdinal(word, 0, _data, index, word.Length) == 0)
+                {
+                    return word.Length;
+                }
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -254,22 +288,22 @@ namespace SharpLife.Utility.Text
         /// <returns></returns>
         public static List<string> GetTokens(string text, bool leaveNewLines = false)
         {
-            return GetTokens(text, DefaultSingleCharacters, leaveNewLines);
+            return GetTokens(text, DefaultWords, leaveNewLines);
         }
 
         /// <summary>
         /// Gets all of the tokens from the given text
-        /// Uses the given list of single characters
+        /// Uses the given list of words
         /// </summary>
         /// <param name="text"></param>
-        /// <param name="singleCharacters"></param>
+        /// <param name="words"></param>
         /// <param name="leaveNewLines"></param>
         /// <returns></returns>
-        public static List<string> GetTokens(string text, IEnumerable<char> singleCharacters, bool leaveNewLines = false)
+        public static List<string> GetTokens(string text, IEnumerable<string> words, bool leaveNewLines = false)
         {
             var list = new List<string>();
 
-            for (var tokenizer = new Tokenizer(text) { SingleCharacters = singleCharacters, LeaveNewLines = leaveNewLines }; tokenizer.Next();)
+            for (var tokenizer = new Tokenizer(text) { Words = words, LeaveNewLines = leaveNewLines }; tokenizer.Next();)
             {
                 list.Add(tokenizer.Token);
             }
