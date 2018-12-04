@@ -24,9 +24,9 @@ namespace SharpLife.CommandSystem
     public static class CommandUtils
     {
         /// <summary>
-        /// The list of single characters to use as delimiters for command parsing
+        /// The list of words to use as delimiters for command parsing
         /// </summary>
-        public static readonly IReadOnlyList<string> SingleCharacters = Tokenizer
+        public static readonly IReadOnlyList<string> Words = Tokenizer
             .DefaultWords
             .ToList()
             .Concat(
@@ -55,7 +55,10 @@ namespace SharpLife.CommandSystem
             }
 
             //A command is delimited by either newlines, semicolons or the end of the string, quoted semicolons don't delimit
-            var tokensList = commands.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(command => Tokenizer.GetTokens(command, SingleCharacters)).ToList();
+            var tokensList = commands
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(command => Tokenizer.GetTokens(command, tokenizer => tokenizer.WithCStyleComments().WithWords(Words)))
+                .ToList();
 
             var list = new List<ICommandArgs>();
 

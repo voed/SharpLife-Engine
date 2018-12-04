@@ -24,18 +24,25 @@ namespace SharpLife.Utility.Text
     public static class KeyValuesParser
     {
         /// <summary>
-        /// Parses the next block in the tokenizer into a list of keyvalues
+        /// Configures a tokenizer for keyvalues parsing
         /// </summary>
         /// <param name="tokenizer"></param>
-        /// <returns>A list of keyvalues that have been parsed</returns>
-        /// <exception cref="ArgumentException">If the syntax is invalid</exception>
-        public static List<KeyValuePair<string, string>> Parse(Tokenizer tokenizer)
+        /// <returns>The tokenizer, configured for keyvalues parsing</returns>
+        public static Tokenizer ConfigureTokenizer(Tokenizer tokenizer)
         {
             if (tokenizer == null)
             {
                 throw new ArgumentNullException(nameof(tokenizer));
             }
 
+            tokenizer.WithCStyleComments();
+            tokenizer.WithWords(Tokenizer.DefaultWords);
+
+            return tokenizer;
+        }
+
+        public static List<KeyValuePair<string, string>> InternalParse(Tokenizer tokenizer)
+        {
             var list = new List<KeyValuePair<string, string>>();
 
             //Valid syntax is as follows:
@@ -97,6 +104,24 @@ namespace SharpLife.Utility.Text
         }
 
         /// <summary>
+        /// Parses the next block in the tokenizer into a list of keyvalues
+        /// </summary>
+        /// <param name="tokenizer"></param>
+        /// <returns>A list of keyvalues that have been parsed</returns>
+        /// <exception cref="ArgumentException">If the syntax is invalid</exception>
+        public static List<KeyValuePair<string, string>> Parse(Tokenizer tokenizer)
+        {
+            if (tokenizer == null)
+            {
+                throw new ArgumentNullException(nameof(tokenizer));
+            }
+
+            ConfigureTokenizer(tokenizer);
+
+            return InternalParse(tokenizer);
+        }
+
+        /// <summary>
         /// Parses all blocks
         /// </summary>
         /// <param name="data"></param>
@@ -110,10 +135,12 @@ namespace SharpLife.Utility.Text
 
             var tokenizer = new Tokenizer(data);
 
+            ConfigureTokenizer(tokenizer);
+
             var list = new List<List<KeyValuePair<string, string>>>();
 
             //If it's empty we've ran out of data to parse
-            for (var block = Parse(tokenizer); block.Count > 0; block = Parse(tokenizer))
+            for (var block = InternalParse(tokenizer); block.Count > 0; block = Parse(tokenizer))
             {
                 list.Add(block);
             }
