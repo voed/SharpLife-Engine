@@ -24,6 +24,68 @@ namespace SharpLife.Utility.Text
     /// </summary>
     public sealed class Tokenizer
     {
+        public sealed class CommentDefinition
+        {
+            public readonly string StartingDelimiter;
+
+            public readonly string EndingDelimiter;
+
+            /// <summary>
+            /// Invoked when this comment is encountered, passing this CommentDefinition and the comment string excluding delimiters
+            /// </summary>
+            public readonly Action<CommentDefinition, string> Callback;
+
+            /// <summary>
+            /// Creates a new comment definition
+            /// </summary>
+            /// <param name="startingDelimiter">The starting delimiter of the comment. Must contain valid characters</param>
+            /// <param name="endingDelimiter">The ending delimiter of the comment. Must contain valid characters. If null, the comment ends after the newline</param>
+            /// <param name="callback">Optional callback to invoke when this comment is encountered</param>
+            public CommentDefinition(string startingDelimiter, string endingDelimiter = null, Action<CommentDefinition, string> callback = null)
+            {
+                if (startingDelimiter == null)
+                {
+                    throw new ArgumentNullException(nameof(startingDelimiter));
+                }
+
+                if (string.IsNullOrWhiteSpace(startingDelimiter))
+                {
+                    throw new ArgumentException("Starting delimiter must be valid and contain valid characters", nameof(startingDelimiter));
+                }
+
+                if (endingDelimiter != null && string.IsNullOrWhiteSpace(endingDelimiter))
+                {
+                    throw new ArgumentException("Ending delimiter must be valid and contain valid characters", nameof(endingDelimiter));
+                }
+
+                StartingDelimiter = startingDelimiter;
+
+                //The end is either as specified or the end of the line
+                EndingDelimiter = endingDelimiter ?? StringUtils.NewlineFormat.Unix;
+
+                Callback = callback;
+            }
+        }
+
+        /// <summary>
+        /// Strings to treat as their own tokens
+        /// </summary>
+        public static readonly IReadOnlyList<string> DefaultWords =
+        new[]{
+            "{",
+            "}",
+            "(",
+            ")",
+            "\'",
+            ","
+        };
+
+        public static readonly IEnumerable<CommentDefinition> NoCommentDefinitions = Enumerable.Empty<CommentDefinition>();
+
+        public static readonly CommentDefinition CStyleComment = new CommentDefinition("//");
+
+        public static readonly CommentDefinition CPPStyleComment = new CommentDefinition("/*", "*/");
+
         private readonly string _data;
 
         private IEnumerable<string> _words = DefaultWords;
@@ -46,6 +108,14 @@ namespace SharpLife.Utility.Text
 
                 _words = value;
             }
+        }
+
+        private IEnumerable<CommentDefinition> _commentDefinitions = NoCommentDefinitions;
+
+        public IEnumerable<CommentDefinition> CommentDefinitions
+        {
+            get => _commentDefinitions;
+            set => _commentDefinitions = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -86,19 +156,6 @@ namespace SharpLife.Utility.Text
         }
 
         /// <summary>
-        /// Strings to treat as their own tokens
-        /// </summary>
-        public static readonly IReadOnlyList<string> DefaultWords =
-        new[]{
-            "{",
-            "}",
-            "(",
-            ")",
-            "\'",
-            ","
-        };
-
-        /// <summary>
         /// Creates a tokenizer that uses the default words
         /// </summary>
         /// <param name="data"></param>
@@ -125,27 +182,41 @@ namespace SharpLife.Utility.Text
 
         private bool SkipCommentLine()
         {
-            if (Index + 1 < _data.Length && _data[Index] == '/' && _data[Index + 1] == '/')
+            foreach (var definition in _commentDefinitions)
             {
-                var index = _data.IndexOf('\n', Index + 2);
-
-                if (index == -1)
+                if (definition.StartingDelimiter.Equals(_data, Index))
                 {
-                    Index = _data.Length;
-                    return false;
-                }
+                    var endIndex = _data.IndexOf(definition.EndingDelimiter, Index + definition.StartingDelimiter.Length);
 
-                //Leave the newline as the next token
-                if (LeaveNewLines)
-                {
-                    Index = index;
-                }
-                else
-                {
-                    Index = index + 1;
-                }
+                    if (definition.Callback != null)
+                    {
+                        //Pass the comment contents only
+                        var commentStartIndex = Index + definition.StartingDelimiter.Length;
 
-                return true;
+                        var commentData = _data.Substring(commentStartIndex, endIndex - commentStartIndex);
+
+                        definition.Callback(definition, commentData);
+                    }
+
+                    //Comment didn't end, treat rest of input as comment
+                    if (endIndex == -1)
+                    {
+                        Index = _data.Length;
+                        return false;
+                    }
+
+                    //Point to past the ending delimiter
+                    Index = endIndex + definition.EndingDelimiter.Length;
+
+                    //Leave the last newline as the next token
+                    //This can happen when comment end delimiters end with a newline, or consists only out of a newline
+                    if (LeaveNewLines && definition.EndingDelimiter.EndsWith(StringUtils.NewlineFormat.Unix))
+                    {
+                        --Index;
+                    }
+
+                    return true;
+                }
             }
 
             return false;
