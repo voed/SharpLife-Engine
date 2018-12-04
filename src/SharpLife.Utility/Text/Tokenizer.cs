@@ -78,9 +78,8 @@ namespace SharpLife.Utility.Text
         /// </summary>
         /// <param name="data"></param>
         public Tokenizer(string data)
+            : this(data, SingleCharacters)
         {
-            _data = data ?? throw new ArgumentNullException(nameof(data));
-            _singleCharacters = SingleCharacters;
         }
 
         /// <summary>
@@ -92,6 +91,9 @@ namespace SharpLife.Utility.Text
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             _singleCharacters = singleCharacters ?? throw new ArgumentNullException(nameof(singleCharacters));
+
+            //Preprocess to leave only \n as newlines
+            _data = _data.NormalizeNewlines();
         }
 
         private void SkipWhitespace()

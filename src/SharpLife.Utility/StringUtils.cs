@@ -15,6 +15,7 @@
 
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SharpLife.Utility
 {
@@ -104,6 +105,33 @@ namespace SharpLife.Utility
             }
 
             return result;
+        }
+
+        public static class NewlineFormat
+        {
+            public const string Unix = "\n";
+
+            public const string CarriageReturn = "\r";
+
+            public const string Windows = "\r\n";
+
+            public const string RISC = "\n\r";
+        }
+
+        /// <summary>
+        /// Normalizes the newlines in a string to a given newline format
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="format">The format to normalize to. Defaults to <see cref="NewlineFormat.Unix"/></param>
+        /// <returns></returns>
+        public static string NormalizeNewlines(this string input, string format = NewlineFormat.Unix)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            return Regex.Replace(input, @"\r\n|\n\r|\n|\r", format);
         }
     }
 }
